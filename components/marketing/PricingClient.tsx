@@ -98,7 +98,7 @@ export function PricingClient() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl font-bold text-text-primary mb-4">Simple, India-first pricing</h1>
-            <p className="text-text-secondary">Start free. Upgrade when you're ready.</p>
+            <p className="text-text-secondary">Start free. Upgrade when you are ready.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

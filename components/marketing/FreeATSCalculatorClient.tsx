@@ -249,7 +249,7 @@ export function FreeATSCalculatorClient() {
                   Your ATS Score
                 </h2>
                 <p className="text-text-muted">
-                  Here's how your resume performs
+                  Here is how your resume performs
                 </p>
               </div>
 
