@@ -1,0 +1,21 @@
+John Doe
+Software Engineer
+john.doe@example.com
+123-456-7890
+
+Summary:
+Experienced software engineer with 5 years of experience in JavaScript, React, Node.js, and SQL databases. Strong communicator and team player.
+
+Skills:
+- JavaScript, React, Node.js, HTML, CSS, SQL, Git
+- Communication, Problem Solving, Agile
+
+Experience:
+Software Engineer at TechCorp (2022 - Present)
+- Developed and maintained web applications using React and Node.js.
+- Collaborative with product managers and designers to deliver high-quality features.
+- Optimized database queries to improve performance by 20%.
+
+Junior Software Engineer at DevInc (2020 - 2022)
+- Built web pages using HTML, CSS, and JavaScript.
+- Assisted senior engineers in debugging and testing features.

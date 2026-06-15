@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-text-primary font-sans antialiased;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  h1 {
+    @apply text-[48px] font-bold leading-tight;
+  }
+
+  h2 {
+    @apply text-[36px] font-bold leading-tight;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold;
+  }
+
+  h4 {
+    @apply text-lg font-semibold;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent to-accent-hover bg-clip-text text-transparent;
+  }
+
+  .glass {
+    @apply backdrop-blur-sm bg-surface/80;
+  }
+
+  .card-glow {
+    box-shadow: 0 0 40px rgba(108, 99, 255, 0.1);
+  }
+
+  .purple-glow {
+    box-shadow: 0 0 80px rgba(108, 99, 255, 0.15);
+  }
+}
