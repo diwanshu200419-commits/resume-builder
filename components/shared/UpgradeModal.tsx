@@ -30,8 +30,9 @@ const proFeatures = [
 ];
 
 const planLabels: Record<Exclude<Plan, "free">, { name: string; price: string }> = {
-  pro: { name: "Pro Plan", price: "₹199" },
-  premium: { name: "Premium Plan", price: "₹399" },
+  pro: { name: "Pro Plan", price: "₹99" },
+  premium: { name: "Premium Plan", price: "₹299" },
+  "career-pack": { name: "Career Pack", price: "₹499" },
 };
 
 export function UpgradeModal({

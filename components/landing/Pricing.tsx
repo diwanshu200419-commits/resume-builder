@@ -11,14 +11,14 @@ const plans = [
     name: "Free",
     price: "₹0",
     period: "forever",
-    description: "Perfect to try ResumeAI",
+    description: "Perfect to try Vaylo AI",
     features: [
-      { text: "2 resume analyses/month", included: true },
-      { text: "ATS score check", included: true },
-      { text: "Basic keyword suggestions", included: true },
-      { text: "PDF + DOCX download", included: false },
+      { text: "2 resume downloads", included: true },
+      { text: "Basic ATS check", included: true },
+      { text: "Watermark on PDF export", included: true },
       { text: "Cover letter generator", included: false },
-      { text: "Interview prep", included: false },
+      { text: "LinkedIn optimizer", included: false },
+      { text: "Portfolio generator", included: false },
     ],
     cta: "Start free",
     href: "/signup",
@@ -26,16 +26,16 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "₹199",
+    price: "₹99",
     period: "/month",
-    description: "For active job seekers",
+    description: "Essential optimization tools",
     features: [
-      { text: "Unlimited analyses", included: true },
-      { text: "Full ATS optimization", included: true },
-      { text: "PDF + DOCX download", included: true },
+      { text: "Unlimited PDF downloads", included: true },
+      { text: "Unlimited Resume builds", included: true },
       { text: "Cover letter generator", included: true },
-      { text: "Before/after comparison", included: true },
-      { text: "Interview prep", included: false },
+      { text: "ATS Score optimization", included: true },
+      { text: "LinkedIn profile optimizer", included: true },
+      { text: "No watermark", included: true },
     ],
     cta: "Upgrade to Pro",
     href: "/checkout/pro",
@@ -43,19 +43,36 @@ const plans = [
   },
   {
     name: "Premium",
-    price: "₹399",
+    price: "₹299",
     period: "/month",
-    description: "Complete career toolkit",
+    description: "Complete career copilot",
     features: [
       { text: "Everything in Pro", included: true },
-      { text: "Interview question generator", included: true },
-      { text: "LinkedIn profile optimizer", included: true },
-      { text: "Career roadmap", included: true },
-      { text: "Priority support", included: true },
-      { text: "Early access to features", included: true },
+      { text: "Portfolio website generator", included: true },
+      { text: "Interview question prep", included: true },
+      { text: "AI Career Coach mentor", included: true },
+      { text: "AI Job matcher analysis", included: true },
+      { text: "Career Roadmap planner", included: true },
     ],
     cta: "Go Premium",
     href: "/checkout/premium",
+    popular: false,
+  },
+  {
+    name: "Career Pack",
+    price: "₹499",
+    period: "/one-time",
+    description: "Full service placement help",
+    features: [
+      { text: "Everything in Premium", included: true },
+      { text: "24/7 Priority support channel", included: true },
+      { text: "Exclusive premium templates", included: true },
+      { text: "Deep AI analysis processing", included: true },
+      { text: "Guaranteed recruiter format", included: true },
+      { text: "Lifetime roadmap access", included: true },
+    ],
+    cta: "Get Career Pack",
+    href: "/checkout/career-pack",
     popular: false,
   },
 ];
@@ -71,7 +88,7 @@ export function Pricing() {
           <p className="text-text-secondary">Start free. Upgrade when you&apos;re ready.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}

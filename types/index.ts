@@ -1,4 +1,4 @@
-export type Plan = "free" | "pro" | "premium";
+export type Plan = "free" | "pro" | "premium" | "career-pack";
 export type PaymentStatus = "pending" | "completed" | "expired" | "rejected";
 export type SubscriptionStatus = "active" | "expired" | "cancelled" | "pending";
 
@@ -130,6 +130,7 @@ export function canAccessPremium(profile: Profile): boolean {
 
 export const PLAN_LIMITS = {
   free: { analyses: 2, price: 0 },
-  pro: { analyses: Infinity, price: 199 },
-  premium: { analyses: Infinity, price: 399 },
+  pro: { analyses: Infinity, price: 99 },
+  premium: { analyses: Infinity, price: 299 },
+  "career-pack": { analyses: Infinity, price: 499 },
 } as const;

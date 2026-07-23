@@ -2,8 +2,9 @@ import type { Plan } from "@/types";
 
 // Amounts are in paise-equivalent rupees (whole rupees here, unlike Razorpay's paise)
 const PLAN_AMOUNTS: Record<Exclude<Plan, "free">, number> = {
-  pro: 199,
-  premium: 399,
+  pro: 99,
+  premium: 299,
+  "career-pack": 499,
 };
 
 export function getPlanAmount(plan: Exclude<Plan, "free">): number {

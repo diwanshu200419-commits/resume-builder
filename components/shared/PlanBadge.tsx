@@ -6,6 +6,7 @@ const planConfig: Record<Plan, { label: string; variant: "default" | "success" |
   free: { label: "Free", variant: "default", icon: <Zap className="w-3 h-3" /> },
   pro: { label: "Pro", variant: "success", icon: <Sparkles className="w-3 h-3" /> },
   premium: { label: "Premium", variant: "warning", icon: <Crown className="w-3 h-3" /> },
+  "career-pack": { label: "Career Pack", variant: "warning", icon: <Crown className="w-3 h-3" /> },
 };
 
 export function PlanBadge({ plan }: { plan: Plan }) {
