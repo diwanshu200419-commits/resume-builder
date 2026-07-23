@@ -128,6 +128,7 @@ export default function CheckoutPage() {
       fd.append("customerName", name.trim());
       fd.append("customerEmail", email.trim());
       fd.append("customerPhone", phone.trim());
+      fd.append("plan", plan);
       if (screenshot) fd.append("screenshot", screenshot);
 
       const res = await fetch("/api/payment/upi/submit", { method: "POST", body: fd });
@@ -223,7 +224,7 @@ export default function CheckoutPage() {
                 <>
                   <div className="bg-white p-3 rounded-xl shadow-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/myscanner.jpg" alt="UPI QR code" width={220} height={220} />
+                    <img src={order.qrUrl} alt="UPI QR code" width={220} height={220} />
                   </div>
 
                   <div className="w-full text-center">

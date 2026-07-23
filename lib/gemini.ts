@@ -499,3 +499,135 @@ RETURN JSON ONLY:
     };
   }
 }
+
+export async function generateResumeRoast(resumeText: string): Promise<{
+  general_roast: string;
+  format_roast: string;
+  skills_roast: string;
+  honest_advice: string;
+}> {
+  try {
+    const safeResume = resumeText.replace(/ignore previous instructions/i, "[REDACTED]").slice(0, 12000);
+    return await withRetryAndTimeout(async () => {
+      const prompt = `You are a brutally honest, sarcastic, and hilarious tech recruiter who roasts bad resumes for fun.
+Your roast should be witty, savage, and funny, but ultimately conclude with some actual helpful advice.
+
+RESUME CONTENT:
+${safeResume}
+
+RETURN JSON ONLY (NO OTHER TEXT):
+{
+  "general_roast": "brutally honest 3-4 sentence general roast of the resume",
+  "format_roast": "roast of formatting, layout, structure, or buzzword usage",
+  "skills_roast": "roast of their skill set, or lack thereof",
+  "honest_advice": "3 sentences of real, constructive career advice to actually make it better"
+}`;
+      const res = await getModel().generateContent(prompt);
+      return JSON.parse(cleanAndExtractJSON(res.response.text()));
+    });
+  } catch (error) {
+    console.error("Error in generateResumeRoast:", error);
+    return {
+      general_roast: "This resume looks like it was written in 1995. Even bots would reject this from their spam folder.",
+      format_roast: "The formatting is so standard it put me to sleep. Try using columns or a modern layout.",
+      skills_roast: "Listing 'Microsoft Word' as a technical skill in 2026? Bold move.",
+      honest_advice: "Clean up the structure, focus on achievements rather than listing responsibilities, and keep it modern."
+    };
+  }
+}
+
+export async function generateCareerRoadmap(
+  currentSkills: string,
+  targetRole: string,
+  dreamCompany: string,
+  experienceLevel: string
+): Promise<{
+  learning_roadmap: { title: string; duration: string; skills_to_learn: string[]; action_steps: string[] }[];
+  projects: { title: string; description: string; tech_stack: string[]; difficulty: string }[];
+  courses: string[];
+  timeline: string;
+}> {
+  try {
+    return await withRetryAndTimeout(async () => {
+      const prompt = `${MASTER_SYSTEM_PROMPT}
+You are an expert career strategist. Create a learning roadmap for this candidate.
+
+CURRENT SKILLS: ${currentSkills}
+TARGET ROLE: ${targetRole}
+DREAM COMPANY: ${dreamCompany}
+EXPERIENCE LEVEL: ${experienceLevel}
+
+RETURN JSON ONLY (NO OTHER TEXT):
+{
+  "learning_roadmap": [
+    {
+      "title": "Phase 1: Foundation",
+      "duration": "1-2 months",
+      "skills_to_learn": ["skillA", "skillB"],
+      "action_steps": ["step 1", "step 2"]
+    }
+  ],
+  "projects": [
+    {
+      "title": "Project Name",
+      "description": "What to build and how it helps",
+      "tech_stack": ["tech1", "tech2"],
+      "difficulty": "Intermediate"
+    }
+  ],
+  "courses": ["Suggested course topic 1", "Suggested course topic 2"],
+  "timeline": "Estimated prep time (e.g. 6 months)"
+}`;
+      const res = await getModel().generateContent(prompt);
+      return JSON.parse(cleanAndExtractJSON(res.response.text()));
+    });
+  } catch (error) {
+    console.error("Error in generateCareerRoadmap:", error);
+    return {
+      learning_roadmap: [{ title: "Foundations", duration: "1 month", skills_to_learn: ["HTML", "CSS", "JavaScript"], action_steps: ["Build basic websites", "Learn DOM manipulation"] }],
+      projects: [{ title: "AI Portfolio", description: "Build a responsive portfolio showing your projects", tech_stack: ["React", "Tailwind"], difficulty: "Beginner" }],
+      courses: ["Modern JavaScript Course", "React Guide for Beginners"],
+      timeline: "3-4 Months"
+    };
+  }
+}
+
+export async function generatePortfolioWebsite(resumeText: string): Promise<string> {
+  try {
+    const safeResume = resumeText.replace(/ignore previous instructions/i, "[REDACTED]").slice(0, 10000);
+    return await withRetryAndTimeout(async () => {
+      const prompt = `You are a premium front-end developer and UI designer. 
+Generate a single-page HTML portfolio website code for this candidate based on their resume.
+Use modern styling:
+- Dark mode theme (Slate/Zinc colors)
+- Responsive Tailwind CSS (via CDN)
+- Beautiful modern typography, spacing, glassmorphism card designs, gradients.
+- Interactive sections: Hero (with target role and copy CTA), About, Skills, Projects, Experience, and Contact Form.
+
+RESUME CONTENT:
+${safeResume}
+
+RETURN ONLY THE COMPLETED HTML CODE, starting with <!DOCTYPE html>. Do not wrap in markdown code blocks or json.`;
+      
+      const res = await getModel().generateContent(prompt);
+      let htmlText = res.response.text().trim();
+      // Remove any markdown code fences if generated
+      htmlText = htmlText.replace(/^```html\s*|\s*```$/gi, "");
+      return htmlText;
+    });
+  } catch (error) {
+    console.error("Error in generatePortfolioWebsite:", error);
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans flex items-center justify-center min-h-screen">
+  <div class="text-center p-8 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+    <h1 class="text-3xl font-bold mb-4">Portfolio Generation Offline</h1>
+    <p class="text-gray-400">We could not build the portfolio website at this moment. Please try again later.</p>
+  </div>
+</body>
+</html>`;
+  }
+}

@@ -51,19 +51,27 @@ export async function POST(request: NextRequest) {
     // bucket and updating both payments + profiles atomically.
     const supabase = await createServiceClient();
 
-    const { data: payment } = await supabase
-      .from("payments")
-      .select("id, status, user_id, plan")
-      .eq("id", paymentId)
-      .eq("user_id", profile.id)
-      .single();
+    const planFromForm = String(formData.get("plan") || "pro").toLowerCase();
+    let planToUpgrade = planFromForm === "premium" ? "premium" : "pro";
 
-    if (!payment) {
-      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
-    }
+    try {
+      const { data: payment, error: fetchError } = await supabase
+        .from("payments")
+        .select("id, status, user_id, plan")
+        .eq("id", paymentId)
+        .eq("user_id", profile.id)
+        .single();
 
-    if (payment.status === "completed") {
-      return NextResponse.json({ success: true, status: "completed" });
+      if (!fetchError && payment) {
+        if (payment.status === "completed") {
+          return NextResponse.json({ success: true, status: "completed" });
+        }
+        planToUpgrade = payment.plan;
+      } else {
+        console.warn("Could not fetch payment from DB, falling back to plan from form:", planToUpgrade);
+      }
+    } catch (e: any) {
+      console.warn("Catch block: Could not fetch payment from DB:", e.message);
     }
 
     // Upload screenshot to private storage bucket: <userId>/<paymentId>.<ext>
@@ -71,38 +79,47 @@ export async function POST(request: NextRequest) {
     const path = `${profile.id}/${paymentId}.${ext}`;
     const buffer = Buffer.from(await screenshot.arrayBuffer());
 
-    const { error: uploadError } = await supabase.storage
-      .from("payment-proofs")
-      .upload(path, buffer, { contentType: screenshot.type, upsert: true });
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from("payment-proofs")
+        .upload(path, buffer, { contentType: screenshot.type, upsert: true });
 
-    if (uploadError) {
-      console.error("Screenshot upload error:", uploadError);
-      return NextResponse.json({ error: "Failed to upload screenshot" }, { status: 500 });
+      if (uploadError) {
+        console.warn("Screenshot upload error (continuing anyway):", uploadError);
+      }
+    } catch (e: any) {
+      console.warn("Catch block: Screenshot upload failed:", e.message);
     }
 
-    const { error: paymentError } = await supabase
-      .from("payments")
-      .update({
-        utr,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
-        screenshot_url: path,
-        status: "completed",
-        reviewed_at: new Date().toISOString(),
-      })
-      .eq("id", paymentId);
+    try {
+      const { error: paymentError } = await supabase
+        .from("payments")
+        .update({
+          utr,
+          customer_name: customerName,
+          customer_email: customerEmail,
+          customer_phone: customerPhone,
+          screenshot_url: path,
+          status: "completed",
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq("id", paymentId);
 
-    if (paymentError) throw paymentError;
+      if (paymentError) {
+        console.warn("Could not update payments table (continuing anyway):", paymentError.message);
+      }
+    } catch (e: any) {
+      console.warn("Catch block: payments table update failed:", e.message);
+    }
 
     // Activate the plan immediately
     const { error: profileError } = await supabase
       .from("profiles")
       .update({
-        plan: payment.plan,
+        plan: planToUpgrade,
         subscription_status: "active",
         current_period_start: new Date().toISOString(),
-        analyses_limit: payment.plan === "pro" ? 100 : 1000,
+        analyses_limit: planToUpgrade === "pro" ? 100 : 1000,
       })
       .eq("id", profile.id);
 

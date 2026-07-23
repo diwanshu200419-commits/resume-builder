@@ -14,6 +14,11 @@ import {
   LogOut,
   Menu,
   X,
+  Layout,
+  Compass,
+  Flame,
+  Laptop,
+  ShieldAlert,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -31,18 +36,31 @@ export function Sidebar({ profile }: { profile: Profile }) {
     router.refresh();
   };
 
+  const ADMIN_EMAILS = [
+    "admin@vaylo.ai",
+    "jattshiv32@gmail.com",
+    "paid_tester_123@example.com"
+  ];
+
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/analyze", label: "New Analysis", icon: FileSearch },
-    { href: "/dashboard#history", label: "History", icon: History },
+    { href: "/builder", label: "Resume Builder", icon: Layout },
+    { href: "/roadmap", label: "AI Roadmap", icon: Compass },
+    { href: "/roast", label: "Resume Roast", icon: Flame },
+    { href: "/portfolio", label: "AI Portfolio", icon: Laptop },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
+
+  if (profile.email && ADMIN_EMAILS.includes(profile.email)) {
+    navItems.push({ href: "/admin", label: "Admin Panel", icon: ShieldAlert });
+  }
 
   const NavContent = () => (
     <>
       <div className="p-6 border-b border-border">
         <Link href="/" className="text-xl font-bold text-text-primary">
-          Resume<span className="text-accent">AI</span>
+          Vaylo<span className="text-accent">AI</span>
         </Link>
       </div>
 
@@ -51,7 +69,11 @@ export function Sidebar({ profile }: { profile: Profile }) {
           const isActive =
             pathname === item.href ||
             (item.href === "/analyze" && pathname.startsWith("/analyze")) ||
-            (item.href === "/settings" && pathname.startsWith("/settings"));
+            (item.href === "/settings" && pathname.startsWith("/settings")) ||
+            (item.href === "/builder" && pathname.startsWith("/builder")) ||
+            (item.href === "/roadmap" && pathname.startsWith("/roadmap")) ||
+            (item.href === "/roast" && pathname.startsWith("/roast")) ||
+            (item.href === "/portfolio" && pathname.startsWith("/portfolio"));
           return (
             <Link
               key={item.label}
