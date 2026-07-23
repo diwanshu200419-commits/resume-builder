@@ -17,10 +17,10 @@ interface UserProfile {
 }
 
 export default function AdminPage() {
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState([] as UserProfile[]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [actionId, setActionId] = useState<string | null>(null);
+  const [actionId, setActionId] = useState(null as string | null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -59,17 +59,20 @@ export default function AdminPage() {
     }
   };
 
-  const filteredUsers = users.filter((u) =>
-    (u.email || "").toLowerCase().includes(search.toLowerCase()) ||
-    (u.full_name || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredUsers = users.filter((u) => {
+    return (
+      (u.email || "").toLowerCase().includes(search.toLowerCase()) ||
+      (u.full_name || "").toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
-  const pendingUsers = users.filter((u) => u.subscription_status === "pending" || u.plan === "pending");
+  const pendingUsers = users.filter((u) => {
+    return u.subscription_status === "pending" || u.plan === "pending";
+  });
 
   const totalRevenue = users.reduce((acc, curr) => {
-    if (curr.plan === "pro") return acc + 99;
-    if (curr.plan === "premium") return acc + 299;
-    return acc;
+    const cost = curr.plan === "pro" ? 99 : curr.plan === "premium" ? 299 : 0;
+    return acc + cost;
   }, 0);
 
   return (
@@ -131,7 +134,7 @@ export default function AdminPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-text-secondary flex items-center justify-between">
               Total Revenue <Sparkles className="w-4 h-4 text-accent" />
-            </Title>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-extrabold text-text-primary">₹{totalRevenue}</div>
@@ -198,7 +201,7 @@ export default function AdminPage() {
                           ) : (
                             <>
                               <Button
-                                size="xs"
+                                size="sm"
                                 variant="outline"
                                 className="text-success border-success/30 hover:bg-success/5"
                                 onClick={() => handleUpdatePlan(u.id, "pro", "approve")}
@@ -206,7 +209,7 @@ export default function AdminPage() {
                                 Upgrade Pro
                               </Button>
                               <Button
-                                size="xs"
+                                size="sm"
                                 variant="outline"
                                 className="text-accent border-accent/30 hover:bg-accent/5"
                                 onClick={() => handleUpdatePlan(u.id, "premium", "approve")}
@@ -215,7 +218,7 @@ export default function AdminPage() {
                               </Button>
                               {u.plan !== "free" && (
                                 <Button
-                                  size="xs"
+                                  size="sm"
                                   variant="ghost"
                                   className="text-danger hover:bg-danger/5"
                                   onClick={() => handleUpdatePlan(u.id, "free", "reject")}

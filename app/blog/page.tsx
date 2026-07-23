@@ -74,7 +74,7 @@ export default function BlogPage() {
             <CardContent className="pt-0 pb-6 flex items-center justify-between text-xs text-text-muted">
               <span>{post.date}</span>
               <Link href={`/blog/${post.slug}`}>
-                <Button size="xs" variant="ghost" className="gap-1 text-accent hover:text-accent-hover font-semibold">
+                <Button size="sm" variant="ghost" className="gap-1 text-accent hover:text-accent-hover font-semibold">
                   Read Article <ArrowRight className="w-3 h-3" />
                 </Button>
               </Link>

@@ -167,7 +167,7 @@ export default function ResumeBuilderPage() {
               <div className="space-y-1">
                 <div className="flex justify-between items-center mb-1">
                   <Label>Description / Bullet Points</Label>
-                  <Button variant="ghost" size="xs" onClick={handleAIImprove} disabled={aiLoading} className="text-accent hover:text-accent-hover gap-1">
+                  <Button variant="ghost" size="sm" onClick={handleAIImprove} disabled={aiLoading} className="text-accent hover:text-accent-hover gap-1">
                     <Sparkles className="w-3 h-3" /> AI Refine
                   </Button>
                 </div>

@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Compass, Loader2, Sparkles, GraduationCap, Code, Clock } from "lucide-react";
 
 interface RoadmapData {
@@ -97,16 +96,16 @@ export default function CareerRoadmapPage() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="exp">Experience level</Label>
-              <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                <SelectTrigger id="exp">
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Entry Level">Entry Level / Student</SelectItem>
-                  <SelectItem value="Mid Level">Mid Level (1-3 years)</SelectItem>
-                  <SelectItem value="Senior Level">Senior Level (3+ years)</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                id="exp"
+                value={experienceLevel}
+                onChange={(e) => setExperienceLevel(e.target.value)}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"
+              >
+                <option value="Entry Level">Entry Level / Student</option>
+                <option value="Mid Level">Mid Level (1-3 years)</option>
+                <option value="Senior Level">Senior Level (3+ years)</option>
+              </select>
             </div>
 
             <Button
