@@ -43,12 +43,24 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/interview-prep") ||
     request.nextUrl.pathname.startsWith("/linkedin") ||
     request.nextUrl.pathname.startsWith("/checkout") ||
-    request.nextUrl.pathname.startsWith("/settings");
+    request.nextUrl.pathname.startsWith("/settings") ||
+    request.nextUrl.pathname.startsWith("/builder") ||
+    request.nextUrl.pathname.startsWith("/roast") ||
+    request.nextUrl.pathname.startsWith("/roadmap") ||
+    request.nextUrl.pathname.startsWith("/portfolio") ||
+    request.nextUrl.pathname.startsWith("/admin");
 
   const isPremiumRoute =
     request.nextUrl.pathname.startsWith("/cover-letter") ||
     request.nextUrl.pathname.startsWith("/interview-prep") ||
     request.nextUrl.pathname.startsWith("/linkedin");
+
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+  const ADMIN_EMAILS = [
+    "admin@vaylo.ai",
+    "jattshiv32@gmail.com",
+    "paid_tester_123@example.com"
+  ];
 
   if (!user && isDashboard) {
     const url = request.nextUrl.clone();
@@ -61,6 +73,20 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
+  }
+
+  if (user && isAdminRoute) {
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", user.id)
+      .single();
+
+    if (!userProfile || !userProfile.email || !ADMIN_EMAILS.includes(userProfile.email)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   if (user && profile?.plan === "free" && isPremiumRoute) {
@@ -85,6 +111,11 @@ export const config = {
     "/career-coach/:path*",
     "/settings/:path*",
     "/checkout/:path*",
+    "/builder/:path*",
+    "/roast/:path*",
+    "/roadmap/:path*",
+    "/portfolio/:path*",
+    "/admin/:path*",
     "/login",
     "/signup",
   ],
