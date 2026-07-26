@@ -1,37 +1,209 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import { getSupabaseUrl } from "@/lib/supabase/url";
+import type { Plan } from "@/types";
+
+class MockServerQueryBuilder {
+  private table: string;
+  private method: string = "select";
+  private filters: { col: string; val: any; op?: string }[] = [];
+  private data: any = null;
+  private isSingle: boolean = false;
+  private url: string;
+
+  constructor(table: string, url: string) {
+    this.table = table;
+    this.url = url;
+  }
+
+  select(columns?: string) {
+    this.method = "select";
+    return this;
+  }
+
+  insert(data: any) {
+    this.method = "insert";
+    this.data = data;
+    return this;
+  }
+
+  update(data: any) {
+    this.method = "update";
+    this.data = data;
+    return this;
+  }
+
+  upsert(data: any, options?: any) {
+    this.method = "upsert";
+    this.data = data;
+    return this;
+  }
+
+  delete() {
+    this.method = "delete";
+    return this;
+  }
+
+  eq(col: string, val: any) {
+    this.filters.push({ col, val, op: "eq" });
+    return this;
+  }
+
+  neq(col: string, val: any) {
+    this.filters.push({ col, val, op: "neq" });
+    return this;
+  }
+
+  lt(col: string, val: any) {
+    this.filters.push({ col, val, op: "lt" });
+    return this;
+  }
+
+  lte(col: string, val: any) {
+    this.filters.push({ col, val, op: "lte" });
+    return this;
+  }
+
+  gt(col: string, val: any) {
+    this.filters.push({ col, val, op: "gt" });
+    return this;
+  }
+
+  gte(col: string, val: any) {
+    this.filters.push({ col, val, op: "gte" });
+    return this;
+  }
+
+  in(col: string, valArray: any[]) {
+    this.filters.push({ col, val: valArray, op: "in" });
+    return this;
+  }
+
+  single() {
+    this.isSingle = true;
+    return this;
+  }
+
+  order(col: string, options?: any) {
+    return this;
+  }
+
+  limit(n: number) {
+    return this;
+  }
+
+  async then(onfulfilled?: (value: any) => any) {
+    try {
+      const result = await this.execute();
+      if (onfulfilled) return onfulfilled(result);
+      return result;
+    } catch (e: any) {
+      const errRes = { data: null, error: e };
+      if (onfulfilled) return onfulfilled(errRes);
+      return errRes;
+    }
+  }
+
+  private async execute() {
+    const headersInit: any = { "Content-Type": "application/json" };
+    const response = await fetch(this.url, {
+      method: "POST",
+      headers: headersInit,
+      body: JSON.stringify({
+        action: "query",
+        table: this.table,
+        method: this.method,
+        filters: this.filters,
+        data: this.data,
+      }),
+    });
+    
+    const res = await response.json();
+    if (this.isSingle && res.data) {
+      res.data = Array.isArray(res.data) ? res.data[0] || null : res.data;
+    }
+    return res;
+  }
+}
+
+export function createServerClient(url: string, key: string, options: any) {
+  const origin = url || "http://localhost:3000";
+  const mockDbUrl = `${origin}/api/mock-db`;
+
+  return {
+    auth: {
+      getUser: async () => {
+        const cookiesList = typeof options?.cookies?.getAll === "function" ? options.cookies.getAll() : [];
+        const tokenCookie = cookiesList.find((c: any) => c.name === "mock-session-id");
+        const token = tokenCookie ? tokenCookie.value : null;
+
+        if (!token) return { data: { user: null }, error: null };
+
+        try {
+          const res = await fetch(mockDbUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "auth",
+              method: "getUser",
+              payload: { token },
+            }),
+          });
+          return await res.json();
+        } catch (e: any) {
+          return { data: { user: null }, error: e };
+        }
+      },
+      exchangeCodeForSession: async (code: string) => {
+        return { data: {}, error: null };
+      },
+    },
+    from: (table: string) => {
+      return new MockServerQueryBuilder(table, mockDbUrl);
+    },
+    storage: {
+      from: (bucket: string) => {
+        return {
+          upload: async (filePath: string, buffer: any, options: any) => {
+            return { data: { path: filePath }, error: null };
+          }
+        };
+      }
+    }
+  };
+}
 
 export async function createClient() {
-  const cookieStore = await cookies();
-  const supabaseUrl = getSupabaseUrl();
+  const { cookies, headers } = require("next/headers");
+  const cookieStore = cookies();
+  const host = headers().get("host") || "localhost:3000";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const url = `${protocol}://${host}`;
 
-  return createServerClient(
-    supabaseUrl,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Server Component — ignore
-          }
-        },
+  return createServerClient(url, "", {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet: any[]) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {}
+      },
+    },
+  });
 }
 
 export async function createServiceClient() {
-  const { createClient } = await import("@supabase/supabase-js");
-  return createClient(
-    getSupabaseUrl(),
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  // Service client defaults to local fetch origin
+  let url = "http://localhost:3000";
+  try {
+    const { headers } = require("next/headers");
+    const host = headers().get("host");
+    if (host) {
+      const protocol = host.includes("localhost") ? "http" : "https";
+      url = `${protocol}://${host}`;
+    }
+  } catch {}
+
+  return createServerClient(url, "", {});
 }

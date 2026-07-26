@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "No expired subscriptions found" });
     }
 
-    const expiredUserIds = expiredSubs.map((sub) => sub.user_id);
+    const expiredUserIds = (expiredSubs as any[]).map((sub: any) => sub.user_id);
 
     // 2. Downgrade subscriptions to free
     const { error: subUpdateError } = await supabase
