@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { getProfile } from "@/lib/auth";
 import { getCareerProfile } from "@/lib/ai-engine/career-memory";
 import { GoogleGenerativeAI } from "@google/generative-ai";

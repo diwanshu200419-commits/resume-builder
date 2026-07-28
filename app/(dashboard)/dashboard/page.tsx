@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { StatsBar } from "@/components/dashboard/StatsBar";
@@ -14,12 +15,16 @@ import { AIFeed } from "@/components/dashboard/AIFeed";
 
 export default async function DashboardPage() {
   const profile = await getProfile();
+  if (!profile) {
+    redirect("/login");
+  }
+
   const supabase = await createClient();
 
   const { data: analyses } = await supabase
     .from("analyses")
     .select("*")
-    .eq("user_id", profile!.id)
+    .eq("user_id", profile.id)
     .order("created_at", { ascending: false })
     .limit(20);
 

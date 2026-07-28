@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { getProfile } from "@/lib/auth";
 import { calculateCareerScore, saveMonthlyScore } from "@/lib/ai-engine/career-scorer";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";

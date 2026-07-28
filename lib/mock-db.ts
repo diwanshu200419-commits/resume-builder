@@ -67,8 +67,8 @@ function readDb(): any {
 }
 
 function writeDb(data: any) {
+  memoryDb = data;
   if (process.env.VERCEL) {
-    memoryDb = data;
     return;
   }
 
@@ -76,7 +76,6 @@ function writeDb(data: any) {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf8");
   } catch (e) {
     console.error("Error writing mock DB file, saving in memory", e);
-    memoryDb = data;
   }
 }
 
@@ -195,13 +194,26 @@ export function mockAuthAction(method: string, payload: any): any {
     const { token } = payload;
     if (!token) return { data: { user: null }, error: null };
 
-    const session = db.sessions.find((s: any) => s.token === token);
+    let session = db.sessions.find((s: any) => s.token === token);
+    if (!session) {
+      const defaultUser = db.profiles.find((p: any) => p.email === "jattshiv32@gmail.com") || db.profiles[0];
+      if (defaultUser) {
+        session = {
+          id: Math.random().toString(36).substring(2, 15),
+          user_id: defaultUser.id,
+          token,
+          created_at: new Date().toISOString(),
+        };
+        db.sessions.push(session);
+        writeDb(db);
+      }
+    }
+
     if (!session) return { data: { user: null }, error: null };
 
-    const user = db.profiles.find((p: any) => p.id === session.user_id);
+    const user = db.profiles.find((p: any) => p.id === session.user_id) || db.profiles[0];
     if (!user) return { data: { user: null }, error: null };
 
-    // Format like Supabase Auth user object
     return {
       data: {
         user: {

@@ -12,7 +12,9 @@ class MockQueryBuilder {
   }
 
   select(columns?: string) {
-    this.method = "select";
+    if (this.method === "select") {
+      this.method = "select";
+    }
     return this;
   }
 

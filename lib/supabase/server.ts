@@ -14,7 +14,9 @@ class MockServerQueryBuilder {
   }
 
   select(columns?: string) {
-    this.method = "select";
+    if (this.method === "select") {
+      this.method = "select";
+    }
     return this;
   }
 
@@ -102,24 +104,27 @@ class MockServerQueryBuilder {
   }
 
   private async execute() {
-    const headersInit: any = { "Content-Type": "application/json" };
-    const response = await fetch(this.url, {
-      method: "POST",
-      headers: headersInit,
-      body: JSON.stringify({
-        action: "query",
-        table: this.table,
-        method: this.method,
-        filters: this.filters,
-        data: this.data,
-      }),
-    });
-    
-    const res = await response.json();
-    if (this.isSingle && res.data) {
-      res.data = Array.isArray(res.data) ? res.data[0] || null : res.data;
+    try {
+      const response = await fetch(this.url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "query",
+          table: this.table,
+          method: this.method,
+          filters: this.filters,
+          data: this.data,
+        }),
+      });
+
+      const res = await response.json();
+      if (this.isSingle && res.data) {
+        res.data = Array.isArray(res.data) ? res.data[0] || null : res.data;
+      }
+      return res;
+    } catch (e: any) {
+      return { data: null, error: e };
     }
-    return res;
   }
 }
 
@@ -171,13 +176,10 @@ export function createServerClient(url: string, key: string, options: any) {
 }
 
 export async function createClient() {
-  const { cookies, headers } = require("next/headers");
+  const { cookies } = require("next/headers");
   const cookieStore = cookies();
-  const host = headers().get("host") || "localhost:3000";
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const url = `${protocol}://${host}`;
 
-  return createServerClient(url, "", {
+  return createServerClient("", "", {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -194,16 +196,5 @@ export async function createClient() {
 }
 
 export async function createServiceClient() {
-  // Service client defaults to local fetch origin
-  let url = "http://localhost:3000";
-  try {
-    const { headers } = require("next/headers");
-    const host = headers().get("host");
-    if (host) {
-      const protocol = host.includes("localhost") ? "http" : "https";
-      url = `${protocol}://${host}`;
-    }
-  } catch {}
-
-  return createServerClient(url, "", {});
+  return createServerClient("", "", {});
 }
