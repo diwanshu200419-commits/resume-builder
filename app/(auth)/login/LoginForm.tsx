@@ -78,8 +78,7 @@ export default function LoginForm() {
       setError(res.error.message || "Failed to send OTP");
     } else {
       setOtpSent(true);
-      const code = res.data?.otp || "12345";
-      setOtpMessage(`OTP sent to +91 ${phone}! Verification Code: ${code} (or test code: 12345)`);
+      setOtpMessage(`Verification OTP sent to +91 ${phone}. Please enter the 6-digit code to proceed.`);
     }
   };
 
@@ -96,7 +95,7 @@ export default function LoginForm() {
     const supabase = createClient();
     const res = await (supabase.auth as any).verifyOtp({ phone, token: otpCode });
     if (res?.error) {
-      setError(res.error.message || "Invalid OTP code. Try test code: 12345");
+      setError(res.error.message || "Invalid OTP code. Please try again.");
       setLoading(false);
       return;
     }
@@ -132,8 +131,7 @@ export default function LoginForm() {
         setError(data.error.message || "Failed to send reset OTP");
       } else {
         setResetOtpSent(true);
-        const code = data.data?.otp || "12345";
-        setResetMessage(`Reset OTP sent! Verification Code: ${code} (or test code: 12345)`);
+        setResetMessage(`Password reset code sent to ${resetTarget}. Please enter the code below.`);
       }
     } catch {
       setError("Failed to send reset OTP. Try again.");
