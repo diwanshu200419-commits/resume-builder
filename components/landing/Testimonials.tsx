@@ -1,26 +1,29 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star, User } from "lucide-react";
 
 const testimonials = [
   {
     quote: "Vaylo AI improved my resume score from 55 to 91. I started getting interview calls every week!",
     name: "Rohit Sharma",
     role: "Software Engineer",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
+    initials: "RS",
+    gradient: "from-indigo-500 to-purple-600",
   },
   {
     quote: "The AI interview coach is incredible. It felt like talking to a real recruiter.",
     name: "Sneha Verma",
     role: "Product Manager",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+    initials: "SV",
+    gradient: "from-purple-500 to-pink-600",
   },
   {
     quote: "Finally, a tool that truly understands what recruiters are looking for.",
     name: "Arjun Mehta",
     role: "Data Analyst",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80",
+    initials: "AM",
+    gradient: "from-emerald-500 to-teal-600",
   },
 ];
 
@@ -54,7 +57,9 @@ export function Testimonials() {
               </p>
 
               <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-border">
-                <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-border" />
+                <div className={`w-10 h-10 rounded-full bg-gradient-to-tr ${t.gradient} text-white font-extrabold text-xs flex items-center justify-center shadow-md shrink-0`}>
+                  {t.initials}
+                </div>
                 <div>
                   <h4 className="font-bold text-text-primary text-xs">{t.name}</h4>
                   <p className="text-[11px] text-text-muted">{t.role}</p>

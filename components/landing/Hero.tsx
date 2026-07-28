@@ -63,18 +63,24 @@ export function Hero() {
               </Link>
             </motion.div>
 
-            {/* Social Proof Avatars & Badges */}
+            {/* Social Proof AI Avatars */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               className="flex flex-wrap items-center gap-6 pt-4 text-xs text-text-secondary"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <div className="flex -space-x-2">
-                  <img className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="User 1" />
-                  <img className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="User 2" />
-                  <img className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" alt="User 3" />
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-black text-[10px] flex items-center justify-center border-2 border-white dark:border-slate-900 shadow">
+                    RS
+                  </div>
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-500 to-pink-600 text-white font-black text-[10px] flex items-center justify-center border-2 border-white dark:border-slate-900 shadow">
+                    SV
+                  </div>
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 text-white font-black text-[10px] flex items-center justify-center border-2 border-white dark:border-slate-900 shadow">
+                    AM
+                  </div>
                 </div>
                 <div>
                   <div className="flex text-amber-400">

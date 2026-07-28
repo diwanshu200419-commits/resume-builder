@@ -5,7 +5,7 @@ import { Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const saved = localStorage.getItem("vaylo-theme") as "light" | "dark" | null;
@@ -17,7 +17,8 @@ export function ThemeToggle() {
         document.documentElement.classList.remove("dark");
       }
     } else {
-      document.documentElement.classList.add("dark");
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
