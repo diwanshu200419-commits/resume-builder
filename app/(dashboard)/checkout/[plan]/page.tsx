@@ -20,8 +20,8 @@ import Link from "next/link";
 import type { Plan } from "@/types";
 
 const PLAN_DETAILS: Record<string, { name: string; price: number; tagline: string }> = {
-  pro: { name: "Vaylo Pro", price: 99, tagline: "Unlimited resume AI, downloads & cover letters" },
-  premium: { name: "Vaylo Premium", price: 299, tagline: "Everything in Pro + coaching & job matching" },
+  pro: { name: "Vaylo Pro", price: 199, tagline: "Unlimited resume AI, downloads & cover letters" },
+  premium: { name: "Vaylo Premium", price: 399, tagline: "Everything in Pro + coaching & job matching" },
   career: { name: "Vaylo Career Pack", price: 499, tagline: "Complete placement pack with 1-on-1 AI review" },
 };
 

@@ -42,7 +42,52 @@
     }
   ],
   "analyses": [],
-  "payments": [],
+  "payments": [
+    {
+      "id": "oqqt8f38dxh",
+      "created_at": "2026-07-28T07:52:38.259Z",
+      "updated_at": "2026-07-28T07:52:38.259Z",
+      "user_id": "wf521zlx3rp",
+      "upi_ref": "VAYLOMS4CYRZAQZQS98",
+      "plan": "pro",
+      "amount": 99,
+      "currency": "INR",
+      "status": "pending"
+    },
+    {
+      "id": "obxm4nlo33",
+      "created_at": "2026-07-28T07:52:38.262Z",
+      "updated_at": "2026-07-28T07:52:38.262Z",
+      "user_id": "wf521zlx3rp",
+      "upi_ref": "VAYLOMS4CYRZHEJIEKM",
+      "plan": "pro",
+      "amount": 99,
+      "currency": "INR",
+      "status": "pending"
+    },
+    {
+      "id": "j9hmsuaosip",
+      "created_at": "2026-07-28T07:53:22.893Z",
+      "updated_at": "2026-07-28T07:53:22.893Z",
+      "user_id": "wf521zlx3rp",
+      "upi_ref": "VAYLOMS4CZQENV26WHE",
+      "plan": "pro",
+      "amount": 99,
+      "currency": "INR",
+      "status": "pending"
+    },
+    {
+      "id": "tso7bmxj359",
+      "created_at": "2026-07-28T07:53:22.895Z",
+      "updated_at": "2026-07-28T07:53:22.895Z",
+      "user_id": "wf521zlx3rp",
+      "upi_ref": "VAYLOMS4CZQEUJOVDTS",
+      "plan": "pro",
+      "amount": 99,
+      "currency": "INR",
+      "status": "pending"
+    }
+  ],
   "sessions": [
     {
       "id": "uq4znqjcdak",
