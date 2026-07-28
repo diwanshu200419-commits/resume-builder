@@ -7,33 +7,153 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Loader2, RefreshCw, Mic } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Loader2, RefreshCw, Mic, Sparkles, CheckCircle2, Award, Star } from "lucide-react";
 import type { InterviewQuestions, InterviewQuestion } from "@/types";
 
+interface EvaluationResult {
+  rating: number;
+  star_analysis: {
+    situation: string;
+    task: string;
+    action: string;
+    result: string;
+  };
+  strengths: string[];
+  weaknesses: string[];
+  improved_answer: string;
+}
+
 function QuestionCard({ q, index }: { q: InterviewQuestion; index: number }) {
+  const [userAnswer, setUserAnswer] = useState("");
+  const [evaluating, setEvaluating] = useState(false);
+  const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
+  const [showSandbox, setShowSandbox] = useState(false);
+
+  const handleEvaluate = async () => {
+    if (!userAnswer.trim()) return;
+    setEvaluating(true);
+    try {
+      const res = await fetch("/api/ai/interview-eval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: q.question,
+          userAnswer,
+        }),
+      });
+      const data = await res.json();
+      if (data.data) {
+        setEvalResult(data.data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
   return (
-    <Card>
+    <Card className="border-border bg-surface shadow-md hover:border-border-active transition-all">
       <CardContent className="p-5">
         <div className="flex items-start gap-3">
           <span className="w-6 h-6 rounded-full bg-accent/20 text-accent text-xs flex items-center justify-center font-bold shrink-0">
             {index + 1}
           </span>
-          <div className="flex-1">
-            <p className="font-medium text-text-primary text-sm mb-3">{q.question}</p>
-            <Accordion type="single" collapsible>
+          <div className="flex-1 space-y-3">
+            <div className="flex items-start justify-between gap-4">
+              <p className="font-semibold text-text-primary text-sm leading-relaxed">{q.question}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSandbox(!showSandbox)}
+                className="text-xs gap-1 border-accent/30 text-accent hover:bg-accent/10 shrink-0"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                {showSandbox ? "Hide Sandbox" : "Practice Sandbox"}
+              </Button>
+            </div>
+
+            {/* Accordion for Model Answer */}
+            <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="answer" className="border-0">
-                <AccordionTrigger className="text-xs text-accent py-2">Suggested answer</AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-sm text-text-secondary whitespace-pre-wrap">{q.suggested_answer}</p>
+                <AccordionTrigger className="text-xs text-text-secondary hover:text-accent py-1">
+                  View Model Answer & Strategy
+                </AccordionTrigger>
+                <AccordionContent className="pt-2">
+                  <div className="p-3 rounded-lg bg-surface-elevated/60 border border-border/40 text-sm text-text-secondary whitespace-pre-wrap leading-relaxed">
+                    {q.suggested_answer}
+                  </div>
                   {q.tip && (
-                    <p className="text-xs text-text-muted mt-3 flex items-center gap-1">
-                      <Mic className="w-3 h-3" /> {q.tip}
+                    <p className="text-xs text-text-muted mt-2 flex items-center gap-1.5">
+                      <Mic className="w-3.5 h-3.5 text-accent" /> <span className="italic">{q.tip}</span>
                     </p>
                   )}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-            <p className="text-xs text-warning mt-2">Practice out loud before your interview</p>
+
+            {/* Interactive Answer Sandbox */}
+            {showSandbox && (
+              <div className="pt-3 border-t border-border/40 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-text-secondary flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-accent" /> Type Your Response (STAR Method):
+                  </label>
+                  <Textarea
+                    placeholder="Type how you would answer this question in an actual interview..."
+                    className="min-h-[100px] text-sm bg-background border-border"
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      onClick={handleEvaluate}
+                      disabled={evaluating || !userAnswer.trim()}
+                      className="bg-accent hover:bg-accent-hover text-white text-xs gap-1.5"
+                    >
+                      {evaluating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Award className="w-3.5 h-3.5" />}
+                      Evaluate Answer with AI
+                    </Button>
+                  </div>
+                </div>
+
+                {/* AI Feedback Report */}
+                {evalResult && (
+                  <div className="p-4 rounded-xl bg-surface-elevated border border-accent/30 space-y-3 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1">
+                        <Star className="w-4 h-4 text-warning fill-warning" /> AI Response Score
+                      </span>
+                      <Badge className={evalResult.rating >= 8 ? "bg-success text-white" : "bg-warning text-black"}>
+                        {evalResult.rating} / 10
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <div className="p-2 rounded bg-background/50 border border-border/30">
+                        <span className="font-semibold text-text-primary">Situation & Task:</span>
+                        <p className="text-text-muted mt-0.5">{evalResult.star_analysis.situation}</p>
+                      </div>
+                      <div className="p-2 rounded bg-background/50 border border-border/30">
+                        <span className="font-semibold text-text-primary">Action & Result:</span>
+                        <p className="text-text-muted mt-0.5">{evalResult.star_analysis.result}</p>
+                      </div>
+                    </div>
+
+                    {evalResult.improved_answer && (
+                      <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
+                        <span className="text-xs font-semibold text-accent flex items-center gap-1 mb-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> High-Impact Refined Response:
+                        </span>
+                        <p className="text-xs text-text-secondary leading-relaxed">{evalResult.improved_answer}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
@@ -90,67 +210,90 @@ export default function InterviewPrepPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-5xl mx-auto space-y-6 pb-12">
+      <div className="flex items-center justify-between border-b border-border/40 pb-4">
         <div className="flex items-center gap-4">
           <Link href={`/results/${id}`}>
             <Button variant="ghost" size="sm" className="gap-1">
-              <ArrowLeft className="w-4 h-4" /> Back
+              <ArrowLeft className="w-4 h-4" /> Back to Analysis
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold text-text-primary">Interview Prep</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+              Interview Q&A Prep Sandbox
+            </h1>
+            <p className="text-xs text-text-muted mt-0.5">Practice out loud or type your responses to get instant AI STAR feedback.</p>
+          </div>
         </div>
         <Button variant="outline" size="sm" onClick={handleGenerate} disabled={generating} className="gap-1">
-          {generating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-          {questions ? "Regenerate" : "Generate questions"}
+          {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+          {questions ? "Regenerate Questions" : "Generate Prep Questions"}
         </Button>
       </div>
 
       {error && <p className="text-danger text-sm">{error}</p>}
       {!questions ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-text-muted mb-4">Generate personalized interview questions based on your resume and JD</p>
-            <Button onClick={handleGenerate} disabled={generating}>Generate interview prep</Button>
+        <Card className="border-border bg-surface">
+          <CardContent className="p-12 text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto text-accent">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-text-primary">Generate Personalized Prep Questions</h3>
+            <p className="text-sm text-text-muted max-w-md mx-auto">
+              Our AI analyzes your resume and job description to predict HR, technical, and behavioral questions.
+            </p>
+            <Button onClick={handleGenerate} disabled={generating} className="bg-accent text-white">
+              {generating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Generate Interview Questions
+            </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-8">
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-lg font-semibold text-text-primary">HR Questions</h2>
-              <Badge variant="default">{questions.hr_questions?.length || 0}</Badge>
-            </div>
-            <div className="space-y-3">
-              {questions.hr_questions?.map((q, i) => (
-                <QuestionCard key={i} q={q} index={i} />
-              ))}
-            </div>
-          </section>
+          {/* HR Section */}
+          {questions.hr_questions && questions.hr_questions.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-text-primary">HR & General Questions</h2>
+                <Badge variant="default" className="bg-accent text-white">{questions.hr_questions.length}</Badge>
+              </div>
+              <div className="space-y-3">
+                {questions.hr_questions.map((q, i) => (
+                  <QuestionCard key={i} q={q} index={i} />
+                ))}
+              </div>
+            </section>
+          )}
 
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-lg font-semibold text-text-primary">Technical Questions</h2>
-              <Badge variant="default">{questions.technical_questions?.length || 0}</Badge>
-            </div>
-            <div className="space-y-3">
-              {questions.technical_questions?.map((q, i) => (
-                <QuestionCard key={i} q={q} index={i} />
-              ))}
-            </div>
-          </section>
+          {/* Technical Section */}
+          {questions.technical_questions && questions.technical_questions.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-text-primary">Technical & Role-Specific Questions</h2>
+                <Badge variant="default" className="bg-accent text-white">{questions.technical_questions.length}</Badge>
+              </div>
+              <div className="space-y-3">
+                {questions.technical_questions.map((q, i) => (
+                  <QuestionCard key={i} q={q} index={i} />
+                ))}
+              </div>
+            </section>
+          )}
 
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-lg font-semibold text-text-primary">Behavioral Questions</h2>
-              <Badge variant="default">{questions.behavioral_questions?.length || 0}</Badge>
-            </div>
-            <div className="space-y-3">
-              {questions.behavioral_questions?.map((q, i) => (
-                <QuestionCard key={i} q={q} index={i} />
-              ))}
-            </div>
-          </section>
+          {/* Behavioral Section */}
+          {questions.behavioral_questions && questions.behavioral_questions.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-text-primary">Behavioral & STAR Questions</h2>
+                <Badge variant="default" className="bg-accent text-white">{questions.behavioral_questions.length}</Badge>
+              </div>
+              <div className="space-y-3">
+                {questions.behavioral_questions.map((q, i) => (
+                  <QuestionCard key={i} q={q} index={i} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
     </div>

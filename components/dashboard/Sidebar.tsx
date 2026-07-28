@@ -19,6 +19,7 @@ import {
   Flame,
   Laptop,
   ShieldAlert,
+  Target,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -45,6 +46,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/analyze", label: "New Analysis", icon: FileSearch },
+    { href: "/job-match", label: "Job Match", icon: Target },
     { href: "/builder", label: "Resume Builder", icon: Layout },
     { href: "/roadmap", label: "AI Roadmap", icon: Compass },
     { href: "/roast", label: "Resume Roast", icon: Flame },
