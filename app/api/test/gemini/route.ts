@@ -21,7 +21,7 @@ export async function GET() {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `You are a test assistant. Return valid JSON with a single field "message" that says "ResumeAI is working perfectly!"`;
     const result = await model.generateContent(prompt);
