@@ -25,6 +25,20 @@
       "total_resume_downloads": 0,
       "created_at": "2026-07-28T07:07:12.446Z",
       "updated_at": "2026-07-28T07:07:12.446Z"
+    },
+    {
+      "id": "wf521zlx3rp",
+      "email": "user_357615@phone.vaylo.ai",
+      "phone": "9816357615",
+      "full_name": "Member (7615)",
+      "plan": "free",
+      "subscription_status": "active",
+      "analyses_used": 0,
+      "analyses_limit": 2,
+      "total_ats_checks": 0,
+      "total_resume_downloads": 0,
+      "created_at": "2026-07-28T07:47:04.614Z",
+      "updated_at": "2026-07-28T07:47:04.614Z"
     }
   ],
   "analyses": [],
@@ -35,9 +49,42 @@
       "user_id": "admin-id",
       "token": "mock_token_admin",
       "created_at": "2026-07-28T07:38:02.756Z"
+    },
+    {
+      "id": "lzp29qg58og",
+      "user_id": "wf521zlx3rp",
+      "token": "mock_token_cogiun0erap",
+      "created_at": "2026-07-28T07:47:04.614Z"
     }
   ],
   "career_profiles": [],
-  "career_scores": [],
+  "career_scores": [
+    {
+      "id": "cb39ldv8w64",
+      "created_at": "2026-07-28T07:47:11.241Z",
+      "updated_at": "2026-07-28T07:47:11.299Z",
+      "user_id": "wf521zlx3rp",
+      "month": "2026-07",
+      "overall_score": 29,
+      "resume_score": 50,
+      "skills_score": 0,
+      "projects_score": 0,
+      "experience_score": 60,
+      "linkedin_score": 50
+    },
+    {
+      "id": "sbbx5mdhkuc",
+      "created_at": "2026-07-28T07:47:11.611Z",
+      "updated_at": "2026-07-28T07:47:11.690Z",
+      "user_id": "wf521zlx3rp",
+      "month": "2026-07",
+      "overall_score": 29,
+      "resume_score": 50,
+      "skills_score": 0,
+      "projects_score": 0,
+      "experience_score": 60,
+      "linkedin_score": 50
+    }
+  ],
   "subscriptions": []
 }
