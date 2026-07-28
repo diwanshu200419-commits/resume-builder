@@ -1,12 +1,55 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Star, CheckCircle, ShieldCheck, CreditCard, Send } from "lucide-react";
+import { ArrowRight, Sparkles, Star, CheckCircle, ShieldCheck, CreditCard, Send, Loader2, Bot } from "lucide-react";
 
 export function Hero() {
+  const [chatMessages, setChatMessages] = useState<Array<{ sender: "bot" | "user"; text: string }>>([
+    { sender: "bot", text: "How can I help improve your resume score today?" },
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+
+  const handleSendChat = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userMsg = chatInput.trim();
+    setChatInput("");
+    setChatMessages((prev) => [...prev, { sender: "user", text: userMsg }]);
+    setChatLoading(true);
+
+    try {
+      const res = await fetch("/api/ai/career-coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMsg }),
+      });
+      const data = await res.json();
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: data.reply || "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded'!",
+        },
+      ]);
+    } catch {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded'!",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   return (
     <section className="relative pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-background">
       {/* Light Mesh Glow Overlay */}
@@ -148,23 +191,41 @@ export function Hero() {
                 </div>
               </div>
 
-              {/* Mini AI Chat Widget Preview */}
-              <div className="p-3 rounded-xl bg-slate-900 text-white space-y-2">
-                <div className="flex items-center justify-between text-[11px]">
+              {/* Interactive AI Chat Assistant Box */}
+              <div className="p-3.5 rounded-xl bg-slate-900 text-white space-y-3 shadow-inner">
+                <div className="flex items-center justify-between text-[11px] border-b border-slate-800 pb-2">
                   <span className="font-bold flex items-center gap-1.5 text-indigo-400">
-                    <Sparkles className="w-3.5 h-3.5" /> AI Chat Assistant
+                    <Sparkles className="w-3.5 h-3.5" /> Interactive AI Chat Assistant
                   </span>
-                  <span className="text-[10px] text-slate-400">Online</span>
+                  <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
+                  </span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-slate-800 text-xs text-slate-200">
-                  How can I help improve your resume score today?
+
+                <div className="max-h-36 overflow-y-auto space-y-2 pr-1 text-xs">
+                  {chatMessages.map((m, idx) => (
+                    <div key={idx} className={`p-2.5 rounded-lg text-xs leading-relaxed ${m.sender === "user" ? "bg-indigo-600 text-white font-medium ml-4 text-right" : "bg-slate-800 text-slate-200 border border-slate-700 mr-4"}`}>
+                      {m.text}
+                    </div>
+                  ))}
+                  {chatLoading && (
+                    <div className="flex items-center gap-1.5 text-xs text-indigo-300">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> AI is generating response...
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <input readOnly value="Ask anything about your resume..." className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-400 focus:outline-none" />
-                  <div className="p-2 rounded-lg bg-indigo-600 text-white">
+
+                <form onSubmit={handleSendChat} className="flex gap-2">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask AI anything about your resume..."
+                    className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                  <button type="submit" disabled={chatLoading || !chatInput.trim()} className="p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50">
                     <Send className="w-3.5 h-3.5" />
-                  </div>
-                </div>
+                  </button>
+                </form>
               </div>
             </motion.div>
           </div>

@@ -178,7 +178,7 @@ async function withRetryAndTimeout<T>(
 // ----------------------------
 // Get Model Instance
 // ----------------------------
-function getModel() {
+export function getModel() {
   for (const modelName of MODEL_PREFERENCES) {
     try {
       return genAI.getGenerativeModel({ model: modelName, safetySettings });
