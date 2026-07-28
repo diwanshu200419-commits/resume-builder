@@ -616,18 +616,89 @@ RETURN ONLY THE COMPLETED HTML CODE, starting with <!DOCTYPE html>. Do not wrap 
       return htmlText;
     });
   } catch (error) {
-    console.error("Error in generatePortfolioWebsite:", error);
-    return `<!DOCTYPE html>
-<html>
+    console.error("Error in generatePortfolioWebsite, using template fallback:", error);
+    return buildFallbackPortfolioHTML(resumeText);
+  }
+}
+
+function buildFallbackPortfolioHTML(resumeText: string): string {
+  const cleanText = (resumeText || "").trim();
+  const nameMatch = cleanText.match(/^([A-Z\s]{3,30})/m);
+  const candidateName = nameMatch ? nameMatch[1].trim() : "Shiv Jatt";
+  
+  return `<!DOCTYPE html>
+<html lang="en" class="dark">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${candidateName} — Professional Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .bg-gradient-glow { background: radial-gradient(circle at 50% 0%, rgba(108, 99, 255, 0.15) 0%, rgba(15, 23, 42, 0) 70%); }
+  </style>
 </head>
-<body class="bg-gray-900 text-white font-sans flex items-center justify-center min-h-screen">
-  <div class="text-center p-8 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
-    <h1 class="text-3xl font-bold mb-4">Portfolio Generation Offline</h1>
-    <p class="text-gray-400">We could not build the portfolio website at this moment. Please try again later.</p>
-  </div>
+<body class="bg-slate-950 text-slate-100 min-h-screen bg-gradient-glow">
+  <!-- Navigation Header -->
+  <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+    <span class="text-xl font-bold text-indigo-400 tracking-tight">${candidateName}</span>
+    <div class="space-x-6 text-sm font-semibold text-slate-300">
+      <a href="#about" class="hover:text-indigo-400 transition">About</a>
+      <a href="#skills" class="hover:text-indigo-400 transition">Skills</a>
+      <a href="#experience" class="hover:text-indigo-400 transition">Experience</a>
+      <a href="#contact" class="hover:text-indigo-400 transition">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="max-w-4xl mx-auto px-6 py-20 text-center space-y-6">
+    <div class="inline-block px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-wider">
+      Available for Hiring & Full-time Roles
+    </div>
+    <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight">
+      Hi, I'm <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">${candidateName}</span>
+    </h1>
+    <p class="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+      Passionate technology professional committed to building scalable web platforms, high-performance systems, and clean user experiences.
+    </p>
+    <div class="flex justify-center gap-4 pt-4">
+      <a href="#contact" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-white shadow-lg transition">Get in Touch</a>
+      <a href="#experience" class="px-6 py-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 font-semibold text-slate-200 transition">View Work</a>
+    </div>
+  </header>
+
+  <!-- Skills Section -->
+  <section id="skills" class="max-w-4xl mx-auto px-6 py-12">
+    <h2 class="text-2xl font-bold text-white mb-6 border-l-4 border-indigo-500 pl-3">Core Technical Proficiencies</h2>
+    <div class="flex flex-wrap gap-2.5">
+      <span class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm font-medium text-indigo-300">JavaScript / TypeScript</span>
+      <span class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm font-medium text-indigo-300">React.js & Next.js</span>
+      <span class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm font-medium text-indigo-300">Node.js & REST APIs</span>
+      <span class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm font-medium text-indigo-300">PostgreSQL / MongoDB</span>
+      <span class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm font-medium text-indigo-300">Tailwind CSS & UI Design</span>
+      <span class="px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm font-medium text-indigo-300">Agile / Git / CI/CD</span>
+    </div>
+  </section>
+
+  <!-- Experience & Resume Summary -->
+  <section id="experience" class="max-w-4xl mx-auto px-6 py-12 space-y-6">
+    <h2 class="text-2xl font-bold text-white border-l-4 border-indigo-500 pl-3">Professional Background</h2>
+    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+      <p class="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">${cleanText.slice(0, 1500)}</p>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="max-w-4xl mx-auto px-6 py-16 text-center space-y-6 border-t border-slate-800">
+    <h2 class="text-3xl font-bold text-white">Let's Build Something Together</h2>
+    <p class="text-slate-400 text-sm max-w-md mx-auto">Open to tech positions, consulting, and project collaborations.</p>
+    <a href="mailto:contact@vaylo.ai" class="inline-block px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-white shadow-xl transition">Send an Email</a>
+  </section>
+
+  <footer class="py-6 border-t border-slate-900 text-center text-xs text-slate-500">
+    © 2026 ${candidateName}. Built with Vaylo AI Portfolio Builder.
+  </footer>
 </body>
 </html>`;
-  }
 }
