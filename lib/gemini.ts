@@ -702,3 +702,25 @@ function buildFallbackPortfolioHTML(resumeText: string): string {
 </body>
 </html>`;
 }
+
+export async function optimizeBulletPoints(text: string): Promise<string> {
+  const model = getModel();
+  if (!model) {
+    return text
+      .replace(/worked on/gi, "Spearheaded development of")
+      .replace(/helped with/gi, "Architected and optimized")
+      .replace(/responsible for/gi, "Delivered scalable solution for");
+  }
+
+  try {
+    const prompt = `You are a world-class executive recruiter. Rewrite the following resume bullet points/text to be high-impact, metric-driven, and ATS-friendly. Use strong action verbs:\n\n${text}`;
+    const response = await model.generateContent(prompt);
+    return response.response.text().trim();
+  } catch {
+    return text
+      .replace(/worked on/gi, "Spearheaded development of")
+      .replace(/helped with/gi, "Architected and optimized")
+      .replace(/responsible for/gi, "Delivered scalable solution for");
+  }
+}
+

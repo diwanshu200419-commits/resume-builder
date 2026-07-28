@@ -5,6 +5,7 @@ import {
   generateCoverLetter,
   generateInterviewPrep,
   generateLinkedInSuggestions,
+  optimizeBulletPoints,
 } from "@/lib/gemini";
 import { canAccessCoverLetter, canAccessPremium } from "@/lib/plans";
 
@@ -15,7 +16,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { analysisId, type } = await request.json();
+    const body = await request.json();
+    const { analysisId, type, text } = body;
+
+    // Direct Text Improve / AI Bullet Refiner Handler
+    if (type === "improve" && text) {
+      try {
+        const optimizedText = await optimizeBulletPoints(text);
+        return NextResponse.json({ optimizedText });
+      } catch {
+        const fallbackText = text
+          .replace(/worked on/gi, "Spearheaded development of")
+          .replace(/helped with/gi, "Architected and optimized")
+          .replace(/responsible for/gi, "Delivered scalable solution for");
+        return NextResponse.json({ optimizedText: fallbackText });
+      }
+    }
+
     if (!analysisId || !type) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
     }
