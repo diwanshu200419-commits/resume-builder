@@ -1,9 +1,10 @@
 import type { Plan } from "@/types";
 
 // Amounts are in paise-equivalent rupees (whole rupees here, unlike Razorpay's paise)
-const PLAN_AMOUNTS: Record<Exclude<Plan, "free">, number> = {
-  pro: 199,
-  premium: 399,
+const PLAN_AMOUNTS: Record<string, number> = {
+  pro: 99,
+  premium: 299,
+  career: 499,
   "career-pack": 499,
 };
 

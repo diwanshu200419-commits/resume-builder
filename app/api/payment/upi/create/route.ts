@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { plan } = await request.json();
-    if (!plan || (plan !== "pro" && plan !== "premium")) {
+    if (!plan || (plan !== "pro" && plan !== "premium" && plan !== "career" && plan !== "career-pack")) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
