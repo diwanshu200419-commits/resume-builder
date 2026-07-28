@@ -57,7 +57,8 @@ function readDb(): any {
       return DEFAULT_DB;
     }
     const content = fs.readFileSync(DB_FILE, "utf8");
-    return JSON.parse(content);
+    const parsed = JSON.parse(content);
+    return { ...DEFAULT_DB, ...parsed };
   } catch (e) {
     console.error("Error reading mock DB file, using memory", e);
     if (!memoryDb) memoryDb = { ...DEFAULT_DB };

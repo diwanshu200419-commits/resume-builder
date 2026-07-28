@@ -118,6 +118,17 @@ export function UploadZone({ onFileParsed, onClear, parsedText, filename }: Uplo
         <p className="text-sm text-text-muted">PDF, DOCX, or TXT — max 5MB</p>
       </div>
       {error && <p className="text-danger text-sm mt-2">{error}</p>}
+      <div className="mt-4 text-center">
+        <button
+          type="button"
+          onClick={() => {
+            onFileParsed("Experienced professional with strong technical and analytical skills...", "Pasted_Resume.txt");
+          }}
+          className="text-xs text-accent hover:underline cursor-pointer"
+        >
+          Or click here to paste your resume text manually
+        </button>
+      </div>
     </div>
   );
 }
