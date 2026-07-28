@@ -319,10 +319,20 @@ export function mockAuthAction(method: string, payload: any): any {
   if (method === "signInWithOtp") {
     const { phone } = payload;
     const cleanPhone = (phone || "").replace(/\s+/g, "");
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    if (!db.otps) db.otps = [];
+    db.otps.push({
+      phone: cleanPhone,
+      otp: generatedOtp,
+      expires_at: Date.now() + 5 * 60 * 1000,
+    });
+    writeDb(db);
+
     return {
       data: {
-        message: "OTP sent successfully to " + cleanPhone,
-        otp: "123456",
+        message: "OTP sent successfully to +91 " + cleanPhone,
+        otp: generatedOtp,
       },
       error: null,
     };
@@ -330,11 +340,15 @@ export function mockAuthAction(method: string, payload: any): any {
 
   if (method === "verifyOtp") {
     const { phone, token: otpCode } = payload;
-    if (otpCode !== "123456" && otpCode !== "000000") {
-      return { data: null, error: { message: "Invalid OTP code. Use test code: 123456" } };
+    const cleanPhone = (phone || "").replace(/\s+/g, "");
+
+    const storedRecord = (db.otps || []).find((o: any) => o.phone === cleanPhone && o.otp === otpCode);
+    const isValid = otpCode === "123456" || otpCode === "12345" || otpCode === "000000" || storedRecord;
+
+    if (!isValid) {
+      return { data: null, error: { message: "Invalid OTP code. Enter code sent or test code 12345" } };
     }
 
-    const cleanPhone = (phone || "").replace(/\s+/g, "");
     const email = `user_${cleanPhone.slice(-6)}@phone.vaylo.ai`;
 
     let user = db.profiles.find((p: any) => p.email === email || p.phone === cleanPhone);
@@ -373,6 +387,77 @@ export function mockAuthAction(method: string, payload: any): any {
           email: user.email,
           user_metadata: { full_name: user.full_name },
         },
+        session: { token, user_id: user.id },
+      },
+      error: null,
+    };
+  }
+
+  if (method === "sendPasswordResetOtp") {
+    const { target } = payload;
+    const cleanTarget = (target || "").trim().replace(/\s+/g, "");
+    const resetOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    if (!db.reset_otps) db.reset_otps = [];
+    db.reset_otps.push({
+      target: cleanTarget,
+      otp: resetOtp,
+      expires_at: Date.now() + 10 * 60 * 1000,
+    });
+    writeDb(db);
+
+    return {
+      data: {
+        message: "Reset OTP sent to " + cleanTarget,
+        otp: resetOtp,
+      },
+      error: null,
+    };
+  }
+
+  if (method === "resetPasswordWithOtp") {
+    const { target, token: resetToken, newPassword } = payload;
+    const cleanTarget = (target || "").trim().replace(/\s+/g, "");
+
+    const storedRecord = (db.reset_otps || []).find((r: any) => r.target === cleanTarget && r.otp === resetToken);
+    const isValid = resetToken === "123456" || resetToken === "12345" || resetToken === "000000" || storedRecord;
+
+    if (!isValid) {
+      return { data: null, error: { message: "Invalid reset OTP code. Try test code 12345" } };
+    }
+
+    let user = db.profiles.find((p: any) => p.email === cleanTarget || p.phone === cleanTarget);
+    if (!user) {
+      user = {
+        id: Math.random().toString(36).substring(2, 15),
+        email: cleanTarget.includes("@") ? cleanTarget : `user_${cleanTarget.slice(-6)}@phone.vaylo.ai`,
+        phone: cleanTarget.includes("@") ? "" : cleanTarget,
+        full_name: cleanTarget.split("@")[0],
+        plan: "free",
+        subscription_status: "active",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      db.profiles.push(user);
+    }
+
+    user.password = newPassword;
+    user.updated_at = new Date().toISOString();
+
+    const token = "mock_token_" + Math.random().toString(36).substring(2, 15);
+    db.sessions.push({
+      id: Math.random().toString(36).substring(2, 15),
+      user_id: user.id,
+      token,
+      created_at: new Date().toISOString(),
+    });
+
+    writeDb(db);
+
+    return {
+      data: {
+        message: "Password updated successfully!",
+        user: { id: user.id, email: user.email, user_metadata: { full_name: user.full_name } },
         session: { token, user_id: user.id },
       },
       error: null,
