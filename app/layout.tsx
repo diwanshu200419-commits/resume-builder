@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { FloatingAICopilot } from "@/components/shared/FloatingAICopilot";
@@ -9,8 +9,15 @@ const inter = Inter({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vaylo.ai"), // Update to your Vaylo domain
+  metadataBase: new URL("https://vaylo.ai"),
   title: {
     default: "Vaylo AI — Your AI Career Copilot",
     template: "%s | Vaylo AI",
