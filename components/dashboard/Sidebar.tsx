@@ -84,7 +84,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-accent/20 text-accent"
+                  ? "bg-accent/20 text-accent font-bold border-l-2 border-accent shadow-sm"
                   : "text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
               )}
             >
@@ -102,7 +102,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
         </div>
         {profile.plan === "free" && (
           <Link href="/pricing">
-            <Button className="w-full" size="sm">
+            <Button className="w-full bg-gradient-to-r from-accent to-accent-hover text-white font-bold shadow-md hover:scale-[1.02] transition-all" size="sm">
               Upgrade plan
             </Button>
           </Link>
