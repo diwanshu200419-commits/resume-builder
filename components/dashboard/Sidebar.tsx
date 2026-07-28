@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { PlanBadge } from "@/components/shared/PlanBadge";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "@/types";
 import {
@@ -96,6 +97,10 @@ export function Sidebar({ profile }: { profile: Profile }) {
       </nav>
 
       <div className="p-4 border-t border-border space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-text-muted">Theme</span>
+          <ThemeToggle />
+        </div>
         <div className="flex items-center justify-between">
           <span className="text-xs text-text-muted">Current plan</span>
           <PlanBadge plan={profile.plan} />

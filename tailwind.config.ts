@@ -10,23 +10,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#080C14",
-        surface: "#0F172A",
-        "surface-elevated": "#1E293B",
-        border: "#1E293B",
-        "border-active": "#334155",
+        background: "var(--background)",
+        surface: "var(--surface)",
+        "surface-elevated": "var(--surface-elevated)",
+        border: "var(--border)",
+        "border-active": "var(--border-active)",
         accent: {
-          DEFAULT: "#6366F1",
-          hover: "#818CF8",
+          DEFAULT: "var(--accent)",
+          hover: "var(--accent-hover)",
           glow: "rgba(99, 102, 241, 0.15)",
         },
         success: "#10B981",
         warning: "#F59E0B",
         danger: "#F43F5E",
         info: "#38BDF8",
-        "text-primary": "#F8FAFC",
-        "text-secondary": "#94A3B8",
-        "text-muted": "#64748B",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "text-muted": "var(--text-muted)",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
@@ -39,12 +39,11 @@ const config: Config = {
       boxShadow: {
         glow: "0 0 30px rgba(99, 102, 241, 0.12)",
         "glow-lg": "0 0 60px rgba(99, 102, 241, 0.18)",
-        card: "0 10px 30px -10px rgba(0, 0, 0, 0.5)",
+        card: "0 10px 30px -10px rgba(0, 0, 0, 0.08)",
       },
       animation: {
         "fade-in": "fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         "slide-up": "slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       keyframes: {
         fadeIn: {

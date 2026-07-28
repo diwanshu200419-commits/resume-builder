@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
+
 export function Navbar() {
   const [open, setOpen] = useState(false);
 
@@ -18,7 +20,7 @@ export function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             <Link href="/#features" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
               Features
             </Link>
@@ -28,11 +30,12 @@ export function Navbar() {
             <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
               Pricing
             </Link>
+            <ThemeToggle />
             <Link href="/login">
               <Button variant="ghost" size="sm">Log in</Button>
             </Link>
             <Link href="/signup">
-              <Button size="sm">Try free</Button>
+              <Button size="sm" className="bg-accent hover:bg-accent-hover text-white font-bold">Try free</Button>
             </Link>
           </div>
 
