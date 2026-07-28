@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       const res = NextResponse.json(result);
       
       // Set session cookie on login/signup or clear on signout
-      if (method === "signInWithPassword" || method === "signUp") {
+      if (method === "signInWithPassword" || method === "signUp" || method === "verifyOtp") {
         if (result?.data?.session?.token) {
           res.cookies.set("mock-session-id", result.data.session.token, {
             path: "/",

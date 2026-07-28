@@ -305,6 +305,69 @@ export function mockAuthAction(method: string, payload: any): any {
     };
   }
 
+  if (method === "signInWithOtp") {
+    const { phone } = payload;
+    const cleanPhone = (phone || "").replace(/\s+/g, "");
+    return {
+      data: {
+        message: "OTP sent successfully to " + cleanPhone,
+        otp: "123456",
+      },
+      error: null,
+    };
+  }
+
+  if (method === "verifyOtp") {
+    const { phone, token: otpCode } = payload;
+    if (otpCode !== "123456" && otpCode !== "000000") {
+      return { data: null, error: { message: "Invalid OTP code. Use test code: 123456" } };
+    }
+
+    const cleanPhone = (phone || "").replace(/\s+/g, "");
+    const email = `user_${cleanPhone.slice(-6)}@phone.vaylo.ai`;
+
+    let user = db.profiles.find((p: any) => p.email === email || p.phone === cleanPhone);
+    if (!user) {
+      user = {
+        id: Math.random().toString(36).substring(2, 15),
+        email,
+        phone: cleanPhone,
+        full_name: `Member (${cleanPhone.slice(-4)})`,
+        plan: "free",
+        subscription_status: "active",
+        analyses_used: 0,
+        analyses_limit: 2,
+        total_ats_checks: 0,
+        total_resume_downloads: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      db.profiles.push(user);
+    }
+
+    const token = "mock_token_" + Math.random().toString(36).substring(2, 15);
+    db.sessions.push({
+      id: Math.random().toString(36).substring(2, 15),
+      user_id: user.id,
+      token,
+      created_at: new Date().toISOString(),
+    });
+
+    writeDb(db);
+
+    return {
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          user_metadata: { full_name: user.full_name },
+        },
+        session: { token, user_id: user.id },
+      },
+      error: null,
+    };
+  }
+
   if (method === "signOut") {
     const { token } = payload;
     db.sessions = db.sessions.filter((s: any) => s.token !== token);

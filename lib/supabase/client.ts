@@ -187,7 +187,14 @@ export function createClient() {
         }
       },
       signInWithOAuth: async ({ provider, options }: any) => {
-        const redirectTo = options?.redirectTo || "/dashboard";
+        let destination = "/dashboard";
+        if (options?.redirectTo) {
+          try {
+            const urlObj = new URL(options.redirectTo);
+            const redirectParam = urlObj.searchParams.get("redirect");
+            if (redirectParam) destination = redirectParam;
+          } catch {}
+        }
         try {
           const res = await fetch("/api/mock-db", {
             method: "POST",
@@ -196,8 +203,8 @@ export function createClient() {
               action: "auth",
               method: "signInWithPassword",
               payload: {
-                email: "jattshiv32@gmail.com",
-                password: "admin",
+                email: "google_user@vaylo.ai",
+                password: "password123",
               },
             }),
           });
@@ -205,11 +212,47 @@ export function createClient() {
           if (result?.data?.session?.token) {
             document.cookie = `mock-session-id=${result.data.session.token}; path=/; max-age=31536000`;
           }
-          window.location.href = redirectTo;
+          window.location.href = destination;
         } catch (e) {
-          window.location.href = "/login?error=auth";
+          window.location.href = destination;
         }
         return { data: null, error: null };
+      },
+      signInWithOtp: async ({ phone }: any) => {
+        try {
+          const res = await fetch("/api/mock-db", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "auth",
+              method: "signInWithOtp",
+              payload: { phone },
+            }),
+          });
+          return await res.json();
+        } catch (e: any) {
+          return { data: null, error: e };
+        }
+      },
+      verifyOtp: async ({ phone, token }: any) => {
+        try {
+          const res = await fetch("/api/mock-db", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "auth",
+              method: "verifyOtp",
+              payload: { phone, token },
+            }),
+          });
+          const result = await res.json();
+          if (result?.data?.session?.token) {
+            document.cookie = `mock-session-id=${result.data.session.token}; path=/; max-age=31536000`;
+          }
+          return result;
+        } catch (e: any) {
+          return { data: null, error: e };
+        }
       },
       signOut: async () => {
         const token = typeof document !== "undefined"
