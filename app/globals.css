@@ -8,42 +8,54 @@
   }
 
   body {
-    @apply bg-background text-text-primary font-sans antialiased;
-    font-size: 16px;
-    line-height: 1.7;
+    @apply bg-background text-text-primary font-sans antialiased selection:bg-indigo-500/30 selection:text-indigo-200;
+    font-size: 15px;
+    line-height: 1.6;
+    background-image: 
+      radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.12) 0%, rgba(8, 12, 20, 0) 60%),
+      radial-gradient(circle at 100% 40%, rgba(16, 185, 129, 0.04) 0%, rgba(8, 12, 20, 0) 50%);
+    background-attachment: fixed;
   }
 
   h1 {
-    @apply text-[48px] font-bold leading-tight;
+    @apply text-4xl sm:text-5xl font-extrabold tracking-tight text-white;
   }
 
   h2 {
-    @apply text-[36px] font-bold leading-tight;
+    @apply text-2xl sm:text-3xl font-bold tracking-tight text-white;
   }
 
   h3 {
-    @apply text-2xl font-semibold;
+    @apply text-xl font-semibold tracking-tight text-white;
   }
 
   h4 {
-    @apply text-lg font-semibold;
+    @apply text-base font-semibold text-white;
   }
 }
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-accent to-accent-hover bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-white via-slate-100 to-indigo-300 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-indigo {
+    @apply bg-gradient-to-r from-indigo-400 via-purple-300 to-emerald-400 bg-clip-text text-transparent;
   }
 
   .glass {
-    @apply backdrop-blur-sm bg-surface/80;
+    @apply backdrop-blur-xl bg-surface/75 border border-slate-800/80 shadow-2xl;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-lg bg-slate-900/60 border border-slate-800/90 rounded-2xl transition-all duration-300 hover:border-slate-700 hover:shadow-xl;
   }
 
   .card-glow {
-    box-shadow: 0 0 40px rgba(108, 99, 255, 0.1);
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
   }
 
   .purple-glow {
-    box-shadow: 0 0 80px rgba(108, 99, 255, 0.15);
+    box-shadow: 0 0 70px rgba(99, 102, 241, 0.12);
   }
 }
