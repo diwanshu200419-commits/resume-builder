@@ -15,7 +15,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-1">
-            <span className="text-xl font-bold text-text-primary">
+            <span className="text-xl font-extrabold text-text-primary">
               Vaylo<span className="text-accent">AI</span>
             </span>
           </Link>
@@ -27,7 +27,7 @@ export function Navbar() {
             <Link href="/#how-it-works" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
               How it works
             </Link>
-            <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
+            <Link href="/#pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
               Pricing
             </Link>
             <ThemeToggle />
@@ -39,28 +39,31 @@ export function Navbar() {
             </Link>
           </div>
 
-          <button className="md:hidden text-text-primary" onClick={() => setOpen(!open)}>
-            {open ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
+            <button className="p-1.5 text-text-primary rounded-lg hover:bg-surface-elevated" onClick={() => setOpen(!open)} aria-label="Toggle menu">
+              {open ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
 
         {open && (
-          <div className="md:hidden pb-4 space-y-3">
-            <Link href="/#features" className="block text-text-secondary hover:text-text-primary" onClick={() => setOpen(false)}>
+          <div className="md:hidden pb-6 pt-2 space-y-3 border-t border-border/50 animate-fade-in">
+            <Link href="/#features" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
               Features
             </Link>
-            <Link href="/#how-it-works" className="block text-text-secondary hover:text-text-primary" onClick={() => setOpen(false)}>
+            <Link href="/#how-it-works" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
               How it works
             </Link>
-            <Link href="/pricing" className="block text-text-secondary hover:text-text-primary" onClick={() => setOpen(false)}>
+            <Link href="/pricing" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
               Pricing
             </Link>
             <div className="flex gap-2 pt-2">
-              <Link href="/login" className="flex-1">
-                <Button variant="outline" className="w-full" size="sm">Log in</Button>
+              <Link href="/login" className="flex-1" onClick={() => setOpen(false)}>
+                <Button variant="outline" className="w-full text-xs" size="sm">Log in</Button>
               </Link>
-              <Link href="/signup" className="flex-1">
-                <Button className="w-full" size="sm">Try free</Button>
+              <Link href="/signup" className="flex-1" onClick={() => setOpen(false)}>
+                <Button className="w-full text-xs bg-accent text-white font-bold" size="sm">Try free</Button>
               </Link>
             </div>
           </div>

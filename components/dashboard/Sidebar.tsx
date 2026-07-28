@@ -21,6 +21,8 @@ import {
   Laptop,
   ShieldAlert,
   Target,
+  DollarSign,
+  Languages,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -52,6 +54,8 @@ export function Sidebar({ profile }: { profile: Profile }) {
     { href: "/roadmap", label: "AI Roadmap", icon: Compass },
     { href: "/roast", label: "Resume Roast", icon: Flame },
     { href: "/portfolio", label: "AI Portfolio", icon: Laptop },
+    { href: "/salary-calculator", label: "Salary Negotiator", icon: DollarSign },
+    { href: "/translate", label: "AI Translator", icon: Languages },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
 

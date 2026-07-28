@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, RefreshCw, Mic, Sparkles, CheckCircle2, Award, Star } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw, Mic, MicOff, Sparkles, CheckCircle2, Award, Star } from "lucide-react";
 import type { InterviewQuestions, InterviewQuestion } from "@/types";
 
 interface EvaluationResult {
@@ -29,6 +29,29 @@ function QuestionCard({ q, index }: { q: InterviewQuestion; index: number }) {
   const [evaluating, setEvaluating] = useState(false);
   const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
   const [showSandbox, setShowSandbox] = useState(false);
+  const [listening, setListening] = useState(false);
+
+  const startVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice input requires Google Chrome, Microsoft Edge, or Apple Safari.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => setListening(true);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setUserAnswer((prev) => (prev ? prev + " " + transcript : transcript));
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+
+    recognition.start();
+  };
 
   const handleEvaluate = async () => {
     if (!userAnswer.trim()) return;
@@ -97,11 +120,25 @@ function QuestionCard({ q, index }: { q: InterviewQuestion; index: number }) {
             {showSandbox && (
               <div className="pt-3 border-t border-border/40 space-y-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-text-secondary flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-accent" /> Type Your Response (STAR Method):
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-text-secondary flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-accent" /> Practice Your Response (Voice or Text):
+                    </label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={startVoiceInput}
+                      className={`text-xs gap-1.5 transition-all ${
+                        listening ? "border-danger text-danger bg-danger/10 animate-pulse font-bold" : "border-border text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      {listening ? <MicOff className="w-3.5 h-3.5 text-danger" /> : <Mic className="w-3.5 h-3.5 text-accent" />}
+                      {listening ? "Listening... Speak Now" : "Voice Input (Speak)"}
+                    </Button>
+                  </div>
                   <Textarea
-                    placeholder="Type how you would answer this question in an actual interview..."
+                    placeholder="Speak into microphone or type how you would answer in an actual interview..."
                     className="min-h-[100px] text-sm bg-background border-border"
                     value={userAnswer}
                     onChange={(e) => setUserAnswer(e.target.value)}
@@ -111,10 +148,10 @@ function QuestionCard({ q, index }: { q: InterviewQuestion; index: number }) {
                       size="sm"
                       onClick={handleEvaluate}
                       disabled={evaluating || !userAnswer.trim()}
-                      className="bg-accent hover:bg-accent-hover text-white text-xs gap-1.5"
+                      className="bg-accent hover:bg-accent-hover text-white text-xs gap-1.5 font-bold"
                     >
                       {evaluating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Award className="w-3.5 h-3.5" />}
-                      Evaluate Answer with AI
+                      Evaluate Response with AI
                     </Button>
                   </div>
                 </div>
@@ -124,7 +161,7 @@ function QuestionCard({ q, index }: { q: InterviewQuestion; index: number }) {
                   <div className="p-4 rounded-xl bg-surface-elevated border border-accent/30 space-y-3 animate-fade-in">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1">
-                        <Star className="w-4 h-4 text-warning fill-warning" /> AI Response Score
+                        <Star className="w-4 h-4 text-warning fill-warning" /> AI STAR Response Score
                       </span>
                       <Badge className={evalResult.rating >= 8 ? "bg-success text-white" : "bg-warning text-black"}>
                         {evalResult.rating} / 10
@@ -145,7 +182,7 @@ function QuestionCard({ q, index }: { q: InterviewQuestion; index: number }) {
                     {evalResult.improved_answer && (
                       <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
                         <span className="text-xs font-semibold text-accent flex items-center gap-1 mb-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> High-Impact Refined Response:
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Refined STAR Response:
                         </span>
                         <p className="text-xs text-text-secondary leading-relaxed">{evalResult.improved_answer}</p>
                       </div>
@@ -170,18 +207,6 @@ export default function InterviewPrepPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch(`/api/analyze?id=${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.analysis?.interview_questions) {
-          setQuestions(data.analysis.interview_questions);
-        }
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [id]);
-
   const handleGenerate = async () => {
     setGenerating(true);
     setError(null);
@@ -200,6 +225,20 @@ export default function InterviewPrepPage() {
       setGenerating(false);
     }
   };
+
+  useEffect(() => {
+    fetch(`/api/analyze?id=${id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.analysis?.interview_questions) {
+          setQuestions(data.analysis.interview_questions);
+        } else {
+          handleGenerate();
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [id]);
 
   if (loading) {
     return (
@@ -220,9 +259,9 @@ export default function InterviewPrepPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-              Interview Q&A Prep Sandbox
+              Interview Q&A Voice Practice Sandbox
             </h1>
-            <p className="text-xs text-text-muted mt-0.5">Practice out loud or type your responses to get instant AI STAR feedback.</p>
+            <p className="text-xs text-text-muted mt-0.5">Speak into your microphone or type to practice answering STAR interview questions.</p>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={handleGenerate} disabled={generating} className="gap-1">
@@ -242,7 +281,7 @@ export default function InterviewPrepPage() {
             <p className="text-sm text-text-muted max-w-md mx-auto">
               Our AI analyzes your resume and job description to predict HR, technical, and behavioral questions.
             </p>
-            <Button onClick={handleGenerate} disabled={generating} className="bg-accent text-white">
+            <Button onClick={handleGenerate} disabled={generating} className="bg-accent text-white font-bold">
               {generating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Generate Interview Questions
             </Button>

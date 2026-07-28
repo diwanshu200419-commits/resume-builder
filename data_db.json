@@ -122,6 +122,12 @@
       "user_id": "wf521zlx3rp",
       "token": "mock_token_cogiun0erap",
       "created_at": "2026-07-28T07:47:04.614Z"
+    },
+    {
+      "id": "2batbwehei6",
+      "user_id": "admin-id",
+      "token": "mock_token_admin_test_session",
+      "created_at": "2026-07-28T08:22:11.529Z"
     }
   ],
   "career_profiles": [],
