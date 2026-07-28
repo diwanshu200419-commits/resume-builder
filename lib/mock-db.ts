@@ -276,24 +276,22 @@ export function mockAuthAction(method: string, payload: any): any {
   if (method === "signUp") {
     const { email, password, metadata } = payload;
     let user = db.profiles.find((p: any) => p.email === email);
-    if (user) {
-      return { data: null, error: { message: "User already exists" } };
+    if (!user) {
+      user = {
+        id: Math.random().toString(36).substring(2, 15),
+        email,
+        full_name: metadata?.full_name || email.split("@")[0],
+        plan: "free",
+        subscription_status: "active",
+        analyses_used: 0,
+        analyses_limit: 2,
+        total_ats_checks: 0,
+        total_resume_downloads: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      db.profiles.push(user);
     }
-
-    user = {
-      id: Math.random().toString(36).substring(2, 15),
-      email,
-      full_name: metadata?.full_name || email.split("@")[0],
-      plan: "free",
-      subscription_status: "active",
-      analyses_used: 0,
-      analyses_limit: 2,
-      total_ats_checks: 0,
-      total_resume_downloads: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    db.profiles.push(user);
 
     const token = "mock_token_" + Math.random().toString(36).substring(2, 15);
     db.sessions.push({
