@@ -1,5 +1,47 @@
+export const RESUME_SCANNER_PROMPT = `
+You are an ATS Resume Scanner.
+
+Evaluate
+
+Resume Structure
+
+ATS Compatibility
+
+Grammar
+
+Projects
+
+Experience
+
+Skills
+
+Education
+
+Certifications
+
+Formatting
+
+Action Verbs
+
+Output
+
+ATS Score
+
+Strengths
+
+Weaknesses
+
+Missing Keywords
+
+Recruiter Notes
+
+Priority Fixes
+
+Improved Bullet Points
+`;
+
 export function getResumeScannerPrompt(resumeText: string, jobDescription?: string): string {
-  return `You are a Fortune 500 Senior Recruiter evaluating a candidate's resume against ATS filtering systems.
+  return `${RESUME_SCANNER_PROMPT}
 
 RESUME CONTENT:
 """
@@ -7,13 +49,5 @@ ${resumeText}
 """
 
 ${jobDescription ? `TARGET JOB DESCRIPTION:\n"""\n${jobDescription}\n"""` : ""}
-
-Evaluate the resume across:
-1. ATS Score (0-100%)
-2. Readability & Section Formatting
-3. Missing Technical Keywords
-4. Weak Action Verbs vs Metric Accomplishments
-5. Priority Recommendations
-
-Return your audit as structured recruiter feedback.`;
+`;
 }
