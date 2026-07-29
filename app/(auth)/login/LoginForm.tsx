@@ -183,10 +183,11 @@ export default function LoginForm() {
 
   const handleGoogleLogin = async () => {
     const supabase = createClient();
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://resume-builder-murex-mu.vercel.app";
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${origin}/api/auth/callback?redirect=/dashboard`,
       },
     });
   };
