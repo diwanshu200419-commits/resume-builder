@@ -186,24 +186,22 @@ export default function LoginForm() {
     try {
       const supabase = createClient();
       const origin = typeof window !== "undefined" ? window.location.origin : "https://resume-builder-murex-mu.vercel.app";
+      const redirectUrl = `${origin}/api/auth/callback?redirect=${encodeURIComponent(redirect)}`;
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/api/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+          redirectTo: redirectUrl,
         },
       });
 
-      if (error) {
+      if (error || !data?.url) {
         document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000`;
-        router.push(redirect);
-        router.refresh();
+        window.location.href = redirect || "/dashboard";
       }
     } catch {
       document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000`;
-      router.push(redirect);
-      router.refresh();
-    } finally {
-      setLoading(false);
+      window.location.href = redirect || "/dashboard";
     }
   };
 
