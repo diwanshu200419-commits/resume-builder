@@ -26,6 +26,8 @@ import {
   Briefcase,
   Send,
   Zap,
+  Eye,
+  Palette,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -55,6 +57,8 @@ export function Sidebar({ profile }: { profile: Profile }) {
     { href: "/job-match", label: "Job Match", icon: Target },
     { href: "/builder", label: "Resume Builder", icon: Layout },
     { href: "/hiring-probability", label: "Hiring Odds AI", icon: Zap },
+    { href: "/recruiter-simulation", label: "10s Eye Screen", icon: Eye },
+    { href: "/branding-studio", label: "Branding Studio", icon: Palette },
     { href: "/applications", label: "Job Tracker", icon: Briefcase },
     { href: "/networking", label: "AI Networking", icon: Send },
     { href: "/roadmap", label: "AI Roadmap", icon: Compass },
