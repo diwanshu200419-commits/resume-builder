@@ -85,10 +85,11 @@ export function PricingClient() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then((res: any) => {
+      const user = res?.data?.user;
       if (user) {
-        supabase.from("profiles").select("plan").eq("id", user.id).single().then(({ data }) => {
-          if (data) setUserPlan(data.plan as Plan);
+        supabase.from("profiles").select("plan").eq("id", user.id).single().then((profileRes: any) => {
+          if (profileRes?.data) setUserPlan(profileRes.data.plan as Plan);
         });
       }
     });
