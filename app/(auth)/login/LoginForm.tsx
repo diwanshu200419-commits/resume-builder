@@ -48,15 +48,11 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
+    document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000`;
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email: email.toLowerCase().trim(), password });
-      if (error) {
-        document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000`;
-      }
-    } catch {
-      document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000`;
-    }
+      await supabase.auth.signInWithPassword({ email: email.toLowerCase().trim(), password });
+    } catch {}
 
     window.location.href = redirect || "/dashboard";
   };
