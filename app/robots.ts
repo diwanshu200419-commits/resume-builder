@@ -5,7 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: ["/api/", "/admin/"],
     },
-    sitemap: "https://resumeai.app/sitemap.xml",
+    sitemap: "https://resume-builder-murex-mu.vercel.app/sitemap.xml",
   };
 }
