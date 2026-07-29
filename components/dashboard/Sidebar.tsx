@@ -28,6 +28,8 @@ import {
   Zap,
   Eye,
   Palette,
+  Globe,
+  Github,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -61,9 +63,11 @@ export function Sidebar({ profile }: { profile: Profile }) {
     { href: "/branding-studio", label: "Branding Studio", icon: Palette },
     { href: "/applications", label: "Job Tracker", icon: Briefcase },
     { href: "/networking", label: "AI Networking", icon: Send },
+    { href: "/portfolio", label: "AI Portfolio", icon: Laptop },
+    { href: "/portfolio/deploy", label: "Deploy Subdomain", icon: Globe },
+    { href: "/github-sync", label: "GitHub Auto Sync", icon: Github },
     { href: "/roadmap", label: "AI Roadmap", icon: Compass },
     { href: "/roast", label: "Resume Roast", icon: Flame },
-    { href: "/portfolio", label: "AI Portfolio", icon: Laptop },
     { href: "/salary-calculator", label: "Salary Negotiator", icon: DollarSign },
     { href: "/translate", label: "AI Translator", icon: Languages },
     { href: "/settings", label: "Settings", icon: Settings },
