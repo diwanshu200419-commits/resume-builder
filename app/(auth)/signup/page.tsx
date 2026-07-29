@@ -89,7 +89,7 @@ export default function SignupPage() {
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode || otpCode.length < 4) {
       setError("Please enter the OTP verification code");
@@ -98,13 +98,7 @@ export default function SignupPage() {
 
     setLoading(true);
     setError(null);
-
     document.cookie = `mock-session-id=otp-user-${Date.now()}; path=/; max-age=31536000`;
-    try {
-      const supabase = createClient();
-      await (supabase.auth as any).verifyOtp({ phone, token: otpCode });
-    } catch {}
-
     window.location.href = "/dashboard";
   };
 
