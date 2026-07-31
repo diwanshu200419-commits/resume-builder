@@ -3,6 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  // Check session cookie for protected dashboard routes
+  const mockCookie = request.cookies.get("mock-session-id")?.value;
+  const sbAuthCookie = request.cookies.getAll().find(c => c.name.includes("auth-token") || c.name.includes("session"))?.value;
+
+  const isAuthenticated = Boolean(mockCookie || sbAuthCookie);
+  const referer = request.headers.get("referer") || "";
+  const isFromAuth = referer.includes("/login") || referer.includes("/signup") || request.nextUrl.searchParams.get("authed") === "true";
+
   // Public pages that should NEVER be blocked or redirected into loops
   const isPublicRoute =
     pathname === "/" ||
@@ -17,19 +25,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/refund") ||
     pathname.startsWith("/api/");
 
-  if (isPublicRoute) {
-    return NextResponse.next();
-  }
-
-  // Check session cookie for protected dashboard routes
-  const mockCookie = request.cookies.get("mock-session-id")?.value;
-  const sbAuthCookie = request.cookies.getAll().find(c => c.name.includes("auth-token") || c.name.includes("session"))?.value;
-
-  const isAuthenticated = Boolean(mockCookie || sbAuthCookie);
-  const referer = request.headers.get("referer") || "";
-  const isFromAuth = referer.includes("/login") || referer.includes("/signup") || request.nextUrl.searchParams.get("authed") === "true";
-
-  if (!isAuthenticated && !isFromAuth) {
+  if (!isAuthenticated && !isPublicRoute && !isFromAuth) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("redirect", pathname);
@@ -38,7 +34,7 @@ export async function middleware(request: NextRequest) {
 
   const response = NextResponse.next();
   if (!mockCookie) {
-    response.cookies.set("mock-session-id", "user-" + Date.now(), {
+    response.cookies.set("mock-session-id", `user-${Date.now()}`, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       sameSite: "lax",

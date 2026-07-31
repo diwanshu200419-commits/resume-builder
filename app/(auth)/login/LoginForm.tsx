@@ -321,7 +321,7 @@ export default function LoginForm() {
 
                 {error && <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{error}</p>}
 
-                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg transition-all" disabled={loading}>
+                <Button type="submit" onClick={handleEmailLogin} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg transition-all" disabled={loading}>
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In with Email"}
                 </Button>
               </form>
