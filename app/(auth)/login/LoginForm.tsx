@@ -153,14 +153,9 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
-    document.cookie = `mock-session-id=reset-user-${Date.now()}; path=/; max-age=31536000`;
-    window.location.href = redirect || "/dashboard";
-  };
-
-  const handleGoogleLogin = () => {
-    setLoading(true);
-    document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000`;
-    window.location.href = redirect || "/dashboard";
+    document.cookie = `mock-session-id=reset-user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
+    const target = redirect.includes("?") ? `${redirect}&authed=true` : `${redirect}?authed=true`;
+    window.location.href = target;
   };
 
   return (
