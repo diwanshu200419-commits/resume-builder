@@ -68,7 +68,7 @@ export default function LoginForm() {
     setError(null);
 
     try {
-      const res = await fetch("/api/auth/send-sms", {
+      const res = await fetch("/api/sms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone }),
