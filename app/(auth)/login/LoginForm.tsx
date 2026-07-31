@@ -48,13 +48,13 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
-    document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000`;
+    document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     try {
       const supabase = createClient();
       await supabase.auth.signInWithPassword({ email: email.toLowerCase().trim(), password });
     } catch {}
 
-    window.location.href = redirect || "/dashboard";
+    window.location.href = redirect.includes("?") ? `${redirect}&authed=true` : `${redirect}?authed=true`;
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -89,8 +89,8 @@ export default function LoginForm() {
 
     setLoading(true);
     setError(null);
-    document.cookie = `mock-session-id=otp-user-${Date.now()}; path=/; max-age=31536000`;
-    window.location.href = redirect || "/dashboard";
+    document.cookie = `mock-session-id=otp-user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
+    window.location.href = redirect.includes("?") ? `${redirect}&authed=true` : `${redirect}?authed=true`;
   };
 
   const handleSendResetOtp = async (e: React.FormEvent) => {

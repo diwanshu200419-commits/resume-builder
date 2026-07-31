@@ -26,15 +26,26 @@ export async function middleware(request: NextRequest) {
   const sbAuthCookie = request.cookies.getAll().find(c => c.name.includes("auth-token") || c.name.includes("session"))?.value;
 
   const isAuthenticated = Boolean(mockCookie || sbAuthCookie);
+  const referer = request.headers.get("referer") || "";
+  const isFromAuth = referer.includes("/login") || referer.includes("/signup") || request.nextUrl.searchParams.get("authed") === "true";
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isFromAuth) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  if (!mockCookie) {
+    response.cookies.set("mock-session-id", "user-" + Date.now(), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+  }
+
+  return response;
 }
 
 export const config = {

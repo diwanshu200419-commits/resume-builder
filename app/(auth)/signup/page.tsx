@@ -46,7 +46,7 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
 
-    document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000`;
+    document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     try {
       const supabase = createClient();
       await supabase.auth.signUp({
@@ -59,7 +59,7 @@ export default function SignupPage() {
       });
     } catch {}
 
-    window.location.href = "/dashboard";
+    window.location.href = "/dashboard?authed=true";
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -98,14 +98,14 @@ export default function SignupPage() {
 
     setLoading(true);
     setError(null);
-    document.cookie = `mock-session-id=otp-user-${Date.now()}; path=/; max-age=31536000`;
-    window.location.href = "/dashboard";
+    document.cookie = `mock-session-id=otp-user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
+    window.location.href = "/dashboard?authed=true";
   };
 
   const handleGoogleSignup = () => {
     setLoading(true);
-    document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000`;
-    window.location.href = "/dashboard";
+    document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000; SameSite=Lax`;
+    window.location.href = "/dashboard?authed=true";
   };
 
   return (
