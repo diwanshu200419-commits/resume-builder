@@ -67,15 +67,23 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
     try {
-      const supabase = createClient();
-      await (supabase.auth as any).signInWithOtp({ phone });
-    } catch {}
+      const res = await fetch("/api/auth/send-sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      setLoading(false);
 
-    setLoading(false);
-    setOtpSent(true);
-    setOtpMessage(`🔑 Real OTP generated & sent to +91 ${phone}. Your 6-digit verification code is: ${generatedCode}`);
+      if (!res.ok) throw new Error(data.error || "Failed to send OTP SMS");
+
+      setOtpSent(true);
+      setOtpMessage(data.message || `🔑 Real OTP sent to +91 ${phone}. Code: ${data.otp}`);
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message || "Failed to send OTP SMS");
+    }
   };
 
   const handleVerifyOtp = (e: React.FormEvent) => {
