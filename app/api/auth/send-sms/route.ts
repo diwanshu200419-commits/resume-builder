@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendSmsOtp } from "@/lib/sms";
 
+export async function GET() {
+  return NextResponse.json({
+    status: "online",
+    service: "Vaylo AI Mobile SMS Gateway API",
+    method: "POST",
+    endpoint: "/api/auth/send-sms",
+    description: "Send HTTP POST with JSON body { phone: '9876543210' } to dispatch 6-digit OTP SMS.",
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { phone } = await request.json();
