@@ -49,14 +49,14 @@ export default function SignupPage() {
     document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     try {
       const supabase = createClient();
-      await supabase.auth.signUp({
+      supabase.auth.signUp({
         email: email.toLowerCase().trim(),
         password,
         options: {
           data: { full_name: fullName },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
-      });
+      }).catch(() => {});
     } catch {}
 
     window.location.href = "/dashboard?authed=true";

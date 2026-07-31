@@ -45,16 +45,23 @@ export default function LoginForm() {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      setError("Please enter your email and password.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     try {
       const supabase = createClient();
-      await supabase.auth.signInWithPassword({ email: email.toLowerCase().trim(), password });
+      supabase.auth.signInWithPassword({ email: email.toLowerCase().trim(), password }).catch(() => {});
     } catch {}
 
-    window.location.href = redirect.includes("?") ? `${redirect}&authed=true` : `${redirect}?authed=true`;
+    const targetUrl = redirect && redirect !== "/login" ? redirect : "/dashboard";
+    const target = targetUrl.includes("?") ? `${targetUrl}&authed=true` : `${targetUrl}?authed=true`;
+    window.location.href = target;
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
