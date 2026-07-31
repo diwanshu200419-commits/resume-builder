@@ -45,7 +45,14 @@ export default function LoginForm() {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    const form = e.currentTarget as HTMLFormElement;
+    const emailValue = (form?.querySelector("#email") as HTMLInputElement)?.value || email;
+    const passwordValue = (form?.querySelector("#password") as HTMLInputElement)?.value || password;
+
+    const finalEmail = (emailValue || "").trim();
+    const finalPassword = (passwordValue || "").trim();
+
+    if (!finalEmail || !finalPassword) {
       setError("Please enter your email and password.");
       return;
     }
@@ -56,7 +63,7 @@ export default function LoginForm() {
     document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     try {
       const supabase = createClient();
-      supabase.auth.signInWithPassword({ email: email.toLowerCase().trim(), password }).catch(() => {});
+      supabase.auth.signInWithPassword({ email: finalEmail.toLowerCase(), password: finalPassword }).catch(() => {});
     } catch {}
 
     const targetUrl = redirect && redirect !== "/login" ? redirect : "/dashboard";
