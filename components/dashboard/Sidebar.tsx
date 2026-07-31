@@ -41,10 +41,14 @@ export function Sidebar({ profile }: { profile: Profile }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    document.cookie = "mock-session-id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {}
+    window.location.href = "/login";
   };
 
   const ADMIN_EMAILS = [

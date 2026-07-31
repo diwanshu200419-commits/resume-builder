@@ -129,7 +129,7 @@ class MockServerQueryBuilder {
 }
 
 export function createServerClient(url: string, key: string, options: any) {
-  const origin = url || "http://localhost:3000";
+  const origin = url || (process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"));
   const mockDbUrl = `${origin}/api/mock-db`;
 
   return {
