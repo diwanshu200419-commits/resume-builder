@@ -163,7 +163,7 @@ export default function SignupPage() {
 
             {/* Email Sign Up Form */}
             {authMethod === "email" && (
-              <form onSubmit={handleSignup} className="space-y-4">
+              <form onSubmit={handleSignUp} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Full name</Label>
                   <Input
