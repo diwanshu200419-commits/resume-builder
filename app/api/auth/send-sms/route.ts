@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendSmsOtp } from "@/lib/sms";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   return NextResponse.json({
     status: "online",
