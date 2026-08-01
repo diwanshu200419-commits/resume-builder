@@ -60,15 +60,27 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
-    document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     try {
       const supabase = createClient();
-      supabase.auth.signInWithPassword({ email: finalEmail.toLowerCase(), password: finalPassword }).catch(() => {});
-    } catch {}
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email: finalEmail.toLowerCase(),
+        password: finalPassword,
+      });
 
-    const targetUrl = redirect && redirect !== "/login" ? redirect : "/dashboard";
-    const target = targetUrl.includes("?") ? `${targetUrl}&authed=true` : `${targetUrl}?authed=true`;
-    window.location.href = target;
+      if (loginError) {
+        setLoading(false);
+        setError(loginError.message);
+        return;
+      }
+
+      document.cookie = `mock-session-id=${data.user?.id || `user-${Date.now()}`}; path=/; max-age=31536000; SameSite=Lax`;
+      const targetUrl = redirect && redirect !== "/login" ? redirect : "/dashboard";
+      const target = targetUrl.includes("?") ? `${targetUrl}&authed=true` : `${targetUrl}?authed=true`;
+      window.location.href = target;
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message || "Failed to log in. Please check your credentials.");
+    }
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {

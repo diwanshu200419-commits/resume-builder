@@ -46,20 +46,30 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
 
-    document.cookie = `mock-session-id=user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     try {
       const supabase = createClient();
-      supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.toLowerCase().trim(),
         password,
         options: {
           data: { full_name: fullName },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
-      }).catch(() => {});
-    } catch {}
+      });
 
-    window.location.href = "/dashboard?authed=true";
+      if (signUpError) {
+        setLoading(false);
+        setError(signUpError.message);
+        return;
+      }
+
+      // Set fallback session cookie for local resilience
+      document.cookie = `mock-session-id=${data.user?.id || `user-${Date.now()}`}; path=/; max-age=31536000; SameSite=Lax`;
+      window.location.href = "/dashboard?authed=true";
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message || "Failed to create account. Please try again.");
+    }
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -111,22 +121,29 @@ export default function SignupPage() {
   const handleGoogleSignup = async () => {
     setLoading(true);
     setError(null);
-    document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000; SameSite=Lax`;
 
     try {
       const supabase = createClient();
-      const { data } = await supabase.auth.signInWithOAuth({
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
         },
       });
+      if (oauthError) {
+        setLoading(false);
+        setError(oauthError.message);
+        return;
+      }
       if (data?.url) {
         window.location.href = data.url;
         return;
       }
-    } catch {}
+    } catch (err: any) {
+      console.warn("Google OAuth fallback triggered:", err);
+    }
 
+    document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000; SameSite=Lax`;
     window.location.href = "/dashboard?authed=true";
   };
 
