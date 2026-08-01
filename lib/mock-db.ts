@@ -34,13 +34,13 @@ const DEFAULT_DB = {
   ],
   analyses: [],
   payments: [],
+  payment_requests: [],
   sessions: [],
   career_profiles: [],
   career_scores: [],
   subscriptions: []
 };
 
-// Global in-memory fallback for Vercel/serverless environments where writing to cwd is restricted
 let memoryDb: any = null;
 
 function readDb(): any {
@@ -77,6 +77,40 @@ function writeDb(data: any) {
   } catch (e) {
     console.error("Error writing mock DB file, saving in memory", e);
   }
+}
+
+export function mockAddPaymentRequest(payload: any) {
+  const db = readDb();
+  if (!db.payment_requests) db.payment_requests = [];
+  db.payment_requests.push(payload);
+  writeDb(db);
+  return payload;
+}
+
+export function mockApprovePaymentRequest(payload: any) {
+  const { userId, plan, expiresAt } = payload;
+  const db = readDb();
+
+  // 1. Update user profile plan
+  let user = db.profiles.find((p: any) => p.id === userId || p.email === userId);
+  if (user) {
+    user.plan = plan;
+    user.subscription_status = "active";
+    user.expires_at = expiresAt;
+    user.updated_at = new Date().toISOString();
+  }
+
+  // 2. Update payment request status
+  if (db.payment_requests) {
+    const req = db.payment_requests.find((r: any) => r.user_id === userId && r.status === "pending");
+    if (req) {
+      req.status = "approved";
+      req.reviewed_at = new Date().toISOString();
+    }
+  }
+
+  writeDb(db);
+  return { user, success: true };
 }
 
 function matchFilters(row: any, filters: { col: string; val: any; op?: string }[]): boolean {
@@ -232,7 +266,6 @@ export function mockAuthAction(method: string, payload: any): any {
     const { email, password } = payload;
     let user = db.profiles.find((p: any) => p.email === email);
 
-    // Dynamic Account Creation: If account doesn't exist, create it instantly!
     if (!user) {
       user = {
         id: Math.random().toString(36).substring(2, 15),

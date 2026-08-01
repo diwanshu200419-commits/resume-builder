@@ -147,24 +147,27 @@ export default function CheckoutPage() {
   if (submitted) {
     return (
       <div className="max-w-xl mx-auto py-16">
-        <Card className="border-success/30">
+        <Card className="border-amber-500/30 bg-surface">
           <CardContent className="flex flex-col items-center text-center gap-4 py-12 px-6">
-            <div className="w-14 h-14 rounded-2xl bg-success/15 flex items-center justify-center">
-              <CheckCircle2 className="w-7 h-7 text-success" />
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/15 flex items-center justify-center border border-amber-500/30">
+              <CheckCircle2 className="w-7 h-7 text-amber-400" />
             </div>
             <h1 className="text-2xl font-bold text-text-primary">
-              Payment successful! 🎉
+              Payment Submitted — Under Admin Review! ⏳
             </h1>
-            <p className="text-text-secondary max-w-sm">
-              Your <span className="font-semibold">{planInfo.name}</span> plan is now active.
-              Enjoy unlimited access to all premium features.
+            <p className="text-sm text-text-secondary max-w-md leading-relaxed">
+              Your payment proof for the <span className="font-bold text-amber-400">{planInfo.name}</span> plan (UTR: <span className="font-mono text-indigo-400 font-bold">{utr}</span>) has been submitted successfully.
             </p>
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 text-left w-full space-y-1">
+              <p className="font-bold text-amber-200">🔍 What happens next?</p>
+              <p>Our admin team manually verifies UTR numbers against UPI bank app statements within <strong>1-2 hours</strong>. Once verified, your plan features will unlock automatically.</p>
+            </div>
             <div className="flex gap-3 mt-2">
               <Link href="/dashboard">
-                <Button>Go to dashboard</Button>
+                <Button className="bg-accent text-white font-bold">Go to Dashboard</Button>
               </Link>
               <Link href="/settings">
-                <Button variant="outline">View account</Button>
+                <Button variant="outline" className="border-border">View Billing Status</Button>
               </Link>
             </div>
           </CardContent>
