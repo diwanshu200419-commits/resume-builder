@@ -196,6 +196,13 @@ Best regards,
                     {result.script}
                   </pre>
 
+                  {result && (
+                    <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-300 text-xs flex items-center gap-2">
+                      <Info className="w-4 h-4 text-indigo-400 shrink-0" />
+                      <span><strong>Market Benchmark Disclaimer:</strong> Salary ranges are heuristic estimations based on tech industry experience multipliers and regional market bands. They serve as negotiation baselines and do not constitute guaranteed offers.</span>
+                    </div>
+                  )}
+
                   {/* Pro Negotiation Tips */}
                   <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-2">
                     <p className="font-bold flex items-center gap-1.5 text-amber-200">

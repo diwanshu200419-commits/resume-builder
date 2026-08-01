@@ -499,12 +499,12 @@ export default function ApplicationsTrackerPage() {
           <div>
             <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
               <Linkedin className="w-5 h-5 text-sky-500" />
-              LinkedIn Recommended Jobs for You
+              Recommended Tech Roles (Curated Sample Feed)
             </h2>
-            <p className="text-xs text-text-secondary">Curated live tech postings matching your resume experience and target role.</p>
+            <p className="text-xs text-text-secondary">Hand-curated sample tech postings matching candidate skill sets and target roles.</p>
           </div>
-          <Badge variant="outline" className="text-xs font-semibold border-sky-500/30 text-sky-500 w-max">
-            Updated Live
+          <Badge variant="outline" className="text-xs font-semibold border-sky-500/30 text-sky-400 w-max">
+            Curated Sample Feed
           </Badge>
         </div>
 
