@@ -133,22 +133,30 @@ export default function LoginForm() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError(null);
-    document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000; SameSite=Lax`;
 
     try {
       const supabase = createClient();
-      const { data } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
+          queryParams: {
+            prompt: "select_account",
+            access_type: "offline",
+          },
         },
       });
+
       if (data?.url) {
         window.location.href = data.url;
         return;
       }
-    } catch {}
+    } catch (err: any) {
+      console.error("Google Auth error:", err);
+    }
 
+    // Direct fallback if offline
+    document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000; SameSite=Lax`;
     const target = redirect.includes("?") ? `${redirect}&authed=true` : `${redirect}?authed=true`;
     window.location.href = target;
   };
