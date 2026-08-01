@@ -134,10 +134,28 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
-    // Exact Supabase Callback URL shown in Supabase Auth Providers dashboard
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback`,
+          queryParams: {
+            prompt: "select_account",
+          },
+        },
+      });
+
+      if (data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+    } catch (e) {}
+
+    const stateToken = `state_${Date.now()}`;
+    const targetCallback = `${window.location.origin}/api/auth/callback`;
     const googleClientId = "240368883912-158f4vu7a813eorkkd34os6f54l73jpe.apps.googleusercontent.com";
-    const supabaseCallback = "https://ofirvweirnjgsyyedkci.supabase.co/auth/v1/callback";
-    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(supabaseCallback)}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
+    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(targetCallback)}&response_type=code&scope=openid%20email%20profile&state=${stateToken}&prompt=select_account`;
 
     document.cookie = `mock-session-id=google-user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     window.location.href = oauthUrl;

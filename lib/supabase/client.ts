@@ -3,7 +3,11 @@ import { createBrowserClient } from "@supabase/ssr";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ofirvweirnjgsyyedkci.supabase.co";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
+let clientInstance: any = null;
+
 export function createClient() {
+  if (clientInstance) return clientInstance;
+
   if (
     supabaseUrl &&
     supabaseAnonKey &&
@@ -11,14 +15,15 @@ export function createClient() {
     !supabaseUrl.includes("ixrlxjwwcpxacovdsdnu")
   ) {
     try {
-      return createBrowserClient(supabaseUrl, supabaseAnonKey);
+      clientInstance = createBrowserClient(supabaseUrl, supabaseAnonKey);
+      return clientInstance;
     } catch (e) {
       console.warn("Failed to initialize Supabase browser client, falling back to mock client.");
     }
   }
 
-  // Fallback Mock Client
-  return {
+  // Fallback Client with valid OAuth state handler
+  clientInstance = {
     auth: {
       getUser: async () => {
         const token = typeof document !== "undefined"
@@ -78,11 +83,12 @@ export function createClient() {
         }
       },
       signInWithOAuth: async ({ provider, options }: any) => {
-        const supabaseCallback = "https://ofirvweirnjgsyyedkci.supabase.co/auth/v1/callback";
-        const redirectUri = encodeURIComponent(supabaseCallback);
+        const redirectUrl = options?.redirectTo || (typeof window !== "undefined" ? `${window.location.origin}/api/auth/callback` : "https://resume-builder-murex-mu.vercel.app/api/auth/callback");
         const googleClientId = "240368883912-158f4vu7a813eorkkd34os6f54l73jpe.apps.googleusercontent.com";
         const promptParam = options?.queryParams?.prompt || "select_account";
-        const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=${promptParam}`;
+        const stateToken = `state_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+        
+        const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&scope=openid%20email%20profile&state=${stateToken}&prompt=${promptParam}`;
 
         return {
           data: { url: oauthUrl, provider: "google" },
@@ -144,4 +150,6 @@ export function createClient() {
       }),
     }),
   } as any;
+
+  return clientInstance;
 }
