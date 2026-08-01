@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { generateResumePDF, generateCoverLetterPDF } from "@/lib/generate-pdf";
-import { downloadSchema } from "@/lib/validations";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,13 +14,16 @@ export async function POST(request: NextRequest) {
     if (analysisId) {
       try {
         const supabase = await createClient();
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("analyses")
           .select("*")
           .eq("id", analysisId)
           .single();
+        if (error) console.warn("[api/download/pdf] DB fetch warning:", error.message);
         analysis = data;
-      } catch {}
+      } catch (err) {
+        console.warn("[api/download/pdf] DB fetch exception:", err);
+      }
 
       if (!analysis) {
         try {
@@ -31,27 +33,29 @@ export async function POST(request: NextRequest) {
             const json = await res.json();
             analysis = json.analysis;
           }
-        } catch {}
+        } catch (err) {
+          console.warn("[api/download/pdf] API fetch fallback exception:", err);
+        }
       }
     }
 
     if (!analysis) {
       analysis = {
-        job_title: jobTitle || "AI / ML Engineer",
+        job_title: jobTitle || "Software Engineer",
         optimized_resume_text: `diwanshu sharma
 Software Engineer & AI Specialist
 diwanshu2004199@gmail.com | github.com/diwanshu200419-commits
 
 SUMMARY
-Results-driven AI/ML Engineer with 5+ years of experience architecting high-throughput LLM pipelines, RAG vector search microservices, and modern web applications.
+Results-driven AI/ML Engineer with experience architecting high-throughput LLM pipelines and modern web applications.
 
 EXPERIENCE
-Lead AI Platform Engineer — Tech Corp (2022 - Present)
-• Architected RAG retrieval microservices reducing search latency by 45% for 200,000 monthly active users.
-• Spearheaded full-stack Next.js and Supabase integration with zero downtime.
+Lead AI Engineer — Tech Corp (2022 - Present)
+• Architected RAG retrieval microservices reducing search latency by 45%.
+• Spearheaded full-stack Next.js and Supabase integration.
 
 EDUCATION & SKILLS
-B.Tech Computer Science | Skills: Python, TypeScript, React, Next.js, LangChain, PyTorch, Supabase, Docker, AWS`,
+B.Tech Computer Science | Skills: TypeScript, React, Next.js, Python, Supabase, PostgreSQL`,
       };
     }
 
@@ -61,7 +65,7 @@ B.Tech Computer Science | Skills: Python, TypeScript, React, Next.js, LangChain,
 
     let buffer: Buffer;
     if (type === "cover-letter") {
-      const content = analysis.cover_letter || `Dear Hiring Manager,\n\nI am writing to express my strong interest in the ${title} position at your company. With a proven track record in software engineering and AI implementation, I am confident in my ability to deliver immediate value.\n\nSincerely,\n${name}`;
+      const content = analysis.cover_letter || `Dear Hiring Manager,\n\nI am writing to express my strong interest in the ${title} position. With a proven track record in software engineering and AI implementation, I am confident in my ability to deliver value.\n\nSincerely,\n${name}`;
       buffer = await generateCoverLetterPDF(content, title);
     } else {
       const content = analysis.optimized_resume_text || analysis.original_resume_text;

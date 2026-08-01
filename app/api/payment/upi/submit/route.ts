@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createServiceClient();
 
-    // Store in mock database or Supabase table
+    // Store in Supabase table
     try {
       const { error: dbError } = await supabase.from("payment_requests").insert({
         user_id: profile.id,
@@ -62,8 +62,19 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
       });
 
-      if (dbError) console.warn("Supabase payment_requests insert warning:", dbError.message);
-    } catch {}
+      if (dbError) {
+        console.warn("[payment/upi/submit] payment_requests insert warning:", dbError.message);
+        // If UTR constraint fails
+        if (dbError.code === "23505") {
+          return NextResponse.json(
+            { error: "This UTR number has already been submitted for your account." },
+            { status: 400 }
+          );
+        }
+      }
+    } catch (err) {
+      console.warn("[payment/upi/submit] payment_requests insert exception:", err);
+    }
 
     // Mock DB Fallback Store for full offline/mock environment resilience
     try {
@@ -87,7 +98,9 @@ export async function POST(request: NextRequest) {
           },
         }),
       });
-    } catch {}
+    } catch (err) {
+      console.warn("[payment/upi/submit] mock-db sync warning:", err);
+    }
 
     return NextResponse.json({
       success: true,

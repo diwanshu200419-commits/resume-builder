@@ -1,48 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Simple In-Memory Rate Limiter for Development
-// For Production: Replace with Upstash Redis
-const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
+// Safety rate limiter for Gemini AI routes to prevent runaway API billing abuse
+const DAILY_MAX_AI_CALLS = 50;
 
-const LIMIT = 10; // 10 requests
-const WINDOW = 60 * 1000; // per 1 minute
+// In-memory fallback map for offline / fast rate-limiting
+const memoryRateMap = new Map<string, { count: number; resetAt: number }>();
 
-export function rateLimit(request: NextRequest) {
-  const ip = request.ip || request.headers.get("x-forwarded-for") || "anonymous";
-  const now = Date.now();
+export async function checkDailyRateLimit(userId: string): Promise<{ success: boolean; message?: string }> {
+  if (!userId) return { success: true };
 
-  const userLimit = rateLimitMap.get(ip) || { count: 0, lastReset: now };
+  const todayWindow = new Date().setHours(0, 0, 0, 0);
 
-  if (now - userLimit.lastReset > WINDOW) {
-    userLimit.count = 1;
-    userLimit.lastReset = now;
+  const userMem = memoryRateMap.get(userId);
+  if (userMem) {
+    if (userMem.resetAt < todayWindow) {
+      memoryRateMap.set(userId, { count: 1, resetAt: todayWindow });
+    } else if (userMem.count >= DAILY_MAX_AI_CALLS) {
+      return {
+        success: false,
+        message: `Daily AI usage limit reached (${DAILY_MAX_AI_CALLS} calls/day). Please try again tomorrow to protect platform resources.`,
+      };
+    } else {
+      userMem.count += 1;
+    }
   } else {
-    userLimit.count++;
-  }
-
-  rateLimitMap.set(ip, userLimit);
-
-  if (userLimit.count > LIMIT) {
-    return {
-      success: false,
-      response: NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": Math.ceil((WINDOW - (now - userLimit.lastReset)) / 1000).toString(),
-          },
-        }
-      ),
-    };
+    memoryRateMap.set(userId, { count: 1, resetAt: todayWindow });
   }
 
   return { success: true };
 }
 
-// Helper to use in API routes
-export async function withRateLimit(request: NextRequest, handler: () => Promise<NextResponse>) {
-  const { success, response } = rateLimit(request);
-  if (!success) return response;
+// Next.js Route Handler wrapper used by analyze and public routes: withRateLimit(req, handler)
+export async function withRateLimit(
+  req: NextRequest,
+  handler: () => Promise<NextResponse>
+): Promise<NextResponse> {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
+  const rateCheck = await checkDailyRateLimit(ip);
+  if (!rateCheck.success) {
+    return NextResponse.json({ error: rateCheck.message }, { status: 429 });
+  }
   return handler();
 }
