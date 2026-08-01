@@ -1,10 +1,7 @@
 -- ============================================================================
--- Vaylo AI — FULL SCHEMA (Run ONCE in Supabase SQL Editor)
+-- Vaylo AI — FULL SCHEMA (Fully Idempotent with DROP IF EXISTS)
 -- Project: ofirvweirnjgsyyedkci
 -- URL: https://supabase.com/dashboard/project/ofirvweirnjgsyyedkci/sql
---
--- This creates ALL tables from scratch. Do NOT run if tables already exist
--- (use IF NOT EXISTS to be safe, but verify afterwards).
 -- ============================================================================
 
 -- ============================================================================
@@ -174,112 +171,101 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 
 
 -- ============================================================================
--- ROW LEVEL SECURITY
+-- ROW LEVEL SECURITY & POLICIES
 -- ============================================================================
 
 -- profiles
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 
-CREATE POLICY "Users can view own profile" ON profiles
-  FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Users can update own profile" ON profiles
-  FOR UPDATE USING (auth.uid() = id);
-
-CREATE POLICY "Service role full access to profiles" ON profiles
-  FOR ALL USING (current_setting('role') = 'service_role');
+DROP POLICY IF EXISTS "Service role full access to profiles" ON profiles;
+CREATE POLICY "Service role full access to profiles" ON profiles FOR ALL USING (current_setting('role') = 'service_role');
 
 -- analyses
 ALTER TABLE analyses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own analyses" ON analyses;
+CREATE POLICY "Users can view own analyses" ON analyses FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own analyses" ON analyses
-  FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can insert own analyses" ON analyses;
+CREATE POLICY "Users can insert own analyses" ON analyses FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own analyses" ON analyses
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can update own analyses" ON analyses;
+CREATE POLICY "Users can update own analyses" ON analyses FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own analyses" ON analyses
-  FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can delete own analyses" ON analyses;
+CREATE POLICY "Users can delete own analyses" ON analyses FOR DELETE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete own analyses" ON analyses
-  FOR DELETE USING (auth.uid() = user_id);
-
-CREATE POLICY "Service role full access to analyses" ON analyses
-  FOR ALL USING (current_setting('role') = 'service_role');
+DROP POLICY IF EXISTS "Service role full access to analyses" ON analyses;
+CREATE POLICY "Service role full access to analyses" ON analyses FOR ALL USING (current_setting('role') = 'service_role');
 
 -- payments
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own payments" ON payments;
+CREATE POLICY "Users can view own payments" ON payments FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own payments" ON payments
-  FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can create own pending payments" ON payments;
+CREATE POLICY "Users can create own pending payments" ON payments FOR INSERT WITH CHECK (auth.uid() = user_id AND status = 'pending');
 
-CREATE POLICY "Users can create own pending payments" ON payments
-  FOR INSERT WITH CHECK (auth.uid() = user_id AND status = 'pending');
-
-CREATE POLICY "Service role full access to payments" ON payments
-  FOR ALL USING (current_setting('role') = 'service_role');
+DROP POLICY IF EXISTS "Service role full access to payments" ON payments;
+CREATE POLICY "Service role full access to payments" ON payments FOR ALL USING (current_setting('role') = 'service_role');
 
 -- payment_requests
 ALTER TABLE payment_requests ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own payment requests" ON payment_requests;
+CREATE POLICY "Users can view own payment requests" ON payment_requests FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own payment requests" ON payment_requests
-  FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can insert own payment requests" ON payment_requests;
+CREATE POLICY "Users can insert own payment requests" ON payment_requests FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own payment requests" ON payment_requests
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Admins can update payment requests" ON payment_requests;
+CREATE POLICY "Admins can update payment requests" ON payment_requests FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+);
 
-CREATE POLICY "Admins can update payment requests" ON payment_requests
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
-    )
-  );
-
-CREATE POLICY "Service role full access to payment_requests" ON payment_requests
-  FOR ALL USING (current_setting('role') = 'service_role');
+DROP POLICY IF EXISTS "Service role full access to payment_requests" ON payment_requests;
+CREATE POLICY "Service role full access to payment_requests" ON payment_requests FOR ALL USING (current_setting('role') = 'service_role');
 
 -- ai_logs
 ALTER TABLE ai_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own AI logs" ON ai_logs;
+CREATE POLICY "Users can view own AI logs" ON ai_logs FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own AI logs" ON ai_logs
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Service role full access to ai_logs" ON ai_logs
-  FOR ALL USING (current_setting('role') = 'service_role');
+DROP POLICY IF EXISTS "Service role full access to ai_logs" ON ai_logs;
+CREATE POLICY "Service role full access to ai_logs" ON ai_logs FOR ALL USING (current_setting('role') = 'service_role');
 
 -- career_profiles
 ALTER TABLE career_profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own career profile" ON career_profiles;
+CREATE POLICY "Users can view own career profile" ON career_profiles FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own career profile" ON career_profiles
-  FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can update own career profile" ON career_profiles;
+CREATE POLICY "Users can update own career profile" ON career_profiles FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own career profile" ON career_profiles
-  FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can insert own career profile" ON career_profiles;
+CREATE POLICY "Users can insert own career profile" ON career_profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own career profile" ON career_profiles
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Service role full access to career_profiles" ON career_profiles
-  FOR ALL USING (current_setting('role') = 'service_role');
+DROP POLICY IF EXISTS "Service role full access to career_profiles" ON career_profiles;
+CREATE POLICY "Service role full access to career_profiles" ON career_profiles FOR ALL USING (current_setting('role') = 'service_role');
 
 -- career_scores
 ALTER TABLE career_scores ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own career scores" ON career_scores;
+CREATE POLICY "Users can view own career scores" ON career_scores FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own career scores" ON career_scores
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Service role full access to career_scores" ON career_scores
-  FOR ALL USING (current_setting('role') = 'service_role');
+DROP POLICY IF EXISTS "Service role full access to career_scores" ON career_scores;
+CREATE POLICY "Service role full access to career_scores" ON career_scores FOR ALL USING (current_setting('role') = 'service_role');
 
 -- subscriptions
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own subscriptions" ON subscriptions;
+CREATE POLICY "Users can view own subscriptions" ON subscriptions FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own subscriptions" ON subscriptions
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Service role full access to subscriptions" ON subscriptions
-  FOR ALL USING (current_setting('role') = 'service_role');
+DROP POLICY IF EXISTS "Service role full access to subscriptions" ON subscriptions;
+CREATE POLICY "Service role full access to subscriptions" ON subscriptions FOR ALL USING (current_setting('role') = 'service_role');
 
 
 -- ============================================================================
@@ -356,11 +342,13 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('payment-proofs', 'payment-proofs', false)
 ON CONFLICT (id) DO NOTHING;
 
+DROP POLICY IF EXISTS "Users can upload own payment proofs" ON storage.objects;
 CREATE POLICY "Users can upload own payment proofs" ON storage.objects
   FOR INSERT WITH CHECK (
     bucket_id = 'payment-proofs' AND auth.uid()::text = (storage.foldername(name))[1]
   );
 
+DROP POLICY IF EXISTS "Users can view own payment proofs" ON storage.objects;
 CREATE POLICY "Users can view own payment proofs" ON storage.objects
   FOR SELECT USING (
     bucket_id = 'payment-proofs' AND auth.uid()::text = (storage.foldername(name))[1]
@@ -370,13 +358,12 @@ CREATE POLICY "Users can view own payment proofs" ON storage.objects
 -- ============================================================================
 -- UTR uniqueness constraint (prevents double-submit of same UTR)
 -- ============================================================================
-ALTER TABLE payment_requests
-  ADD CONSTRAINT uq_utr_per_user UNIQUE (utr_number, user_id);
+ALTER TABLE payment_requests DROP CONSTRAINT IF EXISTS uq_utr_per_user;
+ALTER TABLE payment_requests ADD CONSTRAINT uq_utr_per_user UNIQUE (utr_number, user_id);
 
 
 -- ============================================================================
 -- SEED: Backfill profiles for any existing auth.users that signed up
--- before this schema existed (they have no profiles row yet)
 -- ============================================================================
 INSERT INTO profiles (id, email, full_name, avatar_url)
 SELECT
@@ -391,7 +378,6 @@ WHERE p.id IS NULL;
 
 -- ============================================================================
 -- SEED: Promote admin accounts
--- Run AFTER backfill so the profiles rows exist
 -- ============================================================================
 UPDATE profiles
 SET role = 'admin', plan = 'career_pack', subscription_status = 'active'
@@ -399,14 +385,3 @@ WHERE email IN (
   'jattshiv32@gmail.com',
   'diwanshu200419@gmail.com'
 );
-
-
--- ============================================================================
--- VERIFICATION QUERY — Run this separately after the migration completes:
---
--- SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
---
--- Expected result: 8 rows:
---   profiles, analyses, payments, payment_requests, ai_logs,
---   career_profiles, career_scores, subscriptions
--- ============================================================================
