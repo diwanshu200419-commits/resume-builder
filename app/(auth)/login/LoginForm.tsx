@@ -134,10 +134,10 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
-    // Exact matching URI saved in Google Cloud Console
+    // Exact Supabase Callback URL shown in Supabase Auth Providers dashboard
     const googleClientId = "240368883912-158f4vu7a813eorkkd34os6f54l73jpe.apps.googleusercontent.com";
-    const savedRedirectUri = typeof window !== "undefined" ? window.location.origin : "https://resume-builder-murex-mu.vercel.app";
-    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(savedRedirectUri)}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
+    const supabaseCallback = "https://ofirvweirnjgsyyedkci.supabase.co/auth/v1/callback";
+    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(supabaseCallback)}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
 
     document.cookie = `mock-session-id=google-user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
     window.location.href = oauthUrl;
