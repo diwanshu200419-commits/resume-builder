@@ -147,18 +147,25 @@ export default function LoginForm() {
         },
       });
 
+      if (error) {
+        setLoading(false);
+        setError(`Google Auth error: ${error.message}`);
+        return;
+      }
+
       if (data?.url) {
         window.location.href = data.url;
         return;
       }
     } catch (err: any) {
       console.error("Google Auth error:", err);
+      setLoading(false);
+      setError(err.message || "Failed to launch Google Sign-In");
+      return;
     }
 
-    // Direct fallback if offline
-    document.cookie = `mock-session-id=google-user-session; path=/; max-age=31536000; SameSite=Lax`;
-    const target = redirect.includes("?") ? `${redirect}&authed=true` : `${redirect}?authed=true`;
-    window.location.href = target;
+    setLoading(false);
+    setError("Unable to launch Google Sign-In. Please ensure Google Provider is enabled in Supabase.");
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
