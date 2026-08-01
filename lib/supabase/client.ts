@@ -1,6 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ofirvweirnjgsyyedkci.supabase.co";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 export function createClient() {
@@ -78,8 +78,8 @@ export function createClient() {
         }
       },
       signInWithOAuth: async ({ provider, options }: any) => {
-        const supabaseCallback = "https://ofirvweirnjgsyyedkci.supabase.co/auth/v1/callback";
-        const redirectUri = encodeURIComponent(supabaseCallback);
+        const targetCallback = options?.redirectTo || (typeof window !== "undefined" ? `${window.location.origin}/api/auth/callback` : "https://resume-builder-murex-mu.vercel.app/api/auth/callback");
+        const redirectUri = encodeURIComponent(targetCallback);
         const googleClientId = "240368883912-158f4vu7a813eorkkd34os6f54l73jpe.apps.googleusercontent.com";
         const promptParam = options?.queryParams?.prompt || "select_account";
         const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=${promptParam}`;
