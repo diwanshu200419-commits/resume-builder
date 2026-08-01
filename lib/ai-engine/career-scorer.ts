@@ -23,32 +23,39 @@ export async function calculateCareerScore(userId: string): Promise<CareerScoreB
     .limit(1)
     .single();
 
-  const resume_score = latestAnalysis?.optimized_ats_score || latestAnalysis?.original_ats_score || 50;
+  const rawResumeScore = latestAnalysis?.optimized_ats_score || latestAnalysis?.original_ats_score || 60;
+  const resume_score = Math.min(100, Math.max(0, rawResumeScore));
 
-  // 2. Skills Score (25%) - Based on career profile skills
+  // 2. Skills Score (25%) - Based on career profile skills (baseline 50% for new accounts)
   const skillsCount = Array.isArray(profile?.skills) ? profile.skills.length : 0;
-  const skills_score = Math.min(100, (skillsCount / 10) * 100);
+  const skills_score = skillsCount > 0 
+    ? Math.min(100, Math.max(20, Math.round((skillsCount / 10) * 100))) 
+    : 50;
 
-  // 3. Projects Score (20%) - Based on projects in learning history
+  // 3. Projects Score (20%) - Based on projects in learning history (baseline 50%)
   const projectsCount = Array.isArray(profile?.learning_history) ? profile.learning_history.length : 0;
-  const projects_score = Math.min(100, (projectsCount / 5) * 100);
+  const projects_score = projectsCount > 0 
+    ? Math.min(100, Math.max(20, Math.round((projectsCount / 5) * 100))) 
+    : 50;
 
   // 4. Experience Score (15%) - Based on experience level
   let experience_score = 60;
   if (profile?.experience_level === "mid") experience_score = 80;
   if (profile?.experience_level === "senior") experience_score = 95;
 
-  // 5. LinkedIn Score (10%) - Default 70 if profile exists
+  // 5. LinkedIn Score (10%)
   const linkedin_score = profile?.industry ? 80 : 50;
 
-  // Final Weighted Calculation
-  const overall_score = Math.round(
+  // Final Weighted Calculation (bounded 0 - 100)
+  const calculatedOverall = Math.round(
     resume_score * 0.30 +
     skills_score * 0.25 +
     projects_score * 0.20 +
     experience_score * 0.15 +
     linkedin_score * 0.10
   );
+
+  const overall_score = Math.min(100, Math.max(0, calculatedOverall));
 
   return {
     overall_score,
@@ -73,7 +80,7 @@ export async function saveMonthlyScore(userId: string, breakdown: CareerScoreBre
     }, { onConflict: "user_id,month" });
 
     if (error) {
-      console.warn("Could not save monthly score (table career_scores might be missing):", error.message);
+      console.warn("Could not save monthly score:", error.message);
     }
   } catch (err: any) {
     console.warn("Error in saveMonthlyScore:", err.message);
