@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 export async function upgradeUserPlan(
   userId: string,
   plan: string,
-  source: "razorpay" | "manual_upi" | "admin_override",
+  source: "manual_upi" | "admin_override",
   transactionId?: string
 ) {
   let expiresAt: string | null = null;
@@ -29,16 +29,16 @@ export async function upgradeUserPlan(
 
   if (profileError) console.warn("Supabase profile plan update warning:", profileError.message);
 
-  // 2. Audit Record in razorpay_payments
+  // 2. Audit Record in payment_requests
   try {
-    await supabase.from("razorpay_payments").insert({
-      user_id: userId,
-      payment_id: transactionId || `txn_${Date.now()}`,
-      plan: plan,
-      source: source,
-      status: "captured",
-      created_at: new Date().toISOString(),
-    });
+    await supabase
+      .from("payment_requests")
+      .update({
+        status: "approved",
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId)
+      .eq("status", "pending");
   } catch {}
 
   // 3. Fallback Mock DB Store Update
