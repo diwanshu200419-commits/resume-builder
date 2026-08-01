@@ -83,6 +83,7 @@ export default function AdminPage() {
   const [revenue, setRevenue] = useState<RevenueData>({ thisMonth: 0, byPlan: {} });
   const [activity, setActivity] = useState<ActivityData>({ activeToday: 0, active7d: 0, active30d: 0 });
   const [loading, setLoading] = useState(true);
+  const [unauthorized, setUnauthorized] = useState(false);
   const [activeTab, setActiveTab] = useState<"queue" | "users" | "revenue">("queue");
   const [planFilter, setPlanFilter] = useState<string>("all");
   const [activityFilter, setActivityFilter] = useState<string>("all");
@@ -96,15 +97,22 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/users");
+      if (res.status === 403 || res.status === 401) {
+        setUnauthorized(true);
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setUsers(data.users || []);
         setPaymentRequests(data.paymentRequests || []);
         if (data.revenue) setRevenue(data.revenue);
         if (data.activity) setActivity(data.activity);
+      } else {
+        setUnauthorized(true);
       }
     } catch (e) {
       console.error(e);
+      setUnauthorized(true);
     } finally {
       setLoading(false);
     }
@@ -195,6 +203,30 @@ export default function AdminPage() {
   const userPayments = selectedUser
     ? paymentRequests.filter((r) => r.user_id === selectedUser.id)
     : [];
+
+  if (unauthorized) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-6">
+        <Card className="max-w-md w-full border-danger/30 bg-surface shadow-xl text-center p-6">
+          <CardHeader>
+            <ShieldAlert className="w-12 h-12 text-danger mx-auto mb-2" />
+            <CardTitle className="text-xl font-bold text-text-primary">Access Denied</CardTitle>
+            <CardDescription className="text-xs text-text-secondary mt-1">
+              Admin privileges required. Your account does not have permission to access the Vaylo AI Admin Panel.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <Button
+              className="w-full bg-accent hover:bg-accent-hover text-white font-semibold"
+              onClick={() => (window.location.href = "/dashboard")}
+            >
+              Return to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto py-6 sm:py-10 space-y-6 px-4 sm:px-6">
