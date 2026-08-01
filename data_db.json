@@ -128,6 +128,12 @@
       "user_id": "admin-id",
       "token": "mock_token_admin_test_session",
       "created_at": "2026-07-28T08:22:11.529Z"
+    },
+    {
+      "id": "cs0a8ygud9f",
+      "user_id": "admin-id",
+      "token": "google-user-1785562626506",
+      "created_at": "2026-08-01T05:49:22.396Z"
     }
   ],
   "career_profiles": [],
