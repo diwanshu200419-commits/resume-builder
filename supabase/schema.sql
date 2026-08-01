@@ -95,7 +95,7 @@ CREATE POLICY "Only service role can write AI logs" ON ai_logs
 CREATE TABLE IF NOT EXISTS career_profiles (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
-  current_role TEXT,
+  "current_role" TEXT,
   target_role TEXT,
   experience_level TEXT,
   industry TEXT,
