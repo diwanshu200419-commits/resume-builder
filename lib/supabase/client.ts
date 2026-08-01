@@ -78,8 +78,8 @@ export function createClient() {
         }
       },
       signInWithOAuth: async ({ provider, options }: any) => {
-        const targetCallback = options?.redirectTo || (typeof window !== "undefined" ? `${window.location.origin}/api/auth/callback` : "https://resume-builder-murex-mu.vercel.app/api/auth/callback");
-        const redirectUri = encodeURIComponent(targetCallback);
+        const savedRedirectUri = typeof window !== "undefined" ? window.location.origin : "https://resume-builder-murex-mu.vercel.app";
+        const redirectUri = encodeURIComponent(savedRedirectUri);
         const googleClientId = "240368883912-158f4vu7a813eorkkd34os6f54l73jpe.apps.googleusercontent.com";
         const promptParam = options?.queryParams?.prompt || "select_account";
         const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=${promptParam}`;
