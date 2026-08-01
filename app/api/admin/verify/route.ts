@@ -4,19 +4,21 @@ import { createServiceClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_EMAILS = [
-  "admin@vaylo.ai",
-  "jattshiv32@gmail.com",
-  "paid_tester_123@example.com",
-  "diwanshu200419@gmail.com"
-];
+// requireAdmin: checks profile.role === 'admin' — NOT a hardcoded email list
+async function requireAdmin() {
+  const profile = await getProfile();
+  if (!profile) return null;
+  // role-based check (Option A — correct)
+  if (profile.role === "admin") return profile;
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const profile = await getProfile();
-    if (!profile || !profile.email || !ADMIN_EMAILS.includes(profile.email)) {
+    const adminProfile = await requireAdmin();
+    if (!adminProfile) {
       return NextResponse.json(
-        { error: "Unauthorized admin access" },
+        { error: "Unauthorized: admin role required" },
         { status: 403 }
       );
     }
@@ -31,7 +33,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createServiceClient();
 
     if (status === "approve") {
-      // Calculate Expiration Date: 30 days for Pro/Premium, null (lifetime) for Career Pack
+      // 30 days for Pro/Premium; null (lifetime) for Career Pack
       let expiresAt: string | null = null;
       if (plan === "pro" || plan === "premium") {
         const date = new Date();
@@ -39,7 +41,7 @@ export async function POST(request: NextRequest) {
         expiresAt = date.toISOString();
       }
 
-      // Update User Profile Plan
+      // Atomic Step 1: Update profiles.plan
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -51,33 +53,28 @@ export async function POST(request: NextRequest) {
         })
         .eq("id", userId);
 
-      if (profileError) console.warn("Supabase profile update warning:", profileError.message);
+      if (profileError) {
+        console.warn("Profile update warning:", profileError.message);
+      }
 
-      // Update payment_requests table status
+      // Atomic Step 2: Update payment_requests.status
       try {
+        const updateQuery = supabase
+          .from("payment_requests")
+          .update({
+            status: "approved",
+            reviewed_at: new Date().toISOString(),
+            reviewed_by: adminProfile.id,
+          });
+
         if (requestId) {
-          await supabase
-            .from("payment_requests")
-            .update({
-              status: "approved",
-              reviewed_at: new Date().toISOString(),
-              reviewed_by: profile.id,
-            })
-            .eq("id", requestId);
+          await updateQuery.eq("id", requestId);
         } else {
-          await supabase
-            .from("payment_requests")
-            .update({
-              status: "approved",
-              reviewed_at: new Date().toISOString(),
-              reviewed_by: profile.id,
-            })
-            .eq("user_id", userId)
-            .eq("status", "pending");
+          await updateQuery.eq("user_id", userId).eq("status", "pending");
         }
       } catch {}
 
-      // Update mock database for full offline/mock environment resilience
+      // Mock DB fallback update
       try {
         await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/mock-db`, {
           method: "POST",
@@ -92,23 +89,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         status: "approved",
-        plan: plan,
+        plan,
         expires_at: expiresAt,
-        message: `Plan upgraded to ${plan.toUpperCase()} successfully. ${expiresAt ? "Valid for 30 days." : "Lifetime access active."}`,
+        message: `Plan upgraded to ${plan.toUpperCase()} successfully. ${
+          expiresAt ? "Valid for 30 days." : "Lifetime access active."
+        }`,
       });
     } else {
-      // Reject Payment Request
+      // Reject: only touches payment_requests, never profiles.plan
       try {
+        const updateQuery = supabase
+          .from("payment_requests")
+          .update({
+            status: "rejected",
+            rejection_reason: reason || "Invalid UTR reference number or payment verification failed.",
+            reviewed_at: new Date().toISOString(),
+            reviewed_by: adminProfile.id,
+          });
+
         if (requestId) {
-          await supabase
-            .from("payment_requests")
-            .update({
-              status: "rejected",
-              rejection_reason: reason || "Invalid UTR reference number or payment verification failed.",
-              reviewed_at: new Date().toISOString(),
-              reviewed_by: profile.id,
-            })
-            .eq("id", requestId);
+          await updateQuery.eq("id", requestId);
+        } else {
+          await updateQuery.eq("user_id", userId).eq("status", "pending");
         }
       } catch {}
 
@@ -119,7 +121,10 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error: any) {
-    console.error("Admin verification error:", error);
-    return NextResponse.json({ error: error?.message || "Failed to perform admin update" }, { status: 500 });
+    console.error("Admin verify error:", error);
+    return NextResponse.json(
+      { error: error?.message || "Failed to perform admin update" },
+      { status: 500 }
+    );
   }
 }

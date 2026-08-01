@@ -3,11 +3,41 @@ import type { Profile } from "@/types";
 
 export type PlanType = "free" | "pro" | "premium" | "career_pack";
 
+// Returns the real plan from the DB profile
 export function getEffectivePlan(profile: Profile | null): PlanType {
   if (!profile) return "free";
-  const p = (profile.plan || "free").toLowerCase();
+  const p = (profile.plan || "free").toLowerCase().replace("-", "_");
   if (p === "pro" || p === "premium" || p === "career_pack") return p as PlanType;
   return "free";
+}
+
+/**
+ * PART 3 — Admin test-mode override.
+ * If the requester is an admin AND has a test_plan_override cookie,
+ * returns the override plan instead of their real plan.
+ * For all non-admins: ignores any override and returns real plan.
+ * The real profiles.plan in the DB never changes.
+ */
+export function getEffectivePlanWithOverride(
+  profile: Profile | null,
+  testOverride?: string | null
+): PlanType {
+  if (!profile) return "free";
+
+  // Only admins can use test override
+  if (profile.role === "admin" && testOverride) {
+    const o = testOverride.toLowerCase().replace("-", "_");
+    if (o === "pro" || o === "premium" || o === "career_pack" || o === "free") {
+      return o as PlanType;
+    }
+  }
+
+  return getEffectivePlan(profile);
+}
+
+// Server-side admin guard — checks role column, not email list
+export function isAdmin(profile: Profile | null): boolean {
+  return profile?.role === "admin";
 }
 
 export function canAnalyze(profile: Profile | null): boolean {

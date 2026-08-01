@@ -7,7 +7,8 @@ export interface Profile {
   email: string | null;
   full_name: string | null;
   avatar_url: string | null;
-  plan: Plan;
+  plan: Plan | string;
+  role?: "user" | "admin" | null;
   analyses_used: number;
   analyses_limit: number;
   current_period_start: string | null;
@@ -15,6 +16,8 @@ export interface Profile {
   subscription_status: SubscriptionStatus | null;
   total_ats_checks: number;
   total_resume_downloads: number;
+  expires_at?: string | null;
+  last_seen_at?: string | null;
   created_at: string;
   updated_at: string;
 }
