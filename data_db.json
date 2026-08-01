@@ -134,6 +134,12 @@
       "user_id": "admin-id",
       "token": "google-user-1785562626506",
       "created_at": "2026-08-01T05:49:22.396Z"
+    },
+    {
+      "id": "d3im6xhiww8",
+      "user_id": "admin-id",
+      "token": "google-user-1785563810485",
+      "created_at": "2026-08-01T05:56:55.275Z"
     }
   ],
   "career_profiles": [],
@@ -183,6 +189,32 @@
       "updated_at": "2026-07-28T07:52:22.713Z",
       "user_id": "wf521zlx3rp",
       "month": "2026-07",
+      "overall_score": 29,
+      "resume_score": 50,
+      "skills_score": 0,
+      "projects_score": 0,
+      "experience_score": 60,
+      "linkedin_score": 50
+    },
+    {
+      "id": "l9kzlivmqx",
+      "created_at": "2026-08-01T05:56:58.898Z",
+      "updated_at": "2026-08-01T05:56:58.959Z",
+      "user_id": "admin-id",
+      "month": "2026-08",
+      "overall_score": 29,
+      "resume_score": 50,
+      "skills_score": 0,
+      "projects_score": 0,
+      "experience_score": 60,
+      "linkedin_score": 50
+    },
+    {
+      "id": "axwowate4am",
+      "created_at": "2026-08-01T05:56:59.388Z",
+      "updated_at": "2026-08-01T05:56:59.430Z",
+      "user_id": "admin-id",
+      "month": "2026-08",
       "overall_score": 29,
       "resume_score": 50,
       "skills_score": 0,
