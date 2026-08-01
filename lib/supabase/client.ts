@@ -78,32 +78,15 @@ export function createClient() {
         }
       },
       signInWithOAuth: async ({ provider, options }: any) => {
-        let destination = "/dashboard";
-        if (options?.redirectTo) {
-          destination = options.redirectTo;
-        }
-        try {
-          const res = await fetch("/api/mock-db", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "auth",
-              method: "signInWithPassword",
-              payload: {
-                email: "google_user@vaylo.ai",
-                password: "password123",
-              },
-            }),
-          });
-          const result = await res.json();
-          if (result?.data?.session?.token) {
-            document.cookie = `mock-session-id=${result.data.session.token}; path=/; max-age=31536000`;
-          }
-          window.location.href = destination;
-        } catch (e) {
-          window.location.href = destination;
-        }
-        return { data: null, error: null };
+        const redirectUri = encodeURIComponent(options?.redirectTo || (typeof window !== "undefined" ? `${window.location.origin}/api/auth/callback` : "https://resume-builder-murex-mu.vercel.app/api/auth/callback"));
+        const googleClientId = "240368883912-158f4vu7a813eorkkd34os6f54l73jpe.apps.googleusercontent.com";
+        const promptParam = options?.queryParams?.prompt || "select_account";
+        const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=${promptParam}`;
+
+        return {
+          data: { url: oauthUrl, provider: "google" },
+          error: null,
+        };
       },
       signInWithOtp: async ({ phone }: any) => {
         try {
