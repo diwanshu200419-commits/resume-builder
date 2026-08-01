@@ -52,9 +52,9 @@ export async function GET(request: NextRequest) {
     const day30 = new Date(now_ts - 30 * 86400000).toISOString();
 
     const usersArr = users || [];
-    const activeToday = usersArr.filter(u => u.last_seen_at && u.last_seen_at >= day1).length;
-    const active7d = usersArr.filter(u => u.last_seen_at && u.last_seen_at >= day7).length;
-    const active30d = usersArr.filter(u => u.last_seen_at && u.last_seen_at >= day30).length;
+    const activeToday = usersArr.filter((u: any) => u.last_seen_at && u.last_seen_at >= day1).length;
+    const active7d = usersArr.filter((u: any) => u.last_seen_at && u.last_seen_at >= day7).length;
+    const active30d = usersArr.filter((u: any) => u.last_seen_at && u.last_seen_at >= day30).length;
 
     return NextResponse.json({
       users: usersArr,

@@ -295,6 +295,7 @@ export default function InterviewPrepPage() {
         setQuestions(DEFAULT_QUESTIONS);
         setLoading(false);
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (loading) {

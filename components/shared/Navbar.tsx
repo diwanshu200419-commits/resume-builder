@@ -139,9 +139,12 @@ export function Navbar() {
                   className="flex items-center gap-2.5 p-1.5 rounded-xl border border-border bg-surface hover:bg-surface-elevated transition-all"
                 >
                   {user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={user.user_metadata.avatar_url || user.user_metadata.picture}
                       alt="Profile"
+                      width={28}
+                      height={28}
                       className="w-7 h-7 rounded-full object-cover border border-accent/40"
                     />
                   ) : (
