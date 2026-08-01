@@ -62,10 +62,19 @@ export default function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+
+      const loginPromise = supabase.auth.signInWithPassword({
         email: finalEmail.toLowerCase(),
         password: finalPassword,
       });
+
+      const timeoutPromise = new Promise<{ data: any; error: any }>((_, reject) =>
+        setTimeout(() => reject(new Error("Connection timed out. Please ensure NEXT_PUBLIC_SUPABASE_ANON_KEY is updated in Vercel for all environments (Production, Preview, Development) and Redeploy.")), 8000)
+      );
+
+      const res: any = await Promise.race([loginPromise, timeoutPromise]);
+      const data = res?.data;
+      const loginError = res?.error;
 
       if (loginError) {
         setLoading(false);
@@ -73,7 +82,7 @@ export default function LoginForm() {
         return;
       }
 
-      document.cookie = `mock-session-id=${data.user?.id || `user-${Date.now()}`}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `mock-session-id=${data?.user?.id || `user-${Date.now()}`}; path=/; max-age=31536000; SameSite=Lax`;
       const targetUrl = redirect && redirect !== "/login" ? redirect : "/dashboard";
       const target = targetUrl.includes("?") ? `${targetUrl}&authed=true` : `${targetUrl}?authed=true`;
       window.location.href = target;

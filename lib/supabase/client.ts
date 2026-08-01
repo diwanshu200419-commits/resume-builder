@@ -8,19 +8,19 @@ let clientInstance: any = null;
 export function createClient() {
   if (clientInstance) return clientInstance;
 
-  if (supabaseUrl && supabaseAnonKey) {
-    try {
-      clientInstance = createBrowserClient(supabaseUrl, supabaseAnonKey);
-      return clientInstance;
-    } catch (e) {
-      console.warn("Failed to initialize Supabase browser client:", e);
-    }
-  }
+  const url = supabaseUrl && !supabaseUrl.includes("aBcDe") 
+    ? supabaseUrl 
+    : "https://ofirvweirnjgsyyedkci.supabase.co";
 
-  // Fallback if env vars are missing
-  clientInstance = createBrowserClient(
-    supabaseUrl,
-    supabaseAnonKey || "dummy-anon-key-set-env-var"
-  );
-  return clientInstance;
+  const key = supabaseAnonKey && supabaseAnonKey.length > 20 
+    ? supabaseAnonKey 
+    : "missing-anon-key";
+
+  try {
+    clientInstance = createBrowserClient(url, key);
+    return clientInstance;
+  } catch (e) {
+    console.error("Error creating browser client:", e);
+    return createBrowserClient("https://ofirvweirnjgsyyedkci.supabase.co", "missing-anon-key");
+  }
 }
