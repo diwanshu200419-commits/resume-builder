@@ -7,22 +7,9 @@ export async function getUser() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) return user;
-  } catch {}
-
-  // Cookie session fallback
-  try {
-    const cookieStore = cookies();
-    const mockCookie = cookieStore.get("mock-session-id")?.value;
-    const sbAuthCookie = cookieStore.getAll().find(c => c.name.includes("auth-token") || c.name.includes("session"))?.value;
-
-    if (mockCookie || sbAuthCookie) {
-      return {
-        id: mockCookie || "candidate-session-id",
-        email: "candidate@vaylo.ai",
-        user_metadata: { full_name: "Vaylo Candidate" },
-      } as any;
-    }
-  } catch {}
+  } catch (err) {
+    console.error("[auth] getUser failed:", err);
+  }
 
   return null;
 }
@@ -33,22 +20,40 @@ export async function getProfile(): Promise<Profile | null> {
 
   try {
     const supabase = await createClient();
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .single();
 
-    if (profile) return profile as Profile;
-  } catch {}
+    if (error) {
+      // Log the actual error instead of silently swallowing it
+      console.error("[auth] getProfile DB error:", error.message, "| code:", error.code);
+    }
 
-  // Default fallback profile object
+    if (profile) return profile as Profile;
+  } catch (err) {
+    console.error("[auth] getProfile exception:", err);
+  }
+
+  // Fallback: return a FREE-tier profile, not "pro".
+  // This ensures that if the DB is unreachable or the profiles table
+  // doesn't exist, users get the most restrictive tier — not a free pass.
+  // The fallback plan MUST be "free" so tier-gated features are blocked.
   return {
-    id: user.id || "candidate-session-id",
-    email: user.email || "candidate@vaylo.ai",
-    full_name: user.user_metadata?.full_name || "Vaylo Candidate",
+    id: user.id,
+    email: user.email || null,
+    full_name: user.user_metadata?.full_name || null,
     avatar_url: user.user_metadata?.avatar_url || null,
-    plan: "pro",
+    plan: "free",
+    role: null,
+    analyses_used: 0,
+    analyses_limit: 2,
+    current_period_start: null,
+    current_period_end: null,
+    subscription_status: null,
+    total_ats_checks: 0,
+    total_resume_downloads: 0,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   } as Profile;
