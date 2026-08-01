@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         .eq("id", userId);
 
       if (profileError) {
-        console.warn("Profile update warning:", profileError.message);
+        console.warn("[admin/verify] Profile update warning:", profileError.message);
       }
 
       // Atomic Step 2: Update payment_requests.status
@@ -68,11 +68,15 @@ export async function POST(request: NextRequest) {
           });
 
         if (requestId) {
-          await updateQuery.eq("id", requestId);
+          const { error } = await updateQuery.eq("id", requestId);
+          if (error) console.warn("[admin/verify] payment_requests update error:", error.message);
         } else {
-          await updateQuery.eq("user_id", userId).eq("status", "pending");
+          const { error } = await updateQuery.eq("user_id", userId).eq("status", "pending");
+          if (error) console.warn("[admin/verify] payment_requests fallback update error:", error.message);
         }
-      } catch {}
+      } catch (err) {
+        console.warn("[admin/verify] payment_requests update exception:", err);
+      }
 
       // Mock DB fallback update
       try {
@@ -84,7 +88,9 @@ export async function POST(request: NextRequest) {
             payload: { userId, plan, expiresAt },
           }),
         });
-      } catch {}
+      } catch (err) {
+        console.warn("[admin/verify] mock-db sync warning:", err);
+      }
 
       return NextResponse.json({
         success: true,
@@ -108,11 +114,15 @@ export async function POST(request: NextRequest) {
           });
 
         if (requestId) {
-          await updateQuery.eq("id", requestId);
+          const { error } = await updateQuery.eq("id", requestId);
+          if (error) console.warn("[admin/verify] payment_requests reject error:", error.message);
         } else {
-          await updateQuery.eq("user_id", userId).eq("status", "pending");
+          const { error } = await updateQuery.eq("user_id", userId).eq("status", "pending");
+          if (error) console.warn("[admin/verify] payment_requests fallback reject error:", error.message);
         }
-      } catch {}
+      } catch (err) {
+        console.warn("[admin/verify] payment_requests reject exception:", err);
+      }
 
       return NextResponse.json({
         success: true,

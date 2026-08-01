@@ -14,23 +14,29 @@ export async function GET() {
   // Update last_seen_at on every profile fetch (tracks active users for admin dashboard)
   try {
     const supabase = await createClient();
-    await supabase
+    const { error } = await supabase
       .from("profiles")
       .update({ last_seen_at: new Date().toISOString() })
       .eq("id", profile.id);
-  } catch {}
+    if (error) console.warn("[api/profile] last_seen_at update error:", error.message);
+  } catch (err) {
+    console.warn("[api/profile] last_seen_at update exception:", err);
+  }
 
   // Also fetch user's payment requests for /settings billing history
   let paymentRequests: any[] = [];
   try {
     const supabase = await createClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("payment_requests")
       .select("id, requested_plan, amount_claimed, utr_number, status, created_at")
       .eq("user_id", profile.id)
       .order("created_at", { ascending: false });
+    if (error) console.warn("[api/profile] payment_requests fetch error:", error.message);
     if (data) paymentRequests = data;
-  } catch {}
+  } catch (err) {
+    console.warn("[api/profile] payment_requests fetch exception:", err);
+  }
 
   return NextResponse.json({
     profile,
