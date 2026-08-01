@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DollarSign, TrendingUp, Sparkles, Copy, Check, Briefcase, Award, MessageSquare } from "lucide-react";
+import { DollarSign, TrendingUp, Sparkles, Copy, Check, Briefcase, Award, MessageSquare, Info } from "lucide-react";
 
 export default function SalaryCalculatorPage() {
   const [jobTitle, setJobTitle] = useState("Software Engineer");

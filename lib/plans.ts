@@ -37,7 +37,7 @@ export function canDeployPortfolio(profile: Profile | null): boolean {
 export function canAccessSTARVoice(profile: Profile | null): boolean {
   const plan = getEffectivePlan(profile);
   if (plan === "free" || plan === "pro") {
-    return (profile.total_resume_downloads || 0) < 5;
+    return (profile?.total_resume_downloads || 0) < 5;
   }
   return true;
 }
