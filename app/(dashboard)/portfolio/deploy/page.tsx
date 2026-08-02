@@ -13,15 +13,10 @@ import {
   RotateCcw,
   ExternalLink,
   CheckCircle2,
-  Clock,
   BarChart3,
-  Server,
   Terminal,
-  Lock,
-  Sparkles,
   Copy,
   Check,
-  AlertCircle,
   TrendingUp,
   Download,
   Users,
@@ -44,7 +39,7 @@ const INITIAL_VERSIONS: DeploymentVersion[] = [
     deployedAt: "2026-07-29 11:20",
     status: "Production",
     commitHash: "7da5d6e",
-    url: "https://shiv.vaylo.ai",
+    url: "/p/shiv",
   },
   {
     id: "v-102",
@@ -52,7 +47,7 @@ const INITIAL_VERSIONS: DeploymentVersion[] = [
     deployedAt: "2026-07-28 14:15",
     status: "Rolled Back",
     commitHash: "e197d75",
-    url: "https://v102-shiv.vaylo.ai",
+    url: "/p/shiv",
   },
 ];
 
@@ -65,6 +60,7 @@ export default function PortfolioDeployPage() {
   const [versions, setVersions] = useState<DeploymentVersion[]>(INITIAL_VERSIONS);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
+  const instantLiveUrl = `/p/${subdomain}`;
   const fullSubdomainUrl = `https://${subdomain}.vaylo.ai`;
 
   const handleDeploy = () => {
@@ -73,6 +69,7 @@ export default function PortfolioDeployPage() {
       "🚀 Initializing Vaylo Cloud Edge Pipeline...",
       "📦 Packaging Tailwind CSS Dark Mode HTML Bundle...",
       "⚡ Optimizing Open Graph & Meta Tags for SEO...",
+      "🔗 Live Working Route Generated: " + instantLiveUrl,
       "🌐 Provisioning Edge Subdomain: " + fullSubdomainUrl,
       "🔒 Issuing Let's Encrypt TLS/SSL Certificate...",
       "✅ Deployment Successful! Live on Vaylo Global Edge CDN.",
@@ -85,7 +82,7 @@ export default function PortfolioDeployPage() {
         deployedAt: new Date().toISOString().replace("T", " ").slice(0, 16),
         status: "Production",
         commitHash: Math.random().toString(36).substring(2, 9),
-        url: fullSubdomainUrl,
+        url: instantLiveUrl,
       };
 
       setVersions((prev) => [
@@ -114,10 +111,10 @@ export default function PortfolioDeployPage() {
         </div>
         <h1 className="text-3xl font-extrabold flex items-center gap-2 tracking-tight">
           <Globe className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-          One-Click Portfolio Deployment & Custom Domain
+          One-Click Portfolio Deployment &amp; Custom Domain
         </h1>
         <p className="text-text-secondary text-sm mt-1">
-          Publish your AI Portfolio to your free Vaylo subdomain (`username.vaylo.ai`) or connect a custom domain with automatic SSL certificates.
+          Publish your AI Portfolio to your free Vaylo handle or custom subdomain with automatic SSL certificates.
         </p>
       </div>
 
@@ -142,8 +139,8 @@ export default function PortfolioDeployPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <Card className="lg:col-span-6 border-border bg-surface shadow-lg">
               <CardHeader>
-                <CardTitle className="text-base">Subdomain Configuration</CardTitle>
-                <CardDescription className="text-xs">Claim your free username.vaylo.ai domain.</CardDescription>
+                <CardTitle className="text-base">Subdomain &amp; Live Route Configuration</CardTitle>
+                <CardDescription className="text-xs">Claim your free username handle and view your instant live portfolio.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -158,17 +155,35 @@ export default function PortfolioDeployPage() {
                   </div>
                 </div>
 
+                {/* Instant Working Live Route Box */}
+                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Instant Live Working Link (Click to Open)
+                    </span>
+                    <Button variant="outline" size="sm" onClick={() => handleCopy(window.location.origin + instantLiveUrl)} className="gap-1 text-xs border-emerald-500/30 text-emerald-300">
+                      {copiedUrl === window.location.origin + instantLiveUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      Copy
+                    </Button>
+                  </div>
+                  <a
+                    href={instantLiveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-bold text-emerald-400 flex items-center gap-1 hover:underline break-all"
+                  >
+                    {instantLiveUrl} <ExternalLink className="w-3 h-3 shrink-0" />
+                  </a>
+                </div>
+
+                {/* Custom DNS Subdomain Box */}
                 <div className="p-3.5 rounded-xl bg-surface-elevated border border-border flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] text-text-muted font-medium">Production URL</p>
+                    <p className="text-[11px] text-text-muted font-medium">Custom Subdomain (Requires CNAME DNS)</p>
                     <a href={fullSubdomainUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 hover:underline">
                       {fullSubdomainUrl} <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => handleCopy(fullSubdomainUrl)} className="gap-1 text-xs">
-                    {copiedUrl === fullSubdomainUrl ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedUrl === fullSubdomainUrl ? "Copied" : "Copy"}
-                  </Button>
                 </div>
 
                 <Button
@@ -185,7 +200,7 @@ export default function PortfolioDeployPage() {
             <Card className="lg:col-span-6 border-border bg-slate-950 text-slate-100 shadow-xl p-5 font-mono text-xs space-y-3">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                 <span className="flex items-center gap-2 text-indigo-400 font-bold">
-                  <Terminal className="w-4 h-4" /> Build & Edge Deploy Logs
+                  <Terminal className="w-4 h-4" /> Build &amp; Edge Deploy Logs
                 </span>
                 <Badge variant="outline" className="border-slate-800 text-slate-400 text-[10px]">
                   SSL Active
@@ -194,7 +209,7 @@ export default function PortfolioDeployPage() {
 
               <div className="h-44 overflow-y-auto space-y-1.5 text-[11px] leading-relaxed text-slate-300">
                 {deployLogs.length === 0 ? (
-                  <p className="text-slate-500 italic">Click 'Deploy Latest Portfolio' to view real-time build logs.</p>
+                  <p className="text-slate-500 italic">Click &apos;Deploy Latest Portfolio&apos; to view real-time build logs.</p>
                 ) : (
                   deployLogs.map((log, i) => (
                     <div key={i} className="flex items-start gap-2">
@@ -286,7 +301,7 @@ export default function PortfolioDeployPage() {
         <TabsContent value="versions" className="space-y-6">
           <Card className="border-border bg-surface shadow-lg">
             <CardHeader>
-              <CardTitle className="text-base">Deployment History & Rollback</CardTitle>
+              <CardTitle className="text-base">Deployment History &amp; Rollback</CardTitle>
               <CardDescription className="text-xs">Instant 1-click rollback to any previous version of your portfolio.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
