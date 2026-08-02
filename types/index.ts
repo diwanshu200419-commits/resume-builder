@@ -46,6 +46,11 @@ export interface Analysis {
   skills_match_score?: number | null;
   readability_score?: number | null;
   format_score?: number | null;
+  metric_density_score?: number | null;
+  verb_strength_score?: number | null;
+  seniority_match_score?: number | null;
+  structural_flags?: string[] | null;
+  metric_density_feedback?: string | null;
   optimized_keyword_match?: number | null;
   optimized_skills_match?: number | null;
   optimized_readability?: number | null;
@@ -61,6 +66,11 @@ export interface ATSAnalysisResult {
   skills_match_score: number;
   readability_score: number;
   format_score: number;
+  metric_density_score?: number;
+  verb_strength_score?: number;
+  seniority_match_score?: number;
+  structural_flags?: string[];
+  metric_density_feedback?: string;
   missing_keywords: string[];
   missing_skills: string[];
   weak_sections: string[];
