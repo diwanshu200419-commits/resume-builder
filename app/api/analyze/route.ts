@@ -183,6 +183,16 @@ export async function POST(request: NextRequest) {
             status: "done",
           })
           .eq("id", dbAnalysisId);
+
+        // Increment user's analyses_used count
+        const serviceClient = await createServiceClient();
+        await serviceClient
+          .from("profiles")
+          .update({
+            analyses_used: (profile.analyses_used || 0) + 1,
+            total_ats_checks: (profile.total_ats_checks || 0) + 1,
+          })
+          .eq("id", profile.id);
       } catch {}
 
       return NextResponse.json({ id: dbAnalysisId });
