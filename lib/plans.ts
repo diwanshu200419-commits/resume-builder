@@ -12,11 +12,7 @@ export function getEffectivePlan(profile: Profile | null): PlanType {
 }
 
 /**
- * PART 3 — Admin test-mode override.
- * If the requester is an admin AND has a test_plan_override cookie,
- * returns the override plan instead of their real plan.
- * For all non-admins: ignores any override and returns real plan.
- * The real profiles.plan in the DB never changes.
+ * Admin test-mode override.
  */
 export function getEffectivePlanWithOverride(
   profile: Profile | null,
@@ -24,7 +20,6 @@ export function getEffectivePlanWithOverride(
 ): PlanType {
   if (!profile) return "free";
 
-  // Only admins can use test override
   if (profile.role === "admin" && testOverride) {
     const o = testOverride.toLowerCase().replace("-", "_");
     if (o === "pro" || o === "premium" || o === "career_pack" || o === "free") {
@@ -35,11 +30,12 @@ export function getEffectivePlanWithOverride(
   return getEffectivePlan(profile);
 }
 
-// Server-side admin guard — checks role column, not email list
+// Server-side admin guard
 export function isAdmin(profile: Profile | null): boolean {
   return profile?.role === "admin";
 }
 
+// ATS Scan Limit: Free = 2 scans, Pro/Premium/Career Pack = Unlimited
 export function canAnalyze(profile: Profile | null): boolean {
   if (!profile) return true;
   const plan = getEffectivePlan(profile);
@@ -47,62 +43,86 @@ export function canAnalyze(profile: Profile | null): boolean {
   return true;
 }
 
+// Auto-Fix Bullet Rewriter: Pro+
 export function canAutoFix(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "pro" || plan === "premium" || plan === "career_pack";
 }
 
+// PDF Export: Free (with watermark) / Pro+ (no watermark)
 export function canDownloadPDF(profile: Profile | null): boolean {
   return true;
 }
 
+// DOCX Export: Pro+
 export function canDownloadDOCX(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "pro" || plan === "premium" || plan === "career_pack";
 }
 
+// Portfolio Live Subdomain Deploy: Premium+
 export function canDeployPortfolio(profile: Profile | null): boolean {
   const plan = getEffectivePlan(profile);
   return plan === "premium" || plan === "career_pack";
 }
 
+// Portfolio Custom Domain (CNAME): Career Pack
+export function canUseCustomDomain(profile: Profile | null): boolean {
+  const plan = getEffectivePlan(profile);
+  return plan === "career_pack";
+}
+
+// STAR Voice Interview Practice: Premium+
 export function canAccessSTARVoice(profile: Profile | null): boolean {
   const plan = getEffectivePlan(profile);
-  if (plan === "free" || plan === "pro") {
-    return (profile?.total_resume_downloads || 0) < 5;
-  }
-  return true;
+  return plan === "premium" || plan === "career_pack";
 }
 
+// Recruiter Eye-Screen Simulation: Premium+
 export function canAccessRecruiterSim(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "premium" || plan === "career_pack";
 }
 
+// Hiring Odds Predictor: Premium+
 export function canAccessHiringPredictor(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "premium" || plan === "career_pack";
 }
 
+// Branding Studio & LinkedIn: Pro+
 export function canAccessBrandingStudio(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "pro" || plan === "premium" || plan === "career_pack";
 }
 
+// Salary Negotiator: Premium+
 export function canAccessSalaryNegotiator(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "premium" || plan === "career_pack";
 }
 
+// Multi-Language Translator: Pro+
 export function canAccessTranslator(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "pro" || plan === "premium" || plan === "career_pack";
 }
 
+// AI Cover Letter Generator: Pro+
 export function canAccessCoverLetter(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "pro" || plan === "premium" || plan === "career_pack";
 }
 
+// Premium All-Access
 export function canAccessPremium(profile: Profile | null): boolean {
   const plan = getEffectivePlan(profile);
   return plan === "premium" || plan === "career_pack";
 }
 
 export function canDownload(profile: Profile | null): boolean {
-  return true;
+  const plan = getEffectivePlan(profile);
+  return plan === "pro" || plan === "premium" || plan === "career_pack";
 }
 
 export function getRemainingAnalyses(profile: Profile | null): number | "unlimited" {
