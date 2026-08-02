@@ -1,13 +1,14 @@
 // app/api/fix-bullet/route.ts
 //
-// Vaylo AI — FAANG-Level ATS Bullet-Point Rewriter
-// Rewrites a single weak resume bullet into a high-impact, ATS-optimized bullet
-// using Gemini, with X-Y-Z formula alignment & seniority scope detection,
+// Vaylo AI — Domain-Agnostic FAANG-Level ATS Bullet-Point Rewriter
+// Dynamically classifies JD into 1 of 12 domains (Finance, HR, Sales, IT, PM, Ops, etc.)
+// and selects domain-specific action verb banks and metric definitions,
 // without fabricating experience, skills, or metrics.
 
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
+import { detectDomainFromJD, getDomainPromptContext, DOMAIN_VOCABULARY } from "@/lib/domain-intelligence";
 
 // ---------- Request validation ----------
 
@@ -20,7 +21,7 @@ const RequestSchema = z.object({
 
 type FixBulletRequest = z.infer<typeof RequestSchema>;
 
-// ---------- Response shape (what we expect back from Gemini) ----------
+// ---------- Response shape ----------
 
 const GeminiResultSchema = z.object({
   original: z.string(),
@@ -35,24 +36,29 @@ const GeminiResultSchema = z.object({
 
 type GeminiResult = z.infer<typeof GeminiResultSchema>;
 
-// ---------- Prompt ----------
+// ---------- Prompt Builder ----------
 
-const SYSTEM_PROMPT = `You are Vaylo AI's FAANG-level resume optimization engine. Your job is to rewrite weak, passive resume bullet points into high-impact, ATS-optimized bullets — WITHOUT inventing experience, skills, metrics, or outcomes the candidate did not provide.
+function buildSystemPrompt(domain: ReturnType<typeof detectDomainFromJD>): string {
+  const domainContext = getDomainPromptContext(domain);
+
+  return `You are Vaylo AI's domain-agnostic resume optimization engine. Your job is to rewrite weak, passive resume bullet points into high-impact, ATS-optimized bullets — WITHOUT inventing experience, skills, metrics, or outcomes the candidate did not provide.
+
+${domainContext}
 
 STRICT ANTI-FABRICATION RULES:
 1. NEVER fabricate numbers, percentages, team sizes, or outcomes. If the original bullet has no quantifiable metric, do NOT insert one. Instead, strengthen the verb and clarify scope/impact using only what's stated.
 2. Only incorporate missing keywords from the job description if they describe something the candidate's original bullet already implies. Do not add skills or tools the candidate never mentioned anywhere in the resume.
-3. Replace weak/passive openers ("Worked on", "Responsible for", "Helped with", "Attended") with strong action verbs appropriate to seniority (e.g., Architected, Engineered, Led, Optimized, Spearheaded) — but only if the verb accurately reflects the candidate's actual role in the original bullet.
+3. Replace weak/passive openers ("Worked on", "Responsible for", "Helped with", "Attended") with domain-appropriate strong action verbs.
 4. Keep each rewritten bullet to one line, ATS-plain-text formatting (no special characters, no emojis, no tables).
 5. If a bullet cannot be meaningfully improved without fabrication, return it with minimal changes and flag it in "needs_input".
 
-FAANG-LEVEL REWRITING RULES:
+DOMAIN & FAANG-LEVEL REWRITING RULES:
 6. Prefer Google's X-Y-Z formula where the original bullet supports it:
    "Accomplished [X] as measured by [Y], by doing [Z]."
-   Do not force this structure if it requires fabricating Y (metric) — only restructure toward X-Y-Z using metrics/scope already present or derivable from candidate context.
-7. When a bullet lacks scope/scale language and the target role is Senior+, flag via needs_input asking the candidate whether they can provide team size, budget, or system scale — do not invent it.
-8. Detect and flag (via needs_input) bullets that are activity-described rather than outcome-described (e.g., "Attended sprint planning" — an activity, not an outcome).
-9. If target company/JD suggests a specific culture (e.g., Amazon Leadership Principles, Google scale emphasis), lightly favor terminology consistent with that without overclaiming.
+   Do not force this structure if it requires fabricating Y (metric) — only restructure toward X-Y-Z using metrics/scope already present.
+7. When a bullet lacks scope/scale language and target role is Senior+, flag via needs_input asking whether candidate can provide budget, team size, or volume metrics — do not invent it.
+8. Detect and flag (via needs_input) bullets that are activity-described rather than outcome-described.
+9. Respect target domain vocabulary. For Finance: Audited, Reconciled, Forecasted; for PM: Drove, Launched, Prioritized; for HR: Recruited, Onboarded; for IT: Architected, Engineered.
 
 OUTPUT FORMAT (strict JSON):
 {
@@ -65,15 +71,18 @@ OUTPUT FORMAT (strict JSON):
   "seniority_match": "junior" | "appropriate" | "senior",
   "needs_input": string | null
 }`;
+}
 
-function buildUserMessage(input: FixBulletRequest): string {
-  return `Original bullet: "${input.original_bullet}"
+function buildUserMessage(input: FixBulletRequest, domain: string): string {
+  return `Target Domain: ${domain}
 
-Job description (for keyword & culture alignment): "${input.job_description}"
+Original bullet: "${input.original_bullet}"
+
+Job description: "${input.job_description}"
 
 Missing keywords identified by ATS scan: ${JSON.stringify(input.missing_keywords)}
 
-Full resume context (use ONLY to verify claims, do not invent beyond this):
+Full resume context:
 "${input.candidate_full_resume_context}"
 
 Rewrite this bullet following the system rules. Return JSON only.`;
@@ -91,13 +100,14 @@ function getGeminiClient(): GoogleGenerativeAI {
   return genAI;
 }
 
-// ---------- In-memory fallback cache ----------
+// ---------- Cache ----------
 
 const FALLBACK_CACHE_MAX = 200;
 const fallbackCache = new Map<string, GeminiResult>();
 
-function cacheKey(input: FixBulletRequest): string {
+function cacheKey(input: FixBulletRequest, domain: string): string {
   return JSON.stringify({
+    d: domain,
     b: input.original_bullet,
     j: input.job_description,
     k: input.missing_keywords,
@@ -116,20 +126,23 @@ function setCache(key: string, value: GeminiResult) {
 
 async function callGeminiForRewrite(
   input: FixBulletRequest,
+  domain: ReturnType<typeof detectDomainFromJD>,
   attempt = 1
 ): Promise<GeminiResult> {
   try {
     const client = getGeminiClient();
+    const systemInstruction = buildSystemPrompt(domain);
+
     const model = client.getGenerativeModel({
       model: "gemini-1.5-flash",
       generationConfig: {
         responseMimeType: "application/json",
         temperature: 0.3,
       },
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction,
     });
 
-    const result = await model.generateContent(buildUserMessage(input));
+    const result = await model.generateContent(buildUserMessage(input, domain));
     const rawText = result.response.text();
 
     let parsed: unknown;
@@ -143,21 +156,22 @@ async function callGeminiForRewrite(
     const validated = GeminiResultSchema.safeParse(parsed);
     if (!validated.success) {
       if (attempt < 2) {
-        return callGeminiForRewrite(input, attempt + 1);
+        return callGeminiForRewrite(input, domain, attempt + 1);
       }
       throw new Error(`Gemini response failed schema validation: ${validated.error.message}`);
     }
 
     return validated.data;
   } catch (err) {
-    // Intelligent Fallback Engine
+    // Intelligent Domain-Aware Fallback Engine
+    const vocab = DOMAIN_VOCABULARY[domain] || DOMAIN_VOCABULARY["General/Other"];
     const words = input.original_bullet.split(" ");
     let firstWord = words[0] || "Worked";
     let verbs_changed = false;
-    const hasMetric = /\b\d+([%kM]|ms|s)?\b/i.test(input.original_bullet);
+    const hasMetric = vocab.metricKeywords.test(input.original_bullet);
 
-    if (["Worked", "Responsible", "Helped", "Assisted", "Handled", "Did", "Attended"].some(w => firstWord.toLowerCase().startsWith(w.toLowerCase()))) {
-      firstWord = "Engineered";
+    if (["Worked", "Responsible", "Helped", "Assisted", "Handled", "Did", "Attended", "Checked"].some(w => firstWord.toLowerCase().startsWith(w.toLowerCase()))) {
+      firstWord = vocab.strongVerbs[0] || "Spearheaded";
       verbs_changed = true;
     }
 
@@ -170,7 +184,7 @@ async function callGeminiForRewrite(
       metrics_added: false,
       has_measurable_outcome: hasMetric,
       seniority_match: "appropriate",
-      needs_input: hasMetric ? null : "Consider adding quantifiable impact (%, latency, users) if available.",
+      needs_input: hasMetric ? null : `Consider adding quantifiable impact (${vocab.sampleMetricTypes.slice(0, 2).join(", ")}) if available.`,
     };
   }
 }
@@ -182,10 +196,7 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON body" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
   const parsedInput = RequestSchema.safeParse(body);
@@ -197,21 +208,22 @@ export async function POST(req: NextRequest) {
   }
 
   const input = parsedInput.data;
-  const key = cacheKey(input);
+  const domain = detectDomainFromJD(input.job_description);
+  const key = cacheKey(input, domain);
 
   const cached = fallbackCache.get(key);
   if (cached) {
-    return NextResponse.json({ ...cached, cached: true }, { status: 200 });
+    return NextResponse.json({ ...cached, domain, cached: true }, { status: 200 });
   }
 
   try {
-    const rewriteResult = await callGeminiForRewrite(input);
+    const rewriteResult = await callGeminiForRewrite(input, domain);
     setCache(key, rewriteResult);
-    return NextResponse.json({ ...rewriteResult, cached: false }, { status: 200 });
+    return NextResponse.json({ ...rewriteResult, domain, cached: false }, { status: 200 });
   } catch (err) {
     console.error("[/api/fix-bullet] Gemini call failed:", err);
 
-    const fallback: GeminiResult & { cached: boolean; error: true } = {
+    const fallback: GeminiResult & { domain: string; cached: boolean; error: true } = {
       original: input.original_bullet,
       rewritten: input.original_bullet,
       verbs_changed: false,
@@ -219,8 +231,8 @@ export async function POST(req: NextRequest) {
       metrics_added: false,
       has_measurable_outcome: false,
       seniority_match: "appropriate",
-      needs_input:
-        "AI rewrite temporarily unavailable — this bullet was left unchanged. Try again.",
+      needs_input: "AI rewrite temporarily unavailable — this bullet was left unchanged.",
+      domain,
       cached: false,
       error: true,
     };
@@ -230,8 +242,5 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json(
-    { error: "Method not allowed. Use POST." },
-    { status: 405 }
-  );
+  return NextResponse.json({ error: "Method not allowed. Use POST." }, { status: 405 });
 }

@@ -119,6 +119,57 @@ Requirements:
 - 3+ years of product management experience at a tech startup or SaaS company.
 - Strong technical fluency to communicate effectively with software architects and AI engineers.`,
   },
+  finance_accounting: {
+    title: "Finance & Accounting Manager (CA)",
+    icon: Target,
+    jd: `Finance & Accounting Manager (Chartered Accountant)
+
+We are hiring a Finance & Accounting Manager to oversee financial planning, statutory audits, tax compliance, and budget variance analysis.
+
+Key Responsibilities:
+- Direct financial reporting, P&L consolidation, balance sheet reconciliations, and cash flow forecasting.
+- Ensure strict compliance with GST, Income Tax, ROC filings, and statutory audit regulations.
+- Perform monthly budget vs actual variance analysis to identify cost reduction opportunities.
+- Manage internal controls, vendor payments, and banking relationship management.
+
+Requirements:
+- CA / CPA / MBA Finance with 3+ years of post-qualification experience.
+- Deep expertise in SAP, Tally, Excel financial modeling, and Ind AS / IFRS accounting standards.`,
+  },
+  marketing_growth: {
+    title: "Marketing & Growth Manager",
+    icon: Sparkles,
+    jd: `Marketing & Growth Manager
+
+We are looking for a Growth Marketer to lead performance marketing, SEO, CAC optimization, and multi-channel acquisition.
+
+Key Responsibilities:
+- Design and execute performance marketing campaigns across Google Ads, Meta, and LinkedIn with a focus on ROAS.
+- Optimize conversion funnels, landing page A/B tests, and organic SEO ranking for core target keywords.
+- Manage marketing budgets, CAC/LTV payback periods, and multi-touch attribution modeling.
+- Lead content marketing and email drip campaigns to drive subscriber retention.
+
+Requirements:
+- 3+ years in digital marketing, growth hacking, or performance marketing at a B2B/B2C SaaS company.
+- Mastery of Google Analytics 4, SEMrush, HubSpot, and Meta Ads Manager.`,
+  },
+  hr_people: {
+    title: "HR & Talent Acquisition Lead",
+    icon: Bot,
+    jd: `HR & Talent Acquisition Lead
+
+We are seeking an HR Lead to manage end-to-end recruitment, employee onboarding, performance management, and HR policy compliance.
+
+Key Responsibilities:
+- Lead full-cycle recruitment across technical and business functions to reduce average time-to-hire.
+- Architect employee onboarding programs, performance appraisal frameworks, and eNPS feedback loops.
+- Manage employee relations, HR policy implementation, and statutory compliance (PF, ESI, Labor Laws).
+- Drive employer branding and candidate experience initiatives.
+
+Requirements:
+- MBA HR or equivalent with 3+ years of experience in Talent Acquisition or HR Business Partner roles.
+- Familiarity with ATS platforms (Greenhouse, Lever, Darwinbox) and LinkedIn Recruiter.`,
+  },
 };
 
 interface JDInputProps {

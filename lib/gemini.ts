@@ -197,34 +197,37 @@ function calculateKeywordMatch(resumeText: string, jobDescription: string): numb
   return Math.min(100, Math.round((matches / Math.max(1, Math.min(wordCount, 50))) * 100));
 }
 
-// 1. Metric Density Evaluator
-function calculateMetricDensity(resumeText: string) {
+import { detectDomainFromJD, getDomainPromptContext, DOMAIN_VOCABULARY, DomainCategory } from "./domain-intelligence";
+
+// 1. Metric Density Evaluator (Domain-Aware)
+function calculateMetricDensity(resumeText: string, domain: DomainCategory) {
+  const vocab = DOMAIN_VOCABULARY[domain] || DOMAIN_VOCABULARY["General/Other"];
   const lines = resumeText
     .split("\n")
     .map((l) => l.trim())
     .filter((l) => l.length > 15 && (l.startsWith("•") || l.startsWith("-") || l.startsWith("*") || /^\d+\./.test(l) || l.includes("  ")));
 
   const total = Math.max(1, lines.length);
-  const metricRegex = /\b\d+([%kM]|ms|s)?\b|\$\d+|\b\d+\s*(users|customers|clients|projects|teams|million|billion|k|x|percent|hrs|hours|days|weeks|months|yr|years)\b/i;
-  
   let count = 0;
   for (const line of lines) {
-    if (metricRegex.test(line)) {
+    if (vocab.metricKeywords.test(line)) {
       count++;
     }
   }
 
   const score = Math.min(100, Math.round((count / total) * 100));
   const targetCount = Math.ceil(total * 0.7);
-  const feedback = `${count} of ${total} bullets have measurable impact — aim for ${targetCount}+ for FAANG standard.`;
+  const sampleMetric = vocab.sampleMetricTypes[0] || "quantifiable metrics";
+  const feedback = `${count} of ${total} bullets contain ${domain} metrics — aim for ${targetCount}+ (${sampleMetric}) for top recruiter impact.`;
 
   return { score, count, total, feedback };
 }
 
-// 2. Action Verb Strength Evaluator
-function calculateVerbStrength(resumeText: string) {
-  const weakVerbs = ["worked", "responsible", "helped", "assisted", "handled", "participated", "attended", "tasked", "did", "supported", "involved"];
-  const strongVerbs = ["architected", "drove", "led", "reduced", "scaled", "spearheaded", "engineered", "pioneered", "tripled", "cut", "launched", "optimized", "automated", "streamlined", "maximized", "surpassed", "eliminated", "orchestrated", "accelerated", "overhauled"];
+// 2. Action Verb Strength Evaluator (Domain-Aware)
+function calculateVerbStrength(resumeText: string, domain: DomainCategory) {
+  const vocab = DOMAIN_VOCABULARY[domain] || DOMAIN_VOCABULARY["General/Other"];
+  const weakVerbs = vocab.weakVerbs;
+  const strongVerbs = vocab.strongVerbs;
 
   const lines = resumeText
     .split("\n")
@@ -237,8 +240,8 @@ function calculateVerbStrength(resumeText: string) {
 
   for (const line of lines) {
     const firstWord = (line.split(" ")[0] || "").toLowerCase();
-    if (strongVerbs.includes(firstWord)) strongCount++;
-    else if (weakVerbs.includes(firstWord)) weakCount++;
+    if (strongVerbs.some((v) => firstWord.startsWith(v))) strongCount++;
+    else if (weakVerbs.some((v) => firstWord.startsWith(v))) weakCount++;
   }
 
   const neutralCount = Math.max(0, total - strongCount - weakCount);
@@ -253,8 +256,8 @@ function calculateSeniorityMatch(resumeText: string, jobDescription: string) {
   const jdLower = jobDescription.toLowerCase();
   const resLower = resumeText.toLowerCase();
 
-  const isSeniorJd = /\b(senior|staff|principal|lead|head|architect|manager)\b/i.test(jdLower);
-  const hasSeniorSignals = /\b(architected|spearheaded|mentored|cross-functional|system design|roadmap|technical direction|strategy|on-call|design review|budget)\b/i.test(resLower);
+  const isSeniorJd = /\b(senior|staff|principal|lead|head|architect|manager|ca|director)\b/i.test(jdLower);
+  const hasSeniorSignals = /\b(architected|spearheaded|mentored|cross-functional|system design|roadmap|technical direction|strategy|on-call|design review|budget|reconciled|audited|forecasted)\b/i.test(resLower);
 
   if (isSeniorJd) {
     return hasSeniorSignals ? 92 : 58;
@@ -273,8 +276,8 @@ function detectStructuralFlags(resumeText: string) {
   if (!/\b(20\d\d|19\d\d)\b/.test(resumeText)) {
     flags.push("Missing employment/education dates.");
   }
-  if (!resumeText.toLowerCase().includes("skills")) {
-    flags.push("Missing dedicated Technical Skills section.");
+  if (!resumeText.toLowerCase().includes("skills") && !resumeText.toLowerCase().includes("expertise")) {
+    flags.push("Missing dedicated Skills / Core Competencies section.");
   }
   if (!resumeText.toLowerCase().includes("summary") && lines.length > 50) {
     flags.push("No professional summary headline found.");
@@ -288,17 +291,18 @@ function hybridATSScore(
   jobDescription: string,
   aiScore: number
 ): ATSAnalysisResult {
+  const domain = detectDomainFromJD(jobDescription);
   const keywordScore = calculateKeywordMatch(resumeText, jobDescription);
-  const metricDensity = calculateMetricDensity(resumeText);
-  const verbStrength = calculateVerbStrength(resumeText);
+  const metricDensity = calculateMetricDensity(resumeText, domain);
+  const verbStrength = calculateVerbStrength(resumeText, domain);
   const seniorityMatchScore = calculateSeniorityMatch(resumeText, jobDescription);
   const structuralFlags = detectStructuralFlags(resumeText);
 
-  const skillsScore = resumeText.toLowerCase().includes("skills") ? 80 : 50;
+  const skillsScore = (resumeText.toLowerCase().includes("skills") || resumeText.toLowerCase().includes("competencies")) ? 80 : 50;
   const formatScore = structuralFlags.length === 0 ? 90 : Math.max(50, 90 - structuralFlags.length * 10);
   const readabilityScore = resumeText.split("\n").length > 10 ? 88 : 60;
 
-  // FAANG Weighted Overall Score
+  // Domain Weighted Overall Score
   const weightedOverall = Math.round(
     keywordScore * 0.40 +
     metricDensity.score * 0.25 +
@@ -335,7 +339,8 @@ export async function analyzeATS(
   resumeText: string,
   jobDescription: string
 ): Promise<ATSAnalysisResult> {
-  const cacheKey = getCacheKey("ats-faang", resumeText, jobDescription);
+  const domain = detectDomainFromJD(jobDescription);
+  const cacheKey = getCacheKey(`ats-${domain}`, resumeText, jobDescription);
   const cached = getFromCache<ATSAnalysisResult>(cacheKey);
   if (cached) {
     return cached;
@@ -347,11 +352,14 @@ export async function analyzeATS(
       .slice(0, 15000);
     
     const safeJobDesc = jobDescription.slice(0, 10000);
+    const domainContext = getDomainPromptContext(domain);
     
     const aiResult = await withRetryAndTimeout(async () => {
       const prompt = `${MASTER_SYSTEM_PROMPT}
 
-TASK: FAANG ATS Score Evaluation
+${domainContext}
+
+TASK: ATS Score Evaluation for ${domain} role.
 
 RESUME TEXT:
 ${safeResumeText}
@@ -370,7 +378,7 @@ RESPONSE FORMAT (STRICT VALID JSON ONLY):
   "missing_skills": ["skill1", "skill2"],
   "weak_sections": ["Professional Summary", "Experience", "Skills"],
   "match_percentage": <number 0-100>,
-  "summary_analysis": "<2-3 sentences of strict FAANG recruiter feedback>"
+  "summary_analysis": "<2-3 sentences of recruiter feedback tailored to ${domain}>"
 }`;
       
       const result = await getModel().generateContent(prompt);

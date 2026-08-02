@@ -5,6 +5,7 @@ import { analyzeATS, optimizeResume } from "@/lib/gemini";
 import { canAnalyze } from "@/lib/plans";
 import { analyzeSchema } from "@/lib/validations";
 import { withRateLimit } from "@/lib/rate-limit";
+import { detectDomainFromJD } from "@/lib/domain-intelligence";
 
 // In-memory fallback cache for high availability
 const analysisCache = new Map<string, any>();
