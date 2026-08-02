@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { PlanBadge } from "@/components/shared/PlanBadge";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "@/types";
 import {
@@ -83,10 +84,11 @@ export function Sidebar({ profile }: { profile: Profile }) {
 
   const NavContent = () => (
     <>
-      <div className="p-6 border-b border-border">
+      <div className="p-6 border-b border-border flex items-center justify-between">
         <Link href="/" className="text-xl font-bold text-text-primary">
           Vaylo<span className="text-accent">AI</span>
         </Link>
+        <NotificationCenter />
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
