@@ -170,6 +170,40 @@ Requirements:
 - MBA HR or equivalent with 3+ years of experience in Talent Acquisition or HR Business Partner roles.
 - Familiarity with ATS platforms (Greenhouse, Lever, Darwinbox) and LinkedIn Recruiter.`,
   },
+  operations_supply: {
+    title: "Operations & Supply Chain Lead",
+    icon: ShieldCheck,
+    jd: `Operations & Supply Chain Lead
+
+We are hiring an Operations & Supply Chain Lead to manage logistics operations, vendor procurement, SLA compliance, and warehouse throughput.
+
+Key Responsibilities:
+- Streamline end-to-end supply chain logistics, inventory replenishment, and order fulfillment SLA metrics.
+- Negotiate vendor contracts, manage SLA compliance, and reduce unit logistics turnaround time.
+- Implement inventory accuracy tracking, warehouse management processes, and ERP integrations.
+- Optimize operational expenditure and operational risk mitigation protocols.
+
+Requirements:
+- 3+ years of experience in Operations, Supply Chain, Logistics, or Procurement.
+- Deep expertise in ERP systems (SAP, Oracle, Zoho Inventory), Excel analytics, and process standardization.`,
+  },
+  sales_bd: {
+    title: "Sales & Business Development Manager",
+    icon: Target,
+    jd: `Sales & Business Development Manager
+
+We are hiring a Sales & BD Manager to drive enterprise B2B sales, pipeline generation, contract negotiations, and revenue targets.
+
+Key Responsibilities:
+- Prospect, pitch, and close high-value B2B enterprise accounts to consistently surpass quarterly sales quotas.
+- Build and maintain a qualified sales pipeline across target industry verticals.
+- Conduct contract negotiations, client presentations, and key account renewal strategies.
+- Partner with marketing to optimize lead qualification and conversion rates.
+
+Requirements:
+- 3+ years of B2B sales, enterprise account executive, or business development experience.
+- Track record of quota achievement, pipeline management in Salesforce/HubSpot, and deal closing.`,
+  },
 };
 
 interface JDInputProps {
