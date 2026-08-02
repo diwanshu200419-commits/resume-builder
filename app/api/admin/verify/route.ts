@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logAdminAction } from "@/lib/admin-audit";
 
 export const dynamic = "force-dynamic";
 
-// requireAdmin: checks profile.role === 'admin' — NOT a hardcoded email list
 async function requireAdmin() {
   const profile = await getProfile();
   if (!profile) return null;
-  // role-based check (Option A — correct)
   if (profile.role === "admin") return profile;
   return null;
 }
@@ -32,8 +31,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createServiceClient();
 
+    // Fetch target user email for audit log
+    const { data: targetProfile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", userId)
+      .single();
+
+    const targetEmail = targetProfile?.email || "unknown@user.com";
+
     if (status === "approve") {
-      // 30 days for Pro/Premium; null (lifetime) for Career Pack
       let expiresAt: string | null = null;
       if (plan === "pro" || plan === "premium") {
         const date = new Date();
@@ -41,7 +48,7 @@ export async function POST(request: NextRequest) {
         expiresAt = date.toISOString();
       }
 
-      // Atomic Step 1: Update profiles.plan
+      // Step 1: Update profiles.plan
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -57,7 +64,7 @@ export async function POST(request: NextRequest) {
         console.warn("[admin/verify] Profile update warning:", profileError.message);
       }
 
-      // Atomic Step 2: Update payment_requests.status
+      // Step 2: Update payment_requests.status
       try {
         const updateQuery = supabase
           .from("payment_requests")
@@ -68,29 +75,23 @@ export async function POST(request: NextRequest) {
           });
 
         if (requestId) {
-          const { error } = await updateQuery.eq("id", requestId);
-          if (error) console.warn("[admin/verify] payment_requests update error:", error.message);
+          await updateQuery.eq("id", requestId);
         } else {
-          const { error } = await updateQuery.eq("user_id", userId).eq("status", "pending");
-          if (error) console.warn("[admin/verify] payment_requests fallback update error:", error.message);
+          await updateQuery.eq("user_id", userId).eq("status", "pending");
         }
       } catch (err) {
         console.warn("[admin/verify] payment_requests update exception:", err);
       }
 
-      // Mock DB fallback update
-      try {
-        await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/mock-db`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "approve_payment_request",
-            payload: { userId, plan, expiresAt },
-          }),
-        });
-      } catch (err) {
-        console.warn("[admin/verify] mock-db sync warning:", err);
-      }
+      // Step 3: Write to admin_audit_log
+      await logAdminAction({
+        adminUserId: adminProfile.id,
+        adminEmail: adminProfile.email || "admin@system.com",
+        action: "approve_payment",
+        targetUserId: userId,
+        targetEmail: targetEmail,
+        details: { plan, requestId, expiresAt },
+      });
 
       return NextResponse.json({
         success: true,
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
         }`,
       });
     } else {
-      // Reject: only touches payment_requests, never profiles.plan
+      // Reject
       try {
         const updateQuery = supabase
           .from("payment_requests")
@@ -114,15 +115,23 @@ export async function POST(request: NextRequest) {
           });
 
         if (requestId) {
-          const { error } = await updateQuery.eq("id", requestId);
-          if (error) console.warn("[admin/verify] payment_requests reject error:", error.message);
+          await updateQuery.eq("id", requestId);
         } else {
-          const { error } = await updateQuery.eq("user_id", userId).eq("status", "pending");
-          if (error) console.warn("[admin/verify] payment_requests fallback reject error:", error.message);
+          await updateQuery.eq("user_id", userId).eq("status", "pending");
         }
       } catch (err) {
         console.warn("[admin/verify] payment_requests reject exception:", err);
       }
+
+      // Write to admin_audit_log
+      await logAdminAction({
+        adminUserId: adminProfile.id,
+        adminEmail: adminProfile.email || "admin@system.com",
+        action: "reject_payment",
+        targetUserId: userId,
+        targetEmail: targetEmail,
+        details: { reason: reason || "Verification failed", requestId },
+      });
 
       return NextResponse.json({
         success: true,
