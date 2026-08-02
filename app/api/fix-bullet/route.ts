@@ -134,7 +134,7 @@ async function callGeminiForRewrite(
     const systemInstruction = buildSystemPrompt(domain);
 
     const model = client.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json",
         temperature: 0.3,
