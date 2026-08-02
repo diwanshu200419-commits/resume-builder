@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ofirvweirnjgsyyedkci.supabase.co";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9maXJ2d2Vpcm5qZ3N5eWVka2NpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDc4NzYxMSwiZXhwIjoyMTAwMzYzNjExfQ.fJKKqs0Psp0Tg3IBN5UTQsRY4EpjungqCspoJdI3AG0";
 
 export async function createClient() {
   const cookieStore = cookies();
@@ -30,8 +31,7 @@ export async function createClient() {
 }
 
 export async function createServiceClient() {
-  const key = serviceRoleKey || supabaseAnonKey;
-  return createSupabaseJsClient(supabaseUrl, key, {
+  return createSupabaseJsClient(supabaseUrl, serviceRoleKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
