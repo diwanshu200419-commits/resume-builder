@@ -365,6 +365,7 @@ export default function AdminPage() {
       {activeTab === "overview" && (
         <div className="space-y-6">
           {/* Top Real Financial Aggregates */}
+          {/* Top Real Financial Aggregates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-border bg-surface shadow-sm">
               <CardHeader className="pb-2">
@@ -434,6 +435,48 @@ export default function AdminPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Career Pack Profitability Signal */}
+          <Card className="border-border bg-surface shadow-sm border-l-4 border-l-amber-500">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-bold text-text-primary flex items-center justify-between">
+                <span>CAREER PACK ECONOMICS &amp; PROFITABILITY</span>
+                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">
+                  Lifetime Revenue vs AI Cost
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs pt-1">
+                <div>
+                  <span className="text-[10px] text-text-muted font-semibold uppercase">Lifetime Revenue</span>
+                  <p className="text-xl font-extrabold text-amber-400 mt-0.5">
+                    ₹{overview.careerPackRevenueTotal || 0}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-text-muted font-semibold uppercase">Career Pack AI Cost (This Month)</span>
+                  <p className="text-xl font-extrabold text-emerald-400 mt-0.5">
+                    ₹{analytics.aiUsage?.estimatedCostThisMonthInr || 0}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-text-muted font-semibold uppercase">Avg AI Cost / User</span>
+                  <p className="text-xl font-extrabold text-indigo-400 mt-0.5">
+                    ₹{overview.planCounts?.career_pack ? (Number(analytics.aiUsage?.estimatedCostTotalInr || 0) / overview.planCounts.career_pack).toFixed(2) : "0.00"}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-text-muted font-semibold uppercase">Revenue-to-AI-Cost Ratio</span>
+                  <p className="text-xl font-extrabold text-sky-400 mt-0.5">
+                    {analytics.aiUsage?.estimatedCostTotalInr > 0
+                      ? `${(overview.careerPackRevenueTotal / Number(analytics.aiUsage.estimatedCostTotalInr)).toFixed(1)}x`
+                      : "High Margin"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Activity Momentum Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

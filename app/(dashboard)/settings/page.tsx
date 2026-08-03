@@ -138,23 +138,62 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-4 rounded-xl border border-border bg-surface-elevated">
-              <p className="text-xs text-text-muted font-semibold uppercase">ATS Scans Used</p>
+              <p className="text-xs text-text-muted font-semibold uppercase">ATS Scans Allowance</p>
               <p className="text-2xl font-extrabold text-text-primary mt-1">
-                {profile?.plan === "free" ? `${profile.analyses_used || 0} / 2` : "Unlimited"}
+                {profile?.plan === "free" ? `${profile.analyses_used || 0} / 2` : profile?.plan === "career_pack" ? "50 / Day" : "50 / Day"}
               </p>
-              {profile?.plan === "free" && (
-                <p className="text-xs text-text-muted mt-1">
-                  {Math.max(0, 2 - (profile?.analyses_used || 0))} free scans remaining this month
-                </p>
-              )}
+              <p className="text-xs text-text-muted mt-1">
+                {profile?.plan === "free"
+                  ? `${Math.max(0, 2 - (profile?.analyses_used || 0))} free scans remaining`
+                  : "Daily allowance resets automatically at 00:00 UTC"}
+              </p>
             </div>
 
             <div className="p-4 rounded-xl border border-border bg-surface-elevated">
-              <p className="text-xs text-text-muted font-semibold uppercase">PDF / DOCX Exports</p>
+              <p className="text-xs text-text-muted font-semibold uppercase">AI Fair-Use Allowance</p>
               <p className="text-2xl font-extrabold text-emerald-400 mt-1">
-                {profile?.plan === "free" ? "Unlocked" : "Unlimited"}
+                {profile?.plan === "career_pack" ? "Lifetime Access" : profile?.plan === "premium" ? "High Allowance" : profile?.plan === "pro" ? "Standard Allowance" : "Basic Allowance"}
               </p>
-              <p className="text-xs text-text-muted mt-1">100% unlocked PDF &amp; Word exports</p>
+              <p className="text-xs text-text-muted mt-1">
+                {profile?.plan === "career_pack"
+                  ? "Permanent feature access with 50 AI scans & rewrites/day"
+                  : "Fair-use limits protect service quality"}
+              </p>
+            </div>
+          </div>
+
+          {/* Daily Usage Table */}
+          <div className="p-4 rounded-xl border border-border bg-surface-elevated space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-text-primary">Daily AI Feature Limits &amp; Allowance</span>
+              <span className="text-[10px] text-text-muted font-mono">Resets daily at 00:00 UTC</span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div className="p-2.5 rounded-lg bg-surface border border-border">
+                <span className="text-[10px] text-text-muted block font-semibold">ATS Resume Scans</span>
+                <span className="font-bold text-text-primary">
+                  {profile?.plan === "free" ? `${profile.analyses_used || 0}/2` : "Active (50/day)"}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-surface border border-border">
+                <span className="text-[10px] text-text-muted block font-semibold">Bullet Rewrites</span>
+                <span className="font-bold text-text-primary">
+                  {profile?.plan === "free" ? "Pro Tier" : "Active (100/day)"}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-surface border border-border">
+                <span className="text-[10px] text-text-muted block font-semibold">LinkedIn Optimizations</span>
+                <span className="font-bold text-text-primary">
+                  {profile?.plan === "free" ? "Pro Tier" : "Active (25/day)"}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-surface border border-border">
+                <span className="text-[10px] text-text-muted block font-semibold">AI Career Coach</span>
+                <span className="font-bold text-text-primary">
+                  {profile?.plan === "free" ? "Premium Tier" : "Active (50/day)"}
+                </span>
+              </div>
             </div>
           </div>
         </CardContent>

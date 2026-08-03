@@ -62,16 +62,18 @@ const plans = [
     name: "Career Pack",
     price: "₹499",
     period: "/one-time",
-    description: "Full service placement help",
+    description: "Lifetime AI Career Toolkit",
     features: [
       { text: "Everything in Premium", included: true },
-      { text: "24/7 Priority support channel", included: true },
-      { text: "Exclusive premium templates", included: true },
-      { text: "Deep AI analysis processing", included: true },
-      { text: "Guaranteed recruiter format", included: true },
-      { text: "Lifetime roadmap access", included: true },
+      { text: "Lifetime access to Career Pack features", included: true },
+      { text: "Recruiter-Friendly Premium Templates", included: true },
+      { text: "Advanced Career Analysis", included: true },
+      { text: "Lifetime Career Roadmap Access", included: true },
+      { text: "Portfolio & Personal Branding Tools", included: true },
+      { text: "Higher AI Fair-Use Limits", included: true },
+      { text: "24/7 Priority Support", included: true },
     ],
-    cta: "Get Career Pack",
+    cta: "Get Lifetime Access",
     href: "/checkout/career-pack",
     popular: false,
   },
@@ -98,50 +100,59 @@ export function Pricing() {
               transition={{ delay: i * 0.1 }}
               className={`relative rounded-xl border p-6 ${
                 plan.popular
-                  ? "border-accent bg-surface card-glow scale-105"
+                  ? "border-accent bg-accent/5 shadow-lg shadow-accent/10"
                   : "border-border bg-surface"
               }`}
             >
               {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white border-0">
-                  MOST POPULAR
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white font-bold text-[10px] px-3 py-0.5">
+                  Most popular
                 </Badge>
               )}
 
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-text-primary">{plan.name}</h3>
-                <p className="text-sm text-text-muted mt-1">{plan.description}</p>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-text-primary">{plan.price}</span>
-                  <span className="text-text-muted text-sm">{plan.period}</span>
-                </div>
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-text-primary">{plan.name}</h3>
+                <p className="text-xs text-text-secondary mt-1">{plan.description}</p>
               </div>
 
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((f) => (
-                  <li key={f.text} className="flex items-center gap-2 text-sm">
-                    {f.included ? (
+              <div className="mb-6 flex items-baseline gap-1">
+                <span className="text-3xl font-extrabold text-text-primary">{plan.price}</span>
+                <span className="text-xs text-text-muted">{plan.period}</span>
+              </div>
+
+              <ul className="space-y-3 text-xs mb-8">
+                {plan.features.map((feat) => (
+                  <li key={feat.text} className="flex items-center gap-2">
+                    {feat.included ? (
                       <Check className="w-4 h-4 text-success shrink-0" />
                     ) : (
                       <X className="w-4 h-4 text-text-muted shrink-0" />
                     )}
-                    <span className={f.included ? "text-text-secondary" : "text-text-muted"}>
-                      {f.text}
+                    <span className={feat.included ? "text-text-primary" : "text-text-muted"}>
+                      {feat.text}
                     </span>
                   </li>
                 ))}
               </ul>
 
-              <Link href={plan.href}>
-                <Button
-                  className="w-full"
-                  variant={plan.popular ? "default" : "outline"}
-                >
-                  {plan.cta}
-                </Button>
-              </Link>
+              <Button
+                asChild
+                className={`w-full font-bold ${
+                  plan.popular
+                    ? "bg-accent hover:bg-accent-hover text-white"
+                    : "bg-surface-elevated hover:bg-border text-text-primary border border-border"
+                }`}
+              >
+                <Link href={plan.href}>{plan.cta}</Link>
+              </Button>
             </motion.div>
           ))}
+        </div>
+
+        <div className="text-center mt-10">
+          <p className="text-[11px] text-text-muted font-mono">
+            *AI-powered features are subject to reasonable fair-use and abuse-prevention limits.
+          </p>
         </div>
       </div>
     </section>

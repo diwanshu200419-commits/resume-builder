@@ -3,6 +3,147 @@ import type { Profile } from "@/types";
 
 export type PlanType = "free" | "pro" | "premium" | "career_pack";
 
+export interface PlanConfig {
+  id: PlanType;
+  name: string;
+  priceInr: number;
+  billingType: "free" | "recurring" | "lifetime";
+  periodLabel: string;
+  tagline: string;
+  features: string[];
+  limits: Record<string, number>;
+}
+
+export const PLAN_CONFIG: Record<PlanType, PlanConfig> = {
+  free: {
+    id: "free",
+    name: "Free Tier",
+    priceInr: 0,
+    billingType: "free",
+    periodLabel: "forever",
+    tagline: "Perfect to try Vaylo AI",
+    features: [
+      "2 ATS Resume Scans",
+      "Basic Resume Builder",
+      "Watermark on PDF export",
+    ],
+    limits: {
+      ats_scan: 2,
+      bullet_rewrite: 0,
+      linkedin_optimizer: 0,
+      cover_letter: 0,
+      resume_roast: 0,
+      networking: 0,
+      translation: 0,
+      interview_eval: 0,
+      hiring_readiness: 0,
+      recruiter_simulation: 0,
+      career_roadmap: 0,
+      salary_analysis: 0,
+      portfolio_generation: 0,
+      career_coach: 0,
+    },
+  },
+  pro: {
+    id: "pro",
+    name: "Pro Plan",
+    priceInr: 99,
+    billingType: "recurring",
+    periodLabel: "/month",
+    tagline: "Essential optimization tools",
+    features: [
+      "Unlimited PDF downloads",
+      "Auto-Fix Bullet Rewriter",
+      "LinkedIn Profile Optimizer",
+      "Cover Letter Generator",
+      "No Watermark",
+      "Higher AI Allowance",
+    ],
+    limits: {
+      ats_scan: 30,
+      bullet_rewrite: 50,
+      linkedin_optimizer: 15,
+      cover_letter: 15,
+      resume_roast: 10,
+      networking: 15,
+      translation: 10,
+      interview_eval: 0,
+      hiring_readiness: 0,
+      recruiter_simulation: 0,
+      career_roadmap: 5,
+      salary_analysis: 0,
+      portfolio_generation: 0,
+      career_coach: 20,
+    },
+  },
+  premium: {
+    id: "premium",
+    name: "Premium Plan",
+    priceInr: 299,
+    billingType: "recurring",
+    periodLabel: "/month",
+    tagline: "Complete career copilot",
+    features: [
+      "Everything in Pro",
+      "STAR Voice Interview Practice",
+      "Portfolio Website Generator",
+      "Recruiter Attention Simulator",
+      "Hiring Odds Predictor",
+      "AI Career Mentor",
+    ],
+    limits: {
+      ats_scan: 50,
+      bullet_rewrite: 100,
+      linkedin_optimizer: 25,
+      cover_letter: 25,
+      resume_roast: 20,
+      networking: 30,
+      translation: 15,
+      interview_eval: 20,
+      hiring_readiness: 20,
+      recruiter_simulation: 20,
+      career_roadmap: 10,
+      salary_analysis: 20,
+      portfolio_generation: 10,
+      career_coach: 50,
+    },
+  },
+  career_pack: {
+    id: "career_pack",
+    name: "Career Pack",
+    priceInr: 499,
+    billingType: "lifetime",
+    periodLabel: "one-time",
+    tagline: "Lifetime AI Career Toolkit",
+    features: [
+      "Everything in Premium",
+      "Lifetime access to Career Pack features",
+      "Recruiter-Friendly Premium Templates",
+      "Advanced Career Analysis",
+      "Lifetime Career Roadmap Access",
+      "Portfolio & Personal Branding Tools",
+      "Higher AI Fair-Use Limits",
+      "Priority Support",
+    ],
+    limits: {
+      ats_scan: 50,
+      bullet_rewrite: 100,
+      linkedin_optimizer: 25,
+      cover_letter: 25,
+      resume_roast: 20,
+      networking: 30,
+      translation: 15,
+      interview_eval: 20,
+      hiring_readiness: 20,
+      recruiter_simulation: 20,
+      career_roadmap: 10,
+      salary_analysis: 20,
+      portfolio_generation: 10,
+      career_coach: 50,
+    },
+  },
+};
+
 // Returns the real plan from the DB profile
 export function getEffectivePlan(profile: Profile | null): PlanType {
   if (!profile) return "free";
@@ -35,7 +176,7 @@ export function isAdmin(profile: Profile | null): boolean {
   return profile?.role === "admin";
 }
 
-// ATS Scan Limit: Free = 2 scans, Pro/Premium/Career Pack = Unlimited
+// ATS Scan Limit
 export function canAnalyze(profile: Profile | null): boolean {
   if (!profile) return true;
   const plan = getEffectivePlan(profile);
