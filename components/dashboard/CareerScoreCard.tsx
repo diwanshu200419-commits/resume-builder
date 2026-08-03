@@ -15,10 +15,32 @@ export function CareerScoreCard() {
       .then((data) => {
         setReport(data);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
       });
   }, []);
 
-  if (loading) return <div className="h-48 animate-pulse bg-surface-elevated rounded-xl" />;
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1 border border-border bg-surface rounded-2xl p-6 h-[190px] animate-pulse space-y-4">
+          <div className="h-4 w-32 bg-surface-elevated rounded" />
+          <div className="h-10 w-24 bg-surface-elevated rounded" />
+          <div className="h-2 w-full bg-surface-elevated rounded" />
+        </div>
+        <div className="md:col-span-2 border border-border bg-surface rounded-2xl p-6 h-[190px] animate-pulse space-y-4">
+          <div className="h-4 w-32 bg-surface-elevated rounded" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+            <div className="h-12 bg-surface-elevated rounded" />
+            <div className="h-12 bg-surface-elevated rounded" />
+            <div className="h-12 bg-surface-elevated rounded" />
+            <div className="h-12 bg-surface-elevated rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const defaultCurrent = {
     overall_score: 75,
@@ -44,7 +66,7 @@ export function CareerScoreCard() {
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-bold text-text-primary">{current.overall_score}</span>
             <span className="text-sm text-success font-medium flex items-center gap-0.5">
-              <TrendingUp className="w-3 h-3" /> {report.growth}
+              <TrendingUp className="w-3 h-3" /> {growth}
             </span>
           </div>
           <Progress value={current.overall_score} className="h-2 mt-4" />
