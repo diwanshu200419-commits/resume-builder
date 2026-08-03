@@ -77,7 +77,12 @@ ALTER TABLE public.ai_usage_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.system_errors ENABLE ROW LEVEL SECURITY;
 
--- Disable public access to admin_audit_log, ai_usage_logs, system_errors
+-- Clean up existing policies if re-running
+DROP POLICY IF EXISTS admin_audit_log_admin_read ON public.admin_audit_log;
+DROP POLICY IF EXISTS ai_usage_logs_admin_read ON public.ai_usage_logs;
+DROP POLICY IF EXISTS system_errors_admin_read ON public.system_errors;
+
+-- Admin read-only RLS policies
 CREATE POLICY admin_audit_log_admin_read ON public.admin_audit_log
   FOR SELECT
   USING (
@@ -95,5 +100,3 @@ CREATE POLICY system_errors_admin_read ON public.system_errors
   USING (
     (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
   );
-
--- Service role bypasses all policies automatically
