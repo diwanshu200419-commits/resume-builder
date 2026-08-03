@@ -18,16 +18,15 @@ import {
   Activity,
   TrendingUp,
   FlaskConical,
-  Eye,
   BarChart3,
   Server,
-  FileCheck,
   Search,
-  UserCheck,
   AlertTriangle,
-  ArrowUpRight,
   SlidersHorizontal,
   History,
+  AlertCircle,
+  RotateCcw,
+  Calendar,
   Lock,
 } from "lucide-react";
 
@@ -65,6 +64,16 @@ interface AuditLog {
   action: string;
   target_email: string | null;
   details: Record<string, any>;
+  metadata?: Record<string, any>;
+  created_at: string;
+}
+
+interface SystemError {
+  id: string;
+  service: string;
+  route: string;
+  error_code: string;
+  safe_message: string;
   created_at: string;
 }
 
@@ -75,45 +84,44 @@ const PLAN_COLORS: Record<string, string> = {
   free: "bg-surface-elevated text-text-muted border border-border",
 };
 
-const TEST_PLAN_OPTIONS = [
-  { value: "real", label: "My Real Plan (Admin)" },
-  { value: "free", label: "🧪 Test as: Free" },
-  { value: "pro", label: "🧪 Test as: Pro" },
-  { value: "premium", label: "🧪 Test as: Premium" },
-  { value: "career_pack", label: "🧪 Test as: Career Pack" },
-];
-
 export default function AdminPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [unauthorized, setUnauthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "payments" | "analytics" | "health" | "audit">("overview");
+  const [lastUpdated, setLastUpdated] = useState<string>("");
 
-  // User tab filters & sorting
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "users" | "payments" | "analytics" | "health" | "audit" | "errors"
+  >("overview");
+
+  // User directory filters & pagination
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [activityFilter, setActivityFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"created" | "active" | "scans">("created");
 
   // Payment tab sub-filter
   const [paymentSubTab, setPaymentSubTab] = useState<"pending" | "history">("pending");
   const [paymentSearch, setPaymentSearch] = useState("");
 
-  // Actions state
+  // Drawer / Action State
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [actionType, setActionType] = useState<"change_plan" | "extend" | "expire" | "reset_usage">("change_plan");
   const [manualPlan, setManualPlan] = useState("pro");
   const [overrideReason, setOverrideReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  const [testOverride, setTestOverride] = useState<string>("real");
-  const [settingOverride, setSettingOverride] = useState(false);
-
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/users");
+      const queryParams = new URLSearchParams();
+      if (search) queryParams.set("search", search);
+      if (planFilter !== "all") queryParams.set("plan", planFilter);
+      if (roleFilter !== "all") queryParams.set("role", roleFilter);
+      queryParams.set("sortBy", sortBy);
+
+      const res = await fetch(`/api/admin/users?${queryParams.toString()}`);
       if (res.status === 403 || res.status === 401) {
         setUnauthorized(true);
         return;
@@ -121,6 +129,7 @@ export default function AdminPage() {
       if (res.ok) {
         const json = await res.json();
         setData(json);
+        setLastUpdated(new Date().toLocaleTimeString());
       } else {
         setUnauthorized(true);
       }
@@ -132,33 +141,9 @@ export default function AdminPage() {
     }
   };
 
-  const fetchOverride = async () => {
-    try {
-      const res = await fetch("/api/admin/test-plan-override");
-      if (res.ok) {
-        const d = await res.json();
-        setTestOverride(d.override || "real");
-      }
-    } catch {}
-  };
-
   useEffect(() => {
     fetchData();
-    fetchOverride();
-  }, []);
-
-  const setTestPlan = async (plan: string) => {
-    setSettingOverride(true);
-    try {
-      await fetch("/api/admin/test-plan-override", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
-      });
-      setTestOverride(plan);
-    } catch {}
-    setSettingOverride(false);
-  };
+  }, [planFilter, roleFilter, sortBy]);
 
   const handleApprovePayment = async (userId: string, requestId: string, plan: string) => {
     setActionLoading(true);
@@ -169,7 +154,7 @@ export default function AdminPage() {
         body: JSON.stringify({ userId, requestId, plan, status: "approve" }),
       });
       if (res.ok) {
-        setActionSuccess("Payment approved successfully!");
+        setActionSuccess("Payment approved & user plan activated successfully!");
         fetchData();
       }
     } catch (e) {
@@ -200,7 +185,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleManualOverride = async () => {
+  const handleAdminUserAction = async () => {
     if (!selectedUser) return;
     setActionLoading(true);
     try {
@@ -209,8 +194,9 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: selectedUser.id,
+          actionType,
           newPlan: manualPlan,
-          reason: overrideReason || "Manual admin override",
+          reason: overrideReason || `Admin action: ${actionType}`,
         }),
       });
       const resJson = await res.json();
@@ -258,42 +244,11 @@ export default function AdminPage() {
   const auditLogs: AuditLog[] = data?.auditLogs || [];
   const analytics = data?.analytics || {};
   const systemHealth = data?.systemHealth || {};
+  const systemErrors: SystemError[] = data?.systemErrors || [];
   const flaggedDuplicateUtrs: string[] = data?.flaggedDuplicateUtrs || [];
 
   const pendingPayments = paymentRequests.filter((r) => r.status === "pending");
 
-  // User directory filtering
-  let filteredUsers = users.filter((u) => {
-    if (planFilter !== "all" && u.plan !== planFilter) return false;
-    if (roleFilter !== "all" && (u.role || "user") !== roleFilter) return false;
-    if (activityFilter === "24h") {
-      const c = new Date(Date.now() - 86400000).toISOString();
-      if (!u.last_seen_at || u.last_seen_at < c) return false;
-    } else if (activityFilter === "7d") {
-      const c = new Date(Date.now() - 7 * 86400000).toISOString();
-      if (!u.last_seen_at || u.last_seen_at < c) return false;
-    }
-    if (search) {
-      const q = search.toLowerCase();
-      const matchEmail = (u.email || "").toLowerCase().includes(q);
-      const matchName = (u.full_name || "").toLowerCase().includes(q);
-      if (!matchEmail && !matchName) return false;
-    }
-    return true;
-  });
-
-  // User directory sorting
-  filteredUsers.sort((a, b) => {
-    if (sortBy === "active") {
-      return (b.last_seen_at || "").localeCompare(a.last_seen_at || "");
-    }
-    if (sortBy === "scans") {
-      return (b.total_ats_checks || 0) - (a.total_ats_checks || 0);
-    }
-    return (b.created_at || "").localeCompare(a.created_at || "");
-  });
-
-  // Payment requests filtering
   const filteredPayments = paymentRequests.filter((r) => {
     if (paymentSubTab === "pending" && r.status !== "pending") return false;
     if (paymentSubTab === "history" && r.status === "pending") return false;
@@ -307,67 +262,42 @@ export default function AdminPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto py-6 sm:py-10 space-y-6 px-4 sm:px-6 text-text-primary">
-      {/* Test Mode Banner */}
-      {testOverride && testOverride !== "real" && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-black text-xs font-bold text-center py-2 flex items-center justify-center gap-3 shadow-lg">
-          <FlaskConical className="w-4 h-4" />
-          🧪 ADMIN TEST MODE ACTIVE — Viewing platform as:{" "}
-          <span className="uppercase underline font-extrabold">{testOverride}</span> plan
-          <Button
-            size="sm"
-            className="h-5 px-2 text-[10px] bg-black text-white hover:bg-gray-800 ml-2"
-            onClick={() => setTestPlan("real")}
-          >
-            Exit Test Mode
-          </Button>
-        </div>
-      )}
-
-      {/* Header */}
+    <div className="max-w-7xl mx-auto py-6 sm:py-10 space-y-6 px-4 sm:px-6 text-text-primary min-w-0">
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold flex items-center gap-2 tracking-tight">
-            <ShieldAlert className="w-8 h-8 text-accent" />
-            Vaylo AI SaaS Console
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold flex items-center gap-2 tracking-tight">
+            <ShieldAlert className="w-7 h-7 sm:w-8 sm:h-8 text-accent shrink-0" />
+            Vaylo AI SaaS Founder Console
           </h1>
-          <p className="text-text-secondary mt-1 text-sm">
-            Live user analytics · payment queue · MRR tracking · audit logging · system health
+          <p className="text-text-secondary mt-1 text-xs sm:text-sm">
+            Live Production Data · Zero Mock Analytics · Verified Billing &amp; AI Costs
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Test Plan Selector */}
-          <select
-            value={testOverride}
-            onChange={(e) => setTestPlan(e.target.value)}
-            disabled={settingOverride}
-            className="bg-surface-elevated border border-border text-xs rounded-lg px-3 py-2 text-text-primary font-medium focus:outline-none focus:ring-1 focus:ring-accent"
-          >
-            {TEST_PLAN_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-
-          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="gap-1.5 text-xs">
+          {lastUpdated && (
+            <span className="text-[10px] sm:text-xs text-text-muted font-mono">
+              Last updated: {lastUpdated}
+            </span>
+          )}
+          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="gap-1.5 text-xs font-bold">
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
           </Button>
         </div>
       </div>
 
       {actionSuccess && (
-        <div className="p-3.5 rounded-xl bg-success/10 border border-success/30 text-success text-xs font-semibold flex items-center gap-2">
-          <Check className="w-4 h-4" /> {actionSuccess}
+        <div className="p-3.5 rounded-xl bg-success/10 border border-success/30 text-success text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+          <Check className="w-4 h-4 text-success" /> {actionSuccess}
         </div>
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-1 border-b border-border overflow-x-auto pb-1">
+      <div className="flex items-center gap-1 border-b border-border overflow-x-auto pb-1 scrollbar-none text-xs font-bold">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
             activeTab === "overview" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
           }`}
         >
@@ -376,16 +306,16 @@ export default function AdminPage() {
 
         <button
           onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
             activeTab === "users" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
           }`}
         >
-          <Users className="w-4 h-4" /> User Directory ({users.length})
+          <Users className="w-4 h-4" /> User Directory ({overview.totalUsers || users.length})
         </button>
 
         <button
           onClick={() => setActiveTab("payments")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
             activeTab === "payments" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
           }`}
         >
@@ -394,16 +324,16 @@ export default function AdminPage() {
 
         <button
           onClick={() => setActiveTab("analytics")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
             activeTab === "analytics" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
           }`}
         >
-          <Sparkles className="w-4 h-4" /> Feature Analytics
+          <Sparkles className="w-4 h-4" /> Feature &amp; AI Cost
         </button>
 
         <button
           onClick={() => setActiveTab("health")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
             activeTab === "health" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
           }`}
         >
@@ -412,25 +342,34 @@ export default function AdminPage() {
 
         <button
           onClick={() => setActiveTab("audit")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
             activeTab === "audit" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
           }`}
         >
           <History className="w-4 h-4" /> Audit Logs ({auditLogs.length})
         </button>
+
+        <button
+          onClick={() => setActiveTab("errors")}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
+            activeTab === "errors" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          <AlertCircle className="w-4 h-4" /> System Errors ({systemErrors.length})
+        </button>
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* TAB 1: OVERVIEW & MRR */}
+      {/* TAB 1: REAL OVERVIEW & MRR */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          {/* Top Aggregates Grid */}
+          {/* Top Real Financial Aggregates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="border-border bg-surface">
+            <Card className="border-border bg-surface shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-                  <span>Total Users (All-Time)</span>
+                  <span>Total Users (Real Database)</span>
                   <Users className="w-4 h-4 text-accent" />
                 </CardTitle>
               </CardHeader>
@@ -444,118 +383,113 @@ export default function AdminPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-border bg-surface">
+            <Card className="border-border bg-surface shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-                  <span>MRR Run-Rate</span>
+                  <span>MRR (Active Recurring Only)</span>
                   <TrendingUp className="w-4 h-4 text-success" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-extrabold text-success">₹{overview.mrrEquivalent || 0}</div>
-                <div className="text-[11px] text-text-muted mt-2">
-                  + ₹{overview.careerPackRevenueTotal || 0} Career Pack One-Time
+                <div className="text-3xl font-extrabold text-success">
+                  ₹{overview.mrrEquivalent || 0}
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-surface">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-                  <span>Approved Revenue (This Month)</span>
-                  <CreditCard className="w-4 h-4 text-purple-500" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-extrabold">₹{overview.revenueThisMonth || 0}</div>
-                <div className="text-[11px] text-text-muted mt-2">
-                  From verified UPI payments
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-surface">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-                  <span>Active Candidates (7d)</span>
-                  <Activity className="w-4 h-4 text-info" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-extrabold">{overview.activity?.active7d || 0}</div>
-                <div className="text-[11px] text-text-muted mt-2 font-mono">
-                  24h: {overview.activity?.activeToday || 0} · 30d: {overview.activity?.active30d || 0}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Secondary Aggregates */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-border bg-surface">
-              <CardHeader>
-                <CardTitle className="text-sm">Signup Momentum</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-secondary">Signups Today</span>
-                  <span className="font-bold font-mono">{overview.signups?.today || 0}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-secondary">Signups This Week</span>
-                  <span className="font-bold font-mono">{overview.signups?.week || 0}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-secondary">Signups This Month</span>
-                  <span className="font-bold font-mono">{overview.signups?.month || 0}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-surface">
-              <CardHeader>
-                <CardTitle className="text-sm">Conversion &amp; Churn Signals</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-secondary">Payment Intent Rate</span>
-                  <span className="font-bold text-success font-mono">{overview.conversionRate || 0}%</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-secondary">Unrenewed Churn (30d)</span>
-                  <span className="font-bold text-danger font-mono">{overview.churn30d || 0} users</span>
-                </div>
-                <p className="text-[11px] text-text-muted leading-relaxed pt-1">
-                  % of registered candidates who submitted a UPI payment reference.
+                <p className="text-[10px] text-text-muted mt-2">
+                  Pro (₹99) &amp; Premium (₹299) active recurring ONLY.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-border bg-surface">
-              <CardHeader>
-                <CardTitle className="text-sm">Fraud &amp; Duplicate Shield</CardTitle>
+            <Card className="border-border bg-surface shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-semibold text-text-secondary flex items-center justify-between">
+                  <span>Lifetime One-Time Revenue</span>
+                  <CreditCard className="w-4 h-4 text-purple-400" />
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-text-secondary">Cross-Account Duplicate UTRs</span>
-                  <Badge variant={flaggedDuplicateUtrs.length > 0 ? "danger" : "outline"} className="text-xs">
-                    {flaggedDuplicateUtrs.length} Flagged
+              <CardContent>
+                <div className="text-3xl font-extrabold text-purple-400">
+                  ₹{overview.careerPackRevenueTotal || 0}
+                </div>
+                <p className="text-[10px] text-text-muted mt-2">
+                  {overview.planCounts?.career_pack || 0} Lifetime Career Pack purchases (₹499).
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border bg-surface shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-semibold text-text-secondary flex items-center justify-between">
+                  <span>Verified Revenue (This Month)</span>
+                  <Activity className="w-4 h-4 text-sky-400" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-extrabold text-sky-400">
+                  ₹{overview.revenueThisMonth || 0}
+                </div>
+                <p className="text-[10px] text-text-muted mt-2 font-mono">
+                  Lifetime Total: ₹{overview.lifetimeVerifiedRevenue || 0}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Activity Momentum Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="border-border bg-surface shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-accent" /> Signup Momentum (Real Database)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between text-xs py-2 border-b border-border">
+                  <span className="text-text-secondary font-medium">New Signups Today (24h)</span>
+                  <span className="font-bold text-text-primary font-mono">{overview.signups?.today || 0}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs py-2 border-b border-border">
+                  <span className="text-text-secondary font-medium">New Signups This Week (7d)</span>
+                  <span className="font-bold text-text-primary font-mono">{overview.signups?.week || 0}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs py-2 border-b border-border">
+                  <span className="text-text-secondary font-medium">New Signups This Month (30d)</span>
+                  <span className="font-bold text-text-primary font-mono">{overview.signups?.month || 0}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs py-2">
+                  <span className="text-text-secondary font-medium">Free → Paid Conversion Rate</span>
+                  <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs font-bold">
+                    {overview.conversionRate || 0}%
                   </Badge>
                 </div>
-                {flaggedDuplicateUtrs.length === 0 ? (
-                  <p className="text-xs text-success flex items-center gap-1 mt-2">
-                    <Check className="w-3.5 h-3.5" /> All submitted UTRs are unique per account.
-                  </p>
-                ) : (
-                  <div className="p-2 rounded bg-danger/10 border border-danger/30 text-[11px] text-danger space-y-1">
-                    <p className="font-bold">Duplicate UTRs detected across accounts:</p>
-                    <ul className="list-disc list-inside font-mono">
-                      {flaggedDuplicateUtrs.map((u) => (
-                        <li key={u}>{u}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-border bg-surface shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-emerald-400" /> Active Candidate Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between text-xs py-2 border-b border-border">
+                  <span className="text-text-secondary font-medium">DAU (Active Last 24 Hours)</span>
+                  <span className="font-bold text-emerald-400 font-mono">{overview.activity?.activeToday || 0}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs py-2 border-b border-border">
+                  <span className="text-text-secondary font-medium">WAU (Active Last 7 Days)</span>
+                  <span className="font-bold text-indigo-400 font-mono">{overview.activity?.active7d || 0}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs py-2 border-b border-border">
+                  <span className="text-text-secondary font-medium">MAU (Active Last 30 Days)</span>
+                  <span className="font-bold text-purple-400 font-mono">{overview.activity?.active30d || 0}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs py-2">
+                  <span className="text-text-secondary font-medium">Pending Verification Queue</span>
+                  <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs font-bold">
+                    {overview.paymentStats?.pending || 0} Pending
+                  </Badge>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -563,27 +497,27 @@ export default function AdminPage() {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* TAB 2: USER DIRECTORY */}
+      {/* TAB 2: REAL USER DIRECTORY */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "users" && (
         <div className="space-y-4">
-          {/* Filter Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-surface p-4 rounded-xl border border-border">
-            <div className="relative col-span-1 sm:col-span-2">
-              <Search className="w-4 h-4 text-text-muted absolute left-3 top-3" />
+          {/* Controls Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-4 rounded-xl border border-border">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
               <Input
-                placeholder="Search email or full name..."
+                placeholder="Search candidate email or full name..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 bg-surface-elevated text-xs"
               />
             </div>
 
-            <div>
+            <div className="flex flex-wrap items-center gap-2">
               <select
                 value={planFilter}
                 onChange={(e) => setPlanFilter(e.target.value)}
-                className="w-full bg-surface-elevated border border-border rounded-lg p-2 text-xs text-text-primary"
+                className="bg-surface-elevated border border-border text-xs rounded-lg px-3 py-2 font-medium"
               >
                 <option value="all">All Plans</option>
                 <option value="free">Free Tier</option>
@@ -591,17 +525,25 @@ export default function AdminPage() {
                 <option value="premium">Premium Plan</option>
                 <option value="career_pack">Career Pack</option>
               </select>
-            </div>
 
-            <div>
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="bg-surface-elevated border border-border text-xs rounded-lg px-3 py-2 font-medium"
+              >
+                <option value="all">All Roles</option>
+                <option value="user">User Candidates</option>
+                <option value="admin">Admins</option>
+              </select>
+
               <select
                 value={sortBy}
                 onChange={(e: any) => setSortBy(e.target.value)}
-                className="w-full bg-surface-elevated border border-border rounded-lg p-2 text-xs text-text-primary font-semibold"
+                className="bg-surface-elevated border border-border text-xs rounded-lg px-3 py-2 font-medium"
               >
                 <option value="created">Sort: Newest Signups</option>
-                <option value="active">Sort: Most Recently Active</option>
-                <option value="scans">Sort: Most ATS Scans Run</option>
+                <option value="active">Sort: Last Active</option>
+                <option value="scans">Sort: Most ATS Scans</option>
               </select>
             </div>
           </div>
@@ -614,21 +556,21 @@ export default function AdminPage() {
                   <th className="py-3 px-4 text-left">Candidate Name / Email</th>
                   <th className="py-3 px-4 text-center">Role</th>
                   <th className="py-3 px-4 text-center">Plan</th>
-                  <th className="py-3 px-4 text-center">Scans</th>
-                  <th className="py-3 px-4 text-center">Signed Up</th>
-                  <th className="py-3 px-4 text-center">Last Active</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-center font-mono">Total Scans</th>
+                  <th className="py-3 px-4 text-center font-mono">Signed Up</th>
+                  <th className="py-3 px-4 text-center font-mono">Last Active</th>
+                  <th className="py-3 px-4 text-right">Manage</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredUsers.length === 0 ? (
+                {users.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-text-muted">
-                      No matching candidate accounts found
+                      No candidate profiles found matching current filters.
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.map((u) => (
+                  users.map((u) => (
                     <tr key={u.id} className="hover:bg-surface-elevated/50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="font-semibold text-text-primary">{u.full_name || "Anonymous Candidate"}</div>
@@ -646,7 +588,7 @@ export default function AdminPage() {
                           {u.plan.toUpperCase()}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center font-mono font-bold">
+                      <td className="py-3 px-4 text-center font-mono font-bold text-accent">
                         {u.total_ats_checks || u.analyses_used || 0}
                       </td>
                       <td className="py-3 px-4 text-center text-text-muted font-mono">
@@ -660,7 +602,7 @@ export default function AdminPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => { setSelectedUser(u); setManualPlan(u.plan); }}
-                          className="h-7 px-2.5 text-[11px] gap-1 border-accent/30 text-accent"
+                          className="h-7 px-2.5 text-[11px] gap-1 border-accent/30 text-accent font-bold"
                         >
                           <SlidersHorizontal className="w-3 h-3" /> Manage
                         </Button>
@@ -675,7 +617,7 @@ export default function AdminPage() {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* TAB 3: PAYMENTS & UTR VERIFICATION */}
+      {/* TAB 3: PAYMENTS & VERIFICATION */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "payments" && (
         <div className="space-y-4">
@@ -708,8 +650,8 @@ export default function AdminPage() {
             />
           </div>
 
-          <div className="rounded-xl border border-border overflow-hidden bg-surface shadow-md">
-            <table className="w-full text-xs">
+          <div className="rounded-xl border border-border overflow-hidden bg-surface shadow-md table-scroll-wrapper">
+            <table className="w-full min-w-[640px] text-xs">
               <thead className="bg-surface-elevated text-text-muted uppercase">
                 <tr>
                   <th className="py-3 px-4 text-left">Candidate</th>
@@ -724,7 +666,7 @@ export default function AdminPage() {
                 {filteredPayments.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-text-muted">
-                      No payment requests found in this view.
+                      No payment requests recorded in this view.
                     </td>
                   </tr>
                 ) : (
@@ -772,7 +714,7 @@ export default function AdminPage() {
                                 size="sm"
                                 disabled={actionLoading}
                                 onClick={() => handleApprovePayment(r.user_id, r.id, r.requested_plan)}
-                                className="h-7 px-2 bg-success hover:bg-success/90 text-white text-[11px]"
+                                className="h-7 px-2 bg-success hover:bg-success/90 text-white text-[11px] font-bold"
                               >
                                 Approve
                               </Button>
@@ -803,60 +745,69 @@ export default function AdminPage() {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* TAB 4: FEATURE ANALYTICS */}
+      {/* TAB 4: REAL FEATURE & AI COST ANALYTICS */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "analytics" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border-border bg-surface">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="border-border bg-surface shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-semibold text-text-secondary">Total ATS Audits Executed</CardTitle>
+                <CardTitle className="text-xs text-text-secondary">Total ATS Resume Scans</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-extrabold">{analytics.totalAtsScans || 0}</div>
+                <div className="text-3xl font-extrabold text-accent">{analytics.totalAtsScans || 0}</div>
+                <p className="text-[11px] text-text-muted mt-1">Average ATS Score: {analytics.avgAtsScore || 0}%</p>
               </CardContent>
             </Card>
 
-            <Card className="border-border bg-surface">
+            <Card className="border-border bg-surface shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-semibold text-text-secondary">Avg Candidate ATS Match Score</CardTitle>
+                <CardTitle className="text-xs text-text-secondary">Logged AI Requests</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-extrabold text-accent">{analytics.avgAtsScore || 68}%</div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-surface">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-semibold text-text-secondary">Est. Monthly Gemini AI Cost</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-extrabold text-success">₹{analytics.estimatedAiCostInr || 0}</div>
-                <div className="text-[10px] text-text-muted mt-1 font-mono">
-                  ~{analytics.estimatedAiCalls || 0} total AI prompts run
+                <div className="text-3xl font-extrabold text-indigo-400">
+                  {analytics.aiUsage?.totalRequests || 0}
                 </div>
+                <p className="text-[11px] text-text-muted mt-1">
+                  Tokens Processed: {(analytics.aiUsage?.totalTokens || 0).toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border bg-surface shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-text-secondary">Estimated Gemini AI Cost</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-extrabold text-emerald-400">
+                  ₹{analytics.aiUsage?.estimatedCostTotalInr || 0}
+                </div>
+                <p className="text-[11px] text-text-muted mt-1">
+                  This Month: ₹{analytics.aiUsage?.estimatedCostThisMonthInr || 0}
+                </p>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="border-border bg-surface">
+          <Card className="border-border bg-surface shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-accent" /> Top Missing Skills Across Candidate Scans
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Market demand signal aggregated across all analyzed resume uploads.
-              </CardDescription>
+              <CardTitle className="text-sm font-bold">Top Missing Skills Aggregation (Real Scans)</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {(analytics.topMissingKeywords || []).map((item: any) => (
-                  <div key={item.keyword} className="p-3 rounded-xl bg-surface-elevated border border-border flex flex-col justify-between">
-                    <span className="font-bold text-xs text-text-primary">{item.keyword}</span>
-                    <span className="text-xs text-accent font-mono mt-2">{item.count} scans missing</span>
-                  </div>
-                ))}
-              </div>
+              {(!analytics.topMissingKeywords || analytics.topMissingKeywords.length === 0) ? (
+                <p className="text-xs text-text-muted py-4">No scan data aggregated yet.</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {analytics.topMissingKeywords.map((item: any) => (
+                    <div key={item.keyword} className="p-3 rounded-xl bg-surface-elevated border border-border text-center space-y-1">
+                      <p className="text-xs font-bold text-text-primary truncate">{item.keyword}</p>
+                      <Badge className="bg-accent/20 text-accent border-accent/30 text-[10px] font-bold">
+                        {item.count} Scans
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -866,50 +817,38 @@ export default function AdminPage() {
       {/* TAB 5: SYSTEM HEALTH */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "health" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-border bg-surface">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Server className="w-5 h-5 text-success" /> Production Infrastructure Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-xs">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-surface-elevated border border-border">
-                <span className="text-text-secondary">Supabase Database</span>
-                <span className="text-success font-bold flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" /> Connected (ofirvweirnjgsyyedkci)
-                </span>
-              </div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card className="border-border bg-surface shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-text-secondary">Database Connection</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-base font-bold text-emerald-400 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  {systemHealth.databaseStatus || "Healthy"}
+                </div>
+                <p className="text-[11px] text-text-muted mt-2 font-mono">
+                  Checked: {systemHealth.lastCheckedAt}
+                </p>
+              </CardContent>
+            </Card>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-surface-elevated border border-border">
-                <span className="text-text-secondary">Subscription Expiry Cron Job</span>
-                <span className="text-success font-bold flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" /> Active (00:00 UTC Daily)
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-lg bg-surface-elevated border border-border">
-                <span className="text-text-secondary">Gemini 1.5 Flash AI Model</span>
-                <span className="text-success font-bold flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" /> Operational
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border bg-surface">
-            <CardHeader>
-              <CardTitle className="text-base">Security &amp; RLS Safeguards</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-xs leading-relaxed text-text-secondary">
-              <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 text-text-primary">
-                🛡️ <strong>Service Role Protection:</strong> Server-side admin routes are protected by <code>isAdmin()</code> role validation and bypass RLS cleanly using the <code>service_role</code> JWT.
-              </div>
-              <div className="p-3 rounded-lg bg-surface-elevated border border-border">
-                🔒 <strong>Database Triggers:</strong> <code>protect_profile_fields()</code> prevents client-side tampering of <code>plan</code> and <code>role</code> columns.
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="border-border bg-surface shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-text-secondary">AI Service Engine</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-base font-bold text-emerald-400 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                  {systemHealth.aiServiceStatus || "Operational"}
+                </div>
+                <p className="text-[11px] text-text-muted mt-2 font-mono">
+                  Checked: {systemHealth.lastCheckedAt}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 
@@ -918,8 +857,8 @@ export default function AdminPage() {
       {/* ------------------------------------------------------------- */}
       {activeTab === "audit" && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-border overflow-hidden bg-surface shadow-md">
-            <table className="w-full text-xs">
+          <div className="rounded-xl border border-border overflow-hidden bg-surface shadow-md table-scroll-wrapper">
+            <table className="w-full min-w-[640px] text-xs">
               <thead className="bg-surface-elevated text-text-muted uppercase">
                 <tr>
                   <th className="py-3 px-4 text-left">Timestamp</th>
@@ -933,7 +872,7 @@ export default function AdminPage() {
                 {auditLogs.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-8 text-center text-text-muted">
-                      No admin audit logs recorded yet. Try performing an admin action!
+                      No administrative actions recorded yet.
                     </td>
                   </tr>
                 ) : (
@@ -946,21 +885,15 @@ export default function AdminPage() {
                         {log.admin_email || "System Admin"}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                          log.action === "approve_payment"
-                            ? "bg-success/20 text-success border border-success/30"
-                            : log.action === "manual_plan_override"
-                            ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
-                            : "bg-danger/20 text-danger border border-danger/30"
-                        }`}>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-accent/20 text-accent border border-accent/30">
                           {log.action}
                         </span>
                       </td>
                       <td className="py-3 px-4 font-mono text-text-primary">
                         {log.target_email || "N/A"}
                       </td>
-                      <td className="py-3 px-4 font-mono text-[11px] text-text-secondary">
-                        {JSON.stringify(log.details)}
+                      <td className="py-3 px-4 font-mono text-[11px] text-text-secondary break-word-safe">
+                        {JSON.stringify(log.details || log.metadata || {})}
                       </td>
                     </tr>
                   ))
@@ -972,41 +905,154 @@ export default function AdminPage() {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* MANUAL PLAN OVERRIDE DRAWER / MODAL */}
+      {/* TAB 7: SYSTEM ERRORS */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === "errors" && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-border overflow-hidden bg-surface shadow-md table-scroll-wrapper">
+            <table className="w-full min-w-[640px] text-xs">
+              <thead className="bg-surface-elevated text-text-muted uppercase">
+                <tr>
+                  <th className="py-3 px-4 text-left">Timestamp</th>
+                  <th className="py-3 px-4 text-left">Service / Route</th>
+                  <th className="py-3 px-4 text-center">Error Code</th>
+                  <th className="py-3 px-4 text-left">Message</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {systemErrors.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-text-muted">
+                      No application errors recorded in this period.
+                    </td>
+                  </tr>
+                ) : (
+                  systemErrors.map((err) => (
+                    <tr key={err.id} className="hover:bg-surface-elevated/50 transition-colors">
+                      <td className="py-3 px-4 font-mono text-text-muted">
+                        {new Date(err.created_at).toLocaleString()}
+                      </td>
+                      <td className="py-3 px-4 font-bold text-text-primary">
+                        {err.service} ({err.route})
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <Badge className="bg-rose-500/20 text-rose-400 border-rose-500/30 text-[10px]">
+                          {err.error_code}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-text-secondary break-word-safe">
+                        {err.safe_message}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* USER MANAGEMENT DRAWER / MODAL */}
       {/* ------------------------------------------------------------- */}
       {selectedUser && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="max-w-md w-full border-border bg-surface shadow-2xl">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <Card className="max-w-lg w-full border-border bg-surface shadow-2xl animate-in zoom-in-95">
+            <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border">
               <div>
-                <CardTitle className="text-base">Manual Plan Override</CardTitle>
-                <CardDescription className="text-xs">
-                  {selectedUser.full_name || selectedUser.email}
+                <CardTitle className="text-base font-bold text-text-primary">User Management Drawer</CardTitle>
+                <CardDescription className="text-xs text-text-muted">
+                  {selectedUser.full_name || "Anonymous Candidate"} ({selectedUser.email})
                 </CardDescription>
               </div>
-              <button onClick={() => setSelectedUser(null)} className="text-text-muted hover:text-text-primary">
+              <button onClick={() => setSelectedUser(null)} className="text-text-muted hover:text-text-primary p-1">
                 <X className="w-5 h-5" />
               </button>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold block mb-1">Target Plan</label>
-                <select
-                  value={manualPlan}
-                  onChange={(e) => setManualPlan(e.target.value)}
-                  className="w-full bg-surface-elevated border border-border rounded-lg p-2.5 text-xs text-text-primary"
-                >
-                  <option value="free">Free Tier</option>
-                  <option value="pro">Pro Plan (₹99)</option>
-                  <option value="premium">Premium Plan (₹299)</option>
-                  <option value="career_pack">Career Pack (₹499)</option>
-                </select>
+            <CardContent className="space-y-4 pt-4 text-xs">
+              <div className="grid grid-cols-2 gap-2 bg-surface-elevated p-3 rounded-xl border border-border">
+                <div>
+                  <span className="text-[10px] text-text-muted font-semibold uppercase">User ID</span>
+                  <p className="font-mono text-[11px] text-text-primary truncate">{selectedUser.id}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-text-muted font-semibold uppercase">Current Plan</span>
+                  <p className="font-bold text-accent">{selectedUser.plan.toUpperCase()}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-text-muted font-semibold uppercase">Signed Up</span>
+                  <p className="font-mono text-text-primary">{new Date(selectedUser.created_at).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-text-muted font-semibold uppercase">Last Active</span>
+                  <p className="font-mono text-text-primary">
+                    {selectedUser.last_seen_at ? new Date(selectedUser.last_seen_at).toLocaleDateString() : "Never"}
+                  </p>
+                </div>
               </div>
 
+              <div className="space-y-2">
+                <label className="text-xs font-bold block">Select Action</label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setActionType("change_plan")}
+                    className={`p-2 rounded-lg text-xs font-semibold border text-left ${
+                      actionType === "change_plan" ? "bg-accent/20 border-accent text-accent" : "border-border text-text-secondary"
+                    }`}
+                  >
+                    Change Plan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActionType("extend")}
+                    className={`p-2 rounded-lg text-xs font-semibold border text-left ${
+                      actionType === "extend" ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : "border-border text-text-secondary"
+                    }`}
+                  >
+                    Extend 30 Days
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActionType("expire")}
+                    className={`p-2 rounded-lg text-xs font-semibold border text-left ${
+                      actionType === "expire" ? "bg-rose-500/20 border-rose-500 text-rose-400" : "border-border text-text-secondary"
+                    }`}
+                  >
+                    Expire Plan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActionType("reset_usage")}
+                    className={`p-2 rounded-lg text-xs font-semibold border text-left ${
+                      actionType === "reset_usage" ? "bg-amber-500/20 border-amber-500 text-amber-400" : "border-border text-text-secondary"
+                    }`}
+                  >
+                    Reset Usage Count
+                  </button>
+                </div>
+              </div>
+
+              {actionType === "change_plan" && (
+                <div>
+                  <label className="text-xs font-semibold block mb-1">Target Plan</label>
+                  <select
+                    value={manualPlan}
+                    onChange={(e) => setManualPlan(e.target.value)}
+                    className="w-full bg-surface-elevated border border-border rounded-lg p-2.5 text-xs text-text-primary"
+                  >
+                    <option value="free">Free Tier</option>
+                    <option value="pro">Pro Plan (₹99)</option>
+                    <option value="premium">Premium Plan (₹299)</option>
+                    <option value="career_pack">Career Pack (₹499)</option>
+                  </select>
+                </div>
+              )}
+
               <div>
-                <label className="text-xs font-semibold block mb-1">Reason for Override (Audit Log)</label>
+                <label className="text-xs font-semibold block mb-1">Reason for Action (Audit Log)</label>
                 <Input
-                  placeholder="e.g. Paid via support chat, GPay delay"
+                  placeholder="e.g. Paid via support chat, extended trial"
                   value={overrideReason}
                   onChange={(e) => setOverrideReason(e.target.value)}
                   className="text-xs bg-surface-elevated"
@@ -1014,19 +1060,15 @@ export default function AdminPage() {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setSelectedUser(null)}
-                >
+                <Button variant="outline" className="flex-1" onClick={() => setSelectedUser(null)}>
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-accent hover:bg-accent-hover text-white font-semibold"
+                  className="flex-1 bg-accent hover:bg-accent-hover text-white font-bold"
                   disabled={actionLoading}
-                  onClick={handleManualOverride}
+                  onClick={handleAdminUserAction}
                 >
-                  {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply Override"}
+                  {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Action"}
                 </Button>
               </div>
             </CardContent>
