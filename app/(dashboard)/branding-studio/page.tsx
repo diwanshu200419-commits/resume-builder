@@ -246,13 +246,18 @@ export default function BrandingStudioPage() {
                     onChange={(e) => setExperienceLevel(e.target.value)}
                     className="w-full bg-surface-elevated border border-border rounded-lg p-2.5 text-xs text-text-primary"
                   >
-                    <option value="Student / Fresher">Student / Fresher</option>
-                    <option value="0–1 year">0–1 year (Junior)</option>
-                    <option value="1–3 years">1–3 years (Mid)</option>
-                    <option value="3–5 years">3–5 years (Senior)</option>
-                    <option value="5–8 years">5–8 years (Lead)</option>
-                    <option value="8–12 years">8–12 years (Manager)</option>
-                    <option value="12+ years / Executive">12+ years / Executive</option>
+                    <option value="Student">Student</option>
+                    <option value="Fresher">Fresher (New Grad)</option>
+                    <option value="0–1 year">0–1 year (Entry Level)</option>
+                    <option value="1–3 years">1–3 years (Junior / Associate)</option>
+                    <option value="3–5 years">3–5 years (Mid-Level)</option>
+                    <option value="5–8 years">5–8 years (Senior Lead)</option>
+                    <option value="8–12 years">8–12 years (Staff / Principal)</option>
+                    <option value="12+ years">12+ years (Industry Veteran)</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Director">Director</option>
+                    <option value="VP">Vice President (VP)</option>
+                    <option value="C-Level / Founder">C-Level / Founder</option>
                   </select>
                 </div>
 

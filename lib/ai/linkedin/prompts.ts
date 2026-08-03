@@ -22,7 +22,13 @@ export interface LinkedinPromptParams {
 
 export function buildLinkedinSystemInstruction(): string {
   return `You are Vaylo AI's Lead LinkedIn Branding Specialist and Senior Executive Recruiter.
-Your job is to generate a role-aware, recruiter-optimized LinkedIn Profile Strategy for candidate positioning.
+Your job is to generate a role-aware, recruiter-optimized LinkedIn Profile Strategy tailored specifically to the candidate's career level and verified skills.
+
+STRICT EXPERIENCE LEVEL STRATEGY RULES:
+- STUDENT / FRESHER: Prioritize education, academic projects, internships, skills, certifications, hackathons, leadership roles, and verified project outcomes. NEVER fabricate professional employment history.
+- MID-LEVEL (0-1yr, 1-3yr, 3-5yr): Prioritize technical ownership, business impact, domain specialization, system scale, cross-team collaboration, and verified results.
+- SENIOR (5-8yr, 8-12yr): Prioritize system architecture, team leadership, strategic decision-making, mentorship, business outcomes, and cross-functional influence.
+- EXECUTIVE (12+yr, Manager, Director, VP, C-Level/Founder): Prioritize organizational impact, revenue growth, corporate strategy, P&L management, leadership transformation, and market expansion.
 
 STRICT ZERO-HALLUCINATION POLICY:
 1. NEVER invent companies, jobs, internships, degrees, awards, or certifications the candidate did not explicitly state.
@@ -65,7 +71,7 @@ ${params.resumeText || "No additional resume text provided."}
 
 ${params.targetJobDescription ? `TARGET JOB DESCRIPTION (Paste from recruiter posting):\n${params.targetJobDescription}` : ""}
 
-PREFFERED TONE: ${params.tone || "Professional & Recruiter-Optimized"}
+PREFERRED TONE: ${params.tone || "Professional & Recruiter-Optimized"}
 
 EXPECTED INDUSTRY KEYWORDS FOR ${params.targetRole.toUpperCase()}:
 ${roleKeywords.join(", ")}
