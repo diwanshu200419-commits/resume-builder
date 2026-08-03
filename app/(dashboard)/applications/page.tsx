@@ -308,14 +308,14 @@ export default function KanbanBoardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold flex items-center gap-2 tracking-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold flex items-center gap-2 tracking-tight break-word-safe">
             Live Job Feed, Internships &amp; Kanban Tracker
           </h1>
-          <p className="text-text-secondary text-sm mt-1">
+          <p className="text-text-secondary text-xs sm:text-sm mt-1">
             Track job applications, browse live FAANG &amp; Internship roles, and configure 1-click real-time AI job alerts.
           </p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 text-xs">
+        <Button onClick={() => setIsAddModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 text-xs w-full sm:w-auto h-9 sm:h-10">
           <Plus className="w-4 h-4" /> Add Application
         </Button>
       </div>

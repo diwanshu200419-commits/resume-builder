@@ -29,19 +29,34 @@
     --text-muted: #64748B;
   }
 
+  *, ::before, ::after {
+    box-sizing: border-box;
+  }
+
   html, body {
     max-width: 100vw;
     overflow-x: hidden;
     touch-action: manipulation;
   }
 
+  /* Prevent iOS Safari unwanted zoom on form focus */
   input, select, textarea {
     font-size: 16px !important;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
+
   @media (min-width: 640px) {
     input, select, textarea {
       font-size: 0.875rem !important;
     }
+  }
+
+  /* Ensure media elements never exceed parent containers */
+  img, svg, canvas, video, iframe {
+    max-width: 100%;
+    height: auto;
   }
 
   * {
@@ -64,20 +79,36 @@
       radial-gradient(circle at 100% 40%, rgba(16, 185, 129, 0.04) 0%, rgba(8, 12, 20, 0) 50%);
   }
 
+  /* Fluid typography with clamp() to prevent mobile header clipping */
   h1 {
-    @apply text-4xl sm:text-5xl font-extrabold tracking-tight text-text-primary;
+    font-size: clamp(1.5rem, 4vw, 2.75rem);
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    @apply text-text-primary;
   }
 
   h2 {
-    @apply text-2xl sm:text-3xl font-bold tracking-tight text-text-primary;
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    @apply text-text-primary;
   }
 
   h3 {
-    @apply text-xl font-semibold tracking-tight text-text-primary;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    line-height: 1.35;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    @apply text-text-primary;
   }
 
   h4 {
-    @apply text-base font-semibold text-text-primary;
+    font-size: clamp(0.95rem, 2vw, 1.125rem);
+    line-height: 1.4;
+    font-weight: 600;
+    @apply text-text-primary;
   }
 }
 
@@ -104,5 +135,28 @@
 
   .purple-glow {
     box-shadow: 0 0 70px rgba(99, 102, 241, 0.12);
+  }
+
+  /* Safe word-wrapping for long titles, emails, URLs, and UTRs */
+  .break-word-safe {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Horizontal scroll wrapper for wide data tables on mobile */
+  .table-scroll-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile safe area padding helpers */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .pt-safe {
+    padding-top: max(1rem, env(safe-area-inset-top));
   }
 }

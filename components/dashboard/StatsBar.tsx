@@ -51,20 +51,20 @@ export function StatsBar({ profile, analyses }: StatsBarProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       {stats.map((stat) => (
-        <Card key={stat.label}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-text-muted">{stat.label}</p>
-                <p className="text-2xl font-bold text-text-primary mt-1">{stat.value}</p>
+        <Card key={stat.label} className="border-border bg-surface min-w-0 shadow-sm">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2 min-w-0">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-text-muted font-medium truncate">{stat.label}</p>
+                <p className="text-xl sm:text-2xl font-bold text-text-primary mt-0.5 truncate">{stat.value}</p>
                 {stat.label === "Analyses used" && remaining !== "unlimited" && (
-                  <p className="text-xs text-text-muted mt-1">{remaining} remaining</p>
+                  <p className="text-[11px] text-text-muted mt-0.5 truncate">{remaining} remaining</p>
                 )}
               </div>
-              <div className={`p-3 rounded-lg bg-surface-elevated ${stat.color}`}>
-                <stat.icon className="w-5 h-5" />
+              <div className={`p-2.5 sm:p-3 rounded-xl bg-surface-elevated shrink-0 ${stat.color}`}>
+                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           </CardContent>

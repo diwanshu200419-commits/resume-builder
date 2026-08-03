@@ -11,7 +11,6 @@ import type { Profile } from "@/types";
 import {
   LayoutDashboard,
   FileSearch,
-  History,
   Settings,
   LogOut,
   Menu,
@@ -33,13 +32,33 @@ import {
   Github,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function Sidebar({ profile }: { profile: Profile }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Lock body scrolling when off-canvas drawer is open on mobile
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (mobileOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+    }
+  }, [mobileOpen]);
+
+  // Handle ESC key press to close mobile drawer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileOpen) {
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen]);
 
   const handleLogout = async () => {
     document.cookie = "mock-session-id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
@@ -83,15 +102,24 @@ export function Sidebar({ profile }: { profile: Profile }) {
   }
 
   const NavContent = () => (
-    <>
-      <div className="p-6 border-b border-border flex items-center justify-between">
+    <div className="flex flex-col h-full overflow-y-auto">
+      <div className="p-5 border-b border-border flex items-center justify-between shrink-0">
         <Link href="/" className="text-xl font-bold text-text-primary">
           Vaylo<span className="text-accent">AI</span>
         </Link>
-        <NotificationCenter />
+        <div className="flex items-center gap-2">
+          <NotificationCenter />
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="lg:hidden p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-elevated"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-3 space-y-1">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -113,14 +141,14 @@ export function Sidebar({ profile }: { profile: Profile }) {
                   : "text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
               )}
             >
-              <item.icon className="w-5 h-5" />
-              {item.label}
+              <item.icon className="w-5 h-5 shrink-0" />
+              <span className="truncate">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-border space-y-3">
+      <div className="p-4 border-t border-border space-y-3 shrink-0">
         <div className="flex items-center justify-between">
           <span className="text-xs text-text-muted">Theme</span>
           <ThemeToggle />
@@ -140,30 +168,39 @@ export function Sidebar({ profile }: { profile: Profile }) {
           onClick={handleLogout}
           className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors w-full px-3 py-2"
         >
-          <LogOut className="w-4 h-4" />
-          Log out
+          <LogOut className="w-4 h-4 shrink-0" />
+          <span>Log out</span>
         </button>
       </div>
-    </>
+    </div>
   );
 
   return (
     <>
+      {/* Mobile Drawer Trigger */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-surface border border-border"
-        onClick={() => setMobileOpen(!mobileOpen)}
+        className="lg:hidden fixed top-4 left-4 z-40 p-2 rounded-xl bg-surface/90 backdrop-blur border border-border shadow-md text-text-primary hover:bg-surface-elevated transition-all"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open Navigation Menu"
       >
-        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+        <Menu size={20} />
       </button>
 
-      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-surface h-screen sticky top-0">
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-surface h-screen sticky top-0 shrink-0">
         <NavContent />
       </aside>
 
+      {/* Mobile Off-Canvas Drawer */}
       {mobileOpen && (
-        <aside className="lg:hidden fixed inset-0 z-40 flex">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="relative flex flex-col w-64 bg-surface h-full">
+        <aside className="lg:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in"
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Drawer Body */}
+          <div className="relative flex flex-col w-[min(85vw,320px)] bg-surface h-[100dvh] shadow-2xl border-r border-border animate-in slide-in-from-left">
             <NavContent />
           </div>
         </aside>

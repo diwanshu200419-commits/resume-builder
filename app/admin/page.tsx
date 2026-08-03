@@ -607,8 +607,8 @@ export default function AdminPage() {
           </div>
 
           {/* User Directory Table */}
-          <div className="rounded-xl border border-border overflow-hidden bg-surface shadow-md">
-            <table className="w-full text-xs">
+          <div className="rounded-xl border border-border overflow-hidden bg-surface shadow-md table-scroll-wrapper">
+            <table className="w-full min-w-[640px] text-xs">
               <thead className="bg-surface-elevated text-text-muted uppercase">
                 <tr>
                   <th className="py-3 px-4 text-left">Candidate Name / Email</th>
