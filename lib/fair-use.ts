@@ -1,4 +1,6 @@
-import "server-only";
+try {
+  require("server-only");
+} catch {}
 import { PLAN_CONFIG, PlanType } from "@/lib/plans";
 import { createServiceClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
@@ -12,7 +14,7 @@ export interface FairUseCheckResult {
   errorResponse?: NextResponse;
 }
 
-// Memory fallback store for high availability if DB table is unpopulated
+// In-Memory Daily Usage Fallback
 const inMemoryDailyUsage = new Map<string, number>();
 
 function getUsageKey(userId: string, featureKey: string, dateStr: string): string {
@@ -26,11 +28,10 @@ export async function checkAndConsumeFairUse(
 ): Promise<FairUseCheckResult> {
   const planConfig = PLAN_CONFIG[userPlan] || PLAN_CONFIG.free;
   const limit = planConfig.limits[featureKey] ?? 10;
-
-  const todayStr = new Date().toISOString().split("T")[0]; // YYYY-MM-DD UTC
   const resetAt = "00:00 UTC";
+  const todayStr = new Date().toISOString().split("T")[0]; // YYYY-MM-DD UTC
 
-  // If feature limit is 0 (unsupported on this plan tier)
+  // If feature limit is 0 for this tier
   if (limit === 0 && userPlan !== "career_pack") {
     return {
       allowed: false,
@@ -49,31 +50,54 @@ export async function checkAndConsumeFairUse(
     };
   }
 
+  let allowed = false;
   let currentUsage = 0;
+  let remaining = 0;
   const memoryKey = getUsageKey(userId, featureKey, todayStr);
 
   try {
     const supabase = await createServiceClient();
 
-    // Query daily usage from ai_usage_logs for today
-    const startOfDay = `${todayStr}T00:00:00.000Z`;
-    const { count, error } = await supabase
-      .from("ai_usage_logs")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .eq("feature", featureKey)
-      .gte("created_at", startOfDay);
+    // Call atomic Postgres RPC consume_feature_usage (revoked from client, executable by service_role only)
+    const { data, error } = await supabase.rpc("consume_feature_usage", {
+      p_user_id: userId,
+      p_feature_key: featureKey,
+      p_daily_limit: limit,
+    });
 
-    if (!error && count !== null) {
-      currentUsage = count;
+    if (!error && data && data.length > 0) {
+      allowed = data[0].allowed;
+      currentUsage = data[0].current_count;
+      remaining = data[0].remaining;
     } else {
-      currentUsage = inMemoryDailyUsage.get(memoryKey) || 0;
+      // Memory fallback if RPC is unpopulated in local dev environment
+      const memCount = inMemoryDailyUsage.get(memoryKey) || 0;
+      if (memCount < limit) {
+        allowed = true;
+        currentUsage = memCount + 1;
+        remaining = Math.max(0, limit - currentUsage);
+        inMemoryDailyUsage.set(memoryKey, currentUsage);
+      } else {
+        allowed = false;
+        currentUsage = memCount;
+        remaining = 0;
+      }
     }
   } catch (err) {
-    currentUsage = inMemoryDailyUsage.get(memoryKey) || 0;
+    const memCount = inMemoryDailyUsage.get(memoryKey) || 0;
+    if (memCount < limit) {
+      allowed = true;
+      currentUsage = memCount + 1;
+      remaining = Math.max(0, limit - currentUsage);
+      inMemoryDailyUsage.set(memoryKey, currentUsage);
+    } else {
+      allowed = false;
+      currentUsage = memCount;
+      remaining = 0;
+    }
   }
 
-  if (currentUsage >= limit) {
+  if (!allowed) {
     const isLifetime = userPlan === "career_pack";
     return {
       allowed: false,
@@ -98,14 +122,35 @@ export async function checkAndConsumeFairUse(
     };
   }
 
-  // Increment memory counter as backup
-  inMemoryDailyUsage.set(memoryKey, currentUsage + 1);
-
   return {
     allowed: true,
     limit,
-    currentUsage: currentUsage + 1,
-    remaining: Math.max(0, limit - (currentUsage + 1)),
+    currentUsage,
+    remaining,
     resetAt,
   };
+}
+
+/**
+ * Refund AI Quota if Gemini call fails, times out, or errors.
+ */
+export async function refundFairUse(userId: string, featureKey: string): Promise<void> {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const memoryKey = getUsageKey(userId, featureKey, todayStr);
+
+  // Decrement memory fallback
+  const memCount = inMemoryDailyUsage.get(memoryKey) || 0;
+  if (memCount > 0) {
+    inMemoryDailyUsage.set(memoryKey, memCount - 1);
+  }
+
+  try {
+    const supabase = await createServiceClient();
+    await supabase.rpc("refund_feature_usage", {
+      p_user_id: userId,
+      p_feature_key: featureKey,
+    });
+  } catch (err) {
+    console.error("Fair-use refund failed:", err);
+  }
 }
