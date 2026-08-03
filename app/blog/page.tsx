@@ -14,7 +14,7 @@ const BLOG_POSTS = [
   {
     title: "How to Build an ATS-Friendly Resume in 2026",
     slug: "ats-friendly-resume-guide",
-    description: "Learn the secrets behind Applicant Tracking Systems and how to write bullet points that guarantee you land interviews.",
+    description: "Learn the secrets behind Applicant Tracking Systems and how to write bullet points that maximize interview callbacks.",
     readTime: "5 min read",
     tag: "ATS Tips",
     date: "July 20, 2026",

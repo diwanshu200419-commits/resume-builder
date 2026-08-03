@@ -136,7 +136,7 @@ export default function RecruiterSimulationPage() {
               {/* Fixes */}
               <Card className="border-border bg-surface p-5 space-y-3">
                 <h4 className="font-bold text-xs text-text-primary flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-500" /> Recommendations to Guarantee Shortlisting
+                  <Zap className="w-4 h-4 text-amber-500" /> Recommendations to Maximize Recruiter Attention
                 </h4>
                 <div className="space-y-2">
                   {result.immediateFixes.map((fix, i) => (
