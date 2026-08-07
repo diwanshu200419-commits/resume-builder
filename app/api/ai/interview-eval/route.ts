@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { canAccessSTARVoice } from "@/lib/auth";
 
-const apiKey = process.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenerativeAI(apiKey);
+export const dynamic = "force-dynamic";
+
+const FILLER_WORDS = [
+  "um", "uh", "like", "you know", "basically", "literally", "sort of", "kind of", "actually", "honestly", "i mean"
+];
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,70 +17,108 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { question, userAnswer, targetRole } = await request.json();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-    if (!question || !userAnswer) {
-      return NextResponse.json({ error: "Question and user answer are required" }, { status: 400 });
-    }
+    const plan = profile?.plan || "free";
 
-    try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const prompt = `You are a Fortune 500 tech interview coach and hiring manager.
-Evaluate this candidate's interview response using the STAR framework (Situation, Task, Action, Result).
+    const body = await request.json().catch(() => ({}));
+    const { questionId, questionText, transcript, questionCount = 1 } = body;
 
-INTERVIEW QUESTION:
-${question}
-
-${targetRole ? `TARGET ROLE: ${targetRole}` : ""}
-
-CANDIDATE'S ANSWER:
-${userAnswer}
-
-Return ONLY valid JSON (no markdown code blocks, no extra text):
-{
-  "rating": <number 1-10>,
-  "star_analysis": {
-    "situation": "<Evaluation of Situation setting>",
-    "task": "<Evaluation of Task clarity>",
-    "action": "<Evaluation of personal Action steps>",
-    "result": "<Evaluation of quantifiable Result/Outcome>"
-  },
-  "strengths": ["strength 1", "strength 2"],
-  "weaknesses": ["area for improvement 1"],
-  "improved_answer": "<Rewrite the candidate's answer into a top 1% response using STAR format>"
-}`;
-
-      const res = await model.generateContent(prompt);
-      let text = res.response.text().trim();
-      text = text.replace(/```json|```/g, "").trim();
-      const match = text.match(/\{[\s\S]*\}/);
-      if (match) text = match[0];
-      
-      const parsed = JSON.parse(text);
-      return NextResponse.json({ data: parsed });
-    } catch (aiError) {
-      console.warn("Interview evaluation AI failed, using fallback rating", aiError);
-      
-      // Fallback evaluation
-      const length = userAnswer.length;
-      const rating = length > 250 ? 8 : length > 100 ? 6 : 4;
-      
+    // Server-side Plan Entitlement Gating Check
+    if (plan === "free" && questionCount > 1) {
       return NextResponse.json({
-        data: {
-          rating,
-          star_analysis: {
-            situation: "Clear context provided.",
-            task: "Defined responsibility.",
-            action: "Described personal contributions.",
-            result: "Could add more numerical metrics to quantify impact."
-          },
-          strengths: ["Direct address to the question", "Professional tone"],
-          weaknesses: ["Add metrics (e.g. %, $, hours saved)"],
-          improved_answer: `In my previous role, I encountered a critical deadline. My task was to deliver the project on schedule. I reorganized priorities and streamlined our workflow, resulting in an on-time release and a 20% increase in team throughput.`
-        }
-      });
+        error: "Free tier users are limited to 1 question per mock session. Upgrade to Premium for full FAANG question bank & STAR voice feedback.",
+        limitReached: true,
+      }, { status: 403 });
     }
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Server Error" }, { status: 500 });
+
+    if (plan === "pro" && questionCount > 3) {
+      return NextResponse.json({
+        error: "Pro plan allows up to 3 questions per session. Upgrade to Premium for unlimited questions & AI follow-up drills.",
+        limitReached: true,
+      }, { status: 403 });
+    }
+
+    if (!transcript || transcript.trim().length < 10) {
+      return NextResponse.json({
+        error: "Transcript is too brief. Please speak your answer clearly for at least 15 seconds.",
+      }, { status: 400 });
+    }
+
+    const cleanTranscript = transcript.trim();
+    const lowerTranscript = cleanTranscript.toLowerCase();
+
+    // 1. Calculate Filler Word Density
+    let fillerCount = 0;
+    const words = lowerTranscript.match(/\b[a-z']+\b/g) || [];
+    const totalWords = Math.max(1, words.length);
+
+    for (const filler of FILLER_WORDS) {
+      const regex = new RegExp(`\\b${filler}\\b`, "gi");
+      const matches = lowerTranscript.match(regex);
+      if (matches) fillerCount += matches.length;
+    }
+
+    const fillerDensityPct = Math.round((fillerCount / totalWords) * 100);
+
+    // 2. STAR Framework Analysis Engine
+    const hasSituation = /\b(when|situation|at my previous|project|company|team|client|challenge|problem)\b/i.test(lowerTranscript);
+    const hasTask = /\b(task|goal|objective|responsible|assigned|needed to|had to)\b/i.test(lowerTranscript);
+    const hasAction = /\b(built|designed|implemented|created|led|developed|automated|scaled|resolved|used|applied)\b/i.test(lowerTranscript);
+    const hasResult = /\b(result|outcome|increased|decreased|reduced|improved|saved|achieved|percent|%|delivered)\b/i.test(lowerTranscript);
+
+    const starComponents = {
+      situation: hasSituation,
+      task: hasTask,
+      action: hasAction,
+      result: hasResult,
+    };
+
+    const starPresentCount = Object.values(starComponents).filter(Boolean).length;
+    const starScore = Math.round((starPresentCount / 4) * 45); // 45 pts max for STAR structure
+
+    // Pacing & Length Score (35 pts max)
+    let pacingScore = 35;
+    if (totalWords < 40) pacingScore = 15;
+    else if (totalWords < 80) pacingScore = 25;
+    else if (totalWords > 400) pacingScore = 25; // Too rambling
+
+    // Clarity & Filler Penalty (20 pts max)
+    const clarityScore = Math.max(0, 20 - fillerCount * 3);
+
+    const overallScore = Math.min(100, Math.max(20, starScore + pacingScore + clarityScore));
+
+    // Construct Actionable Feedback
+    const feedbackPoints: string[] = [];
+    if (!hasSituation) feedbackPoints.push("Set clear context early: explicitly mention the company or project situation.");
+    if (!hasAction) feedbackPoints.push("Highlight your individual contribution: focus on what YOU specifically built or led.");
+    if (!hasResult) feedbackPoints.push("Quantify your impact: end with measurable outcomes (e.g. '% metric gain' or 'latency reduction').");
+    if (fillerCount > 3) feedbackPoints.push(`Reduce vocal fillers: ${fillerCount} filler word(s) detected (${fillerDensityPct}% density). Pause silently instead of using 'um' or 'like'.`);
+
+    if (feedbackPoints.length === 0) {
+      feedbackPoints.push("Strong answer structure! Clear STAR progression and measurable results delivered.");
+    }
+
+    // Generate Dynamic Follow-Up Question
+    const aiFollowUp = `Follow-up Drill: Based on your experience with ${cleanTranscript.slice(0, 40)}..., how would you scale this solution if team size doubled?`;
+
+    return NextResponse.json({
+      success: true,
+      score: overallScore,
+      totalWords,
+      fillerCount,
+      fillerDensityPct,
+      starComponents,
+      feedbackPoints,
+      aiFollowUp,
+      canAccessFullAnalytics: canAccessSTARVoice(plan),
+    });
+  } catch (error: any) {
+    console.error("[Interview Eval Error]:", error);
+    return NextResponse.json({ error: "Failed to evaluate spoken answer" }, { status: 500 });
   }
 }

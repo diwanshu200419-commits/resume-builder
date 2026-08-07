@@ -106,3 +106,7 @@ export async function getProfile(): Promise<Profile | null> {
 
   return minimalProfile;
 }
+
+export function canAccessSTARVoice(plan?: string | null): boolean {
+  return plan === "premium" || plan === "career_pack";
+}

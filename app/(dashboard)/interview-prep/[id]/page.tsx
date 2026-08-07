@@ -1,376 +1,334 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
+import { Mic, MicOff, CheckCircle2, XCircle, AlertCircle, Sparkles, RefreshCw, ChevronRight, Award, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, RefreshCw, Mic, MicOff, Sparkles, CheckCircle2, Award, Star } from "lucide-react";
-import type { InterviewQuestions, InterviewQuestion } from "@/types";
 
-interface EvaluationResult {
-  rating: number;
-  star_analysis: {
-    situation: string;
-    task: string;
-    action: string;
-    result: string;
-  };
-  strengths: string[];
-  weaknesses: string[];
-  improved_answer: string;
+interface InterviewQuestion {
+  id: string;
+  question_text: string;
+  company_tag?: string;
+  difficulty?: string;
+  question_type?: string;
 }
 
-const DEFAULT_QUESTIONS: InterviewQuestions = {
-  hr_questions: [
-    {
-      question: "Tell me about yourself and your background in software engineering.",
-      suggested_answer: "I am a dedicated software engineer specializing in scalable web applications and AI implementations. In my recent experience, I have architected high-throughput microservices and optimized ATS resume systems.",
-      tip: "Focus on your recent technical achievements within a 2-minute overview.",
-    },
-    {
-      question: "Why are you interested in joining our technical team?",
-      suggested_answer: "Your team's focus on high-impact user experiences and modern engineering architecture aligns directly with my background in Next.js, React, and cloud infrastructure.",
-      tip: "Demonstrate knowledge of the company's tech stack and scale.",
-    },
-  ],
-  technical_questions: [
-    {
-      question: "How do you optimize application latency and database query performance?",
-      suggested_answer: "I utilize Redis caching layers, PostgreSQL indexing, serverless edge rendering, and async non-blocking execution to keep API response times under 50ms.",
-      tip: "Provide concrete metrics from systems you have built.",
-    },
-    {
-      question: "Describe how you handle system security and API authentication.",
-      suggested_answer: "I enforce HTTPS, JWT cookie-based session validation, server-side tier gating, CORS headers, and input validation schemas.",
-      tip: "Highlight both frontend sanitization and backend authorization checks.",
-    },
-  ],
-  behavioral_questions: [
-    {
-      question: "Describe a situation where a production issue occurred during a release. How did you handle it?",
-      suggested_answer: "SITUATION: A high traffic event caused database connection pool exhaustion.\nTASK: Restore system stability within 15 minutes.\nACTION: Rolled back release, optimized connection pooling, and enabled read replicas.\nRESULT: Restored 100% uptime with sub-50ms latency.",
-      tip: "Structure your response using STAR: Situation, Task, Action, Result.",
-    },
-  ],
-};
-
-function QuestionCard({ q, index }: { q: InterviewQuestion; index: number }) {
-  const [userAnswer, setUserAnswer] = useState("");
+export default function InterviewPrepRoomPage({ params }: { params: { id: string } }) {
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [micError, setMicError] = useState<string | null>(null);
   const [evaluating, setEvaluating] = useState(false);
-  const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
-  const [showSandbox, setShowSandbox] = useState(false);
-  const [listening, setListening] = useState(false);
+  const [evaluation, setEvaluation] = useState<any | null>(null);
 
-  const startVoiceInput = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Voice input requires Google Chrome, Microsoft Edge, or Apple Safari.");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questions, setQuestions] = useState<InterviewQuestion[]>([
+    {
+      id: "q-1",
+      question_text: "Describe how you optimized rendering performance and load time of a complex React web app.",
+      company_tag: "google_style",
+      difficulty: "medium",
+    },
+    {
+      id: "q-2",
+      question_text: "Tell me about a time when a production service under your ownership experienced unexpected traffic surges.",
+      company_tag: "amazon_style",
+      difficulty: "medium",
+    },
+    {
+      id: "q-3",
+      question_text: "How would you measure success of Google Photos and prioritize the next key retention feature?",
+      company_tag: "meta_style",
+      difficulty: "hard",
+    },
+  ]);
+
+  const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [sessionScores, setSessionScores] = useState<number[]>([]);
+
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Initialize Web Speech API if supported in browser
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+
+        recognition.onresult = (event: any) => {
+          let currentTranscript = "";
+          for (let i = 0; i < event.results.length; i++) {
+            currentTranscript += event.results[i][0].transcript;
+          }
+          setTranscript(currentTranscript);
+        };
+
+        recognition.onerror = (event: any) => {
+          console.warn("[SpeechRecognition Error]:", event.error);
+          if (event.error === "not-allowed" || event.error === "permission-denied") {
+            setMicError("Microphone permission denied. Please allow microphone access in browser settings or use manual text input below.");
+          } else {
+            setMicError(`Voice input issue: ${event.error}. You can type your answer manually.`);
+          }
+          setIsRecording(false);
+        };
+
+        recognitionRef.current = recognition;
+      } else {
+        setMicError("Web Speech API is not supported in this browser. You can type your answer manually in the text area.");
+      }
+    }
+  }, []);
+
+  const toggleRecording = () => {
+    setMicError(null);
+    if (!recognitionRef.current) {
+      setMicError("Microphone recording is unavailable. Please type your answer manually below.");
       return;
     }
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
 
-    recognition.onstart = () => setListening(true);
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setUserAnswer((prev) => (prev ? prev + " " + transcript : transcript));
-    };
-    recognition.onerror = () => setListening(false);
-    recognition.onend = () => setListening(false);
-
-    recognition.start();
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      setTranscript("");
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } catch (err) {
+        console.error(err);
+        setIsRecording(false);
+      }
+    }
   };
 
-  const handleEvaluate = async () => {
-    if (!userAnswer.trim()) return;
+  const handleEvaluateAnswer = async () => {
+    if (!transcript || transcript.trim().length < 10) return;
     setEvaluating(true);
+    setEvaluation(null);
+
     try {
       const res = await fetch("/api/ai/interview-eval", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: q.question,
-          userAnswer,
+          questionId: questions[currentQuestionIndex].id,
+          questionText: questions[currentQuestionIndex].question_text,
+          transcript,
+          questionCount: currentQuestionIndex + 1,
         }),
       });
-      const data = await res.json();
-      if (data.data) {
-        setEvalResult(data.data);
+
+      const json = await res.json();
+      if (res.ok) {
+        setEvaluation(json);
+        setSessionScores((prev) => [...prev, json.score]);
       } else {
-        setEvalResult({
-          rating: 9,
-          star_analysis: {
-            situation: "Clear context provided.",
-            task: "Direct resolution target.",
-            action: "Strong technical action steps outlined.",
-            result: "Measurable outcome achieved.",
-          },
-          strengths: ["Strong action verbs", "Clear technical focus"],
-          weaknesses: ["Add quantifiable metric"],
-          improved_answer: `SITUATION: Handled high-scale project delivery.\nACTION: Engineered automated pipeline.\nRESULT: Improved performance by 35%.`,
-        });
+        setMicError(json.error || "Evaluation failed");
       }
-    } catch {
-      setEvalResult({
-        rating: 9,
-        star_analysis: {
-          situation: "Clear context provided.",
-          task: "Direct resolution target.",
-          action: "Strong technical action steps outlined.",
-          result: "Measurable outcome achieved.",
-        },
-        strengths: ["Strong action verbs", "Clear technical focus"],
-        weaknesses: ["Add quantifiable metric"],
-        improved_answer: `SITUATION: Handled high-scale project delivery.\nACTION: Engineered automated pipeline.\nRESULT: Improved performance by 35%.`,
-      });
+    } catch (e) {
+      console.error(e);
     } finally {
       setEvaluating(false);
     }
   };
 
-  return (
-    <Card className="border-slate-800 bg-slate-900/90 shadow-md hover:border-slate-700 transition-all">
-      <CardContent className="p-5">
-        <div className="flex items-start gap-3">
-          <span className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs flex items-center justify-center font-bold shrink-0">
-            {index + 1}
-          </span>
-          <div className="flex-1 space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <p className="font-semibold text-slate-100 text-sm leading-relaxed">{q.question}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowSandbox(!showSandbox)}
-                className="text-xs gap-1 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10 shrink-0 font-medium"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                {showSandbox ? "Hide Sandbox" : "Practice Sandbox"}
-              </Button>
-            </div>
-
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="answer" className="border-0">
-                <AccordionTrigger className="text-xs text-slate-400 hover:text-indigo-400 py-1 font-medium">
-                  View Model Answer & Strategy
-                </AccordionTrigger>
-                <AccordionContent className="pt-2">
-                  <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 text-xs text-slate-300 whitespace-pre-wrap leading-relaxed">
-                    {q.suggested_answer}
-                  </div>
-                  {q.tip && (
-                    <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
-                      <Mic className="w-3.5 h-3.5 text-indigo-400" /> <span className="italic">{q.tip}</span>
-                    </p>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
-            {showSandbox && (
-              <div className="pt-3 border-t border-slate-800 space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-300 flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Practice Response (Voice or Text):
-                    </label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={startVoiceInput}
-                      className={`text-xs gap-1.5 transition-all ${
-                        listening ? "border-rose-500 text-rose-400 bg-rose-500/10 animate-pulse font-bold" : "border-slate-700 text-slate-300 hover:text-white"
-                      }`}
-                    >
-                      {listening ? <MicOff className="w-3.5 h-3.5 text-rose-400" /> : <Mic className="w-3.5 h-3.5 text-indigo-400" />}
-                      {listening ? "Listening... Speak Now" : "Voice Input (Speak)"}
-                    </Button>
-                  </div>
-                  <Textarea
-                    placeholder="Speak into microphone or type how you would answer in an actual interview..."
-                    className="min-h-[100px] text-xs bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-indigo-500"
-                    value={userAnswer}
-                    onChange={(e) => setUserAnswer(e.target.value)}
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      size="sm"
-                      onClick={handleEvaluate}
-                      disabled={evaluating || !userAnswer.trim()}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs gap-1.5 font-bold"
-                    >
-                      {evaluating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Award className="w-3.5 h-3.5" />}
-                      Evaluate Response with AI
-                    </Button>
-                  </div>
-                </div>
-
-                {evalResult && (
-                  <div className="p-4 rounded-xl bg-slate-950 border border-indigo-500/30 space-y-3 animate-in fade-in">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> AI STAR Response Score
-                      </span>
-                      <Badge className={evalResult.rating >= 8 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-amber-500/20 text-amber-400"}>
-                        {evalResult.rating} / 10
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                      <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
-                        <span className="font-semibold text-slate-200">Situation & Task:</span>
-                        <p className="text-slate-400 mt-0.5">{evalResult.star_analysis.situation}</p>
-                      </div>
-                      <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
-                        <span className="font-semibold text-slate-200">Action & Result:</span>
-                        <p className="text-slate-400 mt-0.5">{evalResult.star_analysis.result}</p>
-                      </div>
-                    </div>
-
-                    {evalResult.improved_answer && (
-                      <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-                        <span className="text-xs font-semibold text-indigo-300 flex items-center gap-1 mb-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" /> Refined STAR Response:
-                        </span>
-                        <p className="text-xs text-slate-300 leading-relaxed">{evalResult.improved_answer}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default function InterviewPrepPage() {
-  const params = useParams();
-  const id = (params.id as string) || "1";
-
-  const [questions, setQuestions] = useState<InterviewQuestions>(DEFAULT_QUESTIONS);
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-
-  const handleGenerate = async () => {
-    setGenerating(true);
-    try {
-      const res = await fetch("/api/optimize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ analysisId: id, type: "interview" }),
-      });
-      const data = await res.json();
-      if (data.interviewQuestions) {
-        setQuestions(data.interviewQuestions);
-      }
-    } catch {
-      setQuestions(DEFAULT_QUESTIONS);
-    } finally {
-      setGenerating(false);
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex + 1 < questions.length) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setTranscript("");
+      setEvaluation(null);
+      setMicError(null);
+    } else {
+      setSessionCompleted(true);
     }
   };
 
-  useEffect(() => {
-    fetch(`/api/analyze?id=${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.analysis?.interview_questions) {
-          setQuestions(data.analysis.interview_questions);
-        } else {
-          handleGenerate();
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setQuestions(DEFAULT_QUESTIONS);
-        setLoading(false);
-      });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-      </div>
-    );
-  }
+  const currentQ = questions[currentQuestionIndex];
+  const avgSessionScore = sessionScores.length > 0
+    ? Math.round(sessionScores.reduce((a, b) => a + b, 0) / sessionScores.length)
+    : 0;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-12">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-        <div className="flex items-center gap-4">
-          <Link href={`/results/${id}`}>
-            <Button variant="ghost" size="sm" className="gap-1 text-slate-300 hover:text-white">
-              <ArrowLeft className="w-4 h-4" /> Back to Analysis
-            </Button>
-          </Link>
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+      {/* Session Progress Header */}
+      <div className="flex items-center justify-between bg-surface p-4 rounded-2xl border border-border">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-accent/10 border border-accent/30 text-accent">
+            <Volume2 className="w-5 h-5" />
+          </div>
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              Interview Q&A Voice Practice Sandbox
-            </h1>
-            <p className="text-xs text-slate-400 mt-0.5">Speak into your microphone or type to practice answering STAR interview questions.</p>
+            <h1 className="text-base font-bold text-text-primary">FAANG Voice Interview Practice</h1>
+            <p className="text-xs text-text-muted">STAR Framework Speech Analysis &amp; Verbal Feedback</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={handleGenerate} disabled={generating} className="gap-1 border-slate-700 text-slate-200">
-          {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-          Regenerate Questions
-        </Button>
+
+        <Badge variant="outline" className="border-accent/40 text-accent bg-accent/10 font-mono text-xs">
+          Question {currentQuestionIndex + 1} of {questions.length}
+        </Badge>
       </div>
 
-      <div className="space-y-8">
-        {questions.hr_questions && questions.hr_questions.length > 0 && (
-          <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">HR & General Questions</h2>
-              <Badge className="bg-indigo-600 text-white font-bold">{questions.hr_questions.length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {questions.hr_questions.map((q, i) => (
-                <QuestionCard key={i} q={q} index={i} />
-              ))}
-            </div>
-          </section>
-        )}
+      {micError && (
+        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-xs text-amber-300">
+          <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+          <p>{micError}</p>
+        </div>
+      )}
 
-        {questions.technical_questions && questions.technical_questions.length > 0 && (
-          <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">Technical & Role-Specific Questions</h2>
-              <Badge className="bg-indigo-600 text-white font-bold">{questions.technical_questions.length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {questions.technical_questions.map((q, i) => (
-                <QuestionCard key={i} q={q} index={i} />
-              ))}
-            </div>
-          </section>
-        )}
+      {!sessionCompleted ? (
+        <div className="space-y-6">
+          {/* Question Card */}
+          <Card className="border-border bg-surface shadow-md">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-[10px] font-mono uppercase">
+                  {currentQ.company_tag?.replace("_", " ")}
+                </Badge>
+                <Badge className="bg-surface-elevated text-text-muted text-[10px] uppercase">
+                  Difficulty: {currentQ.difficulty}
+                </Badge>
+              </div>
+              <CardTitle className="text-base font-bold text-text-primary pt-2 leading-snug">
+                "{currentQ.question_text}"
+              </CardTitle>
+            </CardHeader>
 
-        {questions.behavioral_questions && questions.behavioral_questions.length > 0 && (
-          <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">Behavioral & STAR Questions</h2>
-              <Badge className="bg-indigo-600 text-white font-bold">{questions.behavioral_questions.length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {questions.behavioral_questions.map((q, i) => (
-                <QuestionCard key={i} q={q} index={i} />
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
+            <CardContent className="space-y-4">
+              {/* Mic & Controls */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-xl bg-surface-elevated border border-border">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={toggleRecording}
+                    className={`p-3.5 rounded-2xl font-bold flex items-center gap-2 transition-all ${
+                      isRecording
+                        ? "bg-rose-600 text-white animate-pulse shadow-lg shadow-rose-600/30"
+                        : "bg-accent text-white hover:bg-accent-hover"
+                    }`}
+                  >
+                    {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                    <span>{isRecording ? "Stop Recording" : "Start Voice Answer"}</span>
+                  </button>
+                  {isRecording && (
+                    <span className="text-xs text-rose-400 font-mono font-bold animate-pulse">
+                      ● Recording Audio...
+                    </span>
+                  )}
+                </div>
+
+                <Button
+                  disabled={evaluating || !transcript.trim()}
+                  onClick={handleEvaluateAnswer}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1.5"
+                >
+                  <Sparkles className="w-4 h-4" /> Evaluate Answer
+                </Button>
+              </div>
+
+              {/* Spoken Transcript Area */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text-primary block">
+                  Spoken Answer Transcript (Live Speech-to-Text):
+                </label>
+                <Textarea
+                  rows={4}
+                  placeholder="Click 'Start Voice Answer' and speak into your microphone, or type your answer here..."
+                  value={transcript}
+                  onChange={(e) => setTranscript(e.target.value)}
+                  className="text-xs bg-surface-elevated font-mono"
+                />
+              </div>
+
+              {/* AI Evaluation Report */}
+              {evaluation && (
+                <div className="p-4 rounded-2xl bg-accent/5 border border-accent/20 space-y-4 animate-in fade-in">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <div className="flex items-center gap-2">
+                      <Award className="w-5 h-5 text-accent" />
+                      <span className="font-bold text-sm text-text-primary">STAR Framework Feedback</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-text-muted">Verbal Score:</span>
+                      <Badge className="bg-accent text-white font-bold text-xs">{evaluation.score} / 100</Badge>
+                    </div>
+                  </div>
+
+                  {/* STAR Components Status */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    {Object.entries(evaluation.starComponents || {}).map(([key, isPresent]) => (
+                      <div key={key} className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                        isPresent ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300" : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                      }`}>
+                        <span className="capitalize font-bold text-[11px]">{key}</span>
+                        {isPresent ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <XCircle className="w-4 h-4 text-rose-400" />}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="text-xs space-y-1">
+                    <p className="font-bold text-text-primary">Speech Metrics:</p>
+                    <p className="text-text-secondary text-[11px]">
+                      Total Words: <span className="font-mono font-bold">{evaluation.totalWords}</span> | Filler Words: <span className="font-mono font-bold">{evaluation.fillerCount}</span> ({evaluation.fillerDensityPct}% density)
+                    </p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <p className="font-bold text-xs text-text-primary">Recruiter Coaching Feedback:</p>
+                    <ul className="space-y-1 text-xs text-text-secondary">
+                      {evaluation.feedbackPoints?.map((pt: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="text-accent">•</span> {pt}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <Button onClick={handleNextQuestion} className="bg-accent hover:bg-accent-hover text-white text-xs font-bold gap-1">
+                      Next Question <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        /* End of Session Diagnostic Summary */
+        <Card className="border-border bg-surface p-6 space-y-6 text-center shadow-xl">
+          <div className="w-16 h-16 rounded-full bg-accent/20 border border-accent/40 text-accent flex items-center justify-center mx-auto">
+            <Award className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold text-text-primary">Voice Interview Session Completed!</h2>
+            <p className="text-xs text-text-muted">Average Verbal Score across {questions.length} questions</p>
+          </div>
+
+          <div className="inline-block p-4 rounded-2xl bg-accent/10 border border-accent/30">
+            <span className="text-4xl font-extrabold text-accent">{avgSessionScore}</span>
+            <span className="text-xs text-text-muted block font-semibold mt-1">/ 100 STAR Rating</span>
+          </div>
+
+          <div className="flex gap-3 justify-center pt-4">
+            <Button
+              onClick={() => {
+                setSessionCompleted(false);
+                setCurrentQuestionIndex(0);
+                setSessionScores([]);
+                setTranscript("");
+                setEvaluation(null);
+              }}
+              className="bg-accent hover:bg-accent-hover text-white font-bold text-xs gap-1.5"
+            >
+              <RefreshCw className="w-4 h-4" /> Re-Practice Session
+            </Button>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

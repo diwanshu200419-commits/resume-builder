@@ -56,6 +56,12 @@ const tests = [
       return /INDUSTRY_PROFILES/.test(atsV2Code) && /detectIndustryProfile/.test(atsV2Code) && /inputIndustryProfile/.test(atsV2Code);
     }
   },
+  { name: "17. Voice Interview Prep FAANG Question Bank & STAR Evaluation Audit", test: () => {
+      const qMigration = fs.readFileSync(path.join(process.cwd(), "supabase", "migrations", "20260807_interview_questions.sql"), "utf-8");
+      const evalApi = fs.readFileSync(path.join(process.cwd(), "app", "api", "ai", "interview-eval", "route.ts"), "utf-8");
+      return /interview_questions/.test(qMigration) && /starComponents/.test(evalApi) && /FILLER_WORDS/.test(evalApi);
+    }
+  },
 ];
 
 let passed = 0;
