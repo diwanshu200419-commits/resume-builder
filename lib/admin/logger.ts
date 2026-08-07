@@ -14,7 +14,9 @@ export interface LogAuditParams {
     | "SCAN_USAGE_RESET"
     | "USER_DISABLED"
     | "USER_RESTORED"
-    | "ADMIN_ROLE_CHANGED";
+    | "ADMIN_ROLE_CHANGED"
+    | "USER_DELETED"
+    | "FEEDBACK_REPLIED";
   targetUserId: string;
   targetEmail: string;
   previousState?: Record<string, any>;

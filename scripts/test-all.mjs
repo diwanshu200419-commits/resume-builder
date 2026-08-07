@@ -39,6 +39,12 @@ const tests = [
   { name: "11. Supabase Database Connection & Mock DB Resilience", test: () => true },
   { name: "12. HTTP Security Headers (X-Frame-Options, CSP, HSTS)", test: () => true },
   { name: "13. Mobile Viewport 16px Font Auto-Zoom Prevention Test", test: () => true },
+  { name: "14. Admin Account Deletion 2-Step & Realtime Feedback Audit", test: () => {
+      const deleteRoute = fs.readFileSync(path.join(process.cwd(), "app", "api", "admin", "delete-user", "route.ts"), "utf-8");
+      const migration = fs.readFileSync(path.join(process.cwd(), "supabase", "migrations", "20260807_admin_upgrades.sql"), "utf-8");
+      return /confirmEmail/.test(deleteRoute) && /user_feedback/.test(migration) && /supabase_realtime/.test(migration);
+    }
+  },
 ];
 
 let passed = 0;

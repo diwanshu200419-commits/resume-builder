@@ -212,6 +212,15 @@ export async function GET(request: NextRequest) {
 
     const totalTokensUsed = aiLogs.reduce((sum: number, log: any) => sum + Number(log.total_tokens || 0), 0);
 
+    // Fetch real candidate support/feedback entries
+    const { data: userFeedbackData } = await supabase
+      .from("user_feedback")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    const userFeedback = userFeedbackData || [];
+
     return NextResponse.json({
       timestamp: new Date().toISOString(),
       overview: {
@@ -238,6 +247,7 @@ export async function GET(request: NextRequest) {
       },
       users: usersArr,
       paymentRequests,
+      userFeedback,
       flaggedDuplicateUtrs,
       analytics: {
         totalAtsScans,

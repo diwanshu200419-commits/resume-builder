@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   ShieldAlert,
@@ -28,7 +29,13 @@ import {
   RotateCcw,
   Calendar,
   Lock,
+  MessageSquare,
+  Trash2,
+  Bell,
+  Radio,
+  Send,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface UserProfile {
   id: string;
@@ -91,7 +98,7 @@ export default function AdminPage() {
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
   const [activeTab, setActiveTab] = useState<
-    "overview" | "users" | "payments" | "analytics" | "health" | "audit" | "errors"
+    "overview" | "users" | "payments" | "feedback" | "analytics" | "health" | "audit" | "errors"
   >("overview");
 
   // User directory filters & pagination
@@ -104,13 +111,22 @@ export default function AdminPage() {
   const [paymentSubTab, setPaymentSubTab] = useState<"pending" | "history">("pending");
   const [paymentSearch, setPaymentSearch] = useState("");
 
+  // Feedback tab filters
+  const [feedbackCategory, setFeedbackCategory] = useState("all");
+  const [feedbackStatus, setFeedbackStatus] = useState("all");
+  const [feedbackSearch, setFeedbackSearch] = useState("");
+  const [replyingFeedbackId, setReplyingFeedbackId] = useState<string | null>(null);
+  const [adminReplyText, setAdminReplyText] = useState("");
+
   // Drawer / Action State
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [actionType, setActionType] = useState<"change_plan" | "extend" | "expire" | "reset_usage">("change_plan");
+  const [actionType, setActionType] = useState<"change_plan" | "extend" | "expire" | "reset_usage" | "delete_user">("change_plan");
   const [manualPlan, setManualPlan] = useState("pro");
   const [overrideReason, setOverrideReason] = useState("");
+  const [confirmDeleteEmail, setConfirmDeleteEmail] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [realtimeNotification, setRealtimeNotification] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -143,6 +159,39 @@ export default function AdminPage() {
 
   useEffect(() => {
     fetchData();
+
+    // Supabase Realtime Push Subscriptions on payment_requests, user_feedback, profiles
+    const supabase = createClient();
+    const channel = supabase
+      .channel("admin-realtime-channel")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "payment_requests" },
+        (payload: any) => {
+          setRealtimeNotification("🔔 NEW UPI PAYMENT SUBMITTED BY CANDIDATE!");
+          fetchData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "user_feedback" },
+        (payload: any) => {
+          setRealtimeNotification("🔔 NEW USER SUPPORT/FEEDBACK MESSAGE RECEIVED!");
+          fetchData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "profiles" },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [planFilter, roleFilter, sortBy]);
 
   const handleApprovePayment = async (userId: string, requestId: string, plan: string) => {
@@ -185,8 +234,71 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch("/api/admin/delete-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          confirmEmail: confirmDeleteEmail.trim(),
+          reason: overrideReason || "Admin 2-Step Confirmed Account Deletion",
+        }),
+      });
+      const resJson = await res.json();
+      if (res.ok) {
+        setActionSuccess(resJson.message);
+        setSelectedUser(null);
+        setConfirmDeleteEmail("");
+        setOverrideReason("");
+        fetchData();
+      } else {
+        alert(resJson.error || "Failed to delete user account.");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setActionLoading(false);
+      setTimeout(() => setActionSuccess(null), 4000);
+    }
+  };
+
+  const handleReplyFeedback = async (feedbackId: string) => {
+    if (!adminReplyText.trim()) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch("/api/admin/feedback/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          feedbackId,
+          adminResponse: adminReplyText.trim(),
+          newStatus: "resolved",
+        }),
+      });
+      const resJson = await res.json();
+      if (res.ok) {
+        setActionSuccess("Feedback response sent & status marked resolved!");
+        setReplyingFeedbackId(null);
+        setAdminReplyText("");
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setActionLoading(false);
+      setTimeout(() => setActionSuccess(null), 3000);
+    }
+  };
+
   const handleAdminUserAction = async () => {
     if (!selectedUser) return;
+    if (actionType === "delete_user") {
+      return handleDeleteUser();
+    }
+
     setActionLoading(true);
     try {
       const res = await fetch("/api/admin/manual-plan-override", {
@@ -275,7 +387,11 @@ export default function AdminPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold flex items-center gap-1.5 py-1 px-2.5">
+            <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" /> Realtime Push Active
+          </Badge>
+
           {lastUpdated && (
             <span className="text-[10px] sm:text-xs text-text-muted font-mono">
               Last updated: {lastUpdated}
@@ -286,6 +402,17 @@ export default function AdminPage() {
           </Button>
         </div>
       </div>
+
+      {realtimeNotification && (
+        <div className="p-3.5 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold flex items-center justify-between animate-in slide-in-from-top">
+          <span className="flex items-center gap-2">
+            <Bell className="w-4 h-4 text-amber-400 animate-bounce" /> {realtimeNotification}
+          </span>
+          <button onClick={() => setRealtimeNotification(null)} className="text-text-muted hover:text-text-primary text-xs">
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {actionSuccess && (
         <div className="p-3.5 rounded-xl bg-success/10 border border-success/30 text-success text-xs font-semibold flex items-center gap-2 animate-in fade-in">
@@ -320,6 +447,15 @@ export default function AdminPage() {
           }`}
         >
           <CreditCard className="w-4 h-4" /> Payments ({pendingPayments.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab("feedback")}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
+            activeTab === "feedback" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          <MessageSquare className="w-4 h-4" /> Feedback Inbox ({(data?.userFeedback || []).filter((f: any) => f.status === "open").length})
         </button>
 
         <button
@@ -788,6 +924,164 @@ export default function AdminPage() {
       )}
 
       {/* ------------------------------------------------------------- */}
+      {/* TAB: USER FEEDBACK / SUPPORT INBOX */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === "feedback" && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-4 rounded-xl border border-border">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                placeholder="Search feedback message or email..."
+                value={feedbackSearch}
+                onChange={(e) => setFeedbackSearch(e.target.value)}
+                className="pl-9 bg-surface-elevated text-xs"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <select
+                value={feedbackStatus}
+                onChange={(e) => setFeedbackStatus(e.target.value)}
+                className="bg-surface-elevated border border-border text-xs rounded-lg px-3 py-2 font-medium"
+              >
+                <option value="all">All Statuses</option>
+                <option value="open">Open Complaints</option>
+                <option value="resolved">Resolved</option>
+              </select>
+
+              <select
+                value={feedbackCategory}
+                onChange={(e) => setFeedbackCategory(e.target.value)}
+                className="bg-surface-elevated border border-border text-xs rounded-lg px-3 py-2 font-medium"
+              >
+                <option value="all">All Categories</option>
+                <option value="bug">Bugs</option>
+                <option value="billing">Billing &amp; Payments</option>
+                <option value="feature">Feature Requests</option>
+                <option value="complaint">Complaints</option>
+                <option value="general">General</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {((data?.userFeedback || []) as any[])
+              .filter((item) => {
+                if (feedbackStatus !== "all" && item.status !== feedbackStatus) return false;
+                if (feedbackCategory !== "all" && item.category !== feedbackCategory) return false;
+                if (feedbackSearch) {
+                  const q = feedbackSearch.toLowerCase();
+                  const matchEmail = (item.user_email || "").toLowerCase().includes(q);
+                  const matchMsg = (item.message || "").toLowerCase().includes(q);
+                  if (!matchEmail && !matchMsg) return false;
+                }
+                return true;
+              })
+              .map((item) => {
+                const linkedUser = users.find((u) => u.id === item.user_id || u.email === item.user_email);
+                return (
+                  <Card key={item.id} className="border-border bg-surface shadow-sm">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-text-primary text-xs">{item.user_email}</span>
+                            {linkedUser && (
+                              <Badge className={`text-[10px] ${PLAN_COLORS[linkedUser.plan] || PLAN_COLORS.free}`}>
+                                {linkedUser.plan.toUpperCase()}
+                              </Badge>
+                            )}
+                            <Badge className="bg-surface-elevated border-border text-[10px] uppercase font-mono">
+                              {item.category}
+                            </Badge>
+                          </div>
+                          <p className="text-[10px] text-text-muted font-mono">
+                            Submitted: {new Date(item.created_at).toLocaleString()}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Badge className={`text-[10px] font-bold ${
+                            item.status === "resolved"
+                              ? "bg-success/20 text-success border border-success/30"
+                              : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                          }`}>
+                            {item.status.toUpperCase()}
+                          </Badge>
+                          {linkedUser && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => { setSelectedUser(linkedUser); setManualPlan(linkedUser.plan); }}
+                              className="h-7 px-2 text-[11px] border-accent/30 text-accent font-bold"
+                            >
+                              User Context
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-xs text-text-secondary bg-surface-elevated p-3 rounded-xl border border-border leading-relaxed">
+                        {item.message}
+                      </p>
+
+                      {item.admin_response ? (
+                        <div className="p-3 rounded-xl bg-accent/10 border border-accent/20 space-y-1 text-xs">
+                          <div className="flex items-center justify-between text-[10px] text-accent font-bold">
+                            <span>Admin Reply</span>
+                            <span>{item.responded_at ? new Date(item.responded_at).toLocaleString() : ""}</span>
+                          </div>
+                          <p className="text-text-primary leading-relaxed">{item.admin_response}</p>
+                        </div>
+                      ) : replyingFeedbackId === item.id ? (
+                        <div className="space-y-2 pt-2 border-t border-border">
+                          <Textarea
+                            rows={3}
+                            placeholder="Write admin reply to candidate..."
+                            value={adminReplyText}
+                            onChange={(e) => setAdminReplyText(e.target.value)}
+                            className="text-xs bg-surface-elevated"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => { setReplyingFeedbackId(null); setAdminReplyText(""); }}
+                              className="text-xs"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={actionLoading}
+                              onClick={() => handleReplyFeedback(item.id)}
+                              className="bg-accent hover:bg-accent-hover text-white text-xs font-bold gap-1.5"
+                            >
+                              <Send className="w-3.5 h-3.5" /> Send &amp; Resolve
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { setReplyingFeedbackId(item.id); setAdminReplyText(""); }}
+                          className="h-7 text-xs border-accent/30 text-accent font-bold gap-1"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" /> Reply to Complaint
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
       {/* TAB 4: REAL FEATURE & AI COST ANALYTICS */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "analytics" && (
@@ -1073,6 +1367,15 @@ export default function AdminPage() {
                   >
                     Reset Usage Count
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setActionType("delete_user")}
+                    className={`p-2 rounded-lg text-xs font-semibold border text-left col-span-2 ${
+                      actionType === "delete_user" ? "bg-rose-600 border-rose-500 text-white font-bold" : "border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                    }`}
+                  >
+                    🗑️ Permanently Delete Account (2-Step)
+                  </button>
                 </div>
               </div>
 
@@ -1092,10 +1395,30 @@ export default function AdminPage() {
                 </div>
               )}
 
+              {actionType === "delete_user" && (
+                <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-2">
+                  <p className="text-[11px] font-bold text-rose-400 uppercase tracking-wide">⚠️ 2-Step Confirmation Required</p>
+                  <p className="text-xs text-text-secondary">
+                    This action will permanently delete auth credentials, profile, stored resumes, analysis scans, and feedback messages. Financial transaction records will be anonymized to preserve GST/tax audit logs.
+                  </p>
+                  <div className="space-y-1 pt-1">
+                    <label className="text-xs font-bold text-text-primary block">
+                      Type candidate email (<span className="font-mono text-rose-400">{selectedUser.email}</span>) to confirm:
+                    </label>
+                    <Input
+                      placeholder={selectedUser.email || ""}
+                      value={confirmDeleteEmail}
+                      onChange={(e) => setConfirmDeleteEmail(e.target.value)}
+                      className="text-xs bg-surface-elevated font-mono border-rose-500/30"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="text-xs font-semibold block mb-1">Reason for Action (Audit Log)</label>
                 <Input
-                  placeholder="e.g. Paid via support chat, extended trial"
+                  placeholder="e.g. User requested deletion, test cleanup"
                   value={overrideReason}
                   onChange={(e) => setOverrideReason(e.target.value)}
                   className="text-xs bg-surface-elevated"
@@ -1107,11 +1430,25 @@ export default function AdminPage() {
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-accent hover:bg-accent-hover text-white font-bold"
-                  disabled={actionLoading}
+                  className={`flex-1 font-bold ${
+                    actionType === "delete_user"
+                      ? "bg-rose-600 hover:bg-rose-700 text-white"
+                      : "bg-accent hover:bg-accent-hover text-white"
+                  }`}
+                  disabled={
+                    actionLoading ||
+                    (actionType === "delete_user" &&
+                      confirmDeleteEmail.trim().toLowerCase() !== (selectedUser.email || "").trim().toLowerCase())
+                  }
                   onClick={handleAdminUserAction}
                 >
-                  {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Action"}
+                  {actionLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : actionType === "delete_user" ? (
+                    "Confirm Permanent Deletion"
+                  ) : (
+                    "Confirm Action"
+                  )}
                 </Button>
               </div>
             </CardContent>
