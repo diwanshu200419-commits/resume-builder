@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { logAdminAudit } from "@/lib/admin/logger";
+import { createNotification } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -93,7 +94,15 @@ export async function POST(request: NextRequest) {
           .eq("status", "pending");
       }
 
-      // Step 3: Server-Side Audit Log Entry
+      // Step 3: Dispatch In-App Notification & Audit Log Entry
+      await createNotification({
+        userId,
+        type: "payment_approved",
+        title: `Payment Verified — ${plan.toUpperCase()} Unlocked! 🎉`,
+        body: `Your payment has been verified by our admin team. All features of the ${plan.toUpperCase()} tier are now active on your account.`,
+        link: "/settings",
+      });
+
       await logAdminAudit({
         adminUserId: admin.userId,
         adminEmail: admin.email,
@@ -137,6 +146,15 @@ export async function POST(request: NextRequest) {
           .eq("user_id", userId)
           .eq("status", "pending");
       }
+
+      // Dispatch In-App Notification for rejection
+      await createNotification({
+        userId,
+        type: "payment_rejected",
+        title: "Payment Verification Notice",
+        body: `Your payment submission could not be verified. Reason: ${reason || "Invalid UTR reference number"}. Please re-check your UTR and resubmit.`,
+        link: "/checkout/pro",
+      });
 
       // Audit Log Entry for rejection
       await logAdminAudit({

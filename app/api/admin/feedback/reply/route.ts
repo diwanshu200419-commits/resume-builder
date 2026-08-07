@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { logAdminAudit } from "@/lib/admin/logger";
+import { createNotification } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,16 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
+
+    if (updated.user_id) {
+      await createNotification({
+        userId: updated.user_id,
+        type: "feedback_replied",
+        title: "Support Reply Received! 💬",
+        body: `Our support team has responded to your feedback: "${adminResponse.trim().slice(0, 100)}..."`,
+        link: "/support",
+      });
     }
 
     await logAdminAudit({

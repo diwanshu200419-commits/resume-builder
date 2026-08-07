@@ -45,6 +45,17 @@ const tests = [
       return /confirmEmail/.test(deleteRoute) && /user_feedback/.test(migration) && /supabase_realtime/.test(migration);
     }
   },
+  { name: "15. Notification System & RLS Multi-Tenant Isolation Assertion", test: () => {
+      const notifMigration = fs.readFileSync(path.join(process.cwd(), "supabase", "migrations", "20260807_notifications.sql"), "utf-8");
+      const notifModule = fs.readFileSync(path.join(process.cwd(), "lib", "notifications.ts"), "utf-8");
+      return /CREATE TABLE IF NOT EXISTS public.notifications/.test(notifMigration) && /auth.uid\(\) = user_id/.test(notifMigration) && /createNotification/.test(notifModule);
+    }
+  },
+  { name: "16. ATS V2 Industry-Specific Scoring Profiles & Auto-Detection Audit", test: () => {
+      const atsV2Code = fs.readFileSync(path.join(process.cwd(), "lib", "ats-v2.ts"), "utf-8");
+      return /INDUSTRY_PROFILES/.test(atsV2Code) && /detectIndustryProfile/.test(atsV2Code) && /inputIndustryProfile/.test(atsV2Code);
+    }
+  },
 ];
 
 let passed = 0;

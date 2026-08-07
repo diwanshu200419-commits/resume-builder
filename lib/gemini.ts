@@ -339,10 +339,11 @@ import { evaluateATSV2 } from "./ats-v2";
 
 export async function analyzeATS(
   resumeText: string,
-  jobDescription: string
+  jobDescription: string,
+  industryProfile?: any
 ): Promise<ATSAnalysisResult> {
   const domain = detectDomainFromJD(jobDescription);
-  const cacheKey = getCacheKey(`ats-v2-${domain}`, resumeText, jobDescription);
+  const cacheKey = getCacheKey(`ats-v2-${domain}-${industryProfile || "auto"}`, resumeText, jobDescription);
   const cached = getFromCache<ATSAnalysisResult>(cacheKey);
   if (cached) {
     return cached;
@@ -398,7 +399,7 @@ RESPONSE FORMAT (STRICT VALID JSON ONLY):
     console.warn("AI semantic assist warning in analyzeATS (using deterministic V2 fallback):", error);
   }
 
-  const v2Result = evaluateATSV2(resumeText, jobDescription, aiSemanticBoost);
+  const v2Result = evaluateATSV2(resumeText, jobDescription, aiSemanticBoost, industryProfile);
   if (aiSummary) {
     v2Result.summary_analysis = aiSummary;
   }

@@ -1,19 +1,83 @@
 import type { ATSAnalysisResult, ATSV2ScoreBreakdown, ATSV2RequirementMatch, ATSV2PriorityFix } from "@/types";
 
-export const ATS_SCORING_WEIGHTS = {
-  skills: 30,
-  experience: 20,
-  semantic: 15,
-  projects: 10,
-  education: 5,
-  structure: 10,
-  impact: 10,
-} as const;
+export type IndustryProfileKey = "tech" | "finance" | "marketing" | "healthcare" | "executive" | "general";
 
-// Enforce exact 100 weight validation at compile/module load
-const TOTAL_WEIGHT = Object.values(ATS_SCORING_WEIGHTS).reduce((a, b) => a + b, 0);
-if (TOTAL_WEIGHT !== 100) {
-  throw new Error(`ATS_SCORING_WEIGHTS must sum to 100, got ${TOTAL_WEIGHT}`);
+export const INDUSTRY_PROFILES: Record<
+  IndustryProfileKey,
+  {
+    name: string;
+    weights: {
+      skills: number;
+      experience: number;
+      semantic: number;
+      projects: number;
+      education: number;
+      structure: number;
+      impact: number;
+    };
+    keywords: string[];
+  }
+> = {
+  tech: {
+    name: "Tech & Software Engineering",
+    weights: { skills: 35, experience: 15, semantic: 15, projects: 15, education: 5, structure: 10, impact: 5 },
+    keywords: ["react", "node", "python", "java", "aws", "docker", "developer", "software", "api", "database", "git", "code"],
+  },
+  finance: {
+    name: "Finance, Banking & Accounting",
+    weights: { skills: 20, experience: 25, semantic: 10, projects: 5, education: 5, structure: 10, impact: 25 },
+    keywords: ["finance", "banking", "financial", "accounting", "audit", "portfolio", "investment", "equity", "p&l", "revenue", "roi", "cpa", "cfa"],
+  },
+  marketing: {
+    name: "Marketing, Growth & Creative",
+    weights: { skills: 20, experience: 15, semantic: 25, projects: 5, education: 5, structure: 10, impact: 20 },
+    keywords: ["marketing", "seo", "sem", "growth", "campaign", "social media", "content", "brand", "conversion", "cac", "funnel", "copywriting"],
+  },
+  healthcare: {
+    name: "Healthcare, Clinical & Nursing",
+    weights: { skills: 25, experience: 25, semantic: 10, projects: 5, education: 20, structure: 10, impact: 5 },
+    keywords: ["patient", "clinical", "nursing", "hospital", "medical", "healthcare", "hipaa", "treatment", "care", "doctor", "rn", "license"],
+  },
+  executive: {
+    name: "Executive & Senior Leadership",
+    weights: { skills: 15, experience: 25, semantic: 20, projects: 5, education: 5, structure: 10, impact: 20 },
+    keywords: ["director", "vp", "chief", "head of", "strategy", "roadmap", "leadership", "budget", "p&l", "governance", "cross-functional"],
+  },
+  general: {
+    name: "General / Standard Model",
+    weights: { skills: 30, experience: 20, semantic: 15, projects: 10, education: 5, structure: 10, impact: 10 },
+    keywords: [],
+  },
+};
+
+export const ATS_SCORING_WEIGHTS = INDUSTRY_PROFILES.general.weights;
+
+export function detectIndustryProfile(text: string): IndustryProfileKey {
+  const lower = text.toLowerCase();
+  let bestMatch: IndustryProfileKey = "general";
+  let maxCount = 0;
+
+  for (const [key, config] of Object.entries(INDUSTRY_PROFILES)) {
+    if (key === "general") continue;
+    let count = 0;
+    for (const kw of config.keywords) {
+      if (lower.includes(kw)) count++;
+    }
+    if (count > maxCount) {
+      maxCount = count;
+      bestMatch = key as IndustryProfileKey;
+    }
+  }
+
+  return maxCount >= 2 ? bestMatch : "general";
+}
+
+// Enforce exact 100 weight validation across all industry profiles
+for (const [profKey, profConfig] of Object.entries(INDUSTRY_PROFILES)) {
+  const sum = Object.values(profConfig.weights).reduce((a, b) => a + b, 0);
+  if (sum !== 100) {
+    throw new Error(`INDUSTRY_PROFILES weights for '${profKey}' must sum to 100, got ${sum}`);
+  }
 }
 
 // Curated technical alias mapping dictionary
@@ -95,10 +159,15 @@ export function detectCandidateContext(resumeText: string): "Fresher/Student" | 
 export function evaluateATSV2(
   resumeText: string,
   jobDescription?: string,
-  aiSemanticBoost: number = 0
+  aiSemanticBoost: number = 0,
+  inputIndustryProfile?: IndustryProfileKey
 ): ATSAnalysisResult {
   const hasJD = !!jobDescription && jobDescription.trim().length > 20;
   const candidateContext = detectCandidateContext(resumeText);
+  const industryKey: IndustryProfileKey = inputIndustryProfile || detectIndustryProfile(resumeText + " " + (jobDescription || ""));
+  const profileConfig = INDUSTRY_PROFILES[industryKey] || INDUSTRY_PROFILES.general;
+  const weights = profileConfig.weights;
+
   const resumeLower = resumeText.toLowerCase();
   const jdLower = (jobDescription || "").toLowerCase();
 
@@ -138,7 +207,7 @@ export function evaluateATSV2(
   }
 
   // ----------------------------------------------------
-  // 1. SKILLS MATCH (30 POINTS)
+  // 1. SKILLS MATCH (BASE MAX 30 -> SCALED TO weights.skills)
   // ----------------------------------------------------
   const detailedRequirements: ATSV2RequirementMatch[] = [];
   const matchedMustHaves: string[] = [];
@@ -149,11 +218,9 @@ export function evaluateATSV2(
   let skillsScoreRaw = 0;
 
   if (hasJD) {
-    // Extract potential skills/terms from JD
     const rawTerms = jdLower.match(/[a-z0-9.+#-]+(?:\s[a-z0-9.+#-]+)*/g) || [];
     const termCounts = new Map<string, number>();
 
-    // Common non-technical stopwords
     const stopwords = new Set([
       "the", "a", "an", "and", "or", "for", "with", "in", "on", "at", "to", "of",
       "required", "preferred", "experience", "work", "ability", "strong", "good",
@@ -168,7 +235,6 @@ export function evaluateATSV2(
       }
     }
 
-    // Identify Must-Have vs Preferred
     const extractedSkills = Array.from(termCounts.keys()).slice(0, 20);
 
     let mustHavePoints = 0;
@@ -176,112 +242,85 @@ export function evaluateATSV2(
     let prefPoints = 0;
     let prefMax = 0;
 
-    for (const skillNorm of extractedSkills) {
-      const isMust = /\b(required|must|essential|minimum|proficiency|strong)\b/i.test(jdLower);
-      const isPref = /\b(preferred|nice to have|plus|bonus|advantage)\b/i.test(jdLower);
-      const category: "must_have" | "preferred" = isPref && !isMust ? "preferred" : "must_have";
+    extractedSkills.forEach((skill, idx) => {
+      const isMustHave = idx < 10;
+      const termWeight = isMustHave ? 2.0 : 1.0;
 
-      // Anti-keyword stuffing & evidence confidence search
-      let matched = false;
-      let evidenceText: string | undefined;
-      let evidenceSource: "Experience" | "Projects" | "Skills" | "Education" | undefined;
-      let confidence: "STRONG" | "MEDIUM" | "WEAK" = "WEAK";
+      if (isMustHave) mustHaveMax += termWeight;
+      else prefMax += termWeight;
 
-      // Check Experience first (STRONG evidence)
-      const expLine = sectionLines.Experience.find((l) => normalizeSkill(l).includes(skillNorm));
-      if (expLine) {
-        matched = true;
-        evidenceText = expLine;
-        evidenceSource = "Experience";
-        confidence = "STRONG";
-      } else {
-        // Check Projects second (MEDIUM evidence)
-        const projLine = sectionLines.Projects.find((l) => normalizeSkill(l).includes(skillNorm));
-        if (projLine) {
-          matched = true;
-          evidenceText = projLine;
-          evidenceSource = "Projects";
-          confidence = "MEDIUM";
+      const hasExact = resumeLower.includes(skill);
+      const aliased = TECHNICAL_ALIASES[skill];
+      const hasAlias = aliased ? resumeLower.includes(aliased) : false;
+
+      const sectionMatch = sectionLines.Skills.some((l) => l.toLowerCase().includes(skill))
+        || sectionLines.Experience.some((l) => l.toLowerCase().includes(skill))
+        || sectionLines.Projects.some((l) => l.toLowerCase().includes(skill));
+
+      let matchType: "EXACT" | "SYNONYM" | "MISSING" = "MISSING";
+
+      if (hasExact) {
+        matchType = "EXACT";
+        if (isMustHave) {
+          mustHavePoints += termWeight;
+          matchedMustHaves.push(skill);
         } else {
-          // Check Skills third (WEAK evidence)
-          const skillLine = sectionLines.Skills.find((l) => normalizeSkill(l).includes(skillNorm));
-          if (skillLine || resumeLower.includes(skillNorm)) {
-            matched = true;
-            evidenceText = skillLine || skillNorm;
-            evidenceSource = "Skills";
-            confidence = "WEAK";
-          }
+          prefPoints += termWeight;
+          matchedPreferred.push(skill);
         }
+      } else if (hasAlias) {
+        matchType = "SYNONYM";
+        const partialWeight = termWeight * 0.8;
+        if (isMustHave) {
+          mustHavePoints += partialWeight;
+          matchedMustHaves.push(`${skill} (via ${aliased})`);
+        } else {
+          prefPoints += partialWeight;
+          matchedPreferred.push(`${skill} (via ${aliased})`);
+        }
+      } else {
+        if (isMustHave) missingMustHaves.push(skill);
+        else missingPreferred.push(skill);
       }
 
-      // Check for negated context (e.g. "no experience in AWS", "want to learn React")
-      if (matched && evidenceText) {
-        if (/\b(no experience|learning|want to learn|basic knowledge of|familiar with)\b/i.test(evidenceText)) {
-          confidence = "WEAK";
-        }
-      }
-
-      const displaySkill = skillNorm.toUpperCase();
       detailedRequirements.push({
-        name: displaySkill,
-        category,
-        matched,
-        evidence: evidenceText ? evidenceText.slice(0, 100) : undefined,
-        evidenceSource,
-        confidence: matched ? confidence : undefined,
+        name: skill,
+        category: isMustHave ? "must_have" : "preferred",
+        matched: matchType !== "MISSING",
+        evidenceSource: sectionMatch ? "Skills" : undefined,
       });
+    });
 
-      if (category === "must_have") {
-        mustHaveMax += 2;
-        if (matched) {
-          mustHavePoints += confidence === "STRONG" ? 2 : confidence === "MEDIUM" ? 1.5 : 1;
-          matchedMustHaves.push(displaySkill);
-        } else {
-          missingMustHaves.push(displaySkill);
-        }
-      } else {
-        prefMax += 1;
-        if (matched) {
-          prefPoints += 1;
-          matchedPreferred.push(displaySkill);
-        } else {
-          missingPreferred.push(displaySkill);
-        }
-      }
-    }
-
-    const totalMustScore = mustHaveMax > 0 ? (mustHavePoints / mustHaveMax) * 22 : 22;
-    const totalPrefScore = prefMax > 0 ? (prefPoints / prefMax) * 8 : 8;
-    skillsScoreRaw = Math.min(30, Math.round(totalMustScore + totalPrefScore));
+    const mustRatio = mustHaveMax > 0 ? mustHavePoints / mustHaveMax : 1.0;
+    const prefRatio = prefMax > 0 ? prefPoints / prefMax : 1.0;
+    skillsScoreRaw = Math.round(mustRatio * 22 + prefRatio * 8);
   } else {
-    // No JD Mode: General Technical Skill Breadth (max 30)
     const techCount = Object.keys(TECHNICAL_ALIASES).filter((k) => resumeLower.includes(k)).length;
     skillsScoreRaw = Math.min(30, Math.max(12, techCount * 3));
   }
 
   // ----------------------------------------------------
-  // 2. EXPERIENCE RELEVANCE (20 POINTS)
+  // 2. EXPERIENCE RELEVANCE (BASE MAX 20)
   // ----------------------------------------------------
-  let experienceScore = 0;
+  let experienceScoreRaw = 0;
   const isSeniorJd = /\b(senior|staff|principal|lead|architect|manager)\b/i.test(jdLower);
   const hasSenioritySignals = /\b(architected|spearheaded|led|mentored|system design|roadmap|cross-functional)\b/i.test(resumeLower);
 
   if (candidateContext === "Fresher/Student") {
-    // Fresher mode: Projects & internships substitute for job experience
     const projectBulletCount = sectionLines.Projects.length;
     const internshipCount = (resumeLower.match(/\bintern(ship)?\b/g) || []).length;
-    experienceScore = Math.min(20, Math.round(10 + projectBulletCount * 1.5 + internshipCount * 3));
+    experienceScoreRaw = Math.min(20, Math.round(10 + projectBulletCount * 1.5 + internshipCount * 3));
   } else {
     const expBulletCount = sectionLines.Experience.length;
     const baseExpScore = Math.min(16, Math.max(6, expBulletCount * 2));
     const seniorityBonus = isSeniorJd ? (hasSenioritySignals ? 4 : 0) : 4;
-    experienceScore = Math.min(20, baseExpScore + seniorityBonus);
+    experienceScoreRaw = Math.min(20, baseExpScore + seniorityBonus);
   }
 
   // ----------------------------------------------------
-  // 3. SEMANTIC / RESPONSIBILITY MATCH (15 POINTS)
+  // 3. SEMANTIC / RESPONSIBILITY MATCH (BASE MAX 15)
   // ----------------------------------------------------
-  let semanticScore = 0;
+  let semanticScoreRaw = 0;
   if (hasJD) {
     const jdVerbs = jdLower.match(/\b(build|develop|architect|design|manage|optimize|scale|deploy|lead|collaborate|test|integrate|deliver)\b/g) || [];
     const verbSet = Array.from(new Set(jdVerbs));
@@ -290,28 +329,28 @@ export function evaluateATSV2(
       if (resumeLower.includes(v)) semVerbMatches++;
     }
     const ratio = semVerbMatches / Math.max(1, verbSet.length);
-    semanticScore = Math.min(15, Math.max(4, Math.round(ratio * 12 + (aiSemanticBoost > 0 ? 3 : 2))));
+    semanticScoreRaw = Math.min(15, Math.max(4, Math.round(ratio * 12 + (aiSemanticBoost > 0 ? 3 : 2))));
   } else {
-    semanticScore = sectionLines.Summary.length > 0 ? 13 : 8;
+    semanticScoreRaw = sectionLines.Summary.length > 0 ? 13 : 8;
   }
 
   // ----------------------------------------------------
-  // 4. PROJECT & DOMAIN RELEVANCE (10 POINTS)
+  // 4. PROJECT & DOMAIN RELEVANCE (BASE MAX 10)
   // ----------------------------------------------------
   const projectCount = sectionLines.Projects.length;
-  const projectScore = candidateContext === "Fresher/Student"
+  const projectScoreRaw = candidateContext === "Fresher/Student"
     ? Math.min(10, Math.max(5, projectCount * 2.5))
     : Math.min(10, Math.max(4, projectCount * 2));
 
   // ----------------------------------------------------
-  // 5. EDUCATION & CERTIFICATIONS (5 POINTS)
+  // 5. EDUCATION & CERTIFICATIONS (BASE MAX 5)
   // ----------------------------------------------------
   const hasDegree = /\b(b\.tech|btech|b\.s\.|bs|b\.e\.|be|master|m\.s\.|ms|phd|bachelor|degree)\b/i.test(resumeLower);
-  const hasCert = /\b(certified|aws certified|certificated|coursera|udemy|license)\b/i.test(resumeLower);
-  const educationScore = hasDegree ? 5 : hasCert ? 4 : 3;
+  const hasCert = /\b(certified|aws certified|certificated|coursera|udemy|license|cpa|cfa|rn)\b/i.test(resumeLower);
+  const educationScoreRaw = hasDegree ? 5 : hasCert ? 4 : 3;
 
   // ----------------------------------------------------
-  // 6. ATS STRUCTURE & PARSABILITY (10 POINTS)
+  // 6. ATS STRUCTURE & PARSABILITY (BASE MAX 10)
   // ----------------------------------------------------
   const structuralFlags: string[] = [];
   if (!/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/.test(resumeText)) {
@@ -323,40 +362,48 @@ export function evaluateATSV2(
   if (sectionLines.Skills.length === 0 && !resumeLower.includes("skills")) {
     structuralFlags.push("Missing dedicated Skills / Core Competencies section.");
   }
-  const structureScore = Math.max(3, 10 - structuralFlags.length * 2.5);
+  const structureScoreRaw = Math.max(3, 10 - structuralFlags.length * 2.5);
 
   // ----------------------------------------------------
-  // 7. IMPACT & METRIC QUALITY (10 POINTS)
+  // 7. IMPACT & METRIC QUALITY (BASE MAX 10)
   // ----------------------------------------------------
   const metricRegex = /\b(\d+%\b|\$\d+|\d+\+|\d+x\b|\d+\s*(users|qps|ms|requests|k|m|gb|tb|hrs|days|months))\b/gi;
   const metricMatches = resumeText.match(metricRegex) || [];
   const actionVerbRegex = /\b(spearheaded|architected|engineered|reduced|increased|scaled|optimized|built|delivered|led|automated)\b/gi;
   const verbMatches = resumeText.match(actionVerbRegex) || [];
 
-  const impactScore = Math.min(10, Math.round(Math.min(5, metricMatches.length * 1.2) + Math.min(5, verbMatches.length * 1.0)));
+  const impactScoreRaw = Math.min(10, Math.round(Math.min(5, metricMatches.length * 1.2) + Math.min(5, verbMatches.length * 1.0)));
 
   // ----------------------------------------------------
-  // Authoritative Final Score Mathematics
+  // Dynamic Industry Weight Scaling Mathematics
   // ----------------------------------------------------
-  const finalScore = Math.min(100, Math.max(0, Math.round(
-    skillsScoreRaw +
+  const skillsScore = Math.round((skillsScoreRaw / 30) * weights.skills);
+  const experienceScore = Math.round((experienceScoreRaw / 20) * weights.experience);
+  const semanticScore = Math.round((semanticScoreRaw / 15) * weights.semantic);
+  const projectScore = Math.round((projectScoreRaw / 10) * weights.projects);
+  const educationScore = Math.round((educationScoreRaw / 5) * weights.education);
+  const structureScore = Math.round((structureScoreRaw / 10) * weights.structure);
+  const impactScore = Math.round((impactScoreRaw / 10) * weights.impact);
+
+  const finalScore = Math.min(100, Math.max(0,
+    skillsScore +
     experienceScore +
     semanticScore +
     projectScore +
     educationScore +
     structureScore +
     impactScore
-  )));
+  ));
 
-  // Score breakdown object
+  // Dynamic Score breakdown object matching Industry Profile
   const scoreBreakdown: ATSV2ScoreBreakdown = {
-    skills: { score: skillsScoreRaw, max: 30, label: "Skills Match" },
-    experience: { score: experienceScore, max: 20, label: "Experience Relevance" },
-    semantic: { score: semanticScore, max: 15, label: "Semantic / Responsibilities" },
-    projects: { score: projectScore, max: 10, label: "Project & Domain Relevance" },
-    education: { score: educationScore, max: 5, label: "Education & Certifications" },
-    structure: { score: structureScore, max: 10, label: "ATS Structure & Parsability" },
-    impact: { score: impactScore, max: 10, label: "Impact & Metric Quality" },
+    skills: { score: skillsScore, max: weights.skills, label: "Skills Match" },
+    experience: { score: experienceScore, max: weights.experience, label: "Experience Relevance" },
+    semantic: { score: semanticScore, max: weights.semantic, label: "Semantic / Responsibilities" },
+    projects: { score: projectScore, max: weights.projects, label: "Project & Domain Relevance" },
+    education: { score: educationScore, max: weights.education, label: "Education & Certifications" },
+    structure: { score: structureScore, max: weights.structure, label: "ATS Structure & Parsability" },
+    impact: { score: impactScore, max: weights.impact, label: "Impact & Metric Quality" },
   };
 
   // Top 3 Priority Fixes
@@ -448,5 +495,6 @@ export function evaluateATSV2(
     confidence,
     confidence_reason: confidenceReason,
     candidate_context: candidateContext,
+    industry_profile: industryKey,
   };
 }

@@ -1,78 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
-import { getProfile } from "@/lib/auth";
-import { getCareerProfile } from "@/lib/ai-engine/career-memory";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function GET(request: NextRequest) {
   try {
-    const profile = await getProfile();
-    const targetRole = "Software Engineer";
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    const defaultNotifications = [
-      {
-        id: "trend-1",
-        type: "trend",
-        message: `New trending skills for ${targetRole}: AI Agents, System Architecture, Next.js`,
-        cta: "Update Resume",
-        link: "/analyze"
-      },
-      {
-        id: "score-1",
-        type: "info",
-        message: "Your monthly Career Growth Report is ready!",
-        cta: "View Report",
-        link: "/dashboard"
-      }
-    ];
-
-    try {
-      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
-      if (!apiKey) return NextResponse.json({ notifications: defaultNotifications });
-
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-      const prompt = `Act as a tech market trend analyst. For the role of "${targetRole}", identify 3 trending skills that are becoming popular. Return as JSON array of strings.`;
-      
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
-      const trends = jsonMatch ? JSON.parse(jsonMatch[0]) : ["AI Agents", "System Architecture", "Next.js"];
-
-      return NextResponse.json({
-        notifications: [
-          {
-            id: "trend-1",
-            type: "trend",
-            message: `New trending skills for ${targetRole}: ${trends.join(", ")}`,
-            cta: "Update Resume",
-            link: "/analyze"
-          },
-          {
-            id: "score-1",
-            type: "info",
-            message: "Your monthly Career Growth Report is ready!",
-            cta: "View Report",
-            link: "/dashboard"
-          }
-        ]
-      });
-    } catch {
-      return NextResponse.json({ notifications: defaultNotifications });
+    if (!user) {
+      return NextResponse.json({ notifications: [], unreadCount: 0 });
     }
-  } catch (error) {
-    return NextResponse.json({
-      notifications: [
-        {
-          id: "trend-1",
-          type: "trend",
-          message: "New trending skills for Software Engineer: AI Agents, System Architecture, Next.js",
-          cta: "Update Resume",
-          link: "/analyze"
-        }
-      ]
-    });
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error("[Notifications GET Error]:", error.message);
+      return NextResponse.json({ notifications: [], unreadCount: 0 });
+    }
+
+    const notifications = data || [];
+    const unreadCount = notifications.filter((n) => !n.read_at).length;
+
+    return NextResponse.json({ notifications, unreadCount });
+  } catch (err: any) {
+    console.error("[Notifications GET Exception]:", err);
+    return NextResponse.json({ notifications: [], unreadCount: 0 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const { id, markAllRead } = body;
+    const now = new Date().toISOString();
+
+    if (markAllRead) {
+      await supabase
+        .from("notifications")
+        .update({ read_at: now })
+        .eq("user_id", user.id)
+        .is("read_at", null);
+
+      return NextResponse.json({ success: true, message: "All notifications marked as read." });
+    }
+
+    if (id) {
+      await supabase
+        .from("notifications")
+        .update({ read_at: now })
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      return NextResponse.json({ success: true, message: "Notification marked as read." });
+    }
+
+    return NextResponse.json({ error: "Missing notification id or markAllRead flag" }, { status: 400 });
+  } catch (err: any) {
+    console.error("[Notifications PATCH Exception]:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

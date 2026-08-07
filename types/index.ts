@@ -71,13 +71,13 @@ export interface Analysis {
 }
 
 export interface ATSV2ScoreBreakdown {
-  skills: { score: number; max: 30; label: string };
-  experience: { score: number; max: 20; label: string };
-  semantic: { score: number; max: 15; label: string };
-  projects: { score: number; max: 10; label: string };
-  education: { score: number; max: 5; label: string };
-  structure: { score: number; max: 10; label: string };
-  impact: { score: number; max: 10; label: string };
+  skills: { score: number; max: number; label: string };
+  experience: { score: number; max: number; label: string };
+  semantic: { score: number; max: number; label: string };
+  projects: { score: number; max: number; label: string };
+  education: { score: number; max: number; label: string };
+  structure: { score: number; max: number; label: string };
+  impact: { score: number; max: number; label: string };
 }
 
 export interface ATSV2RequirementMatch {
@@ -127,6 +127,7 @@ export interface ATSAnalysisResult {
   confidence?: "HIGH" | "MEDIUM" | "LOW";
   confidence_reason?: string;
   candidate_context?: "Fresher/Student" | "Early Career" | "Experienced" | "Senior/Lead";
+  industry_profile?: "tech" | "finance" | "marketing" | "healthcare" | "executive" | "general";
 }
 
 export interface OptimizationResult {

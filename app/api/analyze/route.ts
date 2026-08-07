@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
       }
 
       const { resumeText, jobDescription, jobTitle } = validation.data;
+      const industry = body.industry || undefined;
 
       const analysisId = `ans-${Date.now()}`;
       let dbAnalysisId = analysisId;
@@ -117,8 +118,8 @@ export async function POST(request: NextRequest) {
         }
       } catch {}
 
-      // Run AI evaluation with resilient fallbacks
-      const atsResult = await analyzeATS(resumeText, jobDescription);
+      // Run AI evaluation with resilient fallbacks & industry profile
+      const atsResult = await analyzeATS(resumeText, jobDescription, industry);
       const optimization = await optimizeResume(
         resumeText,
         jobDescription,

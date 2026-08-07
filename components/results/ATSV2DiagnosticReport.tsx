@@ -16,6 +16,7 @@ interface ATSV2DiagnosticReportProps {
   confidence?: "HIGH" | "MEDIUM" | "LOW";
   confidenceReason?: string;
   candidateContext?: string;
+  industryProfile?: string;
 }
 
 export function ATSV2DiagnosticReport({
@@ -28,6 +29,7 @@ export function ATSV2DiagnosticReport({
   confidence = "HIGH",
   confidenceReason,
   candidateContext = "Experienced",
+  industryProfile = "general",
 }: ATSV2DiagnosticReportProps) {
   if (!scoreBreakdown) return null;
 
@@ -41,16 +43,28 @@ export function ATSV2DiagnosticReport({
     { key: "impact", data: scoreBreakdown.impact, icon: Award, color: "text-rose-400" },
   ];
 
+  const industryLabels: Record<string, string> = {
+    tech: "Tech & Engineering",
+    finance: "Finance & Banking",
+    marketing: "Marketing & Growth",
+    healthcare: "Healthcare & Medical",
+    executive: "Executive & Leadership",
+    general: "General Model",
+  };
+
   return (
     <div className="space-y-6">
-      {/* Top Banner: Candidate Context & Evaluation Confidence */}
+      {/* Top Banner: Candidate Context, Industry Profile & Evaluation Confidence */}
       <div className="p-4 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="border-indigo-500/40 text-indigo-400 bg-indigo-500/10">
             Context: {candidateContext}
           </Badge>
+          <Badge variant="outline" className="border-purple-500/40 text-purple-400 bg-purple-500/10 uppercase font-mono">
+            Profile: {industryLabels[industryProfile] || industryProfile.toUpperCase()}
+          </Badge>
           <span className="text-text-muted">|</span>
-          <span className="text-text-secondary font-medium">ATS V2 Engine Evaluation</span>
+          <span className="text-text-secondary font-medium">ATS V2 Dynamic Scoring Engine</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-text-muted">Score Confidence:</span>

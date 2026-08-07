@@ -39,7 +39,7 @@ export function NotificationCenter() {
   const supabaseRef = useRef(createClient());
   const channelRef = useRef<any>(null);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n: any) => !n.read && !n.read_at).length;
 
   const fetchNotifications = async () => {
     const supabase = supabaseRef.current;
