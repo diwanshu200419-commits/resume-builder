@@ -39,18 +39,23 @@ export default function SignupForm() {
   const [successState, setSuccessState] = useState<null | "verify" | null>(null);
 
   const mapSignupError = (message: string): string => {
+    if (!message) return "Signup failed. Please try again.";
     const lower = message.toLowerCase();
     if (
       lower.includes("already registered") ||
       lower.includes("user already exists") ||
-      lower.includes("already exists")
+      lower.includes("already exists") ||
+      lower.includes("user_already_exists")
     ) {
       return "An account with this email already exists. Please log in.";
     }
-    if (lower.includes("weak password") || lower.includes("password")) {
+    if (lower.includes("rate limit") || lower.includes("rate_limit") || lower.includes("too many requests")) {
+      return "Too many signup attempts. Please wait a moment or try signing up with Google.";
+    }
+    if (lower.includes("weak password") || lower.includes("password should be")) {
       return "Password must be at least 6 characters.";
     }
-    return "Signup failed. Please try again.";
+    return message;
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
