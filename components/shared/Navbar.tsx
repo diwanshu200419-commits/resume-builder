@@ -47,17 +47,8 @@ export function Navbar() {
           setProfile({ plan: "free" });
         }
       } else {
-        const hasMockSession = typeof document !== "undefined" && document.cookie.includes("mock-session-id=");
-        if (hasMockSession) {
-          setUser({
-            email: "candidate@vaylo.ai",
-            user_metadata: { full_name: "Demo Candidate" },
-          });
-          setProfile({ plan: "pro" });
-        } else {
-          setUser(null);
-          setProfile(null);
-        }
+        setUser(null);
+        setProfile(null);
       }
     } catch {
       setUser(null);
