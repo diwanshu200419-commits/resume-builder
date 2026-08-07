@@ -70,8 +70,9 @@ export default function SignupForm() {
     try {
       const supabase = createClient();
 
+      const finalEmail = email.toLowerCase().trim();
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email: email.toLowerCase().trim(),
+        email: finalEmail,
         password,
         options: {
           data: { full_name: fullName },
@@ -85,16 +86,36 @@ export default function SignupForm() {
         return;
       }
 
-      const { data: sessionData } = await supabase.auth.getSession();
-      const hasValidSession = !!sessionData?.session?.user;
-
-      if (hasValidSession) {
+      // 1. Direct session returned by signUp
+      if (data?.session) {
         router.replace(nextPath);
         router.refresh();
-      } else {
-        setSuccessState("verify");
-        setLoading(false);
+        return;
       }
+
+      // 2. Attempt immediate sign-in if project has email auto-confirmation
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: finalEmail,
+        password,
+      });
+
+      if (!signInError && signInData?.session) {
+        router.replace(nextPath);
+        router.refresh();
+        return;
+      }
+
+      // 3. Check client session state
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session?.user) {
+        router.replace(nextPath);
+        router.refresh();
+        return;
+      }
+
+      // 4. Fallback to verification notice if email confirmation is enforced
+      setSuccessState("verify");
+      setLoading(false);
     } catch (err: any) {
       setLoading(false);
       setError(mapSignupError(err?.message || ""));
