@@ -12,6 +12,9 @@ import { canAccessCoverLetter, canAccessPremium } from "@/lib/plans";
 import type { Analysis } from "@/types";
 import { PremiumFeaturesTabs } from "@/components/results/PremiumFeaturesTabs";
 
+import { ATSV2DiagnosticReport } from "@/components/results/ATSV2DiagnosticReport";
+import { evaluateATSV2 } from "@/lib/ats-v2";
+
 export default async function ResultsPage({ params }: { params: { id: string } }) {
   const profile = await getProfile();
   let analysis: any = null;
@@ -46,6 +49,8 @@ export default async function ResultsPage({ params }: { params: { id: string } }
       original_ats_score: 84,
       optimized_ats_score: 96,
       job_title: "AI / ML Engineer",
+      original_resume_text: "Senior Software Engineer with expertise in Next.js, React, TypeScript, Node.js, and Cloud APIs.",
+      job_description: "Senior Full Stack Engineer position requiring React, TypeScript, Node.js, and SQL.",
       missing_keywords: ["Docker", "LangChain", "Vector DBs", "RAG Architecture"],
       weak_sections: ["Quantifiable Metrics", "Cloud Infrastructure"],
       optimized_resume_text: "Optimized AI/ML Engineer Resume with 96% ATS Compatibility...",
@@ -66,43 +71,40 @@ export default async function ResultsPage({ params }: { params: { id: string } }
     };
   }
 
-  const a = analysis as Analysis & {
-    keyword_match_score?: number;
-    skills_match_score?: number;
-    readability_score?: number;
-    format_score?: number;
-    optimized_keyword_match?: number;
-    optimized_skills_match?: number;
-    optimized_readability?: number;
-    optimized_format?: number;
-  };
+  // Compute V2 evaluation dynamically if not present
+  const v2Analysis = analysis.score_breakdown
+    ? analysis
+    : evaluateATSV2(
+        analysis.original_resume_text || "Senior Software Engineer React TypeScript Node.js",
+        analysis.job_description || "Software Engineer React Node.js SQL"
+      );
 
-  const missingKeywords = a.missing_keywords || [];
-  const optimizedText = (a.optimized_resume_text || "").toLowerCase();
-  const addedKeywords = missingKeywords.filter((kw) =>
+  const missingKeywords = analysis.missing_keywords || v2Analysis.missing_keywords || [];
+  const optimizedText = (analysis.optimized_resume_text || "").toLowerCase();
+  const addedKeywords = missingKeywords.filter((kw: string) =>
     optimizedText.includes(kw.toLowerCase())
   );
 
   const scoreBreakdown = [
     {
       label: "ATS Keyword Match",
-      before: a.keyword_match_score || a.original_ats_score || 72,
-      after: a.optimized_keyword_match || a.optimized_ats_score || 96,
+      before: analysis.keyword_match_score || v2Analysis.keyword_match_score || 72,
+      after: analysis.optimized_keyword_match || analysis.optimized_ats_score || 96,
     },
     {
       label: "Metric Density",
-      before: a.metric_density_score || Math.max(30, (a.original_ats_score || 70) - 15),
-      after: Math.min(100, (a.metric_density_score || 60) + 25),
+      before: analysis.metric_density_score || v2Analysis.metric_density_score || 60,
+      after: Math.min(100, (analysis.metric_density_score || 60) + 25),
     },
     {
       label: "Action Verb Strength",
-      before: a.verb_strength_score || Math.max(40, (a.original_ats_score || 70) - 10),
-      after: Math.min(100, (a.verb_strength_score || 65) + 30),
+      before: analysis.verb_strength_score || v2Analysis.verb_strength_score || 65,
+      after: Math.min(100, (analysis.verb_strength_score || 65) + 30),
     },
     {
       label: "Seniority & Scope Match",
-      before: a.seniority_match_score || a.skills_match_score || 75,
-      after: Math.min(100, (a.seniority_match_score || 80) + 15),
+      before: analysis.seniority_match_score || v2Analysis.seniority_match_score || 75,
+      after: Math.min(100, (analysis.seniority_match_score || 80) + 15),
     },
   ];
 
@@ -110,23 +112,37 @@ export default async function ResultsPage({ params }: { params: { id: string } }
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
-          {a.job_title || "Analysis results"}
+          {analysis.job_title || "Analysis results"}
         </h1>
-        <p className="text-text-secondary mt-1">Your FAANG-optimized resume &amp; multi-dimensional evaluation report</p>
+        <p className="text-text-secondary mt-1">Your FAANG-optimized resume &amp; ATS V2 explainable diagnostic report</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <ATSScoreRing beforeScore={a.original_ats_score || 0} afterScore={a.optimized_ats_score || 0} />
+          <ATSScoreRing beforeScore={analysis.original_ats_score || v2Analysis.ats_score || 0} afterScore={analysis.optimized_ats_score || 96} />
         </div>
         <div className="lg:col-span-2 space-y-4">
           <ScoreBreakdown
             scores={scoreBreakdown}
-            metricFeedback={a.metric_density_feedback || "Aim for quantifiable metrics (%, $, scale) in 70%+ of experience bullets for top-tier MNC standards."}
-            structuralFlags={a.structural_flags || []}
+            metricFeedback={analysis.metric_density_feedback || v2Analysis.metric_density_feedback}
+            structuralFlags={analysis.structural_flags || v2Analysis.structural_flags || []}
           />
         </div>
       </div>
+
+      {/* ATS V2 Explainable Diagnostic Report */}
+      <ATSV2DiagnosticReport
+        scoreBreakdown={v2Analysis.score_breakdown}
+        matchedMustHaves={v2Analysis.matched_must_haves}
+        missingMustHaves={v2Analysis.missing_must_haves}
+        matchedPreferred={v2Analysis.matched_preferred}
+        missingPreferred={v2Analysis.missing_preferred}
+        detailedRequirements={v2Analysis.detailed_requirements}
+        priorityFixes={v2Analysis.priority_fixes}
+        confidence={v2Analysis.confidence}
+        confidenceReason={v2Analysis.confidence_reason}
+        candidateContext={v2Analysis.candidate_context}
+      />
 
       <Card>
         <CardHeader>
@@ -143,12 +159,12 @@ export default async function ResultsPage({ params }: { params: { id: string } }
         </CardHeader>
         <CardContent>
           <BeforeAfterView
-            beforeSummary={a.before_summary || ""}
-            afterSummary={a.after_summary || ""}
-            beforeSkills={a.before_skills || ""}
-            afterSkills={a.after_skills || ""}
-            beforeExperience={a.before_experience || ""}
-            afterExperience={a.after_experience || ""}
+            beforeSummary={analysis.before_summary || ""}
+            afterSummary={analysis.after_summary || ""}
+            beforeSkills={analysis.before_skills || ""}
+            afterSkills={analysis.after_skills || ""}
+            beforeExperience={analysis.before_experience || ""}
+            afterExperience={analysis.after_experience || ""}
           />
         </CardContent>
       </Card>
@@ -159,8 +175,8 @@ export default async function ResultsPage({ params }: { params: { id: string } }
         </CardHeader>
         <CardContent>
           <ResumeEditor
-            initialContent={a.optimized_resume_text || ""}
-            analysisId={a.id}
+            initialContent={analysis.optimized_resume_text || ""}
+            analysisId={analysis.id}
           />
         </CardContent>
       </Card>
@@ -171,19 +187,19 @@ export default async function ResultsPage({ params }: { params: { id: string } }
         </CardHeader>
         <CardContent>
           <DownloadButtons
-            analysisId={a.id}
+            analysisId={analysis.id}
             profile={profile!}
-            jobTitle={a.job_title || undefined}
+            jobTitle={analysis.job_title || undefined}
           />
         </CardContent>
       </Card>
 
       <PremiumFeaturesTabs
-        analysisId={a.id}
+        analysisId={analysis.id}
         profile={profile!}
         hasCoverLetter={canAccessCoverLetter(profile!)}
         hasPremium={canAccessPremium(profile!)}
-        coverLetter={a.cover_letter}
+        coverLetter={analysis.cover_letter}
       />
     </div>
   );

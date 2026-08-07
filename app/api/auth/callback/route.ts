@@ -2,26 +2,54 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const type = searchParams.get("type");
+  const next = searchParams.get("next");
+
+  let validatedNext = "/dashboard";
+
+  if (
+    next &&
+    typeof next === "string" &&
+    next.startsWith("/") &&
+    !next.startsWith("//") &&
+    !next.startsWith("/http")
+  ) {
+    validatedNext = next;
+  }
+
+  if (type === "recovery") {
+    const recoveryPath = next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/http") ? next : "/settings";
+    validatedNext = recoveryPath;
+  }
 
   if (code) {
     try {
       const supabase = await createClient();
       await supabase.auth.exchangeCodeForSession(code);
-    } catch {}
+    } catch (error) {
+      console.error("Auth callback: error exchanging code for session:", error);
+    }
   }
 
-  // Target redirect URL
-  const targetUrl = redirect.includes("?") ? `${origin}${redirect}&authed=true` : `${origin}${redirect}?authed=true`;
+  try {
+    const supabase = await createClient();
+    const { data, error: userError } = await supabase.auth.getUser();
 
-  const response = NextResponse.redirect(targetUrl);
-  response.cookies.set("mock-session-id", `google-user-${Date.now()}`, {
-    path: "/",
-    maxAge: 60 * 60 * 24 * 365,
-    sameSite: "lax",
-  });
+    if (!userError && data?.user) {
+      try {
+        await supabase
+          .from("profiles")
+          .update({ last_seen_at: new Date().toISOString() })
+          .eq("id", data.user.id);
+      } catch (profileError) {
+        console.error("Auth callback: error updating last_seen_at:", profileError);
+      }
+    }
+  } catch (getUserError) {
+    console.error("Auth callback: error getting user:", getUserError);
+  }
 
-  return response;
+  return NextResponse.redirect(new URL(validatedNext, request.url));
 }

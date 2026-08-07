@@ -1,4 +1,4 @@
-export type Plan = "free" | "pro" | "premium" | "career-pack";
+export type Plan = "free" | "pro" | "premium" | "career-pack" | "career_pack";
 export type PaymentStatus = "pending" | "completed" | "expired" | "rejected";
 export type SubscriptionStatus = "active" | "expired" | "cancelled" | "pending";
 
@@ -20,6 +20,16 @@ export interface Profile {
   last_seen_at?: string | null;
   created_at: string;
   updated_at: string;
+  phone?: string | null;
+  location?: string | null;
+  headline?: string | null;
+  current_role?: string | null;
+  target_role?: string | null;
+  experience_level?: string | null;
+  industry?: string | null;
+  skills?: string[] | null;
+  preferred_location?: string | null;
+  onboarding_completed?: boolean | null;
 }
 
 export interface Analysis {
@@ -60,6 +70,33 @@ export interface Analysis {
   created_at: string;
 }
 
+export interface ATSV2ScoreBreakdown {
+  skills: { score: number; max: 30; label: string };
+  experience: { score: number; max: 20; label: string };
+  semantic: { score: number; max: 15; label: string };
+  projects: { score: number; max: 10; label: string };
+  education: { score: number; max: 5; label: string };
+  structure: { score: number; max: 10; label: string };
+  impact: { score: number; max: 10; label: string };
+}
+
+export interface ATSV2RequirementMatch {
+  name: string;
+  category: "must_have" | "preferred";
+  matched: boolean;
+  evidence?: string;
+  evidenceSource?: "Experience" | "Projects" | "Skills" | "Education";
+  confidence?: "STRONG" | "MEDIUM" | "WEAK";
+}
+
+export interface ATSV2PriorityFix {
+  rank: number;
+  title: string;
+  recommendation: string;
+  estimatedImpact: "HIGH" | "MEDIUM" | "LOW";
+  category: string;
+}
+
 export interface ATSAnalysisResult {
   ats_score: number;
   keyword_match_score: number;
@@ -76,6 +113,20 @@ export interface ATSAnalysisResult {
   weak_sections: string[];
   match_percentage: number;
   summary_analysis: string;
+
+  // ATS V2 Properties
+  ats_version?: "v1" | "v2";
+  analysis_type?: "JOB_MATCH" | "RESUME_QUALITY";
+  score_breakdown?: ATSV2ScoreBreakdown;
+  matched_must_haves?: string[];
+  missing_must_haves?: string[];
+  matched_preferred?: string[];
+  missing_preferred?: string[];
+  detailed_requirements?: ATSV2RequirementMatch[];
+  priority_fixes?: ATSV2PriorityFix[];
+  confidence?: "HIGH" | "MEDIUM" | "LOW";
+  confidence_reason?: string;
+  candidate_context?: "Fresher/Student" | "Early Career" | "Experienced" | "Senior/Lead";
 }
 
 export interface OptimizationResult {
@@ -146,4 +197,5 @@ export const PLAN_LIMITS = {
   pro: { analyses: Infinity, price: 99 },
   premium: { analyses: Infinity, price: 299 },
   "career-pack": { analyses: Infinity, price: 499 },
+  career_pack: { analyses: Infinity, price: 499 },
 } as const;

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { TrendingUp, Target, Award, Briefcase, Linkedin } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -42,16 +44,44 @@ export function CareerScoreCard() {
     );
   }
 
-  const defaultCurrent = {
-    overall_score: 75,
-    resume_score: 80,
-    skills_score: 72,
-    experience_score: 75,
-    linkedin_score: 70,
-  };
+  const current = report?.current;
+  const hasValidReport = current && typeof current.overall_score === "number";
 
-  const current = report?.current || defaultCurrent;
-  const growth = report?.growth || "+5%";
+  if (!hasValidReport) {
+    return (
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="border-border/80 bg-surface">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-text-secondary flex items-center gap-2">
+              <Award className="w-4 h-4 text-accent" />
+              Career Score
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-2 max-w-md">
+                <p className="text-sm text-text-primary">
+                  Complete your profile and run analyses to calculate your career score.
+                </p>
+                <p className="text-xs text-text-muted">
+                  We&apos;ll benchmark resume, skills, experience, and LinkedIn readiness.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button asChild size="sm">
+                  <Link href="/profile">
+                    Calculate my score →
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const growth = report?.growth;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -65,9 +95,11 @@ export function CareerScoreCard() {
         <CardContent>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-bold text-text-primary">{current.overall_score}</span>
-            <span className="text-sm text-success font-medium flex items-center gap-0.5">
-              <TrendingUp className="w-3 h-3" /> {growth}
-            </span>
+            {growth && (
+              <span className="text-sm text-success font-medium flex items-center gap-0.5">
+                <TrendingUp className="w-3 h-3" /> {growth}
+              </span>
+            )}
           </div>
           <Progress value={current.overall_score} className="h-2 mt-4" />
           <p className="text-xs text-text-muted mt-4">
@@ -83,30 +115,38 @@ export function CareerScoreCard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-text-muted">
-              <Target className="w-3 h-3" /> Resume
+          {typeof current.resume_score === "number" && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                <Target className="w-3 h-3" /> Resume
+              </div>
+              <div className="text-lg font-semibold text-text-primary">{current.resume_score}%</div>
             </div>
-            <div className="text-lg font-semibold text-text-primary">{current.resume_score}%</div>
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-text-muted">
-              <Award className="w-3 h-3" /> Skills
+          )}
+          {typeof current.skills_score === "number" && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                <Award className="w-3 h-3" /> Skills
+              </div>
+              <div className="text-lg font-semibold text-text-primary">{current.skills_score}%</div>
             </div>
-            <div className="text-lg font-semibold text-text-primary">{current.skills_score}%</div>
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-text-muted">
-              <Briefcase className="w-3 h-3" /> Experience
+          )}
+          {typeof current.experience_score === "number" && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                <Briefcase className="w-3 h-3" /> Experience
+              </div>
+              <div className="text-lg font-semibold text-text-primary">{current.experience_score}%</div>
             </div>
-            <div className="text-lg font-semibold text-text-primary">{current.experience_score}%</div>
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-text-muted">
-              <Linkedin className="w-3 h-3" /> LinkedIn
+          )}
+          {typeof current.linkedin_score === "number" && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                <Linkedin className="w-3 h-3" /> LinkedIn
+              </div>
+              <div className="text-lg font-semibold text-text-primary">{current.linkedin_score}%</div>
             </div>
-            <div className="text-lg font-semibold text-text-primary">{current.linkedin_score}%</div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>

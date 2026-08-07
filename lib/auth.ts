@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import type { Profile } from "@/types";
 
@@ -15,38 +15,58 @@ export async function getUser() {
 }
 
 export async function getProfile(): Promise<Profile | null> {
-  const user = await getUser();
+  let user;
+  try {
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    user = authUser;
+  } catch (err) {
+    console.error("[auth] getProfile getUser failed:", err);
+    return null;
+  }
+
   if (!user) return null;
+
+  let profile: Profile | null = null;
 
   try {
     const supabase = await createClient();
-    const { data: profile, error } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
-      .single();
+      .limit(1);
 
     if (error) {
-      // Log the actual error instead of silently swallowing it
       console.error("[auth] getProfile DB error:", error.message, "| code:", error.code);
+      return null;
     }
 
-    if (profile) return profile as Profile;
+    if (data && data.length > 0) {
+      const row = data[0];
+      profile = {
+        ...row,
+        email: row.email || user.email || null,
+      } as Profile;
+    }
   } catch (err) {
-    console.error("[auth] getProfile exception:", err);
+    console.error("[auth] getProfile DB exception:", err);
+    return null;
   }
 
-  // Fallback: return a FREE-tier profile, not "pro".
-  // This ensures that if the DB is unreachable or the profiles table
-  // doesn't exist, users get the most restrictive tier — not a free pass.
-  // The fallback plan MUST be "free" so tier-gated features are blocked.
-  return {
+  if (profile) return profile;
+
+  // Edge case: handle_new_user trigger failed to create a profiles row.
+  // Try to insert one via service role if available, otherwise return
+  // a minimal in-memory Profile derived from auth metadata only.
+  const now = new Date().toISOString();
+  const minimalProfile: Profile = {
     id: user.id,
     email: user.email || null,
     full_name: user.user_metadata?.full_name || null,
     avatar_url: user.user_metadata?.avatar_url || null,
     plan: "free",
-    role: null,
+    role: "user",
     analyses_used: 0,
     analyses_limit: 2,
     current_period_start: null,
@@ -54,7 +74,35 @@ export async function getProfile(): Promise<Profile | null> {
     subscription_status: null,
     total_ats_checks: 0,
     total_resume_downloads: 0,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  } as Profile;
+    created_at: now,
+    updated_at: now,
+    phone: null,
+    location: null,
+    headline: null,
+    current_role: null,
+    target_role: null,
+    experience_level: null,
+    industry: null,
+    skills: null,
+    preferred_location: null,
+    onboarding_completed: null,
+  };
+
+  try {
+    const serviceClient = await createServiceClient();
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+    if (serviceRoleKey) {
+      const { error: insertError } = await serviceClient
+        .from("profiles")
+        .insert(minimalProfile);
+
+      if (insertError) {
+        console.error("[auth] getProfile service-role insert failed:", insertError.message);
+      }
+    }
+  } catch (err) {
+    console.error("[auth] getProfile service-role exception:", err);
+  }
+
+  return minimalProfile;
 }

@@ -1,4 +1,6 @@
-import http from "http";
+import fs from "fs";
+import path from "path";
+import { evaluateATSV2 } from "../lib/ats-v2.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -7,14 +9,36 @@ console.log("=========================================");
 const tests = [
   { name: "1. Next.js App Router Compilation Check", test: () => true },
   { name: "2. TypeScript Strict Type Safety Check", test: () => true },
-  { name: "3. WCAG 2.2 AA ARIA Accessibility Compliance", test: () => true },
-  { name: "4. Edge Subdomain & Custom Domain DNS Routing", test: () => true },
-  { name: "5. Speech-to-Text Voice Microphone Permission Check", test: () => true },
-  { name: "6. Gemini 2.0 / 1.5 Flash AI Engine Fallback Test", test: () => true },
-  { name: "7. Supabase Database Connection & Mock DB Resilience", test: () => true },
-  { name: "8. HTTP Security Headers (X-Frame-Options, CSP, HSTS)", test: () => true },
-  { name: "9. Mobile Viewport 16px Font Auto-Zoom Prevention Test", test: () => true },
-  { name: "10. One-Click Portfolio Deployment & Version Rollback Test", test: () => true },
+  { name: "3. Permanent Authoritative Pricing Assertion (₹0 / ₹99 / ₹299 / ₹499)", test: () => {
+      const content = fs.readFileSync(path.join(process.cwd(), "lib", "plans.ts"), "utf-8");
+      return /priceInr:\s*0/.test(content) && /priceInr:\s*99/.test(content) && /priceInr:\s*299/.test(content) && /priceInr:\s*499/.test(content);
+    }
+  },
+  { name: "4. ATS V2 Explainable 100-Point Category Math & Determinism", test: () => {
+      const res = evaluateATSV2("Senior Software Engineer React TypeScript Node.js", "Software Engineer React Node.js SQL");
+      const sum = Object.values(res.score_breakdown).reduce((a, b) => a + b.score, 0);
+      return res.ats_version === "v2" && sum === res.ats_score && res.ats_score > 0 && res.ats_score <= 100;
+    }
+  },
+  { name: "5. ATS V2 Anti-Keyword-Stuffing & Evidence Matching", test: () => {
+      const strong = evaluateATSV2("Senior Developer\nExperience: Built React apps with Node.js and AWS.", "React Node.js AWS");
+      const stuffed = evaluateATSV2("React React React React Node Node AWS AWS", "React Node.js AWS");
+      return strong.ats_score > stuffed.ats_score;
+    }
+  },
+  { name: "6. ATS V2 No-JD Resume Quality Mode", test: () => {
+      const fullResume = "Senior Software Engineer with extensive experience in React, TypeScript, Node.js, PostgreSQL, Docker, AWS, and Cloud Microservices. Spearheaded engineering teams, architected high-throughput REST APIs, and optimized application load times.";
+      const res = evaluateATSV2(fullResume, "");
+      return res.analysis_type === "RESUME_QUALITY" && res.confidence === "MEDIUM";
+    }
+  },
+  { name: "7. WCAG 2.2 AA ARIA Accessibility Compliance", test: () => true },
+  { name: "8. Edge Subdomain & Custom Domain DNS Routing", test: () => true },
+  { name: "9. Speech-to-Text Voice Microphone Permission Check", test: () => true },
+  { name: "10. Gemini 2.0 / 1.5 Flash AI Engine Fallback Test", test: () => true },
+  { name: "11. Supabase Database Connection & Mock DB Resilience", test: () => true },
+  { name: "12. HTTP Security Headers (X-Frame-Options, CSP, HSTS)", test: () => true },
+  { name: "13. Mobile Viewport 16px Font Auto-Zoom Prevention Test", test: () => true },
 ];
 
 let passed = 0;

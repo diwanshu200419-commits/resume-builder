@@ -5,15 +5,47 @@ import { createClient } from "@/lib/supabase/server";
 import { StatsBar } from "@/components/dashboard/StatsBar";
 import { AnalysisCard } from "@/components/dashboard/AnalysisCard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileSearch, ArrowRight, Target, Flame, Compass, Laptop, Layout, Sparkles } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import {
+  FileSearch,
+  ArrowRight,
+  Target,
+  Flame,
+  Compass,
+  Laptop,
+  Layout,
+  Sparkles,
+  UserCircle2,
+  Upload,
+  Crosshair,
+  ClipboardCheck,
+  CheckCircle2,
+  Palette,
+  GraduationCap,
+  Eye,
+  Zap,
+  FileText,
+} from "lucide-react";
 import type { Analysis } from "@/types";
 import { UpgradeHandler } from "@/components/dashboard/UpgradeHandler";
 import { CareerScoreCard } from "@/components/dashboard/CareerScoreCard";
 import { NotificationBar } from "@/components/dashboard/NotificationBar";
 import { AIFeed } from "@/components/dashboard/AIFeed";
 import { formatDate, getScoreColor } from "@/lib/utils";
+
+function calculateProfileStrength(p: any): number {
+  let count = 0;
+  if (p.full_name && p.full_name.trim().length > 1) count++;
+  if (p.target_role && p.target_role.trim().length > 0) count++;
+  if (p.experience_level && p.experience_level.trim().length > 0) count++;
+  const hasSkills = Array.isArray(p.skills) ? p.skills.length > 0 : p.skills && String(p.skills).trim().length > 0;
+  if (hasSkills) count++;
+  if (p.location && p.location.trim().length > 0) count++;
+  if (p.headline && p.headline.trim().length > 0) count++;
+  return Math.round((count / 6) * 100);
+}
 
 export default async function DashboardPage() {
   const profile = await getProfile();
@@ -32,55 +64,247 @@ export default async function DashboardPage() {
 
   const analysisList = (analyses || []) as Analysis[];
 
+  const profileStrength = calculateProfileStrength(profile);
+  const isNewUser =
+    analysisList.length === 0 &&
+    profileStrength < 60 &&
+    (!profile.onboarding_completed || profileStrength < 40);
+
   const tools = [
     {
-      title: "AI Job Matcher",
-      desc: "Audit your compatibility against target JDs",
-      href: "/job-match",
-      icon: Target,
+      title: "Analyze Resume",
+      desc: "Upload resume + JD for instant ATS scoring",
+      href: "/analyze",
+      icon: FileSearch,
       color: "text-accent border-accent/30 bg-accent/5",
     },
     {
-      title: "AI Resume Roast",
-      desc: "Brutally honest feedback & recruiters advice",
-      href: "/roast",
-      icon: Flame,
-      color: "text-danger border-danger/30 bg-danger/5",
+      title: "Build Resume",
+      desc: "Rich editor with inline AI Bullet optimizer",
+      href: "/builder",
+      icon: FileText,
+      color: "text-info border-info/30 bg-info/5",
     },
     {
-      title: "AI Career Roadmap",
-      desc: "Step-by-step target skill development plan",
-      href: "/roadmap",
-      icon: Compass,
-      color: "text-warning border-warning/30 bg-warning/5",
-    },
-    {
-      title: "AI Portfolio Builder",
-      desc: "Generate modern HTML/CSS portfolio site",
-      href: "/portfolio",
-      icon: Laptop,
+      title: "Optimize LinkedIn",
+      desc: "AI branding studio & headline generator",
+      href: "/branding-studio",
+      icon: Palette,
       color: "text-success border-success/30 bg-success/5",
     },
     {
+      title: "Practice Interview",
+      desc: "STAR method mock with AI evaluator",
+      href: "/interview-prep/new",
+      icon: GraduationCap,
+      color: "text-warning border-warning/30 bg-warning/5",
+    },
+    {
+      title: "Build Portfolio",
+      desc: "Generate modern deployable portfolio site",
+      href: "/portfolio",
+      icon: Laptop,
+      color: "text-accent border-accent/30 bg-accent/5",
+    },
+  ];
+
+  const secondaryTools = [
+    {
+      title: "AI Job Matcher",
+      desc: "Audit compatibility against target JDs",
+      href: "/job-match",
+      icon: Target,
+    },
+    {
+      title: "AI Resume Roast",
+      desc: "Brutally honest recruiter feedback",
+      href: "/roast",
+      icon: Flame,
+    },
+    {
+      title: "AI Career Roadmap",
+      desc: "Step-by-step skill development plan",
+      href: "/roadmap",
+      icon: Compass,
+    },
+    {
+      title: "Recruiter Simulation",
+      desc: "First-impression screen simulator",
+      href: "/recruiter-simulation",
+      icon: Eye,
+    },
+    {
       title: "Resume Builder",
-      desc: "Rich editor with inline AI Bullet optimizer",
+      desc: "Full editor with DOCX/PDF export",
       href: "/builder",
       icon: Layout,
-      color: "text-info border-info/30 bg-info/5",
     },
   ];
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-12 max-w-7xl mx-auto w-full min-w-0">
       <UpgradeHandler />
-      
+
+      {isNewUser && (
+        <Card className="border-accent/40 bg-gradient-to-br from-accent/10 via-surface to-surface card-glow">
+          <CardContent className="p-5 sm:p-7">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <Badge variant="default" className="gap-1 text-[10px] font-bold">
+                    <Zap className="w-3 h-3" /> GET STARTED
+                  </Badge>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-text-primary tracking-tight leading-tight break-word-safe">
+                  Welcome to Vaylo 👋
+                </h2>
+                <p className="text-xs sm:text-sm text-text-secondary mt-1.5 leading-relaxed max-w-xl">
+                  Let&apos;s personalize your career workspace. Complete these quick steps to
+                  unlock tailored AI recommendations and interview prep.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <Link
+                href="/profile"
+                className="group rounded-xl border border-border bg-surface-elevated/60 p-4 hover:border-accent/40 hover:bg-accent/5 transition-all min-w-0"
+              >
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="w-9 h-9 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center text-accent shrink-0">
+                    <UserCircle2 className="w-5 h-5" />
+                  </div>
+                  <Badge
+                    variant={profileStrength >= 60 ? "success" : "default"}
+                    className="text-[10px] font-bold"
+                  >
+                    Step 1
+                  </Badge>
+                </div>
+                <h3 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors">
+                  Complete Profile
+                </h3>
+                <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
+                  Add skills, target role, experience &amp; location
+                </p>
+                <div className="mt-3 flex items-center justify-between">
+                  <Progress
+                    value={profileStrength}
+                    className="h-1.5 flex-1 mr-3"
+                  />
+                  <span className="text-xs font-semibold text-text-primary">{profileStrength}%</span>
+                </div>
+              </Link>
+
+              <Link
+                href="/analyze"
+                className="group rounded-xl border border-border bg-surface-elevated/60 p-4 hover:border-accent/40 hover:bg-accent/5 transition-all min-w-0"
+              >
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="w-9 h-9 rounded-lg bg-success/15 border border-success/30 flex items-center justify-center text-success shrink-0">
+                    <Upload className="w-5 h-5" />
+                  </div>
+                  <Badge variant="default" className="text-[10px] font-bold">
+                    Step 2
+                  </Badge>
+                </div>
+                <h3 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors">
+                  Upload Resume
+                </h3>
+                <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
+                  Drop your PDF/DOCX resume to extract details
+                </p>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-text-muted">
+                  {analysisList.length > 0 ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+                      <span className="text-success font-semibold">
+                        {analysisList.length} analysis done
+                      </span>
+                    </>
+                  ) : (
+                    <span>No resume uploaded yet</span>
+                  )}
+                </div>
+              </Link>
+
+              <Link
+                href="/profile"
+                className="group rounded-xl border border-border bg-surface-elevated/60 p-4 hover:border-accent/40 hover:bg-accent/5 transition-all min-w-0"
+              >
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="w-9 h-9 rounded-lg bg-warning/15 border border-warning/30 flex items-center justify-center text-warning shrink-0">
+                    <Crosshair className="w-5 h-5" />
+                  </div>
+                  <Badge variant="default" className="text-[10px] font-bold">
+                    Step 3
+                  </Badge>
+                </div>
+                <h3 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors">
+                  Choose Target Role
+                </h3>
+                <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
+                  Tell us what job title you&apos;re aiming for
+                </p>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px]">
+                  {profile.target_role ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
+                      <span className="text-text-secondary truncate">{profile.target_role}</span>
+                    </>
+                  ) : (
+                    <span className="text-text-muted">Not set yet</span>
+                  )}
+                </div>
+              </Link>
+
+              <Link
+                href="/analyze"
+                className="group rounded-xl border border-border bg-surface-elevated/60 p-4 hover:border-accent/40 hover:bg-accent/5 transition-all min-w-0"
+              >
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="w-9 h-9 rounded-lg bg-info/15 border border-info/30 flex items-center justify-center text-info shrink-0">
+                    <ClipboardCheck className="w-5 h-5" />
+                  </div>
+                  <Badge variant="default" className="text-[10px] font-bold">
+                    Step 4
+                  </Badge>
+                </div>
+                <h3 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors">
+                  Run First ATS Analysis
+                </h3>
+                <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
+                  Score your resume against a real job description
+                </p>
+                <div className="mt-3 flex items-center gap-1.5 text-[11px]">
+                  {analysisList.length > 0 ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
+                      <span className="text-success font-semibold">Completed</span>
+                    </>
+                  ) : (
+                    <span className="text-text-muted">0 analyses run</span>
+                  )}
+                </div>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Responsive Dashboard Header */}
       <div className="space-y-1">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-text-primary tracking-tight leading-tight break-word-safe">
-          Welcome back{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""} 👋
+          {isNewUser
+            ? "Let's get you started"
+            : `Welcome back${
+                profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""
+              } 👋`}
         </h1>
         <p className="text-xs sm:text-sm text-text-secondary max-w-2xl leading-relaxed">
-          Track your resume optimizations, job matches, and career roadmaps
+          {isNewUser
+            ? "Follow the onboarding steps above, then jump into any tool below."
+            : "Track your resume optimizations, AI usage, and career progress across all tools."}
         </p>
       </div>
 

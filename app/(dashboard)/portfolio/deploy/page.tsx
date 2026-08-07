@@ -76,12 +76,21 @@ export default function PortfolioDeployPage() {
     ]);
 
     setTimeout(() => {
+      const timestamp = Date.now();
+      const hashInput = `${timestamp}-${subdomain}-${versions.length + 2}`;
+      let hash = 0;
+      for (let i = 0; i < hashInput.length; i++) {
+        hash = ((hash << 5) - hash) + hashInput.charCodeAt(i);
+        hash |= 0;
+      }
+      const commitHash = (Math.abs(hash).toString(16) + timestamp.toString(36)).substring(0, 9).toLowerCase();
+
       const newVersion: DeploymentVersion = {
-        id: "v-" + Date.now().toString().slice(-3),
+        id: "v-" + timestamp.toString().slice(-3),
         version: `v1.0.${versions.length + 2} (Latest)`,
         deployedAt: new Date().toISOString().replace("T", " ").slice(0, 16),
         status: "Production",
-        commitHash: Math.random().toString(36).substring(2, 9),
+        commitHash,
         url: instantLiveUrl,
       };
 
@@ -228,7 +237,7 @@ export default function PortfolioDeployPage() {
           <Card className="border-border bg-surface shadow-lg">
             <CardHeader>
               <CardTitle className="text-base">Connect Custom Domain</CardTitle>
-              <CardDescription className="text-xs">Connect your own custom domain (e.g. john.dev or alex.com) with automatic DNS verification.</CardDescription>
+              <CardDescription className="text-xs">Connect your custom domain (e.g. john.dev) using guided CNAME setup. Manual DNS record configuration required with your domain registrar.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-3">

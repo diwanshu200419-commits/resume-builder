@@ -335,16 +335,21 @@ function hybridATSScore(
 // Main AI Functions
 // ----------------------------
 
+import { evaluateATSV2 } from "./ats-v2";
+
 export async function analyzeATS(
   resumeText: string,
   jobDescription: string
 ): Promise<ATSAnalysisResult> {
   const domain = detectDomainFromJD(jobDescription);
-  const cacheKey = getCacheKey(`ats-${domain}`, resumeText, jobDescription);
+  const cacheKey = getCacheKey(`ats-v2-${domain}`, resumeText, jobDescription);
   const cached = getFromCache<ATSAnalysisResult>(cacheKey);
   if (cached) {
     return cached;
   }
+
+  let aiSemanticBoost = 0;
+  let aiSummary = "";
 
   try {
     const safeResumeText = resumeText
@@ -386,32 +391,20 @@ RESPONSE FORMAT (STRICT VALID JSON ONLY):
       const parsed = JSON.parse(jsonText);
       return ATSAnalysisSchema.parse(parsed);
     });
-    
-    const hybridScore = hybridATSScore(resumeText, jobDescription, aiResult.ats_score);
-    const finalResult: ATSAnalysisResult = {
-      ...hybridScore,
-      ...aiResult,
-      ats_score: hybridScore.ats_score,
-      metric_density_score: hybridScore.metric_density_score,
-      verb_strength_score: hybridScore.verb_strength_score,
-      seniority_match_score: hybridScore.seniority_match_score,
-      structural_flags: hybridScore.structural_flags,
-      metric_density_feedback: hybridScore.metric_density_feedback,
-    };
-    
-    setCache(cacheKey, finalResult);
-    return finalResult;
-    
+
+    aiSemanticBoost = Math.round(aiResult.match_percentage / 25);
+    aiSummary = aiResult.summary_analysis;
   } catch (error) {
-    console.error("Error in analyzeATS:", error);
-    return {
-      ...hybridATSScore(resumeText, jobDescription, 68),
-      missing_keywords: ["Leadership", "System Design", "Cloud Infrastructure"],
-      missing_skills: ["Docker", "CI/CD"],
-      weak_sections: ["Quantifiable Achievements"],
-      summary_analysis: "FAANG ATS analysis fallback applied. Focus on adding quantifiable metrics (%, scale, latency) and strong action verbs.",
-    };
+    console.warn("AI semantic assist warning in analyzeATS (using deterministic V2 fallback):", error);
   }
+
+  const v2Result = evaluateATSV2(resumeText, jobDescription, aiSemanticBoost);
+  if (aiSummary) {
+    v2Result.summary_analysis = aiSummary;
+  }
+
+  setCache(cacheKey, v2Result);
+  return v2Result;
 }
 
 export async function optimizeResume(

@@ -7,50 +7,76 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
-import { Check, Loader2, Phone, Mail, Sparkles, ShieldCheck, KeyRound, ArrowLeft, Star, Zap } from "lucide-react";
+import { Zap, Check, Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
 
-const features = [
-  "Instant ATS Score & Missing Keyword Detection",
-  "AI Resume Optimization & Format Fixer",
-  "1-Click Portfolio Website & STAR Interview Simulator",
-  "PDF & DOCX Export with Recruiter Templates",
+const marketingFeatures = [
+  "ATS-focused resume analysis",
+  "Role-specific AI optimization",
+  "Interview preparation tools",
+  "Portfolio website generation",
 ];
+
+const seriousJobSearchFeatures = [
+  "ATS-focused resume analysis",
+  "Role-specific AI optimization",
+  "Interview preparation",
+  "Portfolio generation",
+];
+
+function mapErrorMessage(error: any): string {
+  const msg = error?.message || "";
+  const lower = msg.toLowerCase();
+
+  if (
+    lower.includes("invalid login credentials") ||
+    lower.includes("invalid") ||
+    lower.includes("credentials")
+  ) {
+    return "Incorrect email or password.";
+  }
+  if (lower.includes("email not confirmed") || lower.includes("not confirmed")) {
+    return "Please verify your email before signing in.";
+  }
+  if (
+    lower.includes("network") ||
+    lower.includes("abort") ||
+    lower.includes("timeout") ||
+    lower.includes("fetch") ||
+    error?.name === "AbortError"
+  ) {
+    return "Unable to connect. Please try again.";
+  }
+  return "Incorrect email or password.";
+}
+
+function validateNextParam(raw: string | null): string {
+  if (!raw) return "/dashboard";
+  if (!raw.startsWith("/")) return "/dashboard";
+  if (raw.startsWith("//")) return "/dashboard";
+  if (raw.startsWith("/http")) return "/dashboard";
+  return raw;
+}
 
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const rawNext = searchParams.get("next");
+  const nextPath = validateNextParam(rawNext);
 
-  const [authMethod, setAuthMethod] = useState<"email" | "phone" | "forgot">("email");
+  const [view, setView] = useState<"login" | "reset">("login");
 
-  // Email state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // Phone OTP state
-  const [phone, setPhone] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
-  const [otpMessage, setOtpMessage] = useState<string | null>(null);
-
-  // Forgot Password state
-  const [resetTarget, setResetTarget] = useState("");
-  const [resetOtpSent, setResetOtpSent] = useState(false);
-  const [resetOtpCode, setResetOtpCode] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const [resetEmail, setResetEmail] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
-    const emailValue = (form?.querySelector("#email") as HTMLInputElement)?.value || email;
-    const passwordValue = (form?.querySelector("#password") as HTMLInputElement)?.value || password;
-
-    const finalEmail = (emailValue || "").trim();
-    const finalPassword = (passwordValue || "").trim();
+    const finalEmail = email.trim().toLowerCase();
+    const finalPassword = password.trim();
 
     if (!finalEmail || !finalPassword) {
       setError("Please enter your email and password.");
@@ -62,100 +88,23 @@ export default function LoginForm() {
 
     try {
       const supabase = createClient();
-
-      const loginPromise = supabase.auth.signInWithPassword({
-        email: finalEmail.toLowerCase(),
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: finalEmail,
         password: finalPassword,
       });
 
-      const timeoutPromise = new Promise<{ data: any; error: any }>((_, reject) =>
-        setTimeout(() => reject(new Error("Connection timed out. Please ensure NEXT_PUBLIC_SUPABASE_ANON_KEY is updated in Vercel for all environments (Production, Preview, Development) and Redeploy.")), 8000)
-      );
-
-      const res: any = await Promise.race([loginPromise, timeoutPromise]);
-      const data = res?.data;
-      const loginError = res?.error;
-
       if (loginError) {
-        if (loginError.message.toLowerCase().includes("not confirmed")) {
-          document.cookie = `mock-session-id=${data?.user?.id || `user-${Date.now()}`}; path=/; max-age=31536000; SameSite=Lax`;
-          const targetUrl = redirect && redirect !== "/login" ? redirect : "/dashboard";
-          const target = targetUrl.includes("?") ? `${targetUrl}&authed=true` : `${targetUrl}?authed=true`;
-          window.location.href = target;
-          return;
-        }
+        setError(mapErrorMessage(loginError));
         setLoading(false);
-        setError(loginError.message);
         return;
       }
 
-      document.cookie = `mock-session-id=${data?.user?.id || `user-${Date.now()}`}; path=/; max-age=31536000; SameSite=Lax`;
-      const targetUrl = redirect && redirect !== "/login" ? redirect : "/dashboard";
-      const target = targetUrl.includes("?") ? `${targetUrl}&authed=true` : `${targetUrl}?authed=true`;
-      window.location.href = target;
+      router.replace(nextPath);
+      router.refresh();
     } catch (err: any) {
+      setError(mapErrorMessage(err));
       setLoading(false);
-      setError(err.message || "Failed to log in. Please check your credentials.");
     }
-  };
-
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phone || phone.length < 10) {
-      setError("Please enter a valid 10-digit mobile number");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch("/api/ai/sms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      });
-      const data = await res.json();
-      setLoading(false);
-
-      if (!res.ok) throw new Error(data.error || "Failed to send OTP SMS");
-
-      setOtpSent(true);
-      setOtpMessage(data.message || `🔑 Real OTP sent to +91 ${phone}. Code: ${data.otp}`);
-    } catch (err: any) {
-      setLoading(false);
-      setError(err.message || "Failed to send OTP SMS");
-    }
-  };
-
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otpCode || otpCode.length < 4) {
-      setError("Please enter the OTP verification code");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    document.cookie = `mock-session-id=otp-user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
-    const target = redirect.includes("?") ? `${redirect}&authed=true` : `${redirect}?authed=true`;
-    window.location.href = target;
-  };
-
-  const handleSendResetOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!resetTarget.trim()) {
-      setError("Please enter your email address or mobile phone number");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setResetOtpSent(true);
-    setLoading(false);
-    setResetMessage(`🔑 Real Password Reset OTP sent to ${resetTarget}. Your 6-digit code is: ${generatedCode}`);
   };
 
   const handleGoogleLogin = async () => {
@@ -164,56 +113,61 @@ export default function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
-          queryParams: {
-            prompt: "select_account",
-          },
+          redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(nextPath)}`,
         },
       });
 
       if (oauthError) {
+        setError(mapErrorMessage(oauthError));
         setLoading(false);
-        setError(oauthError.message);
-        return;
-      }
-
-      if (data?.url) {
-        window.location.href = data.url;
-        return;
       }
     } catch (err: any) {
+      setError(mapErrorMessage(err));
       setLoading(false);
-      setError(err?.message || "Google sign-in failed. Please try again.");
     }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetOtpCode || resetOtpCode.length < 4) {
-      setError("Please enter the reset OTP code");
-      return;
-    }
-    if (!newPassword || newPassword.length < 6) {
-      setError("Password must be at least 6 characters");
+    const finalEmail = resetEmail.trim().toLowerCase();
+
+    if (!finalEmail) {
+      setError("Please enter your email address.");
       return;
     }
 
     setLoading(true);
     setError(null);
 
-    document.cookie = `mock-session-id=reset-user-${Date.now()}; path=/; max-age=31536000; SameSite=Lax`;
-    const target = redirect.includes("?") ? `${redirect}&authed=true` : `${redirect}?authed=true`;
-    window.location.href = target;
+    try {
+      const supabase = createClient();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        finalEmail,
+        {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/settings&type=recovery`,
+        }
+      );
+
+      if (resetError) {
+        setError(mapErrorMessage(resetError));
+        setLoading(false);
+        return;
+      }
+
+      setResetSuccess(true);
+      setLoading(false);
+    } catch (err: any) {
+      setError(mapErrorMessage(err));
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background flex text-text-primary">
-      {/* Left Designer Hero Column */}
+    <div className="min-h-screen bg-slate-950 flex text-white">
       <div className="hidden lg:flex flex-1 flex-col justify-between p-12 border-r border-slate-800/80 bg-slate-950/60 relative overflow-hidden">
-        {/* Glowing Ambient Mesh Light */}
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -223,20 +177,16 @@ export default function LoginForm() {
             Vaylo<span className="text-indigo-400">AI</span>
           </Link>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> AI Career Copilot for Tech & Product Roles
-          </div>
-
           <h2 className="text-3xl font-extrabold text-white leading-tight mb-4">
             Beat the ATS Filters.<br />
-            <span className="text-gradient-indigo">Land 3x More Interviews.</span>
+            Build a Stronger Application.
           </h2>
           <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-            Join thousands of candidates using Vaylo AI to optimize resumes, practice STAR interviews, and showcase deployment-ready portfolio websites.
+            Optimize your resume, prepare for interviews, improve your professional profile, and manage your job-search toolkit from one workspace.
           </p>
 
           <div className="space-y-3.5 mb-10">
-            {features.map((f) => (
+            {marketingFeatures.map((f) => (
               <div key={f} className="flex items-center gap-3 text-slate-300 text-sm font-medium">
                 <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
                   <Check className="w-3 h-3 text-emerald-400" />
@@ -247,280 +197,126 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Testimonial Card */}
-        <div className="relative z-10 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md space-y-3">
-          <div className="flex items-center gap-1 text-amber-400">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-4 h-4 fill-amber-400" />
-            ))}
-          </div>
-          <p className="text-slate-300 text-xs leading-relaxed italic">
-            &ldquo;Vaylo AI fixed missing keywords in my resume and created a portfolio website for me in minutes. Got hired at an AI startup!&rdquo;
+        <div className="relative z-10 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md space-y-4">
+          <p className="text-[11px] font-bold text-indigo-400 tracking-widest uppercase">
+            Built for Serious Job Searches
           </p>
-          <div className="flex items-center gap-3 pt-1">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-xs">
-              PS
-            </div>
-            <div>
-              <p className="text-xs font-bold text-white">Priya Sharma</p>
-              <p className="text-[11px] text-slate-400">Software Engineer, Tech Corp</p>
-            </div>
+          <div className="space-y-2.5">
+            {seriousJobSearchFeatures.map((f) => (
+              <div key={f} className="flex items-center gap-2.5 text-slate-300 text-xs font-medium">
+                <div className="w-4 h-4 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center shrink-0">
+                  <Check className="w-2.5 h-2.5 text-indigo-400" />
+                </div>
+                <span>{f}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Right Login Form Container */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative">
         <div className="w-full max-w-md space-y-6">
-          {/* Card */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur-xl p-8 shadow-card">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-white tracking-tight">
-                {authMethod === "forgot" ? "Reset Your Password" : "Welcome Back"}
-              </h1>
-              <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
-                {authMethod === "forgot" ? "Enter your email or phone to receive a secure password reset code" : "Sign in to access your AI resume copilot and tools"}
-              </p>
-            </div>
-
-            {/* Auth Method Toggle Buttons */}
-            {authMethod !== "forgot" ? (
-              <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-950/80 rounded-xl mb-6 border border-slate-800/80">
-                <button
-                  type="button"
-                  onClick={() => { setAuthMethod("email"); setError(null); }}
-                  className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
-                    authMethod === "email"
-                      ? "bg-indigo-600 text-white shadow-md font-bold"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <Mail className="w-3.5 h-3.5" /> Email Account
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setAuthMethod("phone"); setError(null); }}
-                  className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
-                    authMethod === "phone"
-                      ? "bg-indigo-600 text-white shadow-md font-bold"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <Phone className="w-3.5 h-3.5" /> Mobile Phone OTP
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => { setAuthMethod("email"); setError(null); }}
-                className="flex items-center gap-1.5 text-xs text-indigo-400 hover:underline mb-6 font-semibold"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" /> Back to Login
-              </button>
-            )}
-
-            {/* Email Login Form */}
-            {authMethod === "email" && (
-              <form onSubmit={handleEmailLogin} className="space-y-4">
-                <div>
-                  <Label htmlFor="email" className="text-xs font-semibold text-slate-300">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1.5 bg-slate-950/60 border-slate-800 text-white focus:border-indigo-500 focus:ring-indigo-500/20"
-                    required
-                  />
-                </div>
-                <div>
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="password" className="text-xs font-semibold text-slate-300">Password</Label>
-                    <button
-                      type="button"
-                      onClick={() => { setAuthMethod("forgot"); setError(null); }}
-                      className="text-xs text-indigo-400 hover:underline font-medium"
-                    >
-                      Forgot Password?
-                    </button>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1.5 bg-slate-950/60 border-slate-800 text-white focus:border-indigo-500 focus:ring-indigo-500/20"
-                    required
-                  />
-                </div>
-
-                {error && <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{error}</p>}
-
-                <Button type="submit" onClick={handleEmailLogin} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg transition-all" disabled={loading}>
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In with Email"}
-                </Button>
-              </form>
-            )}
-
-            {/* Phone OTP Login Form */}
-            {authMethod === "phone" && (
-              <div className="space-y-4">
-                {!otpSent ? (
-                  <form onSubmit={handleSendOtp} className="space-y-4">
-                    <div>
-                      <Label htmlFor="phone" className="text-xs font-semibold text-slate-300">Mobile Phone Number</Label>
-                      <div className="flex gap-2 mt-1.5">
-                        <span className="flex items-center justify-center px-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 font-mono font-bold">
-                          +91
-                        </span>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="98765 43210"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="bg-slate-950/60 border-slate-800 text-white focus:border-indigo-500"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {error && <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{error}</p>}
-
-                    <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg gap-1.5 transition-all" disabled={loading}>
-                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
-                      Send Verification OTP
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleVerifyOtp} className="space-y-4">
-                    {otpMessage && (
-                      <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-start gap-2.5 leading-relaxed">
-                        <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
-                        <span>{otpMessage}</span>
-                      </div>
-                    )}
-
-                    <div>
-                      <Label htmlFor="otpCode" className="text-xs font-semibold text-slate-300">Enter OTP Verification Code</Label>
-                      <Input
-                        id="otpCode"
-                        type="text"
-                        maxLength={6}
-                        placeholder="e.g. 12345"
-                        value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value)}
-                        className="mt-1.5 font-mono text-center tracking-widest text-lg bg-slate-950/80 border-slate-800 text-white focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-
-                    {error && <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{error}</p>}
-
-                    <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl shadow-lg gap-1.5 transition-all" disabled={loading}>
-                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                      Verify OTP & Enter Platform
-                    </Button>
-
-                    <button
-                      type="button"
-                      onClick={() => { setOtpSent(false); setOtpCode(""); setError(null); }}
-                      className="text-xs text-slate-400 hover:text-white block mx-auto mt-2"
-                    >
-                      Change Phone Number
-                    </button>
-                  </form>
-                )}
-              </div>
-            )}
-
-            {/* Forgot Password Reset Form */}
-            {authMethod === "forgot" && (
-              <div className="space-y-4">
-                {!resetOtpSent ? (
-                  <form onSubmit={handleSendResetOtp} className="space-y-4">
-                    <div>
-                      <Label htmlFor="resetTarget" className="text-xs font-semibold text-slate-300">Email Address or Mobile Phone</Label>
-                      <Input
-                        id="resetTarget"
-                        type="text"
-                        placeholder="you@example.com or 9876543210"
-                        value={resetTarget}
-                        onChange={(e) => setResetTarget(e.target.value)}
-                        className="mt-1.5 bg-slate-950/60 border-slate-800 text-white focus:border-indigo-500"
-                        required
-                      />
-                    </div>
-
-                    {error && <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{error}</p>}
-
-                    <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg gap-1.5 transition-all" disabled={loading}>
-                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
-                      Send Password Reset OTP
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleResetPassword} className="space-y-4">
-                    {resetMessage && (
-                      <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-start gap-2.5 leading-relaxed">
-                        <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
-                        <span>{resetMessage}</span>
-                      </div>
-                    )}
-
-                    <div>
-                      <Label htmlFor="resetOtpCode" className="text-xs font-semibold text-slate-300">Enter Reset OTP Code</Label>
-                      <Input
-                        id="resetOtpCode"
-                        type="text"
-                        maxLength={6}
-                        placeholder="e.g. 12345"
-                        value={resetOtpCode}
-                        onChange={(e) => setResetOtpCode(e.target.value)}
-                        className="mt-1.5 font-mono text-center tracking-widest text-lg bg-slate-950/80 border-slate-800 text-white focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="newPassword" className="text-xs font-semibold text-slate-300">New Password</Label>
-                      <Input
-                        id="newPassword"
-                        type="password"
-                        placeholder="Min. 6 characters"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        className="mt-1.5 bg-slate-950/60 border-slate-800 text-white focus:border-indigo-500"
-                        minLength={6}
-                        required
-                      />
-                    </div>
-
-                    {error && <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{error}</p>}
-
-                    <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl shadow-lg gap-1.5 transition-all" disabled={loading}>
-                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                      Update Password & Sign In
-                    </Button>
-                  </form>
-                )}
-              </div>
-            )}
-
-            {authMethod !== "forgot" && (
+            {view === "login" && (
               <>
+                <div className="lg:hidden mb-6">
+                  <Link href="/" className="flex items-center gap-2 text-xl font-extrabold text-white tracking-tight">
+                    <Zap className="w-5 h-5 text-indigo-400 fill-indigo-400" />
+                    Vaylo<span className="text-indigo-400">AI</span>
+                  </Link>
+                </div>
+
+                <div className="mb-6">
+                  <h1 className="text-2xl font-bold text-white tracking-tight">
+                    Welcome Back
+                  </h1>
+                  <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
+                    Sign in to access your AI resume copilot and tools
+                  </p>
+                </div>
+
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <Label htmlFor="email" className="text-xs font-semibold text-slate-300">
+                      Email Address
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-1.5 bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/20"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor="password" className="text-xs font-semibold text-slate-300">
+                        Password
+                      </Label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setView("reset");
+                          setError(null);
+                          setResetSuccess(false);
+                        }}
+                        className="text-xs text-indigo-400 hover:underline font-medium"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="mt-1.5 bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/20"
+                      required
+                    />
+                  </div>
+
+                  {error && (
+                    <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">
+                      {error}
+                    </p>
+                  )}
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg transition-all h-11"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In with Email"
+                    )}
+                  </Button>
+                </form>
+
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-slate-800" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-slate-900 px-3 text-slate-400 font-medium">Or instant OAuth</span>
+                    <span className="bg-slate-900 px-3 text-slate-400 font-medium">
+                      Or instant OAuth
+                    </span>
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full border-slate-800 bg-slate-950/60 hover:bg-slate-800 text-slate-200 font-semibold gap-2 rounded-xl" onClick={handleGoogleLogin}>
+                <Button
+                  variant="outline"
+                  className="w-full border-slate-800 bg-slate-950/60 hover:bg-slate-800 text-slate-200 font-semibold gap-2 rounded-xl h-11"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -529,13 +325,99 @@ export default function LoginForm() {
                   </svg>
                   Continue with Google
                 </Button>
+
+                <p className="text-center text-xs text-slate-400 mt-6">
+                  Don&apos;t have an account?{" "}
+                  <Link href="/signup" className="text-indigo-400 font-bold hover:underline">
+                    Create account
+                  </Link>
+                </p>
               </>
             )}
 
-            <p className="text-center text-xs text-slate-400 mt-6">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-indigo-400 font-bold hover:underline">Sign up free</Link>
-            </p>
+            {view === "reset" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setView("login");
+                    setError(null);
+                    setResetSuccess(false);
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-indigo-400 hover:underline mb-6 font-semibold"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back to Login
+                </button>
+
+                <div className="mb-6">
+                  <h1 className="text-2xl font-bold text-white tracking-tight">
+                    Reset Your Password
+                  </h1>
+                  <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
+                    Enter your email to receive a password reset link
+                  </p>
+                </div>
+
+                {resetSuccess ? (
+                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                        <Check className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-emerald-300">
+                          Password reset email sent.
+                        </p>
+                        <p className="text-xs text-emerald-400/80 mt-1">
+                          Check your inbox and follow the instructions to reset your password.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleResetPassword} className="space-y-4">
+                    <div>
+                      <Label htmlFor="resetEmail" className="text-xs font-semibold text-slate-300">
+                        Email Address
+                      </Label>
+                      <div className="relative mt-1.5">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <Input
+                          id="resetEmail"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          className="pl-10 bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/20"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {error && (
+                      <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">
+                        {error}
+                      </p>
+                    )}
+
+                    <Button
+                      type="submit"
+                      className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg transition-all h-11"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Sending reset link...
+                        </>
+                      ) : (
+                        "Send Password Reset Email"
+                      )}
+                    </Button>
+                  </form>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
