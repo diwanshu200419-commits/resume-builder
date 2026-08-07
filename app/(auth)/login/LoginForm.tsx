@@ -71,7 +71,25 @@ export default function LoginForm() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+
+  const handleResendVerification = async () => {
+    if (!email.trim()) return;
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.resend({
+        type: "signup",
+        email: email.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        },
+      });
+      setResendSuccess(true);
+    } catch {}
+    setLoading(false);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -279,9 +297,22 @@ export default function LoginForm() {
                   </div>
 
                   {error && (
-                    <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">
-                      {error}
-                    </p>
+                    <div className="text-xs text-rose-400 font-medium bg-rose-500/10 p-3 rounded-xl border border-rose-500/20 space-y-2">
+                      <p>{error}</p>
+                      {error.includes("verify your email") && (
+                        <div className="pt-1 border-t border-rose-500/20 flex items-center justify-between">
+                          <span className="text-[11px] text-slate-400">Didn&apos;t receive email?</span>
+                          <button
+                            type="button"
+                            onClick={handleResendVerification}
+                            className="text-xs text-indigo-400 font-bold hover:underline"
+                            disabled={loading}
+                          >
+                            {resendSuccess ? "Verification Email Sent!" : "Resend Link"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   <Button
