@@ -578,6 +578,201 @@ RETURN STRICT JSON ONLY:
   }
 }
 
+export async function generateVayloInterviewQuestions(
+  targetRole: string,
+  companyStyle: string = "general industry standard",
+  seniority: string = "mid-level",
+  previouslyAsked: string[] = []
+) {
+  if (!targetRole || targetRole.trim().length < 2) {
+    return { error: "Please enter a valid job role or field." };
+  }
+
+  try {
+    const aiResult = await withRetryAndTimeout(async () => {
+      const prompt = `SYSTEM PROMPT — Vaylo AI Interview Question Generator
+
+You are an expert technical recruiter and hiring manager with 15+ years of experience running interview loops across Fortune 500 companies, top startups, and specialized industries (tech, finance, healthcare, legal, sales, design, trades, government, and academia).
+
+Your job: generate a realistic, role-specific interview question set for a candidate practicing for a real interview.
+
+INPUT:
+- target_role: "${targetRole}"
+- company_style: "${companyStyle || "general industry standard"}"
+- seniority: "${seniority || "mid-level"}"
+- previously_asked: ${JSON.stringify(previouslyAsked)}
+
+WHAT TO GENERATE:
+Produce exactly 8 questions for this role/seniority, distributed as:
+- 3 behavioral questions (STAR-answerable — situations, conflict, failure, leadership, ambiguity)
+- 3 role-specific technical/domain questions (calibrated to what an actual interviewer in THIS field would ask — not generic "tell me about a challenge" filler. If the role has no meaningful "technical" dimension, e.g. some behavioral-heavy sales/CS roles, replace with scenario/role-play questions instead)
+- 1 culture/motivation question ("why this field/company", values fit)
+- 1 curveball/stress question appropriate to the seniority level
+
+Each question must:
+- Be something a real interviewer in this field would plausibly ask this year — not textbook-generic
+- Match the seniority level (entry-level ≠ leadership scrutiny)
+- If company_style is given, reflect that company's known interview culture (e.g., Amazon → Leadership Principles framing, Google → structured/analytical framing, Netflix → high-autonomy/direct framing). If you are not confident about a real company's actual interview style, default to general industry-standard framing and do not fabricate specific claims about that company's process.
+
+EVALUATION RUBRIC (return alongside each question):
+For each question, also generate a scoring rubric with 4 dimensions, weighted for that specific question type:
+- structure_weight: number (0-1)
+- specificity_weight: number (0-1)
+- relevance_weight: number (0-1)
+- communication_weight: number (0-1)
+- model_answer_keywords: array of 3-5 concepts/terms a strong answer would likely include
+
+OUTPUT FORMAT:
+Return ONLY valid JSON, no markdown fences, no preamble, no commentary.
+Exact schema:
+{
+  "role": "${targetRole}",
+  "seniority": "${seniority}",
+  "company_style": "${companyStyle || "general industry standard"}",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "behavioral",
+      "question": "string",
+      "why_this_matters": "string — 1 sentence",
+      "rubric": {
+        "structure_weight": 0.3,
+        "specificity_weight": 0.3,
+        "relevance_weight": 0.2,
+        "communication_weight": 0.2,
+        "model_answer_keywords": ["keyword1", "keyword2", "keyword3"]
+      }
+    }
+  ]
+}
+
+HARD RULES:
+- Never repeat any question in previously_asked, even reworded
+- If target_role is nonsensical, offensive, or not a real job/field, return: {"error": "Please enter a valid job role or field."}`;
+
+      const result = await getModel().generateContent(prompt);
+      const jsonText = cleanAndExtractJSON(result.response.text());
+      return JSON.parse(jsonText);
+    });
+
+    return aiResult;
+  } catch (error) {
+    console.error("[generateVayloInterviewQuestions Error]:", error);
+    // Robust Curated Fallback Question Generator
+    return {
+      role: targetRole,
+      seniority: seniority || "mid-level",
+      company_style: companyStyle || "general industry standard",
+      questions: [
+        {
+          id: `q_${Date.now()}_1`,
+          type: "behavioral",
+          question: `Describe a complex ${targetRole} project where requirements changed midway through execution. How did you adapt your workflow?`,
+          why_this_matters: "Evaluates adaptability and stakeholder alignment under shifting priorities.",
+          rubric: {
+            structure_weight: 0.35,
+            specificity_weight: 0.35,
+            relevance_weight: 0.15,
+            communication_weight: 0.15,
+            model_answer_keywords: ["scope change", "re-prioritization", "stakeholder communication", "impact metrics"]
+          }
+        },
+        {
+          id: `q_${Date.now()}_2`,
+          type: "behavioral",
+          question: `Tell me about a time you had a technical or strategy disagreement with a senior teammate in a ${targetRole} context. How was it resolved?`,
+          why_this_matters: "Tests conflict resolution and professional maturity.",
+          rubric: {
+            structure_weight: 0.3,
+            specificity_weight: 0.3,
+            relevance_weight: 0.2,
+            communication_weight: 0.2,
+            model_answer_keywords: ["data-driven decision", "active listening", "compromise", "team consensus"]
+          }
+        },
+        {
+          id: `q_${Date.now()}_3`,
+          type: "behavioral",
+          question: "Give an example of a mistake or failure you experienced in your work. What was the post-mortem analysis and what did you implement to prevent reoccurrence?",
+          why_this_matters: "Measures accountability, ownership, and systematic learning.",
+          rubric: {
+            structure_weight: 0.4,
+            specificity_weight: 0.3,
+            relevance_weight: 0.15,
+            communication_weight: 0.15,
+            model_answer_keywords: ["ownership", "root cause analysis", "preventative process", "measurable recovery"]
+          }
+        },
+        {
+          id: `q_${Date.now()}_4`,
+          type: "technical",
+          question: `Walk me through your end-to-end methodology when tackling a high-stakes ${targetRole} task with incomplete information.`,
+          why_this_matters: "Assesses problem decomposition and analytical rigor.",
+          rubric: {
+            structure_weight: 0.3,
+            specificity_weight: 0.4,
+            relevance_weight: 0.15,
+            communication_weight: 0.15,
+            model_answer_keywords: ["discovery phase", "risk assessment", "iterative execution", "verification"]
+          }
+        },
+        {
+          id: `q_${Date.now()}_5`,
+          type: "technical",
+          question: `How do you measure efficiency, quality, and performance success in your work as a ${targetRole}?`,
+          why_this_matters: "Determines metric focus and business outcome orientation.",
+          rubric: {
+            structure_weight: 0.25,
+            specificity_weight: 0.45,
+            relevance_weight: 0.15,
+            communication_weight: 0.15,
+            model_answer_keywords: ["KPI tracking", "benchmarking", "quality assurance", "continuous improvement"]
+          }
+        },
+        {
+          id: `q_${Date.now()}_6`,
+          type: "technical",
+          question: `What domain tool or framework have you recently adopted as a ${targetRole}, and why did you choose it over alternatives?`,
+          why_this_matters: "Tests continuous learning and tool selection rationale.",
+          rubric: {
+            structure_weight: 0.25,
+            specificity_weight: 0.45,
+            relevance_weight: 0.15,
+            communication_weight: 0.15,
+            model_answer_keywords: ["trade-off evaluation", "productivity gain", "industry best practices"]
+          }
+        },
+        {
+          id: `q_${Date.now()}_7`,
+          type: "culture",
+          question: `Why are you looking to advance your career in this specific ${targetRole} domain right now?`,
+          why_this_matters: "Gauges long-term career motivation and intrinsic drive.",
+          rubric: {
+            structure_weight: 0.2,
+            specificity_weight: 0.3,
+            relevance_weight: 0.3,
+            communication_weight: 0.2,
+            model_answer_keywords: ["career trajectory", "industry passion", "value alignment"]
+          }
+        },
+        {
+          id: `q_${Date.now()}_8`,
+          type: "curveball",
+          question: `If you were allocated 20% dedicated bandwidth on your team to solve any bottleneck in ${targetRole} operations, what would you fix first and why?`,
+          why_this_matters: "Reveals strategic vision and proactive initiative.",
+          rubric: {
+            structure_weight: 0.3,
+            specificity_weight: 0.4,
+            relevance_weight: 0.15,
+            communication_weight: 0.15,
+            model_answer_keywords: ["bottleneck identification", "ROI calculation", "scalable impact"]
+          }
+        }
+      ]
+    };
+  }
+}
+
 export async function generateCoverLetter(resumeText: string, jobDescription: string = ""): Promise<string> {
   try {
     const prompt = `${MASTER_SYSTEM_PROMPT}\n\nTASK: Generate a professional FAANG-level cover letter based on candidate resume and job description.\n\nRESUME:\n${resumeText.slice(0, 5000)}\n\nJD:\n${jobDescription.slice(0, 3000)}`;
