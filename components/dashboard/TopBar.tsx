@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -41,10 +42,11 @@ function getInitials(
 
 export function TopBar({ profile, pageTitle }: TopBarProps) {
   const router = useRouter();
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const initials = getInitials(profile.full_name, profile.email);
   const displayName = profile.full_name || "User";
   const hasAvatar =
-    typeof profile.avatar_url === "string" && profile.avatar_url.length > 0;
+    typeof profile.avatar_url === "string" && profile.avatar_url.length > 0 && !avatarFailed;
 
   const handleSignOut = async () => {
     try {
@@ -78,13 +80,16 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
               className="flex items-center gap-2 sm:gap-3 rounded-xl border border-transparent hover:border-border hover:bg-surface-elevated px-2 py-1.5 transition-all focus:outline-none focus:ring-2 focus:ring-accent/40"
             >
               {hasAvatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={profile.avatar_url!}
-                  alt=""
-                  className="w-9 h-9 rounded-full object-cover shrink-0"
+                  alt={displayName}
+                  referrerPolicy="no-referrer"
+                  onError={() => setAvatarFailed(true)}
+                  className="w-9 h-9 rounded-full object-cover shrink-0 border border-border"
                 />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shrink-0 border border-border">
                   {initials}
                 </div>
               )}

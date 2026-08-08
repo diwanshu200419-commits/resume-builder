@@ -44,9 +44,11 @@ export async function getProfile(): Promise<Profile | null> {
 
     if (data && data.length > 0) {
       const row = data[0];
+      const oauthAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
       profile = {
         ...row,
         email: row.email || user.email || null,
+        avatar_url: row.avatar_url || oauthAvatar,
       } as Profile;
     }
   } catch (err) {

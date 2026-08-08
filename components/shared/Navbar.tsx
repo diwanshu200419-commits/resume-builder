@@ -28,6 +28,7 @@ export function Navbar() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   const checkUserSession = async () => {
     try {
@@ -129,11 +130,13 @@ export function Navbar() {
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="flex items-center gap-2.5 p-1.5 rounded-xl border border-border bg-surface hover:bg-surface-elevated transition-all"
                 >
-                  {user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+                  {(user.user_metadata?.avatar_url || user.user_metadata?.picture) && !avatarFailed ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={user.user_metadata.avatar_url || user.user_metadata.picture}
                       alt="Profile"
+                      referrerPolicy="no-referrer"
+                      onError={() => setAvatarFailed(true)}
                       width={28}
                       height={28}
                       className="w-7 h-7 rounded-full object-cover border border-accent/40"

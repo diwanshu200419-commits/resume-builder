@@ -74,6 +74,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const [authUser, setAuthUser] = useState<{ email?: string; email_confirmed_at?: string | null } | null>(null);
 
   const [fullName, setFullName] = useState("");
@@ -277,15 +278,14 @@ export default function ProfilePage() {
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
             <div className="shrink-0">
-              {profile.avatar_url ? (
+              {profile.avatar_url && !avatarFailed ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={profile.avatar_url}
                   alt={profile.full_name || "Profile"}
+                  referrerPolicy="no-referrer"
                   className="w-20 h-20 rounded-full object-cover border-2 border-border bg-surface-elevated"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
+                  onError={() => setAvatarFailed(true)}
                 />
               ) : (
                 <div className="w-20 h-20 rounded-full bg-accent/20 text-accent flex items-center justify-center text-2xl font-extrabold border-2 border-border">
