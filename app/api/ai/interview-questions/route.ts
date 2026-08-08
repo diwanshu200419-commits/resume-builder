@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
-import { generateVayloInterviewQuestions } from "@/lib/gemini";
+import { getOrGenerateQuestions } from "@/lib/interview/getOrGenerateQuestions";
 import { checkDailyRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const {
       target_role,
-      company_style = "general industry standard",
+      company_style = null,
       seniority = "mid-level",
       previously_asked = [],
     } = body;
@@ -30,20 +30,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Please enter a valid job role or field." }, { status: 400 });
     }
 
-    const result = await generateVayloInterviewQuestions(
-      target_role.trim(),
-      company_style,
+    const { source, questionSet } = await getOrGenerateQuestions({
+      targetRole: target_role.trim(),
       seniority,
-      previously_asked
-    );
+      companyStyle: company_style,
+      previouslyAsked: Array.isArray(previously_asked) ? previously_asked : [],
+    });
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    return NextResponse.json(result);
+    return NextResponse.json({
+      source,
+      ...questionSet,
+    });
   } catch (error: any) {
     console.error("[Interview Questions API Error]:", error);
-    return NextResponse.json({ error: "Failed to generate interview question set." }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to generate interview question set." }, { status: 500 });
   }
 }

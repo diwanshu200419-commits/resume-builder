@@ -1,5 +1,104 @@
 import type { ATSAnalysisResult, ATSV2ScoreBreakdown, ATSV2RequirementMatch, ATSV2PriorityFix } from "@/types";
 
+export const TECHNICAL_ALIASES: Record<string, string> = {
+  "react.js": "react",
+  "reactjs": "react",
+  "react": "react",
+  "node": "nodejs",
+  "node.js": "nodejs",
+  "nodejs": "nodejs",
+  "postgresql": "postgresql",
+  "postgres": "postgresql",
+  "psql": "postgresql",
+  "machine learning": "machine_learning",
+  "ml": "machine_learning",
+  "javascript": "javascript",
+  "js": "javascript",
+  "typescript": "typescript",
+  "ts": "typescript",
+  "aws": "aws",
+  "amazon web services": "aws",
+  "docker": "docker",
+  "containerization": "docker",
+  "kubernetes": "kubernetes",
+  "k8s": "kubernetes",
+  "gcp": "gcp",
+  "google cloud": "gcp",
+  "rest": "rest_api",
+  "restful": "rest_api",
+  "rest api": "rest_api",
+  "graphql": "graphql",
+  "python": "python",
+  "java": "java",
+  "c++": "cpp",
+  "cpp": "cpp",
+  "c#": "csharp",
+  "csharp": "csharp",
+  "golang": "golang",
+  "go": "golang",
+  "sql": "sql",
+  "mongodb": "mongodb",
+  "mongo": "mongodb",
+  "redis": "redis",
+  "ci/cd": "cicd",
+  "cicd": "cicd",
+  "html": "html",
+  "css": "css",
+  "next.js": "nextjs",
+  "nextjs": "nextjs",
+};
+
+export interface MatchResult {
+  matchCount: number;
+  totalKeywords: number;
+  matchPercentage: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+}
+
+export function matchEvidence(candidateText: string, targetKeywords: string[]): MatchResult {
+  if (!candidateText || !targetKeywords || targetKeywords.length === 0) {
+    return {
+      matchCount: 0,
+      totalKeywords: targetKeywords?.length || 0,
+      matchPercentage: 0,
+      matchedKeywords: [],
+      missingKeywords: targetKeywords || [],
+    };
+  }
+
+  const lowerText = candidateText.toLowerCase();
+  const matchedKeywords: string[] = [];
+  const missingKeywords: string[] = [];
+
+  for (const kw of targetKeywords) {
+    const cleanKw = kw.trim().toLowerCase();
+    if (!cleanKw) continue;
+
+    const hasExact = lowerText.includes(cleanKw);
+    const aliased = TECHNICAL_ALIASES[cleanKw];
+    const hasAlias = aliased ? lowerText.includes(aliased) : false;
+
+    if (hasExact || hasAlias) {
+      matchedKeywords.push(kw);
+    } else {
+      missingKeywords.push(kw);
+    }
+  }
+
+  const totalKeywords = targetKeywords.length;
+  const matchCount = matchedKeywords.length;
+  const matchPercentage = totalKeywords > 0 ? matchCount / totalKeywords : 0;
+
+  return {
+    matchCount,
+    totalKeywords,
+    matchPercentage,
+    matchedKeywords,
+    missingKeywords,
+  };
+}
+
 export type IndustryProfileKey = "tech" | "finance" | "marketing" | "healthcare" | "executive" | "general";
 
 export const INDUSTRY_PROFILES: Record<
@@ -79,64 +178,6 @@ for (const [profKey, profConfig] of Object.entries(INDUSTRY_PROFILES)) {
     throw new Error(`INDUSTRY_PROFILES weights for '${profKey}' must sum to 100, got ${sum}`);
   }
 }
-
-// Curated technical alias mapping dictionary
-const TECHNICAL_ALIASES: Record<string, string> = {
-  "react.js": "react",
-  "reactjs": "react",
-  "react": "react",
-  "node": "nodejs",
-  "node.js": "nodejs",
-  "nodejs": "nodejs",
-  "postgresql": "postgresql",
-  "postgres": "postgresql",
-  "psql": "postgresql",
-  "machine learning": "machine_learning",
-  "ml": "machine_learning",
-  "javascript": "javascript",
-  "js": "javascript",
-  "typescript": "typescript",
-  "ts": "typescript",
-  "aws": "aws",
-  "amazon web services": "aws",
-  "docker": "docker",
-  "containerization": "docker",
-  "kubernetes": "kubernetes",
-  "k8s": "kubernetes",
-  "gcp": "gcp",
-  "google cloud": "gcp",
-  "google cloud platform": "gcp",
-  "azure": "azure",
-  "microsoft azure": "azure",
-  "rest": "rest_api",
-  "restful": "rest_api",
-  "rest api": "rest_api",
-  "restful apis": "rest_api",
-  "graphql": "graphql",
-  "python": "python",
-  "java": "java",
-  "c++": "cpp",
-  "cpp": "cpp",
-  "c#": "csharp",
-  "csharp": "csharp",
-  "golang": "golang",
-  "go": "golang",
-  "sql": "sql",
-  "mongodb": "mongodb",
-  "mongo": "mongodb",
-  "redis": "redis",
-  "ci/cd": "cicd",
-  "cicd": "cicd",
-  "html": "html",
-  "html5": "html",
-  "css": "css",
-  "css3": "css",
-  "tailwind": "tailwindcss",
-  "tailwindcss": "tailwindcss",
-  "next.js": "nextjs",
-  "nextjs": "nextjs",
-  "next": "nextjs",
-};
 
 export function normalizeSkill(term: string): string {
   const clean = term.toLowerCase().trim().replace(/[^a-z0-9.+#\s-]/g, "");

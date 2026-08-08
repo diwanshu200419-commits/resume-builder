@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { canAccessSTARVoice } from "@/lib/auth";
+import { matchEvidence } from "@/lib/evidence-matching";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
     const plan = profile?.plan || "free";
 
     const body = await request.json().catch(() => ({}));
-    const { questionId, questionText, transcript, questionCount = 1 } = body;
+    const { questionId, questionText, transcript, modelAnswerKeywords = [], questionCount = 1 } = body;
 
     // Server-side Plan Entitlement Gating Check
     if (plan === "free" && questionCount > 1) {
@@ -79,24 +80,35 @@ export async function POST(request: NextRequest) {
     };
 
     const starPresentCount = Object.values(starComponents).filter(Boolean).length;
-    const starScore = Math.round((starPresentCount / 4) * 45); // 45 pts max for STAR structure
+    const starScore = Math.round((starPresentCount / 4) * 35); // 35 pts max for STAR structure
 
-    // Pacing & Length Score (35 pts max)
-    let pacingScore = 35;
-    if (totalWords < 40) pacingScore = 15;
-    else if (totalWords < 80) pacingScore = 25;
-    else if (totalWords > 400) pacingScore = 25; // Too rambling
+    // 3. Reuse ATS Evidence-Matching for Model Answer Keywords (30 pts max)
+    const keywordsToTest = Array.isArray(modelAnswerKeywords) && modelAnswerKeywords.length > 0
+      ? modelAnswerKeywords
+      : ["impact", "leadership", "results", "solution"];
+    
+    const evidenceResult = matchEvidence(cleanTranscript, keywordsToTest);
+    const specificityScore = Math.round(evidenceResult.matchPercentage * 30);
 
-    // Clarity & Filler Penalty (20 pts max)
-    const clarityScore = Math.max(0, 20 - fillerCount * 3);
+    // 4. Pacing & Length Score (20 pts max)
+    let pacingScore = 20;
+    if (totalWords < 40) pacingScore = 8;
+    else if (totalWords < 80) pacingScore = 14;
+    else if (totalWords > 400) pacingScore = 14; // Too rambling
 
-    const overallScore = Math.min(100, Math.max(20, starScore + pacingScore + clarityScore));
+    // 5. Clarity & Filler Penalty (15 pts max)
+    const clarityScore = Math.max(0, 15 - fillerCount * 2);
+
+    const overallScore = Math.min(100, Math.max(20, starScore + specificityScore + pacingScore + clarityScore));
 
     // Construct Actionable Feedback
     const feedbackPoints: string[] = [];
     if (!hasSituation) feedbackPoints.push("Set clear context early: explicitly mention the company or project situation.");
     if (!hasAction) feedbackPoints.push("Highlight your individual contribution: focus on what YOU specifically built or led.");
     if (!hasResult) feedbackPoints.push("Quantify your impact: end with measurable outcomes (e.g. '% metric gain' or 'latency reduction').");
+    if (evidenceResult.missingKeywords.length > 0) {
+      feedbackPoints.push(`Include domain keywords: Incorporate key terms like '${evidenceResult.missingKeywords.slice(0, 3).join("', '")}' to boost specificity.`);
+    }
     if (fillerCount > 3) feedbackPoints.push(`Reduce vocal fillers: ${fillerCount} filler word(s) detected (${fillerDensityPct}% density). Pause silently instead of using 'um' or 'like'.`);
 
     if (feedbackPoints.length === 0) {
@@ -112,6 +124,7 @@ export async function POST(request: NextRequest) {
       totalWords,
       fillerCount,
       fillerDensityPct,
+      evidenceResult,
       starComponents,
       feedbackPoints,
       aiFollowUp,

@@ -62,6 +62,21 @@ const tests = [
       return /interview_questions/.test(qMigration) && /starComponents/.test(evalApi) && /FILLER_WORDS/.test(evalApi);
     }
   },
+  { name: "18. Interview Question Cache & JSON Validation Resilience Test", test: () => {
+      const validatorCode = fs.readFileSync(path.join(process.cwd(), "lib", "interview", "validateQuestionSet.ts"), "utf-8");
+      const cacheCode = fs.readFileSync(path.join(process.cwd(), "lib", "interview", "getOrGenerateQuestions.ts"), "utf-8");
+      const evidenceCode = fs.readFileSync(path.join(process.cwd(), "lib", "evidence-matching.ts"), "utf-8");
+      const evalApiCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "ai", "interview-eval", "route.ts"), "utf-8");
+      const cacheMigration = fs.readFileSync(path.join(process.cwd(), "supabase", "migrations", "20260808_interview_cache.sql"), "utf-8");
+
+      return /QuestionSetSchema/.test(validatorCode) &&
+             /interview_question_cache/.test(cacheMigration) &&
+             /normalizeRole/.test(cacheCode) &&
+             /previouslyAsked/.test(cacheCode) &&
+             /matchEvidence/.test(evidenceCode) &&
+             /matchEvidence/.test(evalApiCode);
+    }
+  },
 ];
 
 let passed = 0;
