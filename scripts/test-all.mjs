@@ -77,6 +77,18 @@ const tests = [
              /matchEvidence/.test(evalApiCode);
     }
   },
+  { name: "19. Recruiter Simulation Deterministic Fixation Model Test", test: () => {
+      const fixCode = fs.readFileSync(path.join(process.cwd(), "lib", "recruiter-sim", "fixationModel.ts"), "utf-8");
+      const pageCode = fs.readFileSync(path.join(process.cwd(), "app", "(dashboard)", "recruiter-simulation", "page.tsx"), "utf-8");
+
+      return /parseResumeForSimulation/.test(fixCode) &&
+             /computeFixationPath/.test(fixCode) &&
+             /generateVerdict/.test(fixCode) &&
+             /METRIC_REGEX/.test(fixCode) &&
+             /computeFixationPath/.test(pageCode) &&
+             /generateVerdict/.test(pageCode);
+    }
+  },
 ];
 
 let passed = 0;
