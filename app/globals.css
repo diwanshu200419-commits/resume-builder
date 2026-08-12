@@ -37,6 +37,12 @@
     max-width: 100vw;
     overflow-x: hidden;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Interactive Cursor & Pointer Safety */
+  button, [role="button"], a, input[type="submit"], input[type="button"] {
+    cursor: pointer;
   }
 
   /* Prevent iOS Safari unwanted zoom on form focus */
@@ -158,5 +164,17 @@
 
   .pt-safe {
     padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  /* Hide scrollbar for Chrome, Safari, Opera, Edge, and Firefox */
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar,
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

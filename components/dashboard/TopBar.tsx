@@ -63,7 +63,7 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
     <header
       className="sticky top-0 z-30 w-full h-14 bg-surface/80 backdrop-blur border-b border-border flex items-center justify-between px-4 sm:px-6 lg:px-8"
     >
-      <div className="flex items-center min-w-0 flex-1">
+      <div className="flex items-center min-w-0 flex-1 pl-12 lg:pl-0">
         {pageTitle ? (
           <h1 className="text-lg font-bold text-text-primary truncate">
             {pageTitle}
