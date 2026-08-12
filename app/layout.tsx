@@ -140,6 +140,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        <meta name="google-site-verification" content="0w0LWASRueXYjlydirI9OkfyFuaSVfHtymdPVEY5ad0" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
