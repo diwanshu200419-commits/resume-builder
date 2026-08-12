@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 import { detectDomainFromJD, getDomainPromptContext, DOMAIN_VOCABULARY } from "@/lib/domain-intelligence";
+import { getProfile } from "@/lib/auth";
+import { canAutoFix } from "@/lib/plans";
 
 // ---------- Request validation ----------
 
@@ -192,6 +194,18 @@ async function callGeminiForRewrite(
 // ---------- Route handler ----------
 
 export async function POST(req: NextRequest) {
+  const profile = await getProfile();
+  if (!profile) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!canAutoFix(profile)) {
+    return NextResponse.json(
+      { error: "Auto-Fix Bullet Rewriter requires Pro or higher plan." },
+      { status: 403 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();

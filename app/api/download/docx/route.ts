@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
+import { canDownloadDOCX } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
 import { generateResumeDOCX, generateCoverLetterDOCX } from "@/lib/generate-docx";
 
 export async function POST(request: NextRequest) {
   try {
     const profile = await getProfile();
+    if (!profile) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!canDownloadDOCX(profile)) {
+      return NextResponse.json(
+        { error: "DOCX export requires Pro or higher plan." },
+        { status: 403 }
+      );
+    }
     const body = await request.json().catch(() => ({}));
     const { analysisId, jobTitle, type } = body || {};
 
