@@ -89,6 +89,27 @@ const tests = [
              /generateVerdict/.test(pageCode);
     }
   },
+  { name: "20. Full App Responsive Layout, UserAvatar & Viewport Safety Audit", test: () => {
+      const userAvatarCode = fs.readFileSync(path.join(process.cwd(), "components", "shared", "UserAvatar.tsx"), "utf-8");
+      const topBarCode = fs.readFileSync(path.join(process.cwd(), "components", "dashboard", "TopBar.tsx"), "utf-8");
+      const navbarCode = fs.readFileSync(path.join(process.cwd(), "components", "shared", "Navbar.tsx"), "utf-8");
+      const profilePageCode = fs.readFileSync(path.join(process.cwd(), "app", "(dashboard)", "profile", "page.tsx"), "utf-8");
+      const globalsCss = fs.readFileSync(path.join(process.cwd(), "app", "globals.css"), "utf-8");
+      const inputCode = fs.readFileSync(path.join(process.cwd(), "components", "ui", "input.tsx"), "utf-8");
+      const textareaCode = fs.readFileSync(path.join(process.cwd(), "components", "ui", "textarea.tsx"), "utf-8");
+
+      return /UserAvatar/.test(userAvatarCode) &&
+             /no-referrer/.test(userAvatarCode) &&
+             /UserAvatar/.test(topBarCode) &&
+             /UserAvatar/.test(navbarCode) &&
+             /UserAvatar/.test(profilePageCode) &&
+             /overflow-x: hidden/.test(globalsCss) &&
+             /max-width: 100vw/.test(globalsCss) &&
+             /font-size: 16px !important/.test(globalsCss) &&
+             /text-base sm:text-sm/.test(inputCode) &&
+             /text-base sm:text-sm/.test(textareaCode);
+    }
+  },
 ];
 
 let passed = 0;

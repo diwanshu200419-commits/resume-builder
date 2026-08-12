@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { PlanBadge } from "@/components/shared/PlanBadge";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import type { Profile } from "@/types";
@@ -278,20 +279,7 @@ export default function ProfilePage() {
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
             <div className="shrink-0">
-              {profile.avatar_url && !avatarFailed ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.full_name || "Profile"}
-                  referrerPolicy="no-referrer"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-border bg-surface-elevated"
-                  onError={() => setAvatarFailed(true)}
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-accent/20 text-accent flex items-center justify-center text-2xl font-extrabold border-2 border-border">
-                  {getInitials(profile.full_name)}
-                </div>
-              )}
+              <UserAvatar profile={profile} user={authUser as any} size="xl" />
             </div>
             <div className="flex-1 min-w-0 space-y-2">
               <h2 className="text-2xl font-bold text-text-primary truncate">

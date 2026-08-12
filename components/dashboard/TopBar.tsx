@@ -16,6 +16,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import type { Profile } from "@/types";
 import { PlanBadge } from "@/components/shared/PlanBadge";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { createClient } from "@/lib/supabase/client";
 
 interface TopBarProps {
@@ -79,20 +80,7 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
               type="button"
               className="flex items-center gap-2 sm:gap-3 rounded-xl border border-transparent hover:border-border hover:bg-surface-elevated px-2 py-1.5 transition-all focus:outline-none focus:ring-2 focus:ring-accent/40"
             >
-              {hasAvatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={profile.avatar_url!}
-                  alt={displayName}
-                  referrerPolicy="no-referrer"
-                  onError={() => setAvatarFailed(true)}
-                  className="w-9 h-9 rounded-full object-cover shrink-0 border border-border"
-                />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shrink-0 border border-border">
-                  {initials}
-                </div>
-              )}
+              <UserAvatar profile={profile} size="md" />
 
               <div className="hidden md:flex flex-col items-start leading-tight">
                 <span className="font-semibold text-sm text-text-primary">

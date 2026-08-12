@@ -70,7 +70,7 @@ export default function RecruiterSimulationPage() {
                   setHasRun(true);
                 }}
                 placeholder="Paste your resume summary and bullet points here..."
-                className="bg-surface-elevated text-xs font-mono leading-relaxed"
+                className="bg-surface-elevated text-base sm:text-xs font-mono leading-relaxed"
               />
               <Button
                 onClick={handleSimulate}
