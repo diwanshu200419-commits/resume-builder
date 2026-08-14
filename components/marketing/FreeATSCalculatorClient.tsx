@@ -10,6 +10,7 @@ import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { ShareATSModal } from "@/components/ats/ShareATSModal";
 
 type PublicATSResult = {
   atsScore: number;
@@ -244,13 +245,22 @@ export function FreeATSCalculatorClient() {
 
           {step === "results" && atsResult && (
             <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-text-primary mb-2">
+              <div className="text-center mb-8 space-y-3">
+                <h2 className="text-3xl font-bold text-text-primary">
                   Your ATS Score
                 </h2>
                 <p className="text-text-muted">
-                  Here is how your resume performs
+                  Here is how your resume performs against Applicant Tracking Systems
                 </p>
+                <div className="flex justify-center pt-2">
+                  <ShareATSModal
+                    score={atsResult.atsScore}
+                    keywordScore={atsResult.keywordMatchScore}
+                    skillsScore={atsResult.skillsMatchScore}
+                    readabilityScore={atsResult.readabilityScore}
+                    formattingScore={atsResult.formatScore}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">

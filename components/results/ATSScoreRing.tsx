@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { getScoreColor } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ShareATSModal } from "@/components/ats/ShareATSModal";
 
 interface ATSScoreRingProps {
   beforeScore: number;
@@ -80,13 +81,16 @@ export function ATSScoreRing({ beforeScore, afterScore }: ATSScoreRingProps) {
         <ArrowRight className="w-8 h-8 text-accent hidden sm:block" />
         <ScoreRing score={afterScore} label="After" size={160} />
       </div>
-      <div className="text-center">
-        <h2 className="text-lg font-semibold text-text-primary mb-2">ATS Score</h2>
+      <div className="text-center space-y-3">
+        <h2 className="text-lg font-semibold text-text-primary">ATS Score</h2>
         {improvement > 0 && (
           <Badge variant="success" className="text-sm px-3 py-1">
             +{improvement} points improvement
           </Badge>
         )}
+        <div className="pt-2 flex justify-center">
+          <ShareATSModal score={afterScore} />
+        </div>
       </div>
     </div>
   );
