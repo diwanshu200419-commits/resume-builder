@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { BLOG_POSTS } from "@/lib/blog";
+import { ROLE_PAGES_DATA } from "@/lib/seo/role-pages";
 
 const BASE_URL = "https://www.vayloai.online";
 
@@ -7,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     { path: "", priority: 1.0, changeFreq: "daily" },
     { path: "/free-ats-checker", priority: 0.95, changeFreq: "daily" },
+    { path: "/cover-letter-generator", priority: 0.85, changeFreq: "weekly" },
     { path: "/pricing", priority: 0.9, changeFreq: "weekly" },
     { path: "/blog", priority: 0.8, changeFreq: "daily" },
     { path: "/about", priority: 0.6, changeFreq: "monthly" },
@@ -21,7 +23,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFreq: "weekly",
   }));
 
-  const allRoutes = [...staticRoutes, ...blogRoutes];
+  const roleRoutes = Object.keys(ROLE_PAGES_DATA).map((slug) => ({
+    path: `/resume/${slug}`,
+    priority: 0.85,
+    changeFreq: "weekly",
+  }));
+
+  const allRoutes = [...staticRoutes, ...blogRoutes, ...roleRoutes];
 
   return allRoutes.map((r) => ({
     url: `${BASE_URL}${r.path}`,
