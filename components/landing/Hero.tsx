@@ -5,11 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Star, CheckCircle, ShieldCheck, CreditCard, Send, Loader2, Bot } from "lucide-react";
+import { ArrowRight, Sparkles, CheckCircle, ShieldCheck, CreditCard, Send, Loader2 } from "lucide-react";
 
 export function Hero() {
   const [chatMessages, setChatMessages] = useState<Array<{ sender: "bot" | "user"; text: string }>>([
-    { sender: "bot", text: "How can I help improve your resume score today?" },
+    { sender: "bot", text: "How can I help optimize your resume score today?" },
   ]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -61,7 +61,7 @@ export function Hero() {
           <div className="lg:col-span-7 space-y-6 text-left">
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
               <Badge variant="outline" className="px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-surface border-indigo-200 dark:border-border text-indigo-600 dark:text-indigo-400 font-semibold text-xs gap-1.5 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500" /> Your AI Career Copilot
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500" /> Built for India's Next Generation of Job Seekers
               </Badge>
             </motion.div>
 
@@ -71,9 +71,9 @@ export function Hero() {
               transition={{ delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-[56px] font-extrabold text-text-primary leading-[1.15] tracking-tight"
             >
-              Your next career move{" "}
+              Your AI Career Copilot.{" "}
               <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-500 bg-clip-text text-transparent">
-                starts with AI.
+                Move from application to opportunity.
               </span>
             </motion.h1>
 
@@ -83,7 +83,7 @@ export function Hero() {
               transition={{ delay: 0.2 }}
               className="text-base sm:text-lg text-text-secondary max-w-xl leading-relaxed"
             >
-              Vaylo AI optimizes your resume, prepares you for interviews, and helps you find the perfect career path — all in one place.
+              Build a stronger resume, optimize it for real job descriptions, prepare for STAR interviews, and launch your career with AI.
             </motion.p>
 
             {/* CTAs */}
@@ -95,57 +95,35 @@ export function Hero() {
             >
               <Link href="/signup">
                 <Button size="lg" className="w-full sm:w-auto px-7 py-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-500/20 gap-2 transition-all hover:scale-[1.02]">
-                  Start Your Free Career Scan
+                  Start Free
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-              <Link href="/career-coach">
+              <Link href="/#features">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 py-6 rounded-xl border-border bg-surface text-text-primary hover:bg-surface-elevated font-semibold gap-2">
-                  Try AI Coach
+                  Explore Features
                 </Button>
               </Link>
             </motion.div>
 
-            {/* Social Proof AI Avatars */}
+            {/* Honest Value Badges */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               className="flex flex-wrap items-center gap-6 pt-4 text-xs text-text-secondary"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="flex -space-x-2">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-black text-[10px] flex items-center justify-center border-2 border-white dark:border-slate-900 shadow">
-                    RS
-                  </div>
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-500 to-pink-600 text-white font-black text-[10px] flex items-center justify-center border-2 border-white dark:border-slate-900 shadow">
-                    SV
-                  </div>
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 text-white font-black text-[10px] flex items-center justify-center border-2 border-white dark:border-slate-900 shadow">
-                    AM
-                  </div>
-                </div>
-                <div>
-                  <div className="flex text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
-                    ))}
-                  </div>
-                  <span className="font-bold text-text-primary text-[11px]">4.9/5 from 1,200+ users</span>
-                </div>
-              </div>
-
               <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-                <CreditCard className="w-4 h-4" /> No Credit Card
+                <CreditCard className="w-4 h-4" /> No Credit Card Required
               </div>
 
               <div className="flex items-center gap-1.5 font-medium text-indigo-600 dark:text-indigo-400">
-                <ShieldCheck className="w-4 h-4" /> 100% Private
+                <ShieldCheck className="w-4 h-4" /> 100% Private &amp; Secure
               </div>
             </motion.div>
           </div>
 
-          {/* Right Floating SaaS Product Mockup */}
+          {/* Right SaaS Product Mockup */}
           <div className="lg:col-span-5 relative">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -169,25 +147,25 @@ export function Hero() {
                   89
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-text-primary text-sm">Excellent ATS Match</h4>
-                  <p className="text-xs text-text-muted mt-0.5">Your resume is strong! Ready to send to recruiters.</p>
+                  <h4 className="font-extrabold text-text-primary text-sm">ATS Match Score</h4>
+                  <p className="text-xs text-text-muted mt-0.5">Resume optimization analysis breakdown.</p>
                 </div>
               </div>
 
               {/* AI Checklist */}
               <div className="space-y-2 text-xs">
-                <p className="font-bold text-text-primary uppercase tracking-wider text-[10px]">AI Optimization Checklist</p>
+                <p className="font-bold text-text-primary uppercase tracking-wider text-[10px]">AI Optimization Breakdown</p>
                 <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-between font-medium">
                   <span className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500" /> Add 4 quantifiable metric achievements
+                    <CheckCircle className="w-4 h-4 text-emerald-500" /> Quantifiable Metric Achievements
                   </span>
-                  <span className="text-[10px] font-bold bg-emerald-500/20 px-2 py-0.5 rounded">Fixed</span>
+                  <span className="text-[10px] font-bold bg-emerald-500/20 px-2 py-0.5 rounded">Analyzed</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-between font-medium">
                   <span className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-indigo-500" /> Include React & TypeScript keywords
+                    <CheckCircle className="w-4 h-4 text-indigo-500" /> Industry Skill Keyword Matching
                   </span>
-                  <span className="text-[10px] font-bold bg-indigo-500/20 px-2 py-0.5 rounded">Added</span>
+                  <span className="text-[10px] font-bold bg-indigo-500/20 px-2 py-0.5 rounded">Matched</span>
                 </div>
               </div>
 
@@ -195,10 +173,10 @@ export function Hero() {
               <div className="p-3.5 rounded-xl bg-slate-900 text-white space-y-3 shadow-inner">
                 <div className="flex items-center justify-between text-[11px] border-b border-slate-800 pb-2">
                   <span className="font-bold flex items-center gap-1.5 text-indigo-400">
-                    <Sparkles className="w-3.5 h-3.5" /> Interactive AI Chat Assistant
+                    <Sparkles className="w-3.5 h-3.5" /> Interactive AI Career Assistant
                   </span>
                   <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Ready
                   </span>
                 </div>
 

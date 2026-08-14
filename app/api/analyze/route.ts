@@ -21,9 +21,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  // Check cache first
+  // Check cache first (with ownership check)
   if (analysisCache.has(id)) {
-    return NextResponse.json({ analysis: analysisCache.get(id) });
+    const cached = analysisCache.get(id);
+    if (cached.user_id === profile.id) {
+      return NextResponse.json({ analysis: cached });
+    }
   }
 
   try {
@@ -32,6 +35,7 @@ export async function GET(request: NextRequest) {
       .from("analyses")
       .select("*")
       .eq("id", id)
+      .eq("user_id", profile.id)
       .single();
 
     if (analysis) {
@@ -217,8 +221,10 @@ export async function PATCH(request: NextRequest) {
 
   if (analysisCache.has(id)) {
     const cached = analysisCache.get(id);
-    cached.optimized_resume_text = optimized_resume_text;
-    analysisCache.set(id, cached);
+    if (cached.user_id === profile.id) {
+      cached.optimized_resume_text = optimized_resume_text;
+      analysisCache.set(id, cached);
+    }
   }
 
   try {
@@ -226,7 +232,8 @@ export async function PATCH(request: NextRequest) {
     await supabase
       .from("analyses")
       .update({ optimized_resume_text })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", profile.id);
   } catch {}
 
   return NextResponse.json({ success: true });

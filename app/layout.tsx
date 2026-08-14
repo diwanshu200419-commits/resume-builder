@@ -23,23 +23,21 @@ const APP_URL = "https://www.vayloai.online";
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "Vaylo AI — AI Resume Builder, ATS Scanner & Interview Prep",
-    template: "%s | Vaylo AI",
+    default: "VayloAI — AI Career Copilot for Resume, Jobs & Interviews",
+    template: "%s | VayloAI",
   },
   description:
-    "Vaylo AI is your AI career copilot — build ATS-optimized resumes, get instant ATS match scores, practice FAANG-style interviews with voice AI, and simulate how recruiters actually screen your resume. Free to start.",
+    "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
   keywords: [
     "AI resume builder",
     "ATS resume checker",
-    "resume score checker",
-    "AI interview prep",
-    "FAANG interview practice",
-    "resume optimization tool",
-    "ATS scanner free",
     "AI career coach",
-    "resume builder online free",
-    "interview simulator AI",
-    "Vaylo AI"
+    "resume optimizer",
+    "interview preparation",
+    "AI resume India",
+    "resume builder for freshers",
+    "ATS scanner free",
+    "VayloAI"
   ],
   authors: [{ name: "Vaylo AI" }],
   creator: "Vaylo AI",
@@ -56,22 +54,22 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: APP_URL,
-    siteName: "Vaylo AI",
-    title: "Vaylo AI — Your AI Career Copilot",
-    description: "Optimize your resume, ace ATS scans, and practice real interviews with AI — all in one place.",
+    siteName: "VayloAI",
+    title: "VayloAI — AI Career Copilot for Resume, Jobs & Interviews",
+    description: "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Vaylo AI Dashboard — AI Resume Builder and ATS Scanner",
+        alt: "VayloAI Dashboard — AI Resume Builder and ATS Scanner",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vaylo AI — Your AI Career Copilot",
-    description: "Optimize your resume, ace ATS scans, and practice real interviews with AI.",
+    title: "VayloAI — AI Career Copilot for Resume, Jobs & Interviews",
+    description: "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
     images: ["/og-image.png"],
     creator: "@vayloai",
   },
@@ -117,27 +115,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         "@type": "WebSite",
         "@id": `${APP_URL}/#website`,
         url: APP_URL,
-        name: "Vaylo AI",
-        description: "World's Best AI Career Operating System & ATS Copilot",
+        name: "VayloAI",
+        description: "AI Career Copilot for Resume, Jobs & Interviews",
         publisher: { "@id": `${APP_URL}/#organization` }
       },
       {
         "@type": "SoftwareApplication",
-        name: "Vaylo AI Career Operating System",
+        name: "VayloAI Career Copilot",
         operatingSystem: "Web",
         applicationCategory: "BusinessApplication",
-        description: "AI-powered resume builder, ATS scanner, and interview preparation platform.",
+        description: "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
         offers: [
           { "@type": "Offer", name: "Free", price: "0", priceCurrency: "INR" },
           { "@type": "Offer", name: "Pro", price: "99", priceCurrency: "INR" },
           { "@type": "Offer", name: "Premium", price: "299", priceCurrency: "INR" },
           { "@type": "Offer", name: "Career Pack", price: "499", priceCurrency: "INR" }
-        ],
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.9",
-          ratingCount: "1200"
-        }
+        ]
       }
     ]
   };

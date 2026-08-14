@@ -1,29 +1,26 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, User } from "lucide-react";
+import { CheckCircle2, Sparkles, Target, Zap } from "lucide-react";
 
-const testimonials = [
+const platformValues = [
   {
-    quote: "Vaylo AI improved my resume score from 55 to 91. I started getting interview calls every week!",
-    name: "Rohit Sharma",
-    role: "Software Engineer",
-    initials: "RS",
-    gradient: "from-indigo-500 to-purple-600",
+    icon: Target,
+    title: "Targeted ATS Match",
+    description: "Scan your resume against any job description to discover missing keywords, structural formatting gaps, and section improvements.",
+    tag: "ATS Optimization",
   },
   {
-    quote: "The AI interview coach is incredible. It felt like talking to a real recruiter.",
-    name: "Sneha Verma",
-    role: "Product Manager",
-    initials: "SV",
-    gradient: "from-purple-500 to-pink-600",
+    icon: Sparkles,
+    title: "AI Interview Coaching",
+    description: "Practice answering real FAANG & product interview questions using the STAR framework with instant spoken response evaluation.",
+    tag: "Voice Interview",
   },
   {
-    quote: "Finally, a tool that truly understands what recruiters are looking for.",
-    name: "Arjun Mehta",
-    role: "Data Analyst",
-    initials: "AM",
-    gradient: "from-emerald-500 to-teal-600",
+    icon: Zap,
+    title: "Complete Career Toolkit",
+    description: "Generate tailored cover letters, optimize your LinkedIn headline, calculate salary expectations, and launch a personal portfolio.",
+    tag: "Career Copilot",
   },
 ];
 
@@ -32,38 +29,39 @@ export function Testimonials() {
     <section className="py-20 px-4 bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 space-y-2">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">Loved by job seekers everywhere</h2>
-          <p className="text-text-secondary text-sm">See how Vaylo AI has helped thousands of candidates achieve their career goals.</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">Built for Every Stage of Your Career Search</h2>
+          <p className="text-text-secondary text-sm max-w-xl mx-auto">
+            Early access platform designed to help freshers, software engineers, and working professionals present their best candidate profile.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((t, i) => (
+          {platformValues.map((t, i) => (
             <motion.div
-              key={t.name}
+              key={t.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="p-7 rounded-2xl bg-white dark:bg-surface border border-slate-200 dark:border-border shadow-sm hover:shadow-xl transition-all space-y-4"
+              className="p-7 rounded-2xl bg-white dark:bg-surface border border-slate-200 dark:border-border shadow-sm hover:shadow-xl transition-all space-y-4 text-left"
             >
-              <div className="flex text-amber-400 gap-1">
-                {[...Array(5)].map((_, idx) => (
-                  <Star key={idx} className="w-4 h-4 fill-amber-400" />
-                ))}
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                  <t.icon className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold bg-indigo-500/15 text-indigo-400 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  {t.tag}
+                </span>
               </div>
 
-              <p className="text-xs sm:text-sm text-text-primary leading-relaxed font-medium italic">
-                &ldquo;{t.quote}&rdquo;
+              <h3 className="font-extrabold text-text-primary text-base">{t.title}</h3>
+
+              <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                {t.description}
               </p>
 
-              <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-border">
-                <div className={`w-10 h-10 rounded-full bg-gradient-to-tr ${t.gradient} text-white font-extrabold text-xs flex items-center justify-center shadow-md shrink-0`}>
-                  {t.initials}
-                </div>
-                <div>
-                  <h4 className="font-bold text-text-primary text-xs">{t.name}</h4>
-                  <p className="text-[11px] text-text-muted">{t.role}</p>
-                </div>
+              <div className="pt-3 border-t border-slate-100 dark:border-border flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Integrated in Vaylo AI
               </div>
             </motion.div>
           ))}

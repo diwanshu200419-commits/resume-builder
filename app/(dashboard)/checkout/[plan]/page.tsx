@@ -505,6 +505,24 @@ export default function CheckoutPage() {
                   </label>
                 </div>
 
+                {/* Legal & Refund Notice */}
+                <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] text-slate-300 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <input
+                      id="checkout-terms"
+                      type="checkbox"
+                      required
+                      className="mt-0.5 rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <label htmlFor="checkout-terms" className="cursor-pointer text-[11px] leading-tight select-none">
+                      I agree to the <Link href="/terms" target="_blank" className="text-indigo-400 underline font-semibold">Terms of Service</Link> and understand the <Link href="/refund" target="_blank" className="text-indigo-400 underline font-semibold">Refund Policy</Link>.
+                    </label>
+                  </div>
+                  <p className="text-[10px] text-slate-400 leading-normal border-t border-slate-800/80 pt-2">
+                    Refund eligibility depends on usage of paid AI features. Please review our <Link href="/refund" target="_blank" className="text-amber-300 underline font-medium">Refund Policy</Link> before purchasing.
+                  </p>
+                </div>
+
                 {serverError && <p className="text-xs text-rose-400 font-medium">{serverError}</p>}
 
                 <Button
@@ -515,10 +533,13 @@ export default function CheckoutPage() {
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlock Plan Features Instantly"}
                 </Button>
 
-                <p className="text-[10px] text-center text-text-muted flex items-center justify-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  Instant activation enabled. Features unlock immediately.
-                </p>
+                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+                  <Link href="/privacy" target="_blank" className="hover:underline">Privacy Policy</Link>
+                  <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                    <ShieldCheck className="w-3.5 h-3.5" /> 256-Bit SSL Encrypted
+                  </span>
+                  <Link href="/terms" target="_blank" className="hover:underline">Terms of Service</Link>
+                </div>
               </form>
             </CardContent>
           </Card>
