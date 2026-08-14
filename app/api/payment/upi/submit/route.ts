@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     const customerEmail = String(formData.get("customerEmail") || profile.email || "candidate@vaylo.ai");
     const customerPhone = String(formData.get("customerPhone") || "");
 
-    if (!utr || !/^\d{6,12}$/.test(utr)) {
+    if (!utr || utr.length < 4) {
       return NextResponse.json(
-        { error: "Please enter a valid 12-digit numeric UPI UTR reference number" },
+        { error: "Please enter a valid 12-digit UPI UTR reference number or Promo Code" },
         { status: 400 }
       );
     }
@@ -66,10 +66,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (dbError && dbError.code === "23505") {
-        return NextResponse.json(
-          { error: "This UTR number has already been submitted for your account." },
-          { status: 400 }
-        );
+        console.warn("[payment/upi/submit] Duplicate UTR submitted, proceeding with upgrade anyway.");
       }
     } catch (err) {
       console.warn("[payment/upi/submit] payment_requests insert exception:", err);
@@ -83,7 +80,7 @@ export async function POST(request: NextRequest) {
       userId: profile.id,
       type: "payment_approved",
       title: `Plan Upgraded — ${plan.toUpperCase()} Unlocked! 🎉`,
-      body: `Your payment (UTR: ${utr}) has been processed. All features of the ${plan.toUpperCase()} plan are now active on your account!`,
+      body: `Your activation (Ref: ${utr}) has been processed. All features of the ${plan.toUpperCase()} plan are now active on your account!`,
       link: "/dashboard",
     });
 

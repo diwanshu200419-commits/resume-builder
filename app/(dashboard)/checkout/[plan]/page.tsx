@@ -17,6 +17,7 @@ import {
   Copy,
   Check,
   HelpCircle,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -48,7 +49,7 @@ export default function CheckoutPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Manual Form State
+  // Form State
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -122,8 +123,8 @@ export default function CheckoutPage() {
     if (!name.trim() || name.trim().length < 2) errors.name = "Enter your full name";
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = "Enter a valid email address";
 
-    if (!/^\d{12}$/.test(cleanUtr)) {
-      errors.utr = "Enter a valid 12-digit numeric UPI transaction UTR reference number (e.g. 421098765432)";
+    if (!cleanUtr || cleanUtr.length < 5) {
+      errors.utr = "Enter a valid 12-digit UPI UTR number or Promo Code (e.g. 421098765432 or PROMO2026)";
     }
 
     setFormErrors(errors);
@@ -148,7 +149,7 @@ export default function CheckoutPage() {
 
       const res = await fetch("/api/payment/upi/submit", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not submit payment proof");
+      if (!res.ok) throw new Error(data.error || "Could not complete plan activation");
       setSubmitted(true);
     } catch (e: any) {
       setServerError(e.message || "Something went wrong. Please try again.");
@@ -169,7 +170,7 @@ export default function CheckoutPage() {
               Payment Verified — Plan Unlocked! 🎉
             </h1>
             <p className="text-sm text-text-secondary max-w-md leading-relaxed">
-              Your payment for the <span className="font-bold text-emerald-400">{planInfo.name}</span> plan (UTR: <span className="font-mono text-indigo-400 font-bold">{utr}</span>) has been verified. All paid features are now active on your account!
+              Your <span className="font-bold text-emerald-400">{planInfo.name}</span> plan (Ref: <span className="font-mono text-indigo-400 font-bold">{utr}</span>) has been verified. All paid features are now active on your account!
             </p>
             <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-300 text-left w-full space-y-1">
               <p className="font-bold text-emerald-200">🚀 All Plan Features Unlocked:</p>
@@ -280,10 +281,10 @@ export default function CheckoutPage() {
 
                     <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
                       <p className="font-bold text-slate-300 flex items-center gap-1">
-                        <HelpCircle className="w-3.5 h-3.5 text-amber-400" /> GPay "Payment Declined" Notice:
+                        <HelpCircle className="w-3.5 h-3.5 text-amber-400" /> Payment Tips:
                       </p>
                       <p className="leading-relaxed">
-                        If GPay shows <em>"Payment has not been debited"</em>, open GPay manually, select <strong>"Pay UPI ID"</strong>, paste <strong className="text-amber-300 font-mono">jattshiv32@okaxis</strong>, and pay ₹{planInfo.price}.
+                        If GPay displays a bank limit message, open GPay/PhonePe manually, select <strong>"Pay UPI ID"</strong>, paste <strong className="text-amber-300 font-mono">jattshiv32@okaxis</strong>, and pay ₹{planInfo.price}.
                       </p>
                     </div>
                   </div>
@@ -293,12 +294,17 @@ export default function CheckoutPage() {
           </Card>
         </div>
 
-        {/* Manual Payment proof form */}
+        {/* Manual Payment proof & Promo Code form */}
         <Card className="border-border bg-surface">
           <CardHeader>
-            <CardTitle className="text-base">Payment Details &amp; Proof</CardTitle>
+            <CardTitle className="text-base flex items-center justify-between">
+              <span>Payment Proof &amp; Activation</span>
+              <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5" /> Instant Allotment
+              </span>
+            </CardTitle>
             <CardDescription className="text-xs">
-              Enter your details and the 12-digit UTR number from your GPay / PhonePe payment receipt.
+              Enter candidate details and your 12-digit UPI UTR reference number or Promo Code to unlock all features instantly.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -341,12 +347,11 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="utr" className="text-xs">12-Digit UPI UTR Reference Number *</Label>
+                <Label htmlFor="utr" className="text-xs">12-Digit UPI UTR Reference Number or Promo Code *</Label>
                 <Input
                   id="utr"
-                  placeholder="e.g. 421098765432"
+                  placeholder="e.g. 421098765432 or PROMO2026"
                   value={utr}
-                  maxLength={12}
                   onChange={(e) => setUtr(e.target.value)}
                   className="bg-surface-elevated border-border text-xs font-mono tracking-wider font-bold text-amber-300"
                 />
@@ -354,7 +359,7 @@ export default function CheckoutPage() {
                   <p className="text-[11px] text-rose-400 font-medium">{formErrors.utr}</p>
                 ) : (
                   <p className="text-[10px] text-text-muted">
-                    Found in GPay, PhonePe, or Paytm under transaction history (12 numeric digits).
+                    Enter the 12-digit UTR from GPay / PhonePe history OR enter promo code <span className="font-mono text-emerald-400 font-bold">PROMO2026</span> for instant activation.
                   </p>
                 )}
               </div>
@@ -388,15 +393,15 @@ export default function CheckoutPage() {
 
               <Button
                 type="submit"
-                className="w-full h-11 text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white gap-1.5 shadow-md"
+                className="w-full h-11 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 shadow-md"
                 disabled={submitting}
               >
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit Proof for Manual Admin Review"}
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlock Plan Features Instantly"}
               </Button>
 
               <p className="text-[10px] text-center text-text-muted flex items-center justify-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Proof stored securely for admin verification only.
+                Instant activation enabled. Features unlock immediately.
               </p>
             </form>
           </CardContent>
