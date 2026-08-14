@@ -198,6 +198,7 @@ function calculateKeywordMatch(resumeText: string, jobDescription: string): numb
 }
 
 import { detectDomainFromJD, getDomainPromptContext, DOMAIN_VOCABULARY, DomainCategory } from "./domain-intelligence";
+import { calculateATSScore } from "@/lib/ats/scoring";
 
 // 1. Metric Density Evaluator (Domain-Aware)
 function calculateMetricDensity(resumeText: string, domain: DomainCategory) {
@@ -1014,25 +1015,45 @@ export async function generateATSResume(
       const jsonText = cleanAndExtractJSON(result.response.text());
       const parsed = JSON.parse(jsonText);
 
-      // Force weight values and requires_user_confirmation: true
-      if (parsed?.ats_score?.categories) {
-        if (parsed.ats_score.categories.keyword_match) parsed.ats_score.categories.keyword_match.weight = 0.35;
-        if (parsed.ats_score.categories.skills_alignment) parsed.ats_score.categories.skills_alignment.weight = 0.30;
-        if (parsed.ats_score.categories.readability) parsed.ats_score.categories.readability.weight = 0.20;
-        if (parsed.ats_score.categories.formatting_impact) parsed.ats_score.categories.formatting_impact.weight = 0.15;
-      }
+      // Compute canonical deterministic ATS score using lib/ats/scoring
+      const canonicalScore = calculateATSScore({
+        resumeText: input.rawInput,
+        jobDescription: input.jobDescription,
+        aiKeywordMatch: parsed?.ats_score?.categories?.keyword_match?.score,
+        aiSkillsMatch: parsed?.ats_score?.categories?.skills_alignment?.score,
+        aiReadability: parsed?.ats_score?.categories?.readability?.score,
+        aiFormat: parsed?.ats_score?.categories?.formatting_impact?.score,
+      });
+
+      parsed.ats_score = {
+        overall: canonicalScore.overall,
+        categories: {
+          keyword_match: {
+            score: canonicalScore.categories.keyword_match.score,
+            weight: 0.35,
+            matched: canonicalScore.categories.keyword_match.matched,
+            missing: canonicalScore.categories.keyword_match.missing,
+          },
+          skills_alignment: {
+            score: canonicalScore.categories.skills_alignment.score,
+            weight: 0.30,
+            note: canonicalScore.categories.skills_alignment.note,
+          },
+          readability: {
+            score: canonicalScore.categories.readability.score,
+            weight: 0.20,
+            note: canonicalScore.categories.readability.note,
+          },
+          formatting_impact: {
+            score: canonicalScore.categories.formatting_impact.score,
+            weight: 0.15,
+            issues: canonicalScore.categories.formatting_impact.issues,
+          },
+        },
+      };
 
       if (Array.isArray(parsed?.gaps)) {
         parsed.gaps = parsed.gaps.map((g: any) => ({ ...g, requires_user_confirmation: true }));
-      }
-
-      // Recalculate overall score to ensure exact mathematical consistency
-      if (parsed?.ats_score?.categories) {
-        const km = parsed.ats_score.categories.keyword_match?.score || 80;
-        const sa = parsed.ats_score.categories.skills_alignment?.score || 80;
-        const rd = parsed.ats_score.categories.readability?.score || 85;
-        const fi = parsed.ats_score.categories.formatting_impact?.score || 80;
-        parsed.ats_score.overall = Math.min(100, Math.max(0, Math.round(km * 0.35 + sa * 0.30 + rd * 0.20 + fi * 0.15)));
       }
 
       return ATSResumeOutputSchema.parse(parsed);

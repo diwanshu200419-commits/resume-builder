@@ -110,6 +110,17 @@ const tests = [
              /text-base sm:text-sm/.test(textareaCode);
     }
   },
+  { name: "21. Canonical ATS Scoring Engine & Single Source of Truth Assertion", test: () => {
+      const scoringCode = fs.readFileSync(path.join(process.cwd(), "lib", "ats", "scoring.ts"), "utf-8");
+      const geminiCode = fs.readFileSync(path.join(process.cwd(), "lib", "gemini.ts"), "utf-8");
+      return /calculateATSScore/.test(scoringCode) &&
+             /0.35/.test(scoringCode) &&
+             /0.30/.test(scoringCode) &&
+             /0.20/.test(scoringCode) &&
+             /0.15/.test(scoringCode) &&
+             /calculateATSScore/.test(geminiCode);
+    }
+  },
 ];
 
 let passed = 0;
