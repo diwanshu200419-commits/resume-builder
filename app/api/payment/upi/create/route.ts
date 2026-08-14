@@ -21,10 +21,11 @@ export async function POST(request: NextRequest) {
 
     const amount = getPlanAmount(plan as Exclude<Plan, "free">);
     const ref = generateUpiRef(profile.id);
+    
+    // Pure P2P UPI link without merchant note parameter to prevent Axis Bank/GPay fraud flags
     const upiLink = buildUpiLink({
       amount,
       ref,
-      note: `Vaylo AI ${plan}`,
     });
     const qrUrl = buildUpiQrUrl(upiLink, amount);
 

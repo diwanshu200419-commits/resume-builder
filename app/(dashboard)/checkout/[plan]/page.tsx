@@ -17,6 +17,8 @@ import {
   Copy,
   Check,
   Zap,
+  Tag,
+  Gift,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -47,6 +49,12 @@ export default function CheckoutPage() {
   const [creating, setCreating] = useState(true);
   const [createError, setCreateError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Dedicated Coupon Column State
+  const [couponCode, setCouponCode] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
 
   // Form State
   const [name, setName] = useState("");
@@ -105,6 +113,34 @@ export default function CheckoutPage() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCouponError(null);
+    if (!couponCode.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+
+    setApplyingCoupon(true);
+    try {
+      const res = await fetch("/api/payment/coupon/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim(), plan }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Invalid coupon code");
+
+      setAppliedCoupon(data.coupon);
+      setUtr(`COUPON_${data.coupon}`);
+      setSubmitted(true);
+    } catch (err: any) {
+      setCouponError(err.message || "Could not apply coupon");
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setScreenshot(file);
@@ -123,7 +159,7 @@ export default function CheckoutPage() {
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = "Enter a valid email address";
 
     if (!cleanUtr || cleanUtr.length < 4) {
-      errors.utr = "Enter a valid 12-digit UPI UTR number or Promo Code (e.g. 421098765432 or PROMO2026)";
+      errors.utr = "Enter a valid 12-digit UPI UTR number or Promo Code (e.g. 421098765432 or VAYLO100)";
     }
 
     setFormErrors(errors);
@@ -225,7 +261,7 @@ export default function CheckoutPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <QrCode className="w-5 h-5 text-amber-400" />
-                Pay ₹{planInfo.price} via Any UPI App
+                Pay ₹{planInfo.price} via Direct UPI QR / VPA
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
@@ -275,7 +311,7 @@ export default function CheckoutPage() {
                     <a href={order.upiLink} className="w-full block">
                       <Button className="w-full h-11 gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg">
                         <Smartphone className="w-4 h-4" />
-                        Open in GPay / PhonePe / Paytm
+                        Open GPay / PhonePe / Paytm App
                       </Button>
                     </a>
 
@@ -293,118 +329,165 @@ export default function CheckoutPage() {
           </Card>
         </div>
 
-        {/* Manual Payment proof & Promo Code form */}
-        <Card className="border-border bg-surface shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center justify-between">
-              <span>Payment Proof &amp; Activation</span>
-              <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
-                <Zap className="w-3.5 h-3.5" /> Instant Allotment
-              </span>
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Enter candidate details and your 12-digit UPI UTR reference number or Promo Code to unlock all features instantly.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <Label htmlFor="name" className="text-xs font-semibold">Candidate Full Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Your Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="bg-surface-elevated border-border text-xs"
-                />
-                {formErrors.name && <p className="text-[11px] text-rose-400 font-medium">{formErrors.name}</p>}
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="email" className="text-xs font-semibold">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-surface-elevated border-border text-xs"
-                />
-                {formErrors.email && <p className="text-[11px] text-rose-400 font-medium">{formErrors.email}</p>}
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="phone" className="text-xs font-semibold">Phone Number (Optional)</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="bg-surface-elevated border-border text-xs"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="utr" className="text-xs font-semibold">12-Digit UPI UTR Reference Number or Promo Code *</Label>
-                <Input
-                  id="utr"
-                  placeholder="e.g. 421098765432 or PROMO2026"
-                  value={utr}
-                  onChange={(e) => setUtr(e.target.value)}
-                  className="bg-surface-elevated border-border text-xs font-mono tracking-wider font-bold text-amber-300"
-                />
-                {formErrors.utr ? (
-                  <p className="text-[11px] text-rose-400 font-medium">{formErrors.utr}</p>
-                ) : (
-                  <p className="text-[10px] text-text-muted">
-                    Enter the 12-digit UTR from GPay / PhonePe history OR enter promo code <span className="font-mono text-emerald-400 font-bold">PROMO2026</span> for instant activation.
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="screenshot" className="text-xs font-semibold">Payment Screenshot (Optional)</Label>
-                <label
-                  htmlFor="screenshot"
-                  className="flex flex-col items-center justify-center gap-1.5 border border-dashed border-border rounded-xl p-4 cursor-pointer hover:border-accent/50 transition-colors text-center bg-surface-elevated"
-                >
-                  {preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={preview} alt="Screenshot preview" className="max-h-36 rounded object-contain" />
-                  ) : (
-                    <>
-                      <Upload className="w-5 h-5 text-text-muted" />
-                      <span className="text-xs text-text-secondary">Click to upload image (max 5MB)</span>
-                    </>
-                  )}
-                  <input
-                    id="screenshot"
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
-                    className="hidden"
-                    onChange={handleFileChange}
+        {/* Right Column: Special Coupon Column + Payment Proof Form */}
+        <div className="space-y-6">
+          {/* SPECIAL DEDICATED COUPON COLUMN CARD */}
+          <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-surface to-surface shadow-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center justify-between text-white">
+                <span className="flex items-center gap-2">
+                  <Tag className="w-5 h-5 text-emerald-400" />
+                  Special Coupon Code Column
+                </span>
+                <span className="text-[11px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold">
+                  100% OFF Code
+                </span>
+              </CardTitle>
+              <CardDescription className="text-xs text-text-secondary">
+                Have a promotional or discount coupon? Enter your code below for instant free activation.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleApplyCoupon} className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter Coupon Code (e.g. VAYLO100)"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    className="bg-surface-elevated border-emerald-500/30 text-xs font-mono font-bold tracking-wider text-emerald-300 placeholder:text-slate-500 uppercase"
                   />
-                </label>
-              </div>
+                  <Button
+                    type="submit"
+                    disabled={applyingCoupon}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 shadow-md shrink-0"
+                  >
+                    {applyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply Code"}
+                  </Button>
+                </div>
+                {couponError && <p className="text-[11px] text-rose-400 font-medium">{couponError}</p>}
+                <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                  <Gift className="w-3.5 h-3.5 text-emerald-400" /> Available Codes:{" "}
+                  <strong className="text-emerald-300 font-mono">VAYLO100</strong>,{" "}
+                  <strong className="text-emerald-300 font-mono">PROMO2026</strong>,{" "}
+                  <strong className="text-emerald-300 font-mono">VIP2026</strong>
+                </p>
+              </form>
+            </CardContent>
+          </Card>
 
-              {serverError && <p className="text-xs text-rose-400 font-medium">{serverError}</p>}
+          {/* UTR Payment Proof Form */}
+          <Card className="border-border bg-surface shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center justify-between">
+                <span>Payment Proof &amp; Activation</span>
+                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                  <Zap className="w-3.5 h-3.5" /> Instant Allotment
+                </span>
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Enter candidate details and your 12-digit UPI UTR reference number to unlock all features instantly.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <Label htmlFor="name" className="text-xs font-semibold">Candidate Full Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Your Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="bg-surface-elevated border-border text-xs"
+                  />
+                  {formErrors.name && <p className="text-[11px] text-rose-400 font-medium">{formErrors.name}</p>}
+                </div>
 
-              <Button
-                type="submit"
-                className="w-full h-11 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 shadow-md"
-                disabled={submitting}
-              >
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlock Plan Features Instantly"}
-              </Button>
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-xs font-semibold">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="bg-surface-elevated border-border text-xs"
+                  />
+                  {formErrors.email && <p className="text-[11px] text-rose-400 font-medium">{formErrors.email}</p>}
+                </div>
 
-              <p className="text-[10px] text-center text-text-muted flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Instant activation enabled. Features unlock immediately.
-              </p>
-            </form>
-          </CardContent>
-        </Card>
+                <div className="space-y-1">
+                  <Label htmlFor="phone" className="text-xs font-semibold">Phone Number (Optional)</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="bg-surface-elevated border-border text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="utr" className="text-xs font-semibold">12-Digit UPI UTR Reference Number *</Label>
+                  <Input
+                    id="utr"
+                    placeholder="e.g. 421098765432"
+                    value={utr}
+                    onChange={(e) => setUtr(e.target.value)}
+                    className="bg-surface-elevated border-border text-xs font-mono tracking-wider font-bold text-amber-300"
+                  />
+                  {formErrors.utr ? (
+                    <p className="text-[11px] text-rose-400 font-medium">{formErrors.utr}</p>
+                  ) : (
+                    <p className="text-[10px] text-text-muted">
+                      Enter the 12-digit UTR from GPay / PhonePe history for instant activation.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="screenshot" className="text-xs font-semibold">Payment Screenshot (Optional)</Label>
+                  <label
+                    htmlFor="screenshot"
+                    className="flex flex-col items-center justify-center gap-1.5 border border-dashed border-border rounded-xl p-4 cursor-pointer hover:border-accent/50 transition-colors text-center bg-surface-elevated"
+                  >
+                    {preview ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={preview} alt="Screenshot preview" className="max-h-36 rounded object-contain" />
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5 text-text-muted" />
+                        <span className="text-xs text-text-secondary">Click to upload image (max 5MB)</span>
+                      </>
+                    )}
+                    <input
+                      id="screenshot"
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+
+                {serverError && <p className="text-xs text-rose-400 font-medium">{serverError}</p>}
+
+                <Button
+                  type="submit"
+                  className="w-full h-11 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 shadow-md"
+                  disabled={submitting}
+                >
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlock Plan Features Instantly"}
+                </Button>
+
+                <p className="text-[10px] text-center text-text-muted flex items-center justify-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  Instant activation enabled. Features unlock immediately.
+                </p>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
