@@ -14,7 +14,9 @@ import {
   ShieldCheck,
   Smartphone,
   ArrowLeft,
-  Info,
+  Copy,
+  Check,
+  HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -30,6 +32,7 @@ type OrderData = {
   paymentId: string;
   ref: string;
   amount: number;
+  upiId?: string;
   upiLink: string;
   qrUrl: string;
 };
@@ -43,6 +46,7 @@ export default function CheckoutPage() {
   const [order, setOrder] = useState<OrderData | null>(null);
   const [creating, setCreating] = useState(true);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Manual Form State
   const [name, setName] = useState("");
@@ -95,6 +99,12 @@ export default function CheckoutPage() {
     );
   }
 
+  const handleCopyUpi = () => {
+    navigator.clipboard.writeText("jattshiv32@okaxis");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setScreenshot(file);
@@ -112,7 +122,6 @@ export default function CheckoutPage() {
     if (!name.trim() || name.trim().length < 2) errors.name = "Enter your full name";
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = "Enter a valid email address";
 
-    // Enforce 12-digit numeric UPI UTR validation rule
     if (!/^\d{12}$/.test(cleanUtr)) {
       errors.utr = "Enter a valid 12-digit numeric UPI transaction UTR reference number (e.g. 421098765432)";
     }
@@ -213,7 +222,7 @@ export default function CheckoutPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <QrCode className="w-5 h-5 text-amber-400" />
-                Scan &amp; Pay with Any UPI App
+                Pay ₹{planInfo.price} via Any UPI App
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
@@ -235,22 +244,47 @@ export default function CheckoutPage() {
 
               {order && (
                 <>
+                  {/* Clean QR Code */}
                   <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={order.qrUrl} alt="UPI QR code" width={200} height={200} />
                   </div>
 
-                  <div className="w-full text-center">
-                    <p className="text-xs text-text-muted">Direct GPay / UPI ID:</p>
-                    <p className="text-base font-bold text-text-primary mt-0.5 font-mono select-all">jattshiv32@okaxis</p>
+                  {/* Copy UPI VPA Section */}
+                  <div className="w-full bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <p className="text-[11px] text-slate-400 text-center font-medium">Official Vaylo AI UPI VPA:</p>
+                    <div className="flex items-center justify-between bg-slate-900 px-3 py-2 rounded-lg border border-slate-800">
+                      <span className="font-mono text-sm font-bold text-amber-300">jattshiv32@okaxis</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleCopyUpi}
+                        className="h-7 text-xs gap-1 text-indigo-400 hover:text-indigo-300 hover:bg-slate-800"
+                      >
+                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copied ? "Copied!" : "Copy"}</span>
+                      </Button>
+                    </div>
                   </div>
 
-                  <a href={order.upiLink} className="w-full">
-                    <Button className="w-full h-11 gap-2 bg-accent hover:bg-accent-hover text-white font-bold text-xs">
-                      <Smartphone className="w-4 h-4" />
-                      Open in PhonePe / GPay / Paytm
-                    </Button>
-                  </a>
+                  {/* Deep Link Open Button */}
+                  <div className="w-full space-y-2">
+                    <a href={order.upiLink} className="w-full block">
+                      <Button className="w-full h-11 gap-2 bg-accent hover:bg-accent-hover text-white font-bold text-xs shadow-lg">
+                        <Smartphone className="w-4 h-4" />
+                        Open in GPay / PhonePe / Paytm
+                      </Button>
+                    </a>
+
+                    <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                      <p className="font-bold text-slate-300 flex items-center gap-1">
+                        <HelpCircle className="w-3.5 h-3.5 text-amber-400" /> GPay "Payment Declined" Notice:
+                      </p>
+                      <p className="leading-relaxed">
+                        If GPay shows <em>"Payment has not been debited"</em>, open GPay manually, select <strong>"Pay UPI ID"</strong>, paste <strong className="text-amber-300 font-mono">jattshiv32@okaxis</strong>, and pay ₹{planInfo.price}.
+                      </p>
+                    </div>
+                  </div>
                 </>
               )}
             </CardContent>
@@ -262,7 +296,7 @@ export default function CheckoutPage() {
           <CardHeader>
             <CardTitle className="text-base">Payment Details &amp; Proof</CardTitle>
             <CardDescription className="text-xs">
-              Enter your candidate details and 12-digit UTR reference number from your bank payment receipt.
+              Enter your details and the 12-digit UTR number from your GPay / PhonePe payment receipt.
             </CardDescription>
           </CardHeader>
           <CardContent>

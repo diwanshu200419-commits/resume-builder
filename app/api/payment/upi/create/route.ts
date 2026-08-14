@@ -12,24 +12,19 @@ export async function POST(request: NextRequest) {
     }
 
     const { plan } = await request.json();
-    if (!plan || (plan !== "pro" && plan !== "premium" && plan !== "career" && plan !== "career-pack")) {
+    if (!plan || (plan !== "pro" && plan !== "premium" && plan !== "career" && plan !== "career-pack" && plan !== "career_pack")) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    const { upiId } = getUpiConfig();
-    if (!upiId) {
-      return NextResponse.json(
-        { error: "UPI payments are not configured yet. Set NEXT_PUBLIC_UPI_ID in your environment." },
-        { status: 500 }
-      );
-    }
+    const config = getUpiConfig();
+    const upiId = config.upiId || "jattshiv32@okaxis";
 
     const amount = getPlanAmount(plan as Exclude<Plan, "free">);
     const ref = generateUpiRef(profile.id);
     const upiLink = buildUpiLink({
       amount,
       ref,
-      note: `Vaylo ${plan === "pro" ? "Pro" : "Premium"} - ${profile.email ?? profile.id}`,
+      note: `Vaylo AI ${plan} Plan`,
     });
     const qrUrl = buildUpiQrUrl(upiLink);
 
@@ -62,6 +57,7 @@ export async function POST(request: NextRequest) {
       paymentId,
       ref,
       amount,
+      upiId,
       upiLink,
       qrUrl,
     });
