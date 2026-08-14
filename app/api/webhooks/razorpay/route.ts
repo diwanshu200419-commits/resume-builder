@@ -35,13 +35,29 @@ export async function POST(request: NextRequest) {
       const paymentId = paymentEntity.id;
       const notes = paymentEntity.notes || {};
       const userId = notes.userId;
-      const plan = notes.plan || "pro";
+      const rawPlan = (notes.plan || "pro").toLowerCase().replace("-", "_");
+      const plan = rawPlan === "career" ? "career_pack" : rawPlan;
       const amount = paymentEntity.amount ? paymentEntity.amount / 100 : 99;
       const currency = paymentEntity.currency || "INR";
 
       if (!userId) {
         console.warn("[Razorpay Webhook] Missing userId in notes");
         return NextResponse.json({ received: true });
+      }
+
+      // Price Integrity Check
+      const EXPECTED_PRICES: Record<string, number> = {
+        pro: 99,
+        premium: 299,
+        career_pack: 499,
+      };
+
+      const expectedPrice = EXPECTED_PRICES[plan] || 99;
+      const isCouponApplied = Boolean(notes.coupon);
+
+      if (!isCouponApplied && amount < expectedPrice) {
+        console.error(`[Razorpay Webhook Mismatch] Paid ₹${amount} for plan ${plan} (expected ₹${expectedPrice}). Entitlement rejected.`);
+        return NextResponse.json({ error: "Amount mismatch for plan" }, { status: 400 });
       }
 
       // Idempotency Check: Check if paymentId already processed

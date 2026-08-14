@@ -144,9 +144,23 @@ export const PLAN_CONFIG: Record<PlanType, PlanConfig> = {
   },
 };
 
-// Returns the real plan from the DB profile
+// Returns the real plan from the DB profile, respecting subscription expiry
 export function getEffectivePlan(profile: Profile | null): PlanType {
   if (!profile) return "free";
+
+  // Check subscription expiry (Pro & Premium expire after 30 days unless renewed)
+  // Career Pack has no expiry (expires_at is null) and remains lifetime active
+  if (profile.expires_at) {
+    const expiresDate = new Date(profile.expires_at);
+    if (expiresDate.getTime() < Date.now()) {
+      return "free"; // Subscription expired — revoke paid entitlement
+    }
+  }
+
+  if (profile.subscription_status === "cancelled" && !profile.expires_at) {
+    return "free";
+  }
+
   const p = (profile.plan || "free").toLowerCase().replace("-", "_");
   if (p === "career") return "career_pack";
   if (p === "pro" || p === "premium" || p === "career_pack") return p as PlanType;

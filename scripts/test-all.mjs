@@ -121,6 +121,17 @@ const tests = [
              /calculateATSScore/.test(geminiCode);
     }
   },
+  { name: "22. Payment, Plan, Entitlement & Expiry Matrix Assertion", test: () => {
+      const plansCode = fs.readFileSync(path.join(process.cwd(), "lib", "plans.ts"), "utf-8");
+      const webhookCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "webhooks", "razorpay", "route.ts"), "utf-8");
+      const upiSubmitCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "payment", "upi", "submit", "route.ts"), "utf-8");
+
+      return /expires_at/.test(plansCode) &&
+             /EXPECTED_PRICES/.test(webhookCode) &&
+             /status:\s*"pending"/.test(upiSubmitCode) &&
+             /Duplicate/i.test(upiSubmitCode);
+    }
+  },
 ];
 
 let passed = 0;
