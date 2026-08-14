@@ -4,6 +4,7 @@ export type NotificationType =
   | "scan_complete"
   | "payment_approved"
   | "payment_rejected"
+  | "payment_pending"
   | "feedback_replied"
   | "plan_expiring"
   | "admin_announcement";
