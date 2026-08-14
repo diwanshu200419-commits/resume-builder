@@ -17,7 +17,7 @@ export const viewport: Viewport = {
   userScalable: true,
 };
 
-const APP_URL = "https://resume-builder-murex-mu.vercel.app";
+const APP_URL = "https://vayloai.online";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),

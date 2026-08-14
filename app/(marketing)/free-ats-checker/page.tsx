@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { FreeATSCalculatorClient } from "@/components/marketing/FreeATSCalculatorClient";
 
-const APP_URL = "https://resume-builder-murex-mu.vercel.app";
+const APP_URL = "https://vayloai.online";
 
 export const metadata: Metadata = {
   title: "Free ATS Resume Checker & Scanner (99.8% Accuracy) | Vaylo AI",

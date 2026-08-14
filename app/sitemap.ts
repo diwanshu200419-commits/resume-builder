@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://resume-builder-murex-mu.vercel.app";
+const BASE_URL = "https://vayloai.online";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [

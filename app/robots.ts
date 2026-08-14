@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/admin/"],
     },
-    sitemap: "https://resume-builder-murex-mu.vercel.app/sitemap.xml",
+    sitemap: "https://vayloai.online/sitemap.xml",
   };
 }

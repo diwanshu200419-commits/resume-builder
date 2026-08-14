@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { PricingClient } from "@/components/marketing/PricingClient";
 
-const APP_URL = "https://resume-builder-murex-mu.vercel.app";
+const APP_URL = "https://vayloai.online";
 
 export const metadata: Metadata = {
   title: "Pricing Plans & Subscriptions | Vaylo AI",
