@@ -18,8 +18,10 @@ import {
   Check,
   HelpCircle,
   Zap,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
+import { initializeRazorpayPayment } from "@/lib/razorpay";
 
 const PLAN_DETAILS: Record<string, { name: string; price: number; tagline: string }> = {
   pro: { name: "Vaylo Pro", price: 99, tagline: "Unlimited resume AI, downloads & cover letters" },
@@ -48,6 +50,7 @@ export default function CheckoutPage() {
   const [creating, setCreating] = useState(true);
   const [createError, setCreateError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [razorpayLoading, setRazorpayLoading] = useState(false);
 
   // Form State
   const [name, setName] = useState("");
@@ -106,6 +109,61 @@ export default function CheckoutPage() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const handleRazorpayCheckout = async () => {
+    setServerError(null);
+    setRazorpayLoading(true);
+
+    try {
+      // 1. Create Razorpay order via backend
+      const res = await fetch("/api/payment/razorpay/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+
+      const orderRes = await res.json();
+      if (!res.ok) throw new Error(orderRes.error || "Could not create Razorpay order");
+
+      // 2. Open Razorpay modal overlay
+      await initializeRazorpayPayment({
+        key: orderRes.key,
+        amount: orderRes.amount,
+        plan,
+        planName: planInfo.name,
+        orderId: orderRes.orderId,
+        customerName: name || "Candidate",
+        customerEmail: email || "candidate@vaylo.ai",
+        customerPhone: phone,
+        onSuccess: async (rzpResponse) => {
+          // Verify & unlock features
+          const verifyRes = await fetch("/api/payment/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...rzpResponse,
+              plan,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyRes.ok && verifyData.success) {
+            setUtr(rzpResponse.razorpay_payment_id);
+            setSubmitted(true);
+          } else {
+            setServerError(verifyData.error || "Payment verification failed.");
+          }
+          setRazorpayLoading(false);
+        },
+        onFailure: (err) => {
+          setServerError(err.description || "Razorpay payment was not completed.");
+          setRazorpayLoading(false);
+        },
+      });
+    } catch (err: any) {
+      setServerError(err.message || "Failed to initialize Razorpay checkout.");
+      setRazorpayLoading(false);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setScreenshot(file);
@@ -123,7 +181,7 @@ export default function CheckoutPage() {
     if (!name.trim() || name.trim().length < 2) errors.name = "Enter your full name";
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = "Enter a valid email address";
 
-    if (!cleanUtr || cleanUtr.length < 5) {
+    if (!cleanUtr || cleanUtr.length < 4) {
       errors.utr = "Enter a valid 12-digit UPI UTR number or Promo Code (e.g. 421098765432 or PROMO2026)";
     }
 
@@ -221,11 +279,44 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
+          {/* Razorpay Merchant Gateway Button */}
+          <Card className="border-indigo-500/30 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 shadow-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-white">
+                <CreditCard className="w-5 h-5 text-indigo-400" />
+                Pay via Merchant Gateway (Recommended)
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-300">
+                Official Razorpay merchant checkout supporting Google Pay, PhonePe, Paytm, Cards, and Netbanking with zero bank limits.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                onClick={handleRazorpayCheckout}
+                disabled={razorpayLoading}
+                className="w-full h-12 gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-xl hover:scale-[1.01] transition-all rounded-xl"
+              >
+                {razorpayLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-white" />
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    Pay ₹{planInfo.price} via Razorpay (GPay / Cards / UPI)
+                  </>
+                )}
+              </Button>
+              <p className="text-[10px] text-center text-slate-400 flex items-center justify-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 256-bit encrypted merchant checkout
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* QR Code & Direct UPI */}
           <Card className="border-border bg-surface">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <QrCode className="w-5 h-5 text-amber-400" />
-                Pay ₹{planInfo.price} via Any UPI App
+                Or Pay via Direct UPI QR / VPA
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
