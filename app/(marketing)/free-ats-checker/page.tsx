@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { FreeATSCalculatorClient } from "@/components/marketing/FreeATSCalculatorClient";
 
-const APP_URL = "https://vayloai.online";
+const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
   title: "Free ATS Resume Checker & Scanner (99.8% Accuracy) | Vaylo AI",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     siteName: "Vaylo AI",
     images: [
       {
-        url: `${APP_URL}/og-image.png`,
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Vaylo AI Free ATS Resume Checker",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Free ATS Resume Checker & Scanner | Vaylo AI",
     description: "Instant 0-100% ATS compatibility score, missing keyword extraction, and AI bullet fixes.",
-    images: [`${APP_URL}/og-image.png`],
+    images: ["/og-image.png"],
   },
 };
 

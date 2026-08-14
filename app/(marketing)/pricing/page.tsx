@@ -1,12 +1,12 @@
 import { type Metadata } from "next";
 import { PricingClient } from "@/components/marketing/PricingClient";
 
-const APP_URL = "https://vayloai.online";
+const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Pricing Plans & Subscriptions | Vaylo AI",
+  title: "Vaylo AI Pricing — Free, Pro ₹99, Premium ₹299 | AI Resume Builder",
   description:
-    "Transparent pricing for Vaylo AI. Free Tier (₹0), Pro Plan (₹99/mo), Premium Plan (₹299/mo), and Career Pack (₹499 one-time lifetime). 100% money-back guarantee.",
+    "Transparent pricing for Vaylo AI. Free Tier (₹0), Pro Plan (₹99/mo), Premium Plan (₹299/mo), and Career Pack (₹499 one-time lifetime). Start building your career today.",
   keywords: [
     "Vaylo AI pricing",
     "AI resume builder pricing",
@@ -18,14 +18,14 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}/pricing`,
   },
   openGraph: {
-    title: "Pricing Plans & Subscriptions | Vaylo AI",
+    title: "Vaylo AI Pricing — Free, Pro ₹99, Premium ₹299 | AI Resume Builder",
     description:
       "Simple, transparent pricing. Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime). Start building your career today.",
     url: `${APP_URL}/pricing`,
     siteName: "Vaylo AI",
     images: [
       {
-        url: `${APP_URL}/og-image.png`,
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Vaylo AI Pricing Plans",
@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pricing Plans | Vaylo AI",
+    title: "Vaylo AI Pricing — Free, Pro ₹99, Premium ₹299",
     description: "Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime).",
-    images: [`${APP_URL}/og-image.png`],
+    images: ["/og-image.png"],
   },
 };
 

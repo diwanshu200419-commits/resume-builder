@@ -17,35 +17,32 @@ export const viewport: Viewport = {
   userScalable: true,
 };
 
-const APP_URL = "https://vayloai.online";
+const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "Vaylo AI — World's Best AI Career Operating System & ATS Copilot",
+    default: "Vaylo AI — AI Resume Builder, ATS Scanner & Interview Prep",
     template: "%s | Vaylo AI",
   },
   description:
-    "Transform your career with Vaylo AI. Beat ATS filters with 90%+ score optimizer, practice STAR voice interviews, benchmark tech salaries, and deploy single-page HTML portfolio websites to username.vaylo.ai in 1-click.",
+    "Vaylo AI is your AI career copilot — build ATS-optimized resumes, get instant ATS match scores, practice FAANG-style interviews with voice AI, and simulate how recruiters actually screen your resume. Free to start.",
   keywords: [
-    "Vaylo AI",
-    "AI Career Operating System",
-    "ATS Resume Scanner",
-    "ATS Resume Optimizer",
-    "AI Resume Builder",
-    "AI Portfolio Generator",
-    "One-Click Portfolio Deployment",
-    "STAR Interview Coach",
-    "AI Recruiter Simulation",
-    "Hiring Probability Predictor",
-    "Tech Salary Negotiator",
-    "LinkedIn Branding Studio",
-    "GitHub Portfolio Sync",
-    "Career Copilot"
+    "AI resume builder",
+    "ATS resume checker",
+    "resume score checker",
+    "AI interview prep",
+    "FAANG interview practice",
+    "resume optimization tool",
+    "ATS scanner free",
+    "AI career coach",
+    "resume builder online free",
+    "interview simulator AI",
+    "Vaylo AI"
   ],
-  authors: [{ name: "Vaylo AI Technologies Inc.", url: APP_URL }],
-  creator: "Vaylo AI Team",
-  publisher: "Vaylo AI Technologies Inc.",
+  authors: [{ name: "Vaylo AI" }],
+  creator: "Vaylo AI",
+  publisher: "Vaylo AI",
   formatDetection: {
     email: false,
     address: false,
@@ -55,30 +52,34 @@ export const metadata: Metadata = {
     canonical: APP_URL,
   },
   openGraph: {
-    title: "Vaylo AI — World's Best AI Career Operating System",
-    description:
-      "Beat ATS filters with 90%+ score optimizer, practice STAR voice interviews, benchmark tech salaries, and deploy portfolio websites in 1-click.",
+    type: "website",
+    locale: "en_US",
     url: APP_URL,
     siteName: "Vaylo AI",
+    title: "Vaylo AI — Your AI Career Copilot",
+    description: "Optimize your resume, ace ATS scans, and practice real interviews with AI — all in one place.",
     images: [
       {
-        url: `${APP_URL}/og-image.png`,
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Vaylo AI Career Operating System Dashboard Preview",
+        alt: "Vaylo AI Dashboard — AI Resume Builder and ATS Scanner",
       },
     ],
-    locale: "en_US",
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vaylo AI — World's Best AI Career Operating System",
-    description:
-      "Beat ATS filters, practice STAR voice interviews, benchmark salaries, and launch portfolio websites with Vaylo AI.",
-    images: [`${APP_URL}/og-image.png`],
-    creator: "@vaylo_ai",
+    title: "Vaylo AI — Your AI Career Copilot",
+    description: "Optimize your resume, ace ATS scans, and practice real interviews with AI.",
+    images: ["/og-image.png"],
+    creator: "@vayloai",
   },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
   robots: {
     index: true,
     follow: true,
@@ -91,7 +92,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "0w0LWASRueXYjlydirI9OkfyFuaSVfHtymdPVEY5ad0",
+    google: ["googlea1966f76a89819c1", "0w0LWASRueXYjlydirI9OkfyFuaSVfHtymdPVEY5ad0"],
   },
 };
 
@@ -106,9 +107,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         url: APP_URL,
         logo: `${APP_URL}/logo.png`,
         sameAs: [
-          "https://twitter.com/vaylo_ai",
+          "https://twitter.com/vayloai",
           "https://github.com/diwanshu200419-commits/resume-builder",
-          "https://linkedin.com/company/vaylo-ai"
+          "https://linkedin.com/company/vayloai"
         ]
       },
       {
@@ -124,15 +125,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         name: "Vaylo AI Career Operating System",
         operatingSystem: "Web",
         applicationCategory: "BusinessApplication",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "INR"
-        },
+        description: "AI-powered resume builder, ATS scanner, and interview preparation platform.",
+        offers: [
+          { "@type": "Offer", name: "Free", price: "0", priceCurrency: "INR" },
+          { "@type": "Offer", name: "Pro", price: "99", priceCurrency: "INR" },
+          { "@type": "Offer", name: "Premium", price: "299", priceCurrency: "INR" },
+          { "@type": "Offer", name: "Career Pack", price: "499", priceCurrency: "INR" }
+        ],
         aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: "4.9",
-          ratingCount: "12800"
+          ratingCount: "1200"
         }
       }
     ]
