@@ -222,30 +222,53 @@ export default function CheckoutPage() {
   const effectivePrice = discountDetails ? discountDetails.finalPrice : planInfo.price;
 
   if (submitted) {
+    const isCoupon = utr.startsWith("COUPON_");
+
     return (
       <div className="max-w-xl mx-auto py-16">
-        <Card className="border-emerald-500/30 bg-surface shadow-2xl">
+        <Card className={`border-surface shadow-2xl ${isCoupon ? "border-emerald-500/30" : "border-amber-500/30"}`}>
           <CardContent className="flex flex-col items-center text-center gap-4 py-12 px-6">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center border border-emerald-500/30">
-              <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border ${isCoupon ? "bg-emerald-500/15 border-emerald-500/30" : "bg-amber-500/15 border-amber-500/30"}`}>
+              {isCoupon ? (
+                <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+              ) : (
+                <Zap className="w-8 h-8 text-amber-400" />
+              )}
             </div>
             <h1 className="text-2xl font-bold text-text-primary">
-              Payment Verified — Plan Unlocked! 🎉
+              {isCoupon ? "Coupon Verified — Plan Unlocked! 🎉" : "Payment Submitted — Verification Pending ⏳"}
             </h1>
             <p className="text-sm text-text-secondary max-w-md leading-relaxed">
-              Your <span className="font-bold text-emerald-400">{planInfo.name}</span> plan (Ref: <span className="font-mono text-indigo-400 font-bold">{utr}</span>) has been verified. All paid features are now active on your account!
+              {isCoupon ? (
+                <>Your <span className="font-bold text-emerald-400">{planInfo.name}</span> plan pass has been verified. All paid features are now active!</>
+              ) : (
+                <>Payment submitted. Your payment is being verified. Please wait while our team confirms your transaction reference (Ref: <span className="font-mono text-amber-300 font-bold">{utr}</span>). You don&apos;t need to pay again.</>
+              )}
             </p>
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-300 text-left w-full space-y-1">
-              <p className="font-bold text-emerald-200">🚀 All Plan Features Unlocked:</p>
-              <p>• 1-Click Auto-Fix Bullets &amp; Keyword Optimizer</p>
-              <p>• Unwatermarked PDF &amp; DOCX Resume Exports</p>
-              <p>• LinkedIn Branding Studio &amp; AI Cover Letters</p>
-              <p>• STAR Voice Practice &amp; Recruiter Eye-Screen Simulation</p>
+            <div className={`p-4 rounded-xl text-xs text-left w-full space-y-1 ${isCoupon ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300" : "bg-slate-900 border border-slate-800 text-slate-300"}`}>
+              <p className={`font-bold ${isCoupon ? "text-emerald-200" : "text-amber-300"}`}>
+                {isCoupon ? "🚀 All Plan Features Unlocked:" : "ℹ️ Verification Details:"}
+              </p>
+              {isCoupon ? (
+                <>
+                  <p>• 1-Click Auto-Fix Bullets &amp; Keyword Optimizer</p>
+                  <p>• Unwatermarked PDF &amp; DOCX Resume Exports</p>
+                  <p>• LinkedIn Branding Studio &amp; AI Cover Letters</p>
+                  <p>• STAR Voice Practice &amp; Recruiter Eye-Screen Simulation</p>
+                </>
+              ) : (
+                <>
+                  <p>• Transaction Reference: <span className="font-mono text-amber-300 font-bold">{utr}</span></p>
+                  <p>• Plan Requested: <span className="font-bold text-white">{planInfo.name}</span></p>
+                  <p>• Status: <span className="text-amber-400 font-bold">Pending Admin / Webhook Verification</span></p>
+                  <p className="text-[11px] text-slate-400 pt-1">Your features will unlock automatically upon verification. You may return to the dashboard anytime.</p>
+                </>
+              )}
             </div>
             <div className="flex gap-3 mt-2">
               <Link href="/dashboard">
                 <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl">
-                  Go to Dashboard &amp; Start Using Features →
+                  Return to Dashboard →
                 </Button>
               </Link>
             </div>

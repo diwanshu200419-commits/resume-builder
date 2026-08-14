@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { upgradeUserPlan } from "@/lib/upgrade-user-plan";
 import { createNotification } from "@/lib/notifications";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -15,16 +14,16 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const utr = String(formData.get("utr") || "").trim();
+    const utr = String(formData.get("utr") || "").trim().replace(/\s+/g, "");
     const rawPlan = String(formData.get("plan") || "pro").toLowerCase();
     const plan = rawPlan === "career-pack" || rawPlan === "career_pack" ? "career_pack" : rawPlan;
-    const customerName = String(formData.get("customerName") || profile.full_name || "Candidate");
-    const customerEmail = String(formData.get("customerEmail") || profile.email || "candidate@vaylo.ai");
-    const customerPhone = String(formData.get("customerPhone") || "");
+    const customerName = String(formData.get("customerName") || profile.full_name || "Candidate").trim();
+    const customerEmail = String(formData.get("customerEmail") || profile.email || "candidate@vaylo.ai").trim();
+    const customerPhone = String(formData.get("customerPhone") || "").trim();
 
     if (!utr || utr.length < 4) {
       return NextResponse.json(
-        { error: "Please enter a valid 12-digit UPI UTR reference number or Promo Code" },
+        { error: "Please enter a valid 12-digit UPI UTR reference number" },
         { status: 400 }
       );
     }
@@ -50,46 +49,55 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createServiceClient();
 
-    // 1. Store payment request record
-    try {
-      const { error: dbError } = await supabase.from("payment_requests").insert({
-        user_id: profile.id,
-        user_email: customerEmail,
-        customer_name: customerName,
-        customer_phone: customerPhone,
-        requested_plan: plan,
-        amount_claimed: amountClaimed,
-        utr_number: utr,
-        screenshot_url: screenshotPath,
-        status: "approved", // Auto-approved for instant feature allotment
-        created_at: new Date().toISOString(),
-      });
+    // 1. Check for Duplicate UTR
+    const { data: existingPayment } = await supabase
+      .from("payments")
+      .select("id, status")
+      .eq("utr", utr)
+      .single();
 
-      if (dbError && dbError.code === "23505") {
-        console.warn("[payment/upi/submit] Duplicate UTR submitted, proceeding with upgrade anyway.");
-      }
-    } catch (err) {
-      console.warn("[payment/upi/submit] payment_requests insert exception:", err);
+    if (existingPayment) {
+      return NextResponse.json(
+        { error: "This UPI UTR reference number has already been submitted or processed." },
+        { status: 400 }
+      );
     }
 
-    // 2. INSTANT PLAN UPGRADE ALLOTMENT
-    await upgradeUserPlan(profile.id, plan, "manual_upi", utr);
+    // 2. Store Payment Submission with 'pending' status for Manual Review
+    const { error: dbError } = await supabase.from("payments").insert({
+      user_id: profile.id,
+      utr,
+      upi_ref: utr,
+      plan,
+      amount: amountClaimed,
+      currency: "INR",
+      status: "pending",
+      customer_name: customerName,
+      customer_email: customerEmail,
+      customer_phone: customerPhone,
+      screenshot_url: screenshotPath,
+      created_at: new Date().toISOString(),
+    });
 
-    // 3. Dispatch In-App Notification to candidate
+    if (dbError) {
+      console.error("[payment/upi/submit] DB insert error:", dbError.message);
+    }
+
+    // 3. Dispatch In-App Notification
     await createNotification({
       userId: profile.id,
-      type: "payment_approved",
-      title: `Plan Upgraded — ${plan.toUpperCase()} Unlocked! 🎉`,
-      body: `Your activation (Ref: ${utr}) has been processed. All features of the ${plan.toUpperCase()} plan are now active on your account!`,
+      type: "payment_pending",
+      title: "Payment Submitted — Verification Pending",
+      body: `Your payment of ₹${amountClaimed} (Ref: ${utr}) for ${plan.toUpperCase()} has been received and is being verified. Your plan will activate upon approval.`,
       link: "/dashboard",
     });
 
     return NextResponse.json({
       success: true,
-      status: "approved",
+      status: "pending",
       requested_plan: plan,
       utr_number: utr,
-      message: `Success! Your account has been upgraded to ${plan.toUpperCase()}. All features are now unlocked! 🎉`,
+      message: "Payment submitted. Your payment is being verified. Please wait while our team confirms your transaction.",
     });
   } catch (error) {
     console.error("UPI submit error:", error);
