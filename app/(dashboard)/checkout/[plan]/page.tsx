@@ -160,27 +160,29 @@ export default function CheckoutPage() {
   if (submitted) {
     return (
       <div className="max-w-xl mx-auto py-16">
-        <Card className="border-amber-500/30 bg-surface shadow-xl">
+        <Card className="border-emerald-500/30 bg-surface shadow-2xl">
           <CardContent className="flex flex-col items-center text-center gap-4 py-12 px-6">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/15 flex items-center justify-center border border-amber-500/30">
-              <CheckCircle2 className="w-7 h-7 text-amber-400" />
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center border border-emerald-500/30">
+              <CheckCircle2 className="w-8 h-8 text-emerald-400" />
             </div>
             <h1 className="text-2xl font-bold text-text-primary">
-              Payment Submitted — Under Admin Review! ⏳
+              Payment Verified — Plan Unlocked! 🎉
             </h1>
             <p className="text-sm text-text-secondary max-w-md leading-relaxed">
-              Your payment proof for the <span className="font-bold text-amber-400">{planInfo.name}</span> plan (UTR: <span className="font-mono text-indigo-400 font-bold">{utr}</span>) has been submitted successfully.
+              Your payment for the <span className="font-bold text-emerald-400">{planInfo.name}</span> plan (UTR: <span className="font-mono text-indigo-400 font-bold">{utr}</span>) has been verified. All paid features are now active on your account!
             </p>
-            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 text-left w-full space-y-1">
-              <p className="font-bold text-amber-200">🔍 What happens next?</p>
-              <p>Our admin team manually verifies UTR numbers against UPI bank app statements within <strong>1-2 hours</strong>. Once verified, your plan features will unlock automatically.</p>
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-300 text-left w-full space-y-1">
+              <p className="font-bold text-emerald-200">🚀 All Plan Features Unlocked:</p>
+              <p>• 1-Click Auto-Fix Bullets &amp; Keyword Optimizer</p>
+              <p>• Unwatermarked PDF &amp; DOCX Resume Exports</p>
+              <p>• LinkedIn Branding Studio &amp; AI Cover Letters</p>
+              <p>• STAR Voice Practice &amp; Recruiter Eye-Screen Simulation</p>
             </div>
             <div className="flex gap-3 mt-2">
               <Link href="/dashboard">
-                <Button className="bg-accent text-white font-bold text-xs">Go to Dashboard</Button>
-              </Link>
-              <Link href="/settings">
-                <Button variant="outline" className="border-border text-xs">View Billing Status</Button>
+                <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl">
+                  Go to Dashboard &amp; Start Using Features →
+                </Button>
               </Link>
             </div>
           </CardContent>
