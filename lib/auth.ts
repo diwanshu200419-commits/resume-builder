@@ -110,5 +110,6 @@ export async function getProfile(): Promise<Profile | null> {
 }
 
 export function canAccessSTARVoice(plan?: string | null): boolean {
-  return plan === "premium" || plan === "career_pack";
+  const p = (plan || "free").toLowerCase().replace("-", "_");
+  return p === "premium" || p === "career_pack" || p === "career";
 }
