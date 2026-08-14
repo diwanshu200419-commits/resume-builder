@@ -35,34 +35,26 @@ export function generateUpiRef(userId: string): string {
 }
 
 /**
- * Builds a clean, NPCI-compliant UPI deep link (upi://pay...) that opens
- * any UPI app (Google Pay, PhonePe, Paytm, BHIM) cleanly without triggering
- * P2P bank limit or special-character errors.
+ * Builds an ultra-clean NPCI-compliant UPI link that opens any UPI app
+ * (Google Pay, PhonePe, Paytm, BHIM) without triggering NPCI web-phishing bank limit blocks.
  */
 export function buildUpiLink({
   amount,
   ref,
   note,
 }: {
-  amount: number;
+  amount?: number;
   ref?: string;
   note?: string;
 }): string {
   const { upiId, name } = getUpiConfig();
   const targetUpi = upiId || "jattshiv32@okaxis";
 
-  // Clean note string to prevent PNB/GPay bank rejection of email special characters like '+' or '@'
-  const cleanNote = (note || `Vaylo AI ${amount}`)
-    .replace(/[^a-zA-Z0-9 ]/g, "")
-    .trim()
-    .slice(0, 20);
-
+  // Clean P2P UPI link without forced web-intent amount parameters to bypass NPCI P2P web blocks
   const params = new URLSearchParams({
     pa: targetUpi,
     pn: name || "DIWANSHU",
-    am: amount.toString(),
     cu: "INR",
-    tn: cleanNote || `Vaylo AI ${amount}`,
   });
 
   const queryString = params.toString().replace(/\+/g, "%20");
@@ -70,9 +62,21 @@ export function buildUpiLink({
 }
 
 /**
- * Returns a URL to a QR code image encoding the clean UPI link.
+ * Builds full QR code URL with amount prefilled for camera scanning.
  */
-export function buildUpiQrUrl(upiLink: string): string {
-  const encoded = encodeURIComponent(upiLink);
+export function buildUpiQrUrl(upiLink: string, amount: number): string {
+  const { upiId, name } = getUpiConfig();
+  const targetUpi = upiId || "jattshiv32@okaxis";
+
+  const qrParams = new URLSearchParams({
+    pa: targetUpi,
+    pn: name || "DIWANSHU",
+    am: amount.toString(),
+    cu: "INR",
+    tn: `Vaylo AI ${amount}`,
+  });
+
+  const fullQrLink = `upi://pay?${qrParams.toString().replace(/\+/g, "%20")}`;
+  const encoded = encodeURIComponent(fullQrLink);
   return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}`;
 }

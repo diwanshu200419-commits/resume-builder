@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
     const upiLink = buildUpiLink({
       amount,
       ref,
-      note: `Vaylo AI ${plan} Plan`,
+      note: `Vaylo AI ${plan}`,
     });
-    const qrUrl = buildUpiQrUrl(upiLink);
+    const qrUrl = buildUpiQrUrl(upiLink, amount);
 
     let paymentId = "mock-payment-" + Math.random().toString(36).slice(2, 10);
     try {
