@@ -16,12 +16,9 @@ import {
   ArrowLeft,
   Copy,
   Check,
-  HelpCircle,
   Zap,
-  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
-import { initializeRazorpayPayment } from "@/lib/razorpay";
 
 const PLAN_DETAILS: Record<string, { name: string; price: number; tagline: string }> = {
   pro: { name: "Vaylo Pro", price: 99, tagline: "Unlimited resume AI, downloads & cover letters" },
@@ -50,7 +47,6 @@ export default function CheckoutPage() {
   const [creating, setCreating] = useState(true);
   const [createError, setCreateError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [razorpayLoading, setRazorpayLoading] = useState(false);
 
   // Form State
   const [name, setName] = useState("");
@@ -107,61 +103,6 @@ export default function CheckoutPage() {
     navigator.clipboard.writeText("jattshiv32@okaxis");
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
-  };
-
-  const handleRazorpayCheckout = async () => {
-    setServerError(null);
-    setRazorpayLoading(true);
-
-    try {
-      // 1. Create Razorpay order via backend
-      const res = await fetch("/api/payment/razorpay/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
-      });
-
-      const orderRes = await res.json();
-      if (!res.ok) throw new Error(orderRes.error || "Could not create Razorpay order");
-
-      // 2. Open Razorpay modal overlay
-      await initializeRazorpayPayment({
-        key: orderRes.key,
-        amount: orderRes.amount,
-        plan,
-        planName: planInfo.name,
-        orderId: orderRes.orderId,
-        customerName: name || "Candidate",
-        customerEmail: email || "candidate@vaylo.ai",
-        customerPhone: phone,
-        onSuccess: async (rzpResponse) => {
-          // Verify & unlock features
-          const verifyRes = await fetch("/api/payment/razorpay/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...rzpResponse,
-              plan,
-            }),
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyRes.ok && verifyData.success) {
-            setUtr(rzpResponse.razorpay_payment_id);
-            setSubmitted(true);
-          } else {
-            setServerError(verifyData.error || "Payment verification failed.");
-          }
-          setRazorpayLoading(false);
-        },
-        onFailure: (err) => {
-          setServerError(err.description || "Razorpay payment was not completed.");
-          setRazorpayLoading(false);
-        },
-      });
-    } catch (err: any) {
-      setServerError(err.message || "Failed to initialize Razorpay checkout.");
-      setRazorpayLoading(false);
-    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,16 +203,16 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.4fr] gap-6">
         {/* Order summary + QR Code */}
         <div className="space-y-6">
-          <Card className="bg-gradient-to-br from-accent/10 via-surface to-surface border-accent/20">
+          <Card className="bg-gradient-to-br from-indigo-500/10 via-surface to-surface border-indigo-500/20 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-xl font-bold text-white">
                 <span>{planInfo.name}</span>
-                <span className="text-2xl font-bold text-text-primary">₹{planInfo.price}</span>
+                <span className="text-3xl font-extrabold text-amber-300">₹{planInfo.price}</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-text-secondary">{planInfo.tagline}</p>
-              <p className="text-xs text-text-muted mt-2">
+              <p className="text-xs text-text-muted mt-2 font-medium">
                 {plan === "career_pack" || plan === "career-pack" || plan === "career"
                   ? "One-time Lifetime Access"
                   : "30-Day Active Access"}
@@ -279,44 +220,12 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* Razorpay Merchant Gateway Button */}
-          <Card className="border-indigo-500/30 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 shadow-xl">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base text-white">
-                <CreditCard className="w-5 h-5 text-indigo-400" />
-                Pay via Merchant Gateway (Recommended)
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-300">
-                Official Razorpay merchant checkout supporting Google Pay, PhonePe, Paytm, Cards, and Netbanking with zero bank limits.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                onClick={handleRazorpayCheckout}
-                disabled={razorpayLoading}
-                className="w-full h-12 gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-xl hover:scale-[1.01] transition-all rounded-xl"
-              >
-                {razorpayLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-white" />
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    Pay ₹{planInfo.price} via Razorpay (GPay / Cards / UPI)
-                  </>
-                )}
-              </Button>
-              <p className="text-[10px] text-center text-slate-400 flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 256-bit encrypted merchant checkout
-              </p>
-            </CardContent>
-          </Card>
-
           {/* QR Code & Direct UPI */}
-          <Card className="border-border bg-surface">
+          <Card className="border-border bg-surface shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <QrCode className="w-5 h-5 text-amber-400" />
-                Or Pay via Direct UPI QR / VPA
+                Pay ₹{planInfo.price} via Any UPI App
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
@@ -345,18 +254,18 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Copy UPI VPA Section */}
-                  <div className="w-full bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-                    <p className="text-[11px] text-slate-400 text-center font-medium">Official Vaylo AI UPI VPA:</p>
-                    <div className="flex items-center justify-between bg-slate-900 px-3 py-2 rounded-lg border border-slate-800">
+                  <div className="w-full bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                    <p className="text-[11px] text-slate-400 text-center font-semibold">Official Vaylo AI UPI ID:</p>
+                    <div className="flex items-center justify-between bg-slate-900 px-3.5 py-2.5 rounded-lg border border-slate-800">
                       <span className="font-mono text-sm font-bold text-amber-300">jattshiv32@okaxis</span>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={handleCopyUpi}
-                        className="h-7 text-xs gap-1 text-indigo-400 hover:text-indigo-300 hover:bg-slate-800"
+                        className="h-8 text-xs gap-1.5 text-indigo-400 hover:text-indigo-300 hover:bg-slate-800 font-bold"
                       >
-                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copied ? "Copied!" : "Copy"}</span>
+                        {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                        <span>{copied ? "Copied!" : "Copy VPA"}</span>
                       </Button>
                     </div>
                   </div>
@@ -364,18 +273,17 @@ export default function CheckoutPage() {
                   {/* Deep Link Open Button */}
                   <div className="w-full space-y-2">
                     <a href={order.upiLink} className="w-full block">
-                      <Button className="w-full h-11 gap-2 bg-accent hover:bg-accent-hover text-white font-bold text-xs shadow-lg">
+                      <Button className="w-full h-11 gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg">
                         <Smartphone className="w-4 h-4" />
                         Open in GPay / PhonePe / Paytm
                       </Button>
                     </a>
 
-                    <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
-                      <p className="font-bold text-slate-300 flex items-center gap-1">
-                        <HelpCircle className="w-3.5 h-3.5 text-amber-400" /> Payment Tips:
-                      </p>
+                    <div className="p-3.5 bg-slate-900/80 rounded-xl border border-slate-800 text-[11px] text-slate-300 space-y-1.5">
+                      <p className="font-bold text-amber-300">📲 Easy 2-Step Payment Guide:</p>
                       <p className="leading-relaxed">
-                        If GPay displays a bank limit message, open GPay/PhonePe manually, select <strong>"Pay UPI ID"</strong>, paste <strong className="text-amber-300 font-mono">jattshiv32@okaxis</strong>, and pay ₹{planInfo.price}.
+                        1. Tap <strong className="text-white">Copy VPA</strong> or scan QR code on GPay / PhonePe.<br />
+                        2. Pay <strong>₹{planInfo.price}</strong>, copy the 12-digit UTR reference number from GPay history, and paste it on the right!
                       </p>
                     </div>
                   </div>
@@ -386,7 +294,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Manual Payment proof & Promo Code form */}
-        <Card className="border-border bg-surface">
+        <Card className="border-border bg-surface shadow-xl">
           <CardHeader>
             <CardTitle className="text-base flex items-center justify-between">
               <span>Payment Proof &amp; Activation</span>
@@ -401,7 +309,7 @@ export default function CheckoutPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <Label htmlFor="name" className="text-xs">Candidate Full Name</Label>
+                <Label htmlFor="name" className="text-xs font-semibold">Candidate Full Name</Label>
                 <Input
                   id="name"
                   placeholder="Your Name"
@@ -413,7 +321,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="email" className="text-xs">Email Address</Label>
+                <Label htmlFor="email" className="text-xs font-semibold">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
@@ -426,7 +334,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="phone" className="text-xs">Phone Number (Optional)</Label>
+                <Label htmlFor="phone" className="text-xs font-semibold">Phone Number (Optional)</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -438,7 +346,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="utr" className="text-xs">12-Digit UPI UTR Reference Number or Promo Code *</Label>
+                <Label htmlFor="utr" className="text-xs font-semibold">12-Digit UPI UTR Reference Number or Promo Code *</Label>
                 <Input
                   id="utr"
                   placeholder="e.g. 421098765432 or PROMO2026"
@@ -456,7 +364,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="screenshot" className="text-xs">Payment Screenshot (Optional)</Label>
+                <Label htmlFor="screenshot" className="text-xs font-semibold">Payment Screenshot (Optional)</Label>
                 <label
                   htmlFor="screenshot"
                   className="flex flex-col items-center justify-center gap-1.5 border border-dashed border-border rounded-xl p-4 cursor-pointer hover:border-accent/50 transition-colors text-center bg-surface-elevated"
