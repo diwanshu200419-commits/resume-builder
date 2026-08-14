@@ -148,6 +148,7 @@ export const PLAN_CONFIG: Record<PlanType, PlanConfig> = {
 export function getEffectivePlan(profile: Profile | null): PlanType {
   if (!profile) return "free";
   const p = (profile.plan || "free").toLowerCase().replace("-", "_");
+  if (p === "career") return "career_pack";
   if (p === "pro" || p === "premium" || p === "career_pack") return p as PlanType;
   return "free";
 }
