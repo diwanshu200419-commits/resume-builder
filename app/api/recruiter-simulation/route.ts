@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
-import { getEffectivePlan } from "@/lib/plans";
+import { canAccessRecruiterSim } from "@/lib/plans";
 
 export async function POST(req: NextRequest) {
   try {
     const profile = await getProfile();
-    const plan = getEffectivePlan(profile);
 
-    if (plan === "free") {
+    if (!canAccessRecruiterSim(profile)) {
       return NextResponse.json(
         {
           error: "Upgrade required",
           requiredPlan: "premium",
-          message: "Recruiter 10-Second Eye-Screening Simulation requires a Premium plan.",
+          message: "Recruiter 10-Second Eye-Screening Simulation requires a Premium or Career Pack plan.",
         },
         { status: 403 }
       );

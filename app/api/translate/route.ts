@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
-import { getEffectivePlan } from "@/lib/plans";
+import { canAccessTranslator } from "@/lib/plans";
 
 export async function POST(req: NextRequest) {
   try {
     const profile = await getProfile();
-    const plan = getEffectivePlan(profile);
 
-    if (plan === "free") {
+    if (!canAccessTranslator(profile)) {
       return NextResponse.json(
         {
           error: "Upgrade required",
-          requiredPlan: "premium",
-          message: "Multi-Language Resume Translator requires a Premium plan.",
+          requiredPlan: "pro",
+          message: "Multi-Language Resume Translator requires a Pro, Premium, or Career Pack plan.",
         },
         { status: 403 }
       );

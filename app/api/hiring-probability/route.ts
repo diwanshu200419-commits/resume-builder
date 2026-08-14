@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
-import { getEffectivePlan } from "@/lib/plans";
+import { canAccessHiringPredictor } from "@/lib/plans";
 
 export async function POST(req: NextRequest) {
   try {
     const profile = await getProfile();
-    const plan = getEffectivePlan(profile);
 
-    if (plan === "free") {
+    if (!canAccessHiringPredictor(profile)) {
       return NextResponse.json(
         {
           error: "Upgrade required",
           requiredPlan: "premium",
-          message: "Hiring Probability Predictor requires a Premium plan.",
+          message: "Hiring Probability Predictor requires a Premium or Career Pack plan.",
         },
         { status: 403 }
       );

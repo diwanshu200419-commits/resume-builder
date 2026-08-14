@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
-import { getEffectivePlan } from "@/lib/plans";
+import { canAccessSalaryNegotiator } from "@/lib/plans";
 
 export async function POST(req: NextRequest) {
   try {
     const profile = await getProfile();
-    const plan = getEffectivePlan(profile);
 
-    if (plan === "free") {
+    if (!canAccessSalaryNegotiator(profile)) {
       return NextResponse.json(
         {
           error: "Upgrade required",
           requiredPlan: "premium",
-          message: "Salary Negotiator & Pay Benchmarks require a Premium plan.",
+          message: "Salary Negotiator & Pay Benchmarks require a Premium or Career Pack plan.",
         },
         { status: 403 }
       );
