@@ -142,6 +142,16 @@ const tests = [
              !/Razorpay logo/.test(checkoutCode);
     }
   },
+  { name: "24. Customer Support Ticket & Complaint System RLS Isolation Assertion", test: () => {
+      const ticketsRouteCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "support", "tickets", "route.ts"), "utf-8");
+      const ticketIdRouteCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "support", "tickets", "[id]", "route.ts"), "utf-8");
+      const sqlCode = fs.readFileSync(path.join(process.cwd(), "supabase", "migrations", "20260815_support_tickets_system.sql"), "utf-8");
+
+      return /rate limit/.test(ticketsRouteCode) &&
+             /ticket.user_id !== profile.id/.test(ticketIdRouteCode) &&
+             /ENABLE ROW LEVEL SECURITY/.test(sqlCode);
+    }
+  },
 ];
 
 let passed = 0;

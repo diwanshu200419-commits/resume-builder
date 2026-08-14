@@ -934,18 +934,51 @@ export default function AdminPage() {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* TAB: USER FEEDBACK / SUPPORT INBOX */}
+      {/* TAB: USER FEEDBACK & SUPPORT COMPLAINTS INBOX */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "feedback" && (
         <div className="space-y-4">
+          {/* Support Ticket Summary Metrics */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div className="p-3 rounded-xl bg-surface border border-border text-center">
+              <span className="text-[10px] text-text-muted font-semibold uppercase">Total Tickets</span>
+              <p className="text-xl font-extrabold text-white mt-0.5 font-mono">{(data?.userFeedback || []).length}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
+              <span className="text-[10px] text-amber-400 font-semibold uppercase">New / Open</span>
+              <p className="text-xl font-extrabold text-amber-400 mt-0.5 font-mono">
+                {(data?.userFeedback || []).filter((f: any) => f.status === "open").length}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-center">
+              <span className="text-[10px] text-indigo-300 font-semibold uppercase">In Progress</span>
+              <p className="text-xl font-extrabold text-indigo-400 mt-0.5 font-mono">
+                {(data?.userFeedback || []).filter((f: any) => f.status === "in_progress").length}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-center">
+              <span className="text-[10px] text-rose-400 font-semibold uppercase">Urgent / High</span>
+              <p className="text-xl font-extrabold text-rose-400 mt-0.5 font-mono">
+                {(data?.userFeedback || []).filter((f: any) => f.category === "billing" || f.category === "complaint" || f.category === "payment_issue" || f.category === "refund_request").length}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center col-span-2 sm:col-span-1">
+              <span className="text-[10px] text-emerald-400 font-semibold uppercase">Resolved</span>
+              <p className="text-xl font-extrabold text-emerald-400 mt-0.5 font-mono">
+                {(data?.userFeedback || []).filter((f: any) => f.status === "resolved" || f.status === "closed").length}
+              </p>
+            </div>
+          </div>
+
+          {/* Controls Bar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-4 rounded-xl border border-border">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
               <Input
-                placeholder="Search feedback message or email..."
+                placeholder="Search ticket ref, candidate email, subject, or UTR..."
                 value={feedbackSearch}
                 onChange={(e) => setFeedbackSearch(e.target.value)}
-                className="pl-9 bg-surface-elevated text-xs"
+                className="pl-9 bg-surface-elevated text-xs font-mono"
               />
             </div>
 
@@ -956,8 +989,10 @@ export default function AdminPage() {
                 className="bg-surface-elevated border border-border text-xs rounded-lg px-3 py-2 font-medium"
               >
                 <option value="all">All Statuses</option>
-                <option value="open">Open Complaints</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
                 <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
               </select>
 
               <select
@@ -966,15 +1001,17 @@ export default function AdminPage() {
                 className="bg-surface-elevated border border-border text-xs rounded-lg px-3 py-2 font-medium"
               >
                 <option value="all">All Categories</option>
-                <option value="bug">Bugs</option>
-                <option value="billing">Billing &amp; Payments</option>
-                <option value="feature">Feature Requests</option>
-                <option value="complaint">Complaints</option>
+                <option value="payment_issue">Payment / Billing Issue</option>
+                <option value="refund_request">Refund Request</option>
+                <option value="account_issue">Account Issue</option>
+                <option value="ats_resume">ATS Scanner &amp; Resume</option>
+                <option value="bug">Bugs / Technical</option>
                 <option value="general">General</option>
               </select>
             </div>
           </div>
 
+          {/* Support Ticket Cards */}
           <div className="space-y-3">
             {((data?.userFeedback || []) as any[])
               .filter((item) => {
@@ -984,18 +1021,25 @@ export default function AdminPage() {
                   const q = feedbackSearch.toLowerCase();
                   const matchEmail = (item.user_email || "").toLowerCase().includes(q);
                   const matchMsg = (item.message || "").toLowerCase().includes(q);
-                  if (!matchEmail && !matchMsg) return false;
+                  const matchSubject = (item.subject || "").toLowerCase().includes(q);
+                  if (!matchEmail && !matchMsg && !matchSubject) return false;
                 }
                 return true;
               })
               .map((item) => {
                 const linkedUser = users.find((u) => u.id === item.user_id || u.email === item.user_email);
+                const isPaymentRelated = item.category === "billing" || item.category === "payment_issue" || item.category === "refund_request";
+                const userPayment = isPaymentRelated ? paymentRequests.find((r) => r.user_id === item.user_id || r.user_email === item.user_email) : null;
+
                 return (
-                  <Card key={item.id} className="border-border bg-surface shadow-sm">
+                  <Card key={item.id} className="border-border bg-surface shadow-sm hover:border-indigo-500/40 transition-colors">
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-mono text-xs font-bold text-indigo-400">
+                              #{item.ticket_ref || `VAY-${item.id.slice(0, 5).toUpperCase()}`}
+                            </span>
                             <span className="font-bold text-text-primary text-xs">{item.user_email}</span>
                             {linkedUser && (
                               <Badge className={`text-[10px] ${PLAN_COLORS[linkedUser.plan] || PLAN_COLORS.free}`}>
@@ -1013,8 +1057,10 @@ export default function AdminPage() {
 
                         <div className="flex items-center gap-2">
                           <Badge className={`text-[10px] font-bold ${
-                            item.status === "resolved"
+                            item.status === "resolved" || item.status === "closed"
                               ? "bg-success/20 text-success border border-success/30"
+                              : item.status === "in_progress"
+                              ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
                               : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                           }`}>
                             {item.status.toUpperCase()}
@@ -1033,7 +1079,22 @@ export default function AdminPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <p className="text-xs text-text-secondary bg-surface-elevated p-3 rounded-xl border border-border leading-relaxed">
+                      {/* Payment Context Box for Payment Complaints / Refund Requests */}
+                      {userPayment && (
+                        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs space-y-1 text-amber-300">
+                          <p className="font-bold text-amber-400 flex items-center gap-1.5">
+                            <CreditCard className="w-4 h-4" /> Linked Payment Record:
+                          </p>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-[11px] pt-1">
+                            <div>Status: <strong className="text-white uppercase">{userPayment.status}</strong></div>
+                            <div>Claimed: <strong className="text-emerald-400">₹{userPayment.amount_claimed}</strong></div>
+                            <div>UTR: <strong className="text-amber-200">{userPayment.utr_number}</strong></div>
+                            <div>Plan: <strong className="text-indigo-300">{(userPayment.requested_plan || "pro").toUpperCase()}</strong></div>
+                          </div>
+                        </div>
+                      )}
+
+                      <p className="text-xs text-text-secondary bg-surface-elevated p-3 rounded-xl border border-border leading-relaxed whitespace-pre-wrap">
                         {item.message}
                       </p>
 
@@ -1054,7 +1115,7 @@ export default function AdminPage() {
                             onChange={(e) => setAdminReplyText(e.target.value)}
                             className="text-xs bg-surface-elevated"
                           />
-                          <div className="flex gap-2">
+                          <div className="flex justify-end gap-2">
                             <Button
                               size="sm"
                               variant="outline"
@@ -1069,7 +1130,7 @@ export default function AdminPage() {
                               onClick={() => handleReplyFeedback(item.id)}
                               className="bg-accent hover:bg-accent-hover text-white text-xs font-bold gap-1.5"
                             >
-                              <Send className="w-3.5 h-3.5" /> Send &amp; Resolve
+                              <Send className="w-3.5 h-3.5" /> Send &amp; Resolve Ticket
                             </Button>
                           </div>
                         </div>
@@ -1080,7 +1141,7 @@ export default function AdminPage() {
                           onClick={() => { setReplyingFeedbackId(item.id); setAdminReplyText(""); }}
                           className="h-7 text-xs border-accent/30 text-accent font-bold gap-1"
                         >
-                          <MessageSquare className="w-3.5 h-3.5" /> Reply to Complaint
+                          <MessageSquare className="w-3.5 h-3.5" /> Reply to Candidate Ticket
                         </Button>
                       )}
                     </CardContent>

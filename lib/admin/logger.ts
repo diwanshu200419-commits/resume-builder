@@ -16,7 +16,8 @@ export interface LogAuditParams {
     | "USER_RESTORED"
     | "ADMIN_ROLE_CHANGED"
     | "USER_DELETED"
-    | "FEEDBACK_REPLIED";
+    | "FEEDBACK_REPLIED"
+    | "SUPPORT_TICKET_UPDATED";
   targetUserId: string;
   targetEmail: string;
   previousState?: Record<string, any>;

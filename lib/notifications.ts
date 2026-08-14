@@ -6,6 +6,10 @@ export type NotificationType =
   | "payment_rejected"
   | "payment_pending"
   | "feedback_replied"
+  | "ticket_created"
+  | "ticket_reply"
+  | "ticket_updated"
+  | "ticket_resolved"
   | "plan_expiring"
   | "admin_announcement";
 
