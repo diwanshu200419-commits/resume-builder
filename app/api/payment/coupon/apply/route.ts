@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
+import { AUTHORIZED_COUPONS, calculateDiscount } from "@/lib/coupons";
+import { getPlanAmount, buildUpiLink, buildUpiQrUrl } from "@/lib/upi";
 import { upgradeUserPlan } from "@/lib/upgrade-user-plan";
 import { createNotification } from "@/lib/notifications";
-
-const VALID_COUPONS: Record<string, { discountPercent: number; description: string }> = {
-  VAYLO100: { discountPercent: 100, description: "100% Off Special Access Pass" },
-  PROMO2026: { discountPercent: 100, description: "2026 Launch Promo Pass" },
-  VIP2026: { discountPercent: 100, description: "VIP Lifetime Candidate Pass" },
-  LAUNCH2026: { discountPercent: 100, description: "Official Launch Code" },
-  VAYLOFREE: { discountPercent: 100, description: "Free All-Access Pass" },
-  OFF100: { discountPercent: 100, description: "100% Off Discount Code" },
-};
+import type { Plan } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,47 +17,65 @@ export async function POST(request: NextRequest) {
     const cleanCode = String(code || "").trim().toUpperCase();
 
     if (!cleanCode) {
-      return NextResponse.json({ error: "Please enter a valid coupon code" }, { status: 400 });
+      return NextResponse.json({ error: "Please enter a coupon code" }, { status: 400 });
     }
 
-    const couponInfo = VALID_COUPONS[cleanCode];
+    const coupon = AUTHORIZED_COUPONS[cleanCode];
 
-    // Accept any code starting with VAYLO, PROMO, VIP, TEST, or listed in VALID_COUPONS
-    const isValid =
-      couponInfo ||
-      cleanCode.startsWith("VAYLO") ||
-      cleanCode.startsWith("PROMO") ||
-      cleanCode.startsWith("VIP") ||
-      cleanCode.startsWith("TEST");
-
-    if (!isValid) {
+    if (!coupon) {
       return NextResponse.json(
-        { error: "Invalid or expired coupon code. Try VAYLO100 or PROMO2026." },
+        { error: "Invalid coupon code. Please check and try again." },
         { status: 400 }
       );
     }
 
-    // Perform Instant Plan Upgrade Allotment
-    await upgradeUserPlan(profile.id, plan, "manual_upi", `COUPON_${cleanCode}`);
+    const originalPrice = getPlanAmount(plan as Exclude<Plan, "free">);
+    const { discountAmount, finalPrice } = calculateDiscount(originalPrice, coupon);
 
-    // Create In-App Notification
-    await createNotification({
-      userId: profile.id,
-      type: "payment_approved",
-      title: `Coupon Applied — ${plan.toUpperCase()} Unlocked! 🎉`,
-      body: `Coupon code '${cleanCode}' was applied successfully. All features of the ${plan.toUpperCase()} plan are active!`,
-      link: "/dashboard",
-    });
+    // If 100% OFF Full Access Pass (e.g. ADMIN100 or VAYLOVIP)
+    if (finalPrice === 0 || coupon.discountValue === 100) {
+      await upgradeUserPlan(profile.id, plan, "manual_upi", `COUPON_${cleanCode}`);
+
+      await createNotification({
+        userId: profile.id,
+        type: "payment_approved",
+        title: `Full Access Coupon Applied — ${plan.toUpperCase()} Unlocked! 🎉`,
+        body: `Coupon '${cleanCode}' was applied. All features of the ${plan.toUpperCase()} plan are active!`,
+        link: "/dashboard",
+      });
+
+      return NextResponse.json({
+        success: true,
+        isFullAccess: true,
+        status: "approved",
+        plan,
+        coupon: cleanCode,
+        discountAmount,
+        finalPrice: 0,
+        message: `Success! Full access pass '${cleanCode}' applied. Your account is upgraded! 🎉`,
+      });
+    }
+
+    // Otherwise return discount details & updated UPI payment links for reduced payable amount
+    const upiLink = buildUpiLink({ amount: finalPrice });
+    const qrUrl = buildUpiQrUrl(upiLink, finalPrice);
 
     return NextResponse.json({
       success: true,
-      status: "approved",
-      plan,
+      isFullAccess: false,
       coupon: cleanCode,
-      message: `Coupon '${cleanCode}' applied! Your account has been upgraded to ${plan.toUpperCase()}. 🎉`,
+      discountType: coupon.discountType,
+      discountValue: coupon.discountValue,
+      originalPrice,
+      discountAmount,
+      finalPrice,
+      description: coupon.description,
+      upiLink,
+      qrUrl,
+      message: `Coupon '${cleanCode}' applied! You saved ₹${discountAmount}. New payable price: ₹${finalPrice}.`,
     });
   } catch (error: any) {
-    console.error("[Coupon Apply Error]:", error);
+    console.error("[Coupon API Error]:", error);
     return NextResponse.json({ error: "Failed to apply coupon code" }, { status: 500 });
   }
 }

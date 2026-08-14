@@ -18,7 +18,7 @@ import {
   Check,
   Zap,
   Tag,
-  Gift,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -50,11 +50,17 @@ export default function CheckoutPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Dedicated Coupon Column State
-  const [couponCode, setCouponCode] = useState("");
+  // Discount Coupon State
+  const [couponInput, setCouponInput] = useState("");
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
+  const [discountDetails, setDiscountDetails] = useState<{
+    code: string;
+    discountAmount: number;
+    finalPrice: number;
+    description: string;
+  } | null>(null);
 
   // Form State
   const [name, setName] = useState("");
@@ -116,7 +122,10 @@ export default function CheckoutPage() {
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     setCouponError(null);
-    if (!couponCode.trim()) {
+    setCouponSuccess(null);
+
+    const cleanCode = couponInput.trim().toUpperCase();
+    if (!cleanCode) {
       setCouponError("Please enter a coupon code");
       return;
     }
@@ -126,16 +135,33 @@ export default function CheckoutPage() {
       const res = await fetch("/api/payment/coupon/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode.trim(), plan }),
+        body: JSON.stringify({ code: cleanCode, plan }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Invalid coupon code");
 
-      setAppliedCoupon(data.coupon);
-      setUtr(`COUPON_${data.coupon}`);
-      setSubmitted(true);
+      if (data.isFullAccess) {
+        setUtr(`COUPON_${data.coupon}`);
+        setSubmitted(true);
+      } else {
+        setDiscountDetails({
+          code: data.coupon,
+          discountAmount: data.discountAmount,
+          finalPrice: data.finalPrice,
+          description: data.description,
+        });
+        if (order) {
+          setOrder({
+            ...order,
+            amount: data.finalPrice,
+            upiLink: data.upiLink,
+            qrUrl: data.qrUrl,
+          });
+        }
+        setCouponSuccess(`Coupon '${data.coupon}' applied! You saved ₹${data.discountAmount}.`);
+      }
     } catch (err: any) {
-      setCouponError(err.message || "Could not apply coupon");
+      setCouponError(err.message || "Could not apply coupon code.");
     } finally {
       setApplyingCoupon(false);
     }
@@ -159,7 +185,7 @@ export default function CheckoutPage() {
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = "Enter a valid email address";
 
     if (!cleanUtr || cleanUtr.length < 4) {
-      errors.utr = "Enter a valid 12-digit UPI UTR number or Promo Code (e.g. 421098765432 or VAYLO100)";
+      errors.utr = "Enter a valid 12-digit UPI UTR number from GPay / PhonePe";
     }
 
     setFormErrors(errors);
@@ -192,6 +218,8 @@ export default function CheckoutPage() {
       setSubmitting(false);
     }
   };
+
+  const effectivePrice = discountDetails ? discountDetails.finalPrice : planInfo.price;
 
   if (submitted) {
     return (
@@ -243,11 +271,28 @@ export default function CheckoutPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-xl font-bold text-white">
                 <span>{planInfo.name}</span>
-                <span className="text-3xl font-extrabold text-amber-300">₹{planInfo.price}</span>
+                <div className="text-right">
+                  {discountDetails ? (
+                    <div className="flex flex-col items-end">
+                      <span className="text-xs line-through text-slate-400">₹{planInfo.price}</span>
+                      <span className="text-3xl font-extrabold text-emerald-400">₹{discountDetails.finalPrice}</span>
+                    </div>
+                  ) : (
+                    <span className="text-3xl font-extrabold text-amber-300">₹{planInfo.price}</span>
+                  )}
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-text-secondary">{planInfo.tagline}</p>
+              {discountDetails && (
+                <div className="mt-3 p-2 bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-xs text-emerald-300 flex items-center justify-between">
+                  <span className="font-bold flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Coupon '{discountDetails.code}' Applied
+                  </span>
+                  <span className="font-mono font-bold text-emerald-400">-₹{discountDetails.discountAmount} OFF</span>
+                </div>
+              )}
               <p className="text-xs text-text-muted mt-2 font-medium">
                 {plan === "career_pack" || plan === "career-pack" || plan === "career"
                   ? "One-time Lifetime Access"
@@ -261,7 +306,7 @@ export default function CheckoutPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <QrCode className="w-5 h-5 text-amber-400" />
-                Pay ₹{planInfo.price} via Direct UPI QR / VPA
+                Pay ₹{effectivePrice} via Any UPI App
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
@@ -319,7 +364,7 @@ export default function CheckoutPage() {
                       <p className="font-bold text-amber-300">📲 Easy 2-Step Payment Guide:</p>
                       <p className="leading-relaxed">
                         1. Tap <strong className="text-white">Copy VPA</strong> or scan QR code on GPay / PhonePe.<br />
-                        2. Pay <strong>₹{planInfo.price}</strong>, copy the 12-digit UTR reference number from GPay history, and paste it on the right!
+                        2. Pay <strong className="text-emerald-300">₹{effectivePrice}</strong>, copy the 12-digit UTR reference number from GPay history, and paste it on the right!
                       </p>
                     </div>
                   </div>
@@ -329,48 +374,38 @@ export default function CheckoutPage() {
           </Card>
         </div>
 
-        {/* Right Column: Special Coupon Column + Payment Proof Form */}
+        {/* Right Column: Coupon Code Input + UTR Proof Form */}
         <div className="space-y-6">
-          {/* SPECIAL DEDICATED COUPON COLUMN CARD */}
-          <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-surface to-surface shadow-xl">
+          {/* DISCOUNT / PROMO CODE CARD */}
+          <Card className="border-indigo-500/30 bg-surface shadow-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center justify-between text-white">
-                <span className="flex items-center gap-2">
-                  <Tag className="w-5 h-5 text-emerald-400" />
-                  Special Coupon Code Column
-                </span>
-                <span className="text-[11px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold">
-                  100% OFF Code
-                </span>
+              <CardTitle className="text-base flex items-center gap-2 text-white">
+                <Tag className="w-5 h-5 text-indigo-400" />
+                Have a Promo or Discount Coupon?
               </CardTitle>
               <CardDescription className="text-xs text-text-secondary">
-                Have a promotional or discount coupon? Enter your code below for instant free activation.
+                Enter your promotional code to apply a price discount to your order.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleApplyCoupon} className="space-y-3">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Enter Coupon Code (e.g. VAYLO100)"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    className="bg-surface-elevated border-emerald-500/30 text-xs font-mono font-bold tracking-wider text-emerald-300 placeholder:text-slate-500 uppercase"
+                    placeholder="Enter Coupon Code"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    className="bg-surface-elevated border-indigo-500/30 text-xs font-mono font-bold tracking-wider text-amber-300 placeholder:text-slate-500 uppercase"
                   />
                   <Button
                     type="submit"
                     disabled={applyingCoupon}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 shadow-md shrink-0"
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 shadow-md shrink-0"
                   >
-                    {applyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply Code"}
+                    {applyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
                   </Button>
                 </div>
                 {couponError && <p className="text-[11px] text-rose-400 font-medium">{couponError}</p>}
-                <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                  <Gift className="w-3.5 h-3.5 text-emerald-400" /> Available Codes:{" "}
-                  <strong className="text-emerald-300 font-mono">VAYLO100</strong>,{" "}
-                  <strong className="text-emerald-300 font-mono">PROMO2026</strong>,{" "}
-                  <strong className="text-emerald-300 font-mono">VIP2026</strong>
-                </p>
+                {couponSuccess && <p className="text-[11px] text-emerald-400 font-medium">{couponSuccess}</p>}
               </form>
             </CardContent>
           </Card>
@@ -385,7 +420,7 @@ export default function CheckoutPage() {
                 </span>
               </CardTitle>
               <CardDescription className="text-xs">
-                Enter candidate details and your 12-digit UPI UTR reference number to unlock all features instantly.
+                Enter candidate details and your 12-digit UPI UTR reference number from GPay/PhonePe to unlock features.
               </CardDescription>
             </CardHeader>
             <CardContent>
