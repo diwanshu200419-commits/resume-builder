@@ -6,8 +6,11 @@ export async function upgradeUserPlan(
   source: "manual_upi" | "admin_override",
   transactionId?: string
 ) {
+  const normalizedPlan = (plan || "free").toLowerCase().replace("-", "_");
+  const targetPlan = normalizedPlan === "career" ? "career_pack" : normalizedPlan;
+
   let expiresAt: string | null = null;
-  if (plan === "pro" || plan === "premium") {
+  if (targetPlan === "pro" || targetPlan === "premium") {
     const date = new Date();
     date.setDate(date.getDate() + 30);
     expiresAt = date.toISOString();
@@ -15,15 +18,15 @@ export async function upgradeUserPlan(
 
   const supabase = await createServiceClient();
 
-  // 1. Update User Profile Plan
+  // 1. Update User Profile Plan in Supabase
   const { error: profileError } = await supabase
     .from("profiles")
     .update({
-      plan: plan,
+      plan: targetPlan,
       subscription_status: "active",
       current_period_start: new Date().toISOString(),
       expires_at: expiresAt,
-      analyses_limit: plan === "pro" ? 100 : 1000,
+      analyses_limit: targetPlan === "pro" ? 100 : 1000,
     })
     .eq("id", userId);
 
@@ -49,10 +52,10 @@ export async function upgradeUserPlan(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "approve_payment_request",
-        payload: { userId, plan, expiresAt },
+        payload: { userId, plan: targetPlan, expiresAt },
       }),
     });
   } catch {}
 
-  return { success: true, plan, expiresAt, source };
+  return { success: true, plan: targetPlan, expiresAt, source };
 }
