@@ -437,13 +437,13 @@ export default function CheckoutPage() {
           <Card className="border-border bg-surface shadow-xl">
             <CardHeader>
               <CardTitle className="text-base flex items-center justify-between">
-                <span>Payment Proof &amp; Activation</span>
-                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
-                  <Zap className="w-3.5 h-3.5" /> Instant Allotment
+                <span>Payment Proof &amp; Verification</span>
+                <span className="text-xs text-amber-400 font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Verification Required
                 </span>
               </CardTitle>
               <CardDescription className="text-xs">
-                Enter candidate details and your 12-digit UPI UTR reference number from GPay/PhonePe to unlock features.
+                Enter candidate details and your 12-digit UPI UTR reference number from GPay/PhonePe to submit for verification.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -498,7 +498,7 @@ export default function CheckoutPage() {
                     <p className="text-[11px] text-rose-400 font-medium">{formErrors.utr}</p>
                   ) : (
                     <p className="text-[10px] text-text-muted">
-                      Enter the 12-digit UTR from GPay / PhonePe history for instant activation.
+                      Enter the 12-digit UTR from GPay / PhonePe history. Your payment will be manually verified before access is activated.
                     </p>
                   )}
                 </div>
@@ -553,7 +553,7 @@ export default function CheckoutPage() {
                   className="w-full h-11 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 shadow-md"
                   disabled={submitting}
                 >
-                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlock Plan Features Instantly"}
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit Payment for Verification"}
                 </Button>
 
                 <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">

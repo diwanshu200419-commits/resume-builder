@@ -819,6 +819,16 @@ export default function AdminPage() {
             </button>
           </div>
 
+          <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-300 flex items-center justify-between">
+            <span className="font-semibold flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>Verify that the actual UPI transaction has been received in your bank/UPI app before approving.</span>
+            </span>
+            <span className="font-mono text-[10px] text-amber-400 font-bold uppercase bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
+              Payee VPA: jattshiv32@okaxis
+            </span>
+          </div>
+
           <div className="relative max-w-sm">
             <Search className="w-4 h-4 text-text-muted absolute left-3 top-3" />
             <Input

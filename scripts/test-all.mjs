@@ -132,6 +132,16 @@ const tests = [
              /Duplicate/i.test(upiSubmitCode);
     }
   },
+  { name: "23. Manual UPI Payment & Customer Checkout Truthfulness Assertion", test: () => {
+      const checkoutCode = fs.readFileSync(path.join(process.cwd(), "app", "(dashboard)", "checkout", "[plan]", "page.tsx"), "utf-8");
+      const upiCode = fs.readFileSync(path.join(process.cwd(), "lib", "upi.ts"), "utf-8");
+
+      return /jattshiv32@okaxis/.test(upiCode) &&
+             /Verification Required/.test(checkoutCode) &&
+             /Submit Payment for Verification/.test(checkoutCode) &&
+             !/Razorpay logo/.test(checkoutCode);
+    }
+  },
 ];
 
 let passed = 0;
