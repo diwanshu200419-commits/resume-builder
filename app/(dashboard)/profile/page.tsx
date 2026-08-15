@@ -32,13 +32,6 @@ import {
   Clock,
 } from "lucide-react";
 
-function getInitials(name: string | null): string {
-  if (!name) return "??";
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-}
-
 function calculateProfileStrength(p: Profile): number {
   let count = 0;
   if (p.full_name && p.full_name.trim().length > 1) count++;
@@ -75,8 +68,15 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [avatarFailed, setAvatarFailed] = useState(false);
-  const [authUser, setAuthUser] = useState<{ email?: string; email_confirmed_at?: string | null } | null>(null);
+  const [authUser, setAuthUser] = useState<{
+    email?: string | null;
+    email_confirmed_at?: string | null;
+    user_metadata?: {
+      avatar_url?: string | null;
+      picture?: string | null;
+      full_name?: string | null;
+    };
+  } | null>(null);
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -101,6 +101,11 @@ export default function ProfilePage() {
       setAuthUser({
         email: authData.user.email,
         email_confirmed_at: (authData.user as any).email_confirmed_at || null,
+        user_metadata: {
+          avatar_url: authData.user.user_metadata?.avatar_url || null,
+          picture: authData.user.user_metadata?.picture || null,
+          full_name: authData.user.user_metadata?.full_name || null,
+        },
       });
 
       const { data: profileRow, error } = await supabase
@@ -231,6 +236,18 @@ export default function ProfilePage() {
     );
   }
 
+  const displayName =
+    profile.full_name ||
+    authUser?.user_metadata?.full_name ||
+    profile.email ||
+    authUser?.email ||
+    "User";
+  const avatarUrl =
+    profile.avatar_url ||
+    authUser?.user_metadata?.avatar_url ||
+    authUser?.user_metadata?.picture ||
+    null;
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto w-full">
       <div>
@@ -279,11 +296,15 @@ export default function ProfilePage() {
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
             <div className="shrink-0">
-              <UserAvatar profile={profile} user={authUser as any} size="xl" />
+              <UserAvatar
+                avatarUrl={avatarUrl}
+                fullName={displayName}
+                size="lg"
+              />
             </div>
             <div className="flex-1 min-w-0 space-y-2">
               <h2 className="text-2xl font-bold text-text-primary truncate">
-                {profile.full_name || "No Name Set"}
+                {displayName}
               </h2>
               <p className="text-sm text-text-secondary">
                 {profile.headline ? profile.headline : <span className="italic text-text-muted">(No headline yet)</span>}

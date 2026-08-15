@@ -9,12 +9,12 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ notifications: [], unreadCount: 0 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { data, error } = await supabase
       .from("notifications")
-      .select("*")
+      .select("id,user_id,type,title,body,link,read,read_at,created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -24,8 +24,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ notifications: [], unreadCount: 0 });
     }
 
-    const notifications = data || [];
-    const unreadCount = notifications.filter((n) => !n.read_at).length;
+    const notifications = (data || []).map((notification: any) => ({
+      ...notification,
+      read: Boolean(notification.read || notification.read_at),
+    }));
+    const unreadCount = notifications.filter((notification) => !notification.read).length;
 
     return NextResponse.json({ notifications, unreadCount });
   } catch (err: any) {
@@ -50,9 +53,9 @@ export async function PATCH(request: NextRequest) {
     if (markAllRead) {
       await supabase
         .from("notifications")
-        .update({ read_at: now })
+        .update({ read: true, read_at: now })
         .eq("user_id", user.id)
-        .is("read_at", null);
+        .eq("read", false);
 
       return NextResponse.json({ success: true, message: "All notifications marked as read." });
     }
@@ -60,7 +63,7 @@ export async function PATCH(request: NextRequest) {
     if (id) {
       await supabase
         .from("notifications")
-        .update({ read_at: now })
+        .update({ read: true, read_at: now })
         .eq("id", id)
         .eq("user_id", user.id);
 

@@ -18,7 +18,7 @@ export function NotificationBar() {
       .catch(() => {});
   }, []);
 
-  const visibleNotifications = notifications.filter(n => !closed.includes(n.id));
+  const visibleNotifications = notifications.filter((notification) => !closed.includes(notification.id));
 
   if (visibleNotifications.length === 0) return null;
 
@@ -40,14 +40,14 @@ export function NotificationBar() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm font-medium text-text-primary leading-relaxed break-word-safe">
-                {notification.message}
+                {notification.body || notification.message || notification.title}
               </p>
             </div>
           </div>
           <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-accent/10 shrink-0">
-            <Link href={notification.link} className="w-full sm:w-auto">
+            <Link href={notification.link || "/notifications"} className="w-full sm:w-auto">
               <Button variant="ghost" size="sm" className="w-full sm:w-auto h-8 gap-1.5 text-xs text-accent hover:text-accent hover:bg-accent/10 font-bold">
-                {notification.cta} <ArrowRight className="w-3 h-3" />
+                {notification.cta || "View all"} <ArrowRight className="w-3 h-3" />
               </Button>
             </Link>
             <button

@@ -15,6 +15,7 @@ export interface LogAuditParams {
     | "USER_DISABLED"
     | "USER_RESTORED"
     | "ADMIN_ROLE_CHANGED"
+    | "ADMIN_NOTIFICATION_SENT"
     | "USER_DELETED"
     | "FEEDBACK_REPLIED"
     | "SUPPORT_TICKET_UPDATED";

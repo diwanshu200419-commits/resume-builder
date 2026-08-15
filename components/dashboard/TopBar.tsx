@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -24,30 +23,9 @@ interface TopBarProps {
   pageTitle?: string;
 }
 
-function getInitials(
-  name: string | null | undefined,
-  email: string | null | undefined
-): string {
-  const source = (name || email || "U").trim();
-  if (!source) return "U";
-  const parts = source.split(/\s+/).filter(Boolean);
-  if (parts.length >= 2)
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  const src = parts[0] || source;
-  if (src.includes("@")) {
-    const local = src.split("@")[0];
-    return local.slice(0, 2).toUpperCase();
-  }
-  return src.slice(0, 2).toUpperCase();
-}
-
 export function TopBar({ profile, pageTitle }: TopBarProps) {
   const router = useRouter();
-  const [avatarFailed, setAvatarFailed] = useState(false);
-  const initials = getInitials(profile.full_name, profile.email);
-  const displayName = profile.full_name || "User";
-  const hasAvatar =
-    typeof profile.avatar_url === "string" && profile.avatar_url.length > 0 && !avatarFailed;
+  const displayName = profile.full_name || profile.email || "User";
 
   const handleSignOut = async () => {
     try {
@@ -80,7 +58,11 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
               type="button"
               className="flex items-center gap-2 sm:gap-3 rounded-xl border border-transparent hover:border-border hover:bg-surface-elevated px-2 py-1.5 transition-all focus:outline-none focus:ring-2 focus:ring-accent/40"
             >
-              <UserAvatar profile={profile} size="md" />
+              <UserAvatar
+                avatarUrl={profile.avatar_url}
+                fullName={displayName}
+                size="sm"
+              />
 
               <div className="hidden md:flex flex-col items-start leading-tight">
                 <span className="font-semibold text-sm text-text-primary">

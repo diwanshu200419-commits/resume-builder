@@ -13,7 +13,7 @@ interface NotificationItem {
   title: string;
   body: string;
   link?: string | null;
-  read_at?: string | null;
+  read: boolean;
   created_at: string;
 }
 
@@ -42,11 +42,13 @@ export function NotificationBell() {
     fetchNotifications();
 
     const supabase = createClient();
+    let channel: any = null;
+
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const channel = supabase
+      channel = supabase
         .channel(`user-notifications-${user.id}`)
         .on(
           "postgres_changes",
@@ -61,16 +63,21 @@ export function NotificationBell() {
           }
         )
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     })();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, []);
 
   const markAsRead = async (id: string) => {
+    const current = notifications.find((n) => n.id === id);
+    if (!current || current.read) return;
+
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n))
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
 
@@ -86,7 +93,7 @@ export function NotificationBell() {
   };
 
   const markAllRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read_at: new Date().toISOString() })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     setUnreadCount(0);
 
     try {
@@ -111,6 +118,7 @@ export function NotificationBell() {
       case "scan_complete":
         return <Sparkles className="w-4 h-4 text-amber-400" />;
       case "admin_announcement":
+      case "admin_broadcast":
         return <Zap className="w-4 h-4 text-accent" />;
       default:
         return <Bell className="w-4 h-4 text-accent" />;
@@ -171,7 +179,7 @@ export function NotificationBell() {
                     key={n.id}
                     onClick={() => markAsRead(n.id)}
                     className={`p-3.5 text-xs transition-colors hover:bg-surface-elevated/60 cursor-pointer ${
-                      !n.read_at ? "bg-accent/5" : ""
+                      !n.read ? "bg-accent/5" : ""
                     }`}
                   >
                     <div className="flex items-start gap-3">
@@ -180,10 +188,10 @@ export function NotificationBell() {
                       </div>
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center justify-between">
-                          <p className={`font-bold text-xs truncate ${!n.read_at ? "text-text-primary" : "text-text-secondary"}`}>
+                          <p className={`font-bold text-xs truncate ${!n.read ? "text-text-primary" : "text-text-secondary"}`}>
                             {n.title}
                           </p>
-                          {!n.read_at && <span className="w-2 h-2 rounded-full bg-accent shrink-0" />}
+                          {!n.read && <span className="w-2 h-2 rounded-full bg-accent shrink-0" />}
                         </div>
                         <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2">{n.body}</p>
                         <div className="flex items-center justify-between pt-1 text-[10px] text-text-muted font-mono">

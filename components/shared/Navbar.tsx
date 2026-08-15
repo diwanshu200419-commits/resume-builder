@@ -29,7 +29,6 @@ export function Navbar() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [avatarFailed, setAvatarFailed] = useState(false);
 
   const checkUserSession = async () => {
     try {
@@ -92,14 +91,17 @@ export function Navbar() {
     router.refresh();
   };
 
-  const getInitials = () => {
-    const name = user?.user_metadata?.full_name || user?.email || "U";
-    const parts = name.split(" ");
-    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    return name.substring(0, 2).toUpperCase();
-  };
-
   const planName = (profile?.plan || "free").toUpperCase();
+  const displayName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "Account";
+  const avatarUrl =
+    profile?.avatar_url ||
+    user?.user_metadata?.avatar_url ||
+    user?.user_metadata?.picture ||
+    null;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border">
@@ -131,10 +133,14 @@ export function Navbar() {
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="flex items-center gap-2.5 p-1.5 rounded-xl border border-border bg-surface hover:bg-surface-elevated transition-all"
                 >
-                  <UserAvatar user={user} profile={profile} size="sm" />
+                  <UserAvatar
+                    avatarUrl={avatarUrl}
+                    fullName={displayName}
+                    size="sm"
+                  />
 
                   <span className="text-xs font-bold text-text-primary max-w-[120px] truncate">
-                    {user.user_metadata?.full_name || user.email?.split("@")[0] || "Account"}
+                    {displayName}
                   </span>
 
                   <Badge className="text-[10px] font-extrabold bg-accent/15 text-accent border-accent/30 px-1.5 py-0">
@@ -151,7 +157,7 @@ export function Navbar() {
                   >
                     <div className="p-3 rounded-lg bg-surface-elevated/70 border border-border/50 space-y-1">
                       <p className="text-xs font-extrabold text-text-primary truncate">
-                        {user.user_metadata?.full_name || "Vaylo Candidate"}
+                        {displayName}
                       </p>
                       <p className="text-[11px] text-text-muted font-mono truncate">{user.email}</p>
                       <div className="pt-1 flex items-center justify-between">
@@ -238,7 +244,7 @@ export function Navbar() {
             {user ? (
               <div className="space-y-2 pt-2 border-t border-border/50">
                 <div className="p-3 rounded-lg bg-surface-elevated border border-border space-y-1">
-                  <p className="text-xs font-bold text-text-primary">{user.user_metadata?.full_name || "Vaylo Candidate"}</p>
+                  <p className="text-xs font-bold text-text-primary">{displayName}</p>
                   <p className="text-[11px] text-text-muted">{user.email}</p>
                 </div>
                 <Link href="/dashboard" className="block text-xs font-semibold py-1.5 text-accent" onClick={() => setOpen(false)}>

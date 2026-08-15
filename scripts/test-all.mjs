@@ -121,7 +121,41 @@ const tests = [
              /calculateATSScore/.test(geminiCode);
     }
   },
-  { name: "22. Payment, Plan, Entitlement & Expiry Matrix Assertion", test: () => {
+  { name: "22. Notification Send/Receive & Avatar Component Consistency Test", test: () => {
+      const topBarCode = fs.readFileSync(path.join(process.cwd(), "components", "dashboard", "TopBar.tsx"), "utf-8");
+      const navbarCode = fs.readFileSync(path.join(process.cwd(), "components", "shared", "Navbar.tsx"), "utf-8");
+      const profilePageCode = fs.readFileSync(path.join(process.cwd(), "app", "(dashboard)", "profile", "page.tsx"), "utf-8");
+      const userAvatarCode = fs.readFileSync(path.join(process.cwd(), "components", "shared", "UserAvatar.tsx"), "utf-8");
+      const sendRouteCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "admin", "notifications", "send", "route.ts"), "utf-8");
+      const notificationRouteCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "notifications", "route.ts"), "utf-8");
+      const notificationsPageCode = fs.readFileSync(path.join(process.cwd(), "app", "(dashboard)", "notifications", "page.tsx"), "utf-8");
+      const notificationCenterCode = fs.readFileSync(path.join(process.cwd(), "components", "shared", "NotificationCenter.tsx"), "utf-8");
+
+      const avatarImportCount = [topBarCode, navbarCode, profilePageCode]
+        .filter((code) => /import\s+\{\s*UserAvatar\s*\}\s+from\s+["']@\/components\/shared\/UserAvatar["']/.test(code))
+        .length;
+
+      return avatarImportCount === 3 &&
+             !/function\s+getInitials/.test(topBarCode) &&
+             !/function\s+getInitials/.test(navbarCode) &&
+             !/function\s+getInitials/.test(profilePageCode) &&
+             /avatarUrl:\s*string\s*\|\s*null/.test(userAvatarCode) &&
+             /fullName:\s*string/.test(userAvatarCode) &&
+             /size:\s*"sm"\s*\|\s*"md"\s*\|\s*"lg"/.test(userAvatarCode) &&
+             /referrerPolicy="no-referrer"/.test(userAvatarCode) &&
+             /onError=\{\(\)\s*=>\s*setFailed\(true\)\}/.test(userAvatarCode) &&
+             /requireAdmin\(\)/.test(sendRouteCode) &&
+             /userId\s*===\s*"all"/.test(sendRouteCode) &&
+             /\.insert\(rows\)/.test(sendRouteCode) &&
+             /read:\s*false/.test(sendRouteCode) &&
+             /eq\("user_id",\s*user\.id\)/.test(notificationRouteCode) &&
+             /update\(\{\s*read:\s*true/.test(notificationRouteCode) &&
+             /No notifications yet/.test(notificationsPageCode) &&
+             /href="\/notifications"/.test(notificationCenterCode) &&
+             /filter:\s*`user_id=eq\.\$\{user\.id\}`/.test(notificationCenterCode);
+    }
+  },
+  { name: "23. Payment, Plan, Entitlement & Expiry Matrix Assertion", test: () => {
       const plansCode = fs.readFileSync(path.join(process.cwd(), "lib", "plans.ts"), "utf-8");
       const webhookCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "webhooks", "razorpay", "route.ts"), "utf-8");
       const upiSubmitCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "payment", "upi", "submit", "route.ts"), "utf-8");
@@ -132,7 +166,7 @@ const tests = [
              /Duplicate/i.test(upiSubmitCode);
     }
   },
-  { name: "23. Manual UPI Payment & Customer Checkout Truthfulness Assertion", test: () => {
+  { name: "24. Manual UPI Payment & Customer Checkout Truthfulness Assertion", test: () => {
       const checkoutCode = fs.readFileSync(path.join(process.cwd(), "app", "(dashboard)", "checkout", "[plan]", "page.tsx"), "utf-8");
       const upiCode = fs.readFileSync(path.join(process.cwd(), "lib", "upi.ts"), "utf-8");
 
@@ -142,7 +176,7 @@ const tests = [
              !/Razorpay logo/.test(checkoutCode);
     }
   },
-  { name: "24. Customer Support Ticket & Complaint System RLS Isolation Assertion", test: () => {
+  { name: "25. Customer Support Ticket & Complaint System RLS Isolation Assertion", test: () => {
       const ticketsRouteCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "support", "tickets", "route.ts"), "utf-8");
       const ticketIdRouteCode = fs.readFileSync(path.join(process.cwd(), "app", "api", "support", "tickets", "[id]", "route.ts"), "utf-8");
       const sqlCode = fs.readFileSync(path.join(process.cwd(), "supabase", "migrations", "20260815_support_tickets_system.sql"), "utf-8");

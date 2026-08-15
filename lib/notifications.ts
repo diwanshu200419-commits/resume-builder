@@ -1,6 +1,9 @@
 import { createServiceClient } from "@/lib/supabase/server";
 
 export type NotificationType =
+  | "general"
+  | "admin_broadcast"
+  | "system"
   | "scan_complete"
   | "payment_approved"
   | "payment_rejected"
@@ -36,6 +39,7 @@ export async function createNotification(params: CreateNotificationParams) {
         title: params.title,
         body: params.body,
         link: params.link || null,
+        read: false,
         created_at: new Date().toISOString(),
       })
       .select()
@@ -76,10 +80,11 @@ export async function broadcastAdminAnnouncement(params: {
 
     const rows = users.map((u) => ({
       user_id: u.id,
-      type: "admin_announcement" as NotificationType,
+      type: "admin_broadcast" as NotificationType,
       title: params.title,
       body: params.body,
       link: params.link || "/dashboard",
+      read: false,
       created_at: new Date().toISOString(),
     }));
 

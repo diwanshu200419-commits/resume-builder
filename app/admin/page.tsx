@@ -91,6 +91,9 @@ const PLAN_COLORS: Record<string, string> = {
   free: "bg-surface-elevated text-text-muted border border-border",
 };
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export default function AdminPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -98,7 +101,7 @@ export default function AdminPage() {
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
   const [activeTab, setActiveTab] = useState<
-    "overview" | "users" | "payments" | "feedback" | "analytics" | "health" | "audit" | "errors"
+    "overview" | "users" | "notifications" | "payments" | "feedback" | "analytics" | "health" | "audit" | "errors"
   >("overview");
 
   // User directory filters & pagination
@@ -127,6 +130,14 @@ export default function AdminPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [realtimeNotification, setRealtimeNotification] = useState<string | null>(null);
+
+  // Admin notification sender
+  const [notificationTarget, setNotificationTarget] = useState<"specific" | "all">("specific");
+  const [notificationRecipient, setNotificationRecipient] = useState("");
+  const [notificationTitle, setNotificationTitle] = useState("");
+  const [notificationBody, setNotificationBody] = useState("");
+  const [notificationSending, setNotificationSending] = useState(false);
+  const [notificationError, setNotificationError] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -293,6 +304,64 @@ export default function AdminPage() {
     }
   };
 
+  const resolveNotificationUserId = () => {
+    const value = notificationRecipient.trim();
+    if (!value) return null;
+    if (UUID_RE.test(value)) return value;
+
+    const matchedUser = ((data?.users || []) as UserProfile[]).find(
+      (user) => (user.email || "").toLowerCase() === value.toLowerCase()
+    );
+
+    return matchedUser?.id || null;
+  };
+
+  const handleSendNotification = async () => {
+    setNotificationError(null);
+
+    const title = notificationTitle.trim();
+    const body = notificationBody.trim();
+    const userId = notificationTarget === "all" ? "all" : resolveNotificationUserId();
+
+    if (!title || !body) {
+      setNotificationError("Title and body are required.");
+      return;
+    }
+
+    if (!userId) {
+      setNotificationError("Enter a valid user UUID or an email visible in the current user directory.");
+      return;
+    }
+
+    setNotificationSending(true);
+    try {
+      const res = await fetch("/api/admin/notifications/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, title, body }),
+      });
+      const resJson = await res.json();
+
+      if (!res.ok) {
+        setNotificationError(resJson.error || "Failed to send notification.");
+        return;
+      }
+
+      const count = Number(resJson.createdCount || 0);
+      setActionSuccess(`Notification sent to ${count} user${count === 1 ? "" : "s"}.`);
+      setNotificationTitle("");
+      setNotificationBody("");
+      if (notificationTarget === "specific") {
+        setNotificationRecipient("");
+      }
+    } catch (error: any) {
+      setNotificationError(error?.message || "Failed to send notification.");
+    } finally {
+      setNotificationSending(false);
+      setTimeout(() => setActionSuccess(null), 3000);
+    }
+  };
+
   const handleAdminUserAction = async () => {
     if (!selectedUser) return;
     if (actionType === "delete_user") {
@@ -438,6 +507,15 @@ export default function AdminPage() {
           }`}
         >
           <Users className="w-4 h-4" /> User Directory ({overview.totalUsers || users.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab("notifications")}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
+            activeTab === "notifications" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          <Bell className="w-4 h-4" /> Notifications
         </button>
 
         <button
@@ -796,7 +874,145 @@ export default function AdminPage() {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* TAB 3: PAYMENTS & VERIFICATION */}
+      {/* TAB 3: SEND NOTIFICATIONS */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === "notifications" && (
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4">
+          <Card className="border-border bg-surface shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Send className="w-4 h-4 text-accent" />
+                Send Notification
+              </CardTitle>
+              <CardDescription className="text-xs">
+                One candidate or all users.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="notification-target" className="text-xs font-bold text-text-primary">
+                    Target
+                  </label>
+                  <select
+                    id="notification-target"
+                    value={notificationTarget}
+                    onChange={(event) => setNotificationTarget(event.target.value as "specific" | "all")}
+                    className="flex h-10 w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  >
+                    <option value="specific">Specific user</option>
+                    <option value="all">All users</option>
+                  </select>
+                </div>
+
+                {notificationTarget === "specific" && (
+                  <div className="space-y-2">
+                    <label htmlFor="notification-recipient" className="text-xs font-bold text-text-primary">
+                      User email or ID
+                    </label>
+                    <Input
+                      id="notification-recipient"
+                      list="notification-recipient-options"
+                      value={notificationRecipient}
+                      onChange={(event) => setNotificationRecipient(event.target.value)}
+                      placeholder="candidate@example.com or UUID"
+                      className="bg-surface-elevated text-xs"
+                    />
+                    <datalist id="notification-recipient-options">
+                      {users.map((user) => (
+                        [
+                          <option
+                            key={`${user.id}-id`}
+                            value={user.id}
+                            label={`${user.email || "No email"} - ${user.full_name || "Anonymous"}`}
+                          />,
+                          user.email ? (
+                            <option
+                              key={`${user.id}-email`}
+                              value={user.email}
+                              label={`${user.id} - ${user.full_name || "Anonymous"}`}
+                            />
+                          ) : null,
+                        ]
+                      ))}
+                    </datalist>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="notification-title" className="text-xs font-bold text-text-primary">
+                  Title
+                </label>
+                <Input
+                  id="notification-title"
+                  value={notificationTitle}
+                  onChange={(event) => setNotificationTitle(event.target.value)}
+                  placeholder="Notification title"
+                  className="bg-surface-elevated text-xs"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="notification-body" className="text-xs font-bold text-text-primary">
+                  Body
+                </label>
+                <Textarea
+                  id="notification-body"
+                  value={notificationBody}
+                  onChange={(event) => setNotificationBody(event.target.value)}
+                  placeholder="Write the notification body..."
+                  className="bg-surface-elevated text-xs min-h-32"
+                />
+              </div>
+
+              {notificationError && (
+                <div className="p-3 rounded-lg bg-danger/10 border border-danger/30 text-danger text-xs font-semibold">
+                  {notificationError}
+                </div>
+              )}
+
+              <Button
+                onClick={handleSendNotification}
+                disabled={notificationSending || !notificationTitle.trim() || !notificationBody.trim()}
+                className="bg-accent hover:bg-accent-hover text-white font-bold text-xs gap-2"
+              >
+                {notificationSending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                {notificationSending ? "Sending..." : "Send Notification"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border bg-surface shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Bell className="w-4 h-4 text-accent" />
+                Delivery
+              </CardTitle>
+              <CardDescription className="text-xs">
+                {notificationTarget === "all" ? "Broadcast" : "Specific user"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-xs text-text-secondary">
+              <div className="p-3 rounded-lg bg-surface-elevated border border-border">
+                <p className="font-bold text-text-primary">Loaded users</p>
+                <p className="mt-1 font-mono">{users.length}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-surface-elevated border border-border">
+                <p className="font-bold text-text-primary">Target</p>
+                <p className="mt-1 font-mono">{notificationTarget === "all" ? "all" : notificationRecipient || "not selected"}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* TAB 4: PAYMENTS & VERIFICATION */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "payments" && (
         <div className="space-y-4">
