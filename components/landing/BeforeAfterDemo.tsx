@@ -12,7 +12,7 @@ export function BeforeAfterDemo() {
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
             See the difference AI makes
           </h2>
-          <p className="text-text-secondary">Real optimization results from ResumeAI users</p>
+          <p className="text-text-secondary">Illustrative AI resume optimization example</p>
         </div>
 
         <motion.div

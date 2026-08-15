@@ -43,37 +43,11 @@ export async function GET(request: NextRequest) {
     }
   } catch {}
 
-  // High availability fallback analysis object
-  const fallback = {
-    id,
-    user_id: profile.id,
-    original_resume_text: "Senior Software Engineer with expertise in Next.js, React, TypeScript, Node.js, and Cloud APIs.",
-    job_description: "Senior Full Stack Engineer position requiring React, TypeScript, Node.js, and SQL.",
-    job_title: "Full Stack Engineer",
-    original_ats_score: 84,
-    optimized_ats_score: 96,
-    missing_keywords: ["Docker", "GraphQL", "CI/CD Pipelines", "Redis"],
-    weak_sections: ["Quantifiable Metrics", "Cloud Infrastructure"],
-    optimized_resume_text: "Optimized Senior Software Engineer Resume with 96% ATS Match...",
-    before_summary: "Experienced developer building web applications.",
-    after_summary: "Results-driven Senior Engineer with 5+ years of experience architecting high-throughput React and Node.js microservices.",
-    before_skills: "React, JS, Node",
-    after_skills: "React.js, Next.js 14, TypeScript, Node.js, PostgreSQL, Docker, AWS",
-    before_experience: "Worked on client projects.",
-    after_experience: "Spearheaded frontend microservices architecture, reducing LCP page load times by 40% across 500k monthly active users.",
-    keyword_match_score: 82,
-    skills_match_score: 88,
-    readability_score: 92,
-    format_score: 90,
-    optimized_keyword_match: 96,
-    optimized_skills_match: 98,
-    optimized_readability: 95,
-    optimized_format: 95,
-    status: "done",
-    created_at: new Date().toISOString(),
-  };
-
-  return NextResponse.json({ analysis: fallback });
+  // Analysis not found in DB or cache — return proper 404
+  return NextResponse.json(
+    { error: "Analysis not found. Please re-run your ATS scan." },
+    { status: 404 }
+  );
 }
 
 export async function POST(request: NextRequest) {

@@ -26,16 +26,32 @@ export function autoSuggestTemplate(resumeText: string): PortfolioTemplateId {
   return "executive";
 }
 
+// SECURITY: HTML escape helper — must be applied to all user-provided strings
+// before interpolating into raw HTML template strings to prevent XSS injection.
+function esc(str: string): string {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTemplateId): string {
-  const skillsPills = data.skills.map((s) => `<span class="skill-pill">${s}</span>`).join(" ");
+  // Precompute escaped top-level fields
+  const safeName = esc(data.name);
+  const safeTitle = esc(data.title);
+  const safeBio = esc(data.bio);
+
+  const skillsPills = data.skills.map((s) => `<span class="skill-pill">${esc(s)}</span>`).join(" ");
 
   const projectCards = data.projects
     .map(
       (p) => `
     <div class="card">
-      <h3>${p.title}</h3>
-      <p>${p.description}</p>
-      <div class="tech-tag">${p.tech}</div>
+      <h3>${esc(p.title)}</h3>
+      <p>${esc(p.description)}</p>
+      <div class="tech-tag">${esc(p.tech)}</div>
     </div>`
     )
     .join("");
@@ -45,10 +61,10 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
       (e) => `
     <div class="exp-item">
       <div class="exp-header">
-        <strong>${e.role}</strong> — <span>${e.company}</span>
-        <span class="exp-period">${e.period}</span>
+        <strong>${esc(e.role)}</strong> — <span>${esc(e.company)}</span>
+        <span class="exp-period">${esc(e.period)}</span>
       </div>
-      <p>${e.summary}</p>
+      <p>${esc(e.summary)}</p>
     </div>`
     )
     .join("");
@@ -60,7 +76,7 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${data.name} — ${data.title}</title>
+  <title>${safeName} — ${safeTitle}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@300;400;600&display=swap');
@@ -77,9 +93,9 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
 <body class="p-6 md:p-16 max-w-4xl mx-auto space-y-16">
   <header class="space-y-4 pt-8">
     <div class="text-xs uppercase tracking-widest text-stone-400 font-semibold">Editorial Portfolio</div>
-    <h1 class="text-4xl md:text-6xl font-normal text-stone-100">${data.name}</h1>
-    <p class="text-xl text-stone-300 italic serif">${data.title}</p>
-    <p class="text-sm md:text-base text-stone-400 max-w-2xl leading-relaxed">${data.bio}</p>
+    <h1 class="text-4xl md:text-6xl font-normal text-stone-100">${safeName}</h1>
+    <p class="text-xl text-stone-300 italic serif">${safeTitle}</p>
+    <p class="text-sm md:text-base text-stone-400 max-w-2xl leading-relaxed">${safeBio}</p>
   </header>
 
   <section class="space-y-6">
@@ -98,7 +114,7 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
   </section>
 
   <footer class="text-xs text-stone-500 border-t border-stone-800 pt-8 flex justify-between">
-    <span>© ${new Date().getFullYear()} ${data.name}</span>
+    <span>© ${new Date().getFullYear()} ${safeName}</span>
     <span>Powered by Vaylo AI Portfolio Engine</span>
   </footer>
 </body>
@@ -112,7 +128,7 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${data.name} // ${data.title}</title>
+  <title>${safeName} // ${safeTitle}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;600&display=swap');
@@ -131,9 +147,9 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
     <div class="flex items-center gap-2 text-xs mono text-emerald-400">
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> SYSTEM_ONLINE // TERMINAL PORTFOLIO
     </div>
-    <h1 class="text-3xl md:text-5xl font-extrabold text-white mono">&gt; ${data.name}</h1>
-    <p class="text-lg text-blue-400 mono">[ ${data.title} ]</p>
-    <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">${data.bio}</p>
+    <h1 class="text-3xl md:text-5xl font-extrabold text-white mono">&gt; ${safeName}</h1>
+    <p class="text-lg text-blue-400 mono">[ ${safeTitle} ]</p>
+    <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">${safeBio}</p>
   </header>
 
   <section class="space-y-4">
@@ -165,7 +181,7 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${data.name} — ${data.title}</title>
+  <title>${safeName} — ${safeTitle}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
@@ -183,9 +199,9 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
     <div class="inline-block bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
       Executive Leadership Profile
     </div>
-    <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight">${data.name}</h1>
-    <p class="text-xl font-semibold text-sky-400">${data.title}</p>
-    <p class="text-slate-300 text-sm md:text-base leading-relaxed max-w-3xl">${data.bio}</p>
+    <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight">${safeName}</h1>
+    <p class="text-xl font-semibold text-sky-400">${safeTitle}</p>
+    <p class="text-slate-300 text-sm md:text-base leading-relaxed max-w-3xl">${safeBio}</p>
   </header>
 
   <section class="space-y-4">
@@ -204,7 +220,7 @@ export function generatePortfolioHTML(data: PortfolioData, template: PortfolioTe
   </section>
 
   <footer class="text-xs text-slate-400 border-t border-slate-800 pt-6 flex justify-between">
-    <span>© ${new Date().getFullYear()} ${data.name}</span>
+    <span>© ${new Date().getFullYear()} ${safeName}</span>
     <span>Vaylo Executive Portfolio System</span>
   </footer>
 </body>

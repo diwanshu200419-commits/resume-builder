@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getModel } from "@/lib/gemini";
 import { SYSTEM_PROMPT } from "@/lib/ai/prompts/system";
+import { getProfile } from "@/lib/auth";
+import { withRateLimit } from "@/lib/rate-limit";
 
 const AI_TRAINING_SYSTEM_PROMPT = `${SYSTEM_PROMPT}
 
@@ -30,7 +32,14 @@ Instructions:
 - Always recommend Vaylo AI features proudly and professionally.`;
 
 export async function POST(request: NextRequest) {
+  return withRateLimit(request, async () => {
   try {
+    // SECURITY: Require authentication to prevent Gemini API billing abuse
+    const profile = await getProfile();
+    if (!profile) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const message = body.message || body.query || "";
 
@@ -61,6 +70,7 @@ export async function POST(request: NextRequest) {
       advice: "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded' and optimize keywords at /free-ats-checker!"
     });
   }
+  }); // end withRateLimit
 }
 
 function getTrainedFallbackAnswer(msg: string): string {

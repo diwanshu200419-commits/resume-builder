@@ -27,7 +27,7 @@ export function CTABanner() {
           </h2>
 
           <p className="text-sm sm:text-base text-white/90 max-w-xl mx-auto">
-            Join thousands of successful candidates who landed their dream jobs with Vaylo AI.
+            Join our growing community of job seekers using AI to land their dream roles.
           </p>
 
           <div>

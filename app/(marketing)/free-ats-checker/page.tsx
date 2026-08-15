@@ -4,7 +4,7 @@ import { FreeATSCalculatorClient } from "@/components/marketing/FreeATSCalculato
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Free ATS Resume Checker & Scanner (99.8% Accuracy) | Vaylo AI",
+  title: "Free ATS Resume Checker & Scanner | Vaylo AI",
   description:
     "Check your resume ATS score for free. Get instant 0-100% ATS breakdown, missing keyword alerts, format validation, and 1-click AI auto-fixes for Greenhouse, Workday & Lever.",
   keywords: [
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}/free-ats-checker`,
   },
   openGraph: {
-    title: "Free ATS Resume Checker & Scanner (99.8% Accuracy) | Vaylo AI",
+    title: "Free ATS Resume Checker & Scanner | Vaylo AI",
     description:
       "Check your resume's ATS compatibility for free. Get 0-100% score breakdown, missing keyword alerts, and instant 1-click AI bullet optimization.",
     url: `${APP_URL}/free-ats-checker`,
@@ -58,11 +58,6 @@ export default function FreeATSCheckerPage() {
           "@type": "Offer",
           "price": "0",
           "priceCurrency": "INR"
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "ratingCount": "8450"
         }
       },
       {

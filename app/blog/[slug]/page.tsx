@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, BookOpen, Clock, Tag, Calendar, User, Sparkles, ShieldCheck, Share2, CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
+import sanitizeHtml from "sanitize-html";
 
 const APP_URL = "https://www.vayloai.online";
 
@@ -156,7 +157,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           <article className="prose prose-invert max-w-none text-text-secondary text-sm sm:text-base leading-relaxed space-y-6 pt-2">
             <div
               className="space-y-6 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-text-primary [&_h2]:pt-6 [&_h2]:border-t [&_h2]:border-border [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-indigo-300 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-2 [&_strong]:text-text-primary"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content, {
+                allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2", "h3", "h4", "code", "pre", "blockquote", "table", "thead", "tbody", "tr", "th", "td", "figure", "figcaption"]),
+                allowedAttributes: { ...sanitizeHtml.defaults.allowedAttributes, img: ["src", "alt", "width", "height", "loading"], a: ["href", "name", "target", "rel"], "*": ["class"] },
+                allowedSchemes: ["http", "https"],
+              }) }}
             />
           </article>
 

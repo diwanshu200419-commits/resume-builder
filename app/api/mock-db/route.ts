@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { mockQuery, mockAuthAction, mockAddPaymentRequest, mockApprovePaymentRequest } from "@/lib/mock-db";
 
 export async function POST(request: NextRequest) {
+  // SECURITY: This mock DB endpoint is disabled in production.
+  // It is only available for local development testing.
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not available" }, { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const { action, table, method, filters, data, payload } = body;

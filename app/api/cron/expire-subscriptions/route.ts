@@ -6,7 +6,15 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const cronSecret = process.env.CRON_SECRET;
+
+    // SECURITY: Always require CRON_SECRET. Without it, block all executions.
+    if (!cronSecret) {
+      console.warn("[Cron] CRON_SECRET is not configured — blocking execution.");
+      return NextResponse.json({ error: "Cron secret not configured" }, { status: 503 });
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: "Unauthorized cron execution" }, { status: 401 });
     }
 

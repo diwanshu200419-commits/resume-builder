@@ -108,7 +108,7 @@ const faqs = [
   },
   {
     q: "What payment methods are supported?",
-    a: "We support instant UPI (Google Pay, PhonePe, Paytm, CRED), Credit/Debit Cards, NetBanking, and Instant UTR verification.",
+    a: "Payment is currently available via UPI (Google Pay, PhonePe, Paytm, CRED, and any UPI app). After completing your UPI payment, submit your 12-digit UTR reference number. Your plan will be activated after our team manually verifies the transaction — typically within a few hours.",
   },
   {
     q: "How does Lifetime Access work on Career Pack?",

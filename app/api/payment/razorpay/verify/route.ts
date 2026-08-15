@@ -20,6 +20,16 @@ export async function POST(request: NextRequest) {
 
     const razorpaySecret = process.env.RAZORPAY_KEY_SECRET;
 
+    // SECURITY: If Razorpay is not configured, this endpoint must be disabled.
+    // Do NOT allow plan upgrades without verified payment signature.
+    if (!razorpaySecret) {
+      console.warn("[Razorpay Verify] RAZORPAY_KEY_SECRET not configured — endpoint disabled.");
+      return NextResponse.json(
+        { error: "Razorpay payment verification is not currently active. Please use UPI payment." },
+        { status: 503 }
+      );
+    }
+
     if (razorpaySecret && razorpay_order_id && razorpay_signature) {
       const generatedSignature = crypto
         .createHmac("sha256", razorpaySecret)
@@ -29,6 +39,12 @@ export async function POST(request: NextRequest) {
       if (generatedSignature !== razorpay_signature) {
         return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
       }
+    } else if (!razorpay_order_id || !razorpay_signature) {
+      // Missing required Razorpay fields — reject
+      return NextResponse.json(
+        { error: "Missing required Razorpay payment fields" },
+        { status: 400 }
+      );
     }
 
     // Upgrade profile & allot all plan features instantly

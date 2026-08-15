@@ -54,7 +54,7 @@ export default function PricingPage() {
             "name": "What is included in the Vaylo AI Free plan?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "The Free plan includes 2 full ATS resume scans per month, access to the interactive resume builder, and PDF exports."
+              "text": "The Free plan includes 2 ATS resume scans (total), access to the interactive resume builder, and PDF exports with a watermark. No credit card required."
             }
           },
           {
@@ -62,7 +62,7 @@ export default function PricingPage() {
             "name": "How much does Vaylo AI Pro cost?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Vaylo AI Pro costs ₹99/month and includes 50 scans/day, 1-Click Auto-Fix bullet rewriter, AI cover letters, and unwatermarked PDF/DOCX exports."
+              "text": "Vaylo AI Pro costs ₹99/month and includes 30 ATS scans per month, 1-Click Auto-Fix bullet rewriter, AI cover letters, LinkedIn optimizer, and unwatermarked PDF/DOCX exports."
             }
           },
           {

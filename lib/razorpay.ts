@@ -37,7 +37,8 @@ export async function initializeRazorpayPayment(options: RazorpayCheckoutOptions
     throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
   }
 
-  const razorpayKey = options.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_VayloAI2026Key";
+  // NOTE: Razorpay is disabled until KYC is complete. Key must be set via env.
+  const razorpayKey = options.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
 
   const rzpOptions = {
     key: razorpayKey,

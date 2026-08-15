@@ -193,7 +193,8 @@ export function isAdmin(profile: Profile | null): boolean {
 
 // ATS Scan Limit
 export function canAnalyze(profile: Profile | null): boolean {
-  if (!profile) return true;
+  // SECURITY: Deny when profile is null (unauthenticated or DB unreachable)
+  if (!profile) return false;
   const plan = getEffectivePlan(profile);
   if (plan === "free") return (profile.analyses_used || 0) < 2;
   return true;

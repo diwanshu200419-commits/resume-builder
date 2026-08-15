@@ -10,17 +10,26 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-razorpay-signature");
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-    // 1. Signature Verification
-    if (webhookSecret && signature) {
-      const expectedSignature = crypto
-        .createHmac("sha256", webhookSecret)
-        .update(rawBody)
-        .digest("hex");
+    // SECURITY: Webhook processing requires a configured secret.
+    // Without it, forged webhooks could trigger plan upgrades.
+    if (!webhookSecret) {
+      console.warn("[Razorpay Webhook] RAZORPAY_WEBHOOK_SECRET not configured — all webhook events rejected.");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
+    }
 
-      if (expectedSignature !== signature) {
-        console.error("[Razorpay Webhook] Invalid HMAC signature.");
-        return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
-      }
+    // 1. Signature Verification (always enforced when secret is set)
+    if (!signature) {
+      return NextResponse.json({ error: "Missing webhook signature" }, { status: 400 });
+    }
+
+    const expectedSignature = crypto
+      .createHmac("sha256", webhookSecret)
+      .update(rawBody)
+      .digest("hex");
+
+    if (expectedSignature !== signature) {
+      console.error("[Razorpay Webhook] Invalid HMAC signature.");
+      return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
     }
 
     const event = JSON.parse(rawBody);

@@ -11,9 +11,16 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   try {
-    // Optional Vercel Cron Header Verification
+    // Vercel Cron Header Verification — always required
     const authHeader = request.headers.get("authorization");
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const cronSecret = process.env.CRON_SECRET;
+
+    if (!cronSecret) {
+      console.warn("[Cron/plan-expiration] CRON_SECRET is not configured — blocking execution.");
+      return NextResponse.json({ error: "Cron secret not configured" }, { status: 503 });
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: "Unauthorized cron request" }, { status: 401 });
     }
 

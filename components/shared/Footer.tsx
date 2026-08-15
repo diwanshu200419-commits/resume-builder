@@ -61,7 +61,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-text-muted gap-4">
-          <p>© {new Date().getFullYear()} Vaylo AI Technologies Inc. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Vaylo AI. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:underline">Privacy</Link>
             <Link href="/terms" className="hover:underline">Terms</Link>

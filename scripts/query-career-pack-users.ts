@@ -1,7 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = "https://ofirvweirnjgsyyedkci.supabase.co";
-const serviceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9maXJ2d2Vpcm5qZ3N5eWVka2NpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDc4NzYxMSwiZXhwIjoyMTAwMzYzNjExfQ.fJKKqs0Psp0Tg3IBN5UTQsRY4EpjungqCspoJdI3AG0";
+// IMPORTANT: Never hardcode service keys. Use environment variables only.
+// Run this script with: SUPABASE_SERVICE_ROLE_KEY=... npx ts-node scripts/query-career-pack-users.ts
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ofirvweirnjgsyyedkci.supabase.co";
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
+if (!serviceKey) {
+  console.error("ERROR: SUPABASE_SERVICE_ROLE_KEY environment variable is required.");
+  process.exit(1);
+}
 
 async function queryCareerPackUsers() {
   console.log("=================================================");
