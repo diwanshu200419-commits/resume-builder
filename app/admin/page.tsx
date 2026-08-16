@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ interface UserProfile {
   id: string;
   email: string | null;
   full_name: string | null;
-  plan: string;
+  plan: string | null;
   role?: string | null;
   subscription_status: string | null;
   total_resume_downloads: number;
@@ -55,11 +55,11 @@ interface UserProfile {
 interface PaymentRequest {
   id: string;
   user_id: string;
-  user_email: string;
-  utr_number: string;
-  amount_claimed: number;
-  requested_plan: string;
-  status: "pending" | "approved" | "rejected";
+  user_email: string | null;
+  utr_number: string | null;
+  amount_claimed: number | null;
+  requested_plan: string | null;
+  status: string | null;
   rejection_reason?: string | null;
   created_at: string;
   reviewed_at?: string | null;
@@ -68,7 +68,7 @@ interface PaymentRequest {
 interface AuditLog {
   id: string;
   admin_email: string | null;
-  action: string;
+  action: string | null;
   target_email: string | null;
   details: Record<string, any>;
   metadata?: Record<string, any>;
@@ -77,10 +77,10 @@ interface AuditLog {
 
 interface SystemError {
   id: string;
-  service: string;
-  route: string;
-  error_code: string;
-  safe_message: string;
+  service: string | null;
+  route: string | null;
+  error_code: string | null;
+  safe_message: string | null;
   created_at: string;
 }
 
@@ -93,6 +93,45 @@ const PLAN_COLORS: Record<string, string> = {
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function safeArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function safeText(value: unknown, fallback = "N/A"): string {
+  if (typeof value !== "string") return fallback;
+  const trimmed = value.trim();
+  return trimmed || fallback;
+}
+
+function normalizePlan(plan: string | null | undefined, fallback = "free"): string {
+  const normalized = safeText(plan, fallback).toLowerCase().replace("-", "_");
+  return PLAN_COLORS[normalized] ? normalized : fallback;
+}
+
+function planLabel(plan: string | null | undefined, fallback = "free"): string {
+  return normalizePlan(plan, fallback).toUpperCase();
+}
+
+function statusKey(status: unknown): string {
+  return safeText(status, "").toLowerCase();
+}
+
+function upperLabel(value: unknown, fallback = "UNKNOWN"): string {
+  return safeText(value, fallback).toUpperCase();
+}
+
+function formatDate(value: string | null | undefined, fallback = "N/A"): string {
+  if (!value) return fallback;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? fallback : date.toLocaleDateString();
+}
+
+function formatDateTime(value: string | null | undefined, fallback = "N/A"): string {
+  if (!value) return fallback;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? fallback : date.toLocaleString();
+}
 
 export default function AdminPage() {
   const [data, setData] = useState<any>(null);
@@ -420,19 +459,23 @@ export default function AdminPage() {
   }
 
   const overview = data?.overview || {};
-  const users: UserProfile[] = data?.users || [];
-  const paymentRequests: PaymentRequest[] = data?.paymentRequests || [];
-  const auditLogs: AuditLog[] = data?.auditLogs || [];
+  const users = safeArray<UserProfile>(data?.users);
+  const paymentRequests = safeArray<PaymentRequest>(data?.paymentRequests);
+  const auditLogs = safeArray<AuditLog>(data?.auditLogs);
   const analytics = data?.analytics || {};
   const systemHealth = data?.systemHealth || {};
-  const systemErrors: SystemError[] = data?.systemErrors || [];
-  const flaggedDuplicateUtrs: string[] = data?.flaggedDuplicateUtrs || [];
+  const systemErrors = safeArray<SystemError>(data?.systemErrors);
+  const flaggedDuplicateUtrs = safeArray<string>(data?.flaggedDuplicateUtrs);
+  const userFeedback = safeArray<any>(data?.userFeedback);
+  const topMissingKeywords = safeArray<any>(analytics.topMissingKeywords);
 
-  const pendingPayments = paymentRequests.filter((r) => r.status === "pending");
+  const pendingPayments = paymentRequests.filter((r) => statusKey(r.status) === "pending");
+  const openFeedbackCount = userFeedback.filter((f) => statusKey(f.status) === "open").length;
 
   const filteredPayments = paymentRequests.filter((r) => {
-    if (paymentSubTab === "pending" && r.status !== "pending") return false;
-    if (paymentSubTab === "history" && r.status === "pending") return false;
+    const status = statusKey(r.status);
+    if (paymentSubTab === "pending" && status !== "pending") return false;
+    if (paymentSubTab === "history" && status === "pending") return false;
     if (paymentSearch) {
       const q = paymentSearch.toLowerCase();
       const matchEmail = (r.user_email || "").toLowerCase().includes(q);
@@ -490,7 +533,7 @@ export default function AdminPage() {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-1 border-b border-border overflow-x-auto pb-1 scrollbar-none text-xs font-bold">
+      <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-1 border-b border-border pb-2 text-xs font-bold">
         <button
           onClick={() => setActiveTab("overview")}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
@@ -533,7 +576,7 @@ export default function AdminPage() {
             activeTab === "feedback" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
           }`}
         >
-          <MessageSquare className="w-4 h-4" /> Feedback Inbox ({(data?.userFeedback || []).filter((f: any) => f.status === "open").length})
+          <MessageSquare className="w-4 h-4" /> Feedback Inbox ({openFeedbackCount})
         </button>
 
         <button
@@ -827,11 +870,13 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ) : (
-                  users.map((u) => (
-                    <tr key={u.id} className="hover:bg-surface-elevated/50 transition-colors">
+                  users.map((u) => {
+                    const userPlan = normalizePlan(u.plan);
+                    return (
+                    <tr key={u.id || u.email || userPlan} className="hover:bg-surface-elevated/50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="font-semibold text-text-primary">{u.full_name || "Anonymous Candidate"}</div>
-                        <div className="text-[11px] text-text-muted font-mono">{u.email}</div>
+                        <div className="text-[11px] text-text-muted font-mono">{u.email || "No email"}</div>
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -841,31 +886,32 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className={`px-2 py-0.5 rounded text-[10px] ${PLAN_COLORS[u.plan] || PLAN_COLORS.free}`}>
-                          {u.plan.toUpperCase()}
+                        <span className={`px-2 py-0.5 rounded text-[10px] ${PLAN_COLORS[userPlan] || PLAN_COLORS.free}`}>
+                          {planLabel(userPlan)}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center font-mono font-bold text-accent">
                         {u.total_ats_checks || u.analyses_used || 0}
                       </td>
                       <td className="py-3 px-4 text-center text-text-muted font-mono">
-                        {new Date(u.created_at).toLocaleDateString()}
+                        {formatDate(u.created_at)}
                       </td>
                       <td className="py-3 px-4 text-center text-text-muted font-mono">
-                        {u.last_seen_at ? new Date(u.last_seen_at).toLocaleDateString() : "Never"}
+                        {formatDate(u.last_seen_at, "Never")}
                       </td>
                       <td className="py-3 px-4 text-right">
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => { setSelectedUser(u); setManualPlan(u.plan); }}
+                          onClick={() => { setSelectedUser(u); setManualPlan(userPlan); }}
                           className="h-7 px-2.5 text-[11px] gap-1 border-accent/30 text-accent font-bold"
                         >
                           <SlidersHorizontal className="w-3 h-3" /> Manage
                         </Button>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -920,20 +966,18 @@ export default function AdminPage() {
                     />
                     <datalist id="notification-recipient-options">
                       {users.map((user) => (
-                        [
+                        <Fragment key={user.id || user.email || "unknown-user"}>
                           <option
-                            key={`${user.id}-id`}
                             value={user.id}
                             label={`${user.email || "No email"} - ${user.full_name || "Anonymous"}`}
-                          />,
-                          user.email ? (
+                          />
+                          {user.email ? (
                             <option
-                              key={`${user.id}-email`}
                               value={user.email}
                               label={`${user.id} - ${user.full_name || "Anonymous"}`}
                             />
-                          ) : null,
-                        ]
+                          ) : null}
+                        </Fragment>
                       ))}
                     </datalist>
                   </div>
@@ -1077,15 +1121,17 @@ export default function AdminPage() {
                 ) : (
                   filteredPayments.map((r) => {
                     const isDup = flaggedDuplicateUtrs.includes((r.utr_number || "").trim().toUpperCase());
+                    const requestedPlan = normalizePlan(r.requested_plan, "pro");
+                    const paymentStatus = statusKey(r.status);
                     return (
-                      <tr key={r.id} className="hover:bg-surface-elevated/50 transition-colors">
+                      <tr key={r.id || `${r.user_id}-${r.utr_number || "payment"}`} className="hover:bg-surface-elevated/50 transition-colors">
                         <td className="py-3 px-4">
-                          <div className="font-mono text-text-primary">{r.user_email}</div>
-                          <div className="text-[10px] text-text-muted">{new Date(r.created_at).toLocaleString()}</div>
+                          <div className="font-mono text-text-primary">{r.user_email || "No email"}</div>
+                          <div className="text-[10px] text-text-muted">{formatDateTime(r.created_at)}</div>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <span className={`px-2 py-0.5 rounded text-[10px] ${PLAN_COLORS[r.requested_plan] || PLAN_COLORS.pro}`}>
-                            {(r.requested_plan || "pro").toUpperCase()}
+                          <span className={`px-2 py-0.5 rounded text-[10px] ${PLAN_COLORS[requestedPlan] || PLAN_COLORS.pro}`}>
+                            {planLabel(requestedPlan, "pro")}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center font-bold text-success font-mono">
@@ -1093,7 +1139,7 @@ export default function AdminPage() {
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span className="font-mono font-bold bg-surface-elevated px-2 py-1 rounded border border-border tracking-wider text-accent">
-                            {r.utr_number}
+                            {r.utr_number || "N/A"}
                           </span>
                           {isDup && (
                             <span className="ml-1 text-[10px] text-danger font-bold flex items-center justify-center gap-0.5 mt-0.5">
@@ -1103,22 +1149,22 @@ export default function AdminPage() {
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            r.status === "approved"
+                            paymentStatus === "approved"
                               ? "bg-success/20 text-success border border-success/30"
-                              : r.status === "rejected"
+                              : paymentStatus === "rejected"
                               ? "bg-danger/20 text-danger border border-danger/30"
                               : "bg-amber-500/20 text-amber-500 border border-amber-500/30"
                           }`}>
-                            {r.status.toUpperCase()}
+                            {upperLabel(paymentStatus)}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-right">
-                          {r.status === "pending" ? (
+                          {paymentStatus === "pending" ? (
                             <div className="flex justify-end gap-1.5">
                               <Button
                                 size="sm"
                                 disabled={actionLoading}
-                                onClick={() => handleApprovePayment(r.user_id, r.id, r.requested_plan)}
+                                onClick={() => handleApprovePayment(r.user_id, r.id, requestedPlan)}
                                 className="h-7 px-2 bg-success hover:bg-success/90 text-white text-[11px] font-bold"
                               >
                                 Approve
@@ -1135,7 +1181,7 @@ export default function AdminPage() {
                             </div>
                           ) : (
                             <span className="text-[11px] text-text-muted font-mono">
-                              {r.reviewed_at ? new Date(r.reviewed_at).toLocaleDateString() : "Reviewed"}
+                              {formatDate(r.reviewed_at, "Reviewed")}
                             </span>
                           )}
                         </td>
@@ -1158,30 +1204,30 @@ export default function AdminPage() {
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <div className="p-3 rounded-xl bg-surface border border-border text-center">
               <span className="text-[10px] text-text-muted font-semibold uppercase">Total Tickets</span>
-              <p className="text-xl font-extrabold text-white mt-0.5 font-mono">{(data?.userFeedback || []).length}</p>
+              <p className="text-xl font-extrabold text-white mt-0.5 font-mono">{userFeedback.length}</p>
             </div>
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
               <span className="text-[10px] text-amber-400 font-semibold uppercase">New / Open</span>
               <p className="text-xl font-extrabold text-amber-400 mt-0.5 font-mono">
-                {(data?.userFeedback || []).filter((f: any) => f.status === "open").length}
+                {openFeedbackCount}
               </p>
             </div>
             <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-center">
               <span className="text-[10px] text-indigo-300 font-semibold uppercase">In Progress</span>
               <p className="text-xl font-extrabold text-indigo-400 mt-0.5 font-mono">
-                {(data?.userFeedback || []).filter((f: any) => f.status === "in_progress").length}
+                {userFeedback.filter((f: any) => statusKey(f.status) === "in_progress").length}
               </p>
             </div>
             <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-center">
               <span className="text-[10px] text-rose-400 font-semibold uppercase">Urgent / High</span>
               <p className="text-xl font-extrabold text-rose-400 mt-0.5 font-mono">
-                {(data?.userFeedback || []).filter((f: any) => f.category === "billing" || f.category === "complaint" || f.category === "payment_issue" || f.category === "refund_request").length}
+                {userFeedback.filter((f: any) => ["billing", "complaint", "payment_issue", "refund_request"].includes(statusKey(f.category))).length}
               </p>
             </div>
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center col-span-2 sm:col-span-1">
               <span className="text-[10px] text-emerald-400 font-semibold uppercase">Resolved</span>
               <p className="text-xl font-extrabold text-emerald-400 mt-0.5 font-mono">
-                {(data?.userFeedback || []).filter((f: any) => f.status === "resolved" || f.status === "closed").length}
+                {userFeedback.filter((f: any) => ["resolved", "closed"].includes(statusKey(f.status))).length}
               </p>
             </div>
           </div>
@@ -1229,10 +1275,10 @@ export default function AdminPage() {
 
           {/* Support Ticket Cards */}
           <div className="space-y-3">
-            {((data?.userFeedback || []) as any[])
+            {userFeedback
               .filter((item) => {
-                if (feedbackStatus !== "all" && item.status !== feedbackStatus) return false;
-                if (feedbackCategory !== "all" && item.category !== feedbackCategory) return false;
+                if (feedbackStatus !== "all" && statusKey(item.status) !== feedbackStatus) return false;
+                if (feedbackCategory !== "all" && statusKey(item.category) !== feedbackCategory) return false;
                 if (feedbackSearch) {
                   const q = feedbackSearch.toLowerCase();
                   const matchEmail = (item.user_email || "").toLowerCase().includes(q);
@@ -1243,49 +1289,53 @@ export default function AdminPage() {
                 return true;
               })
               .map((item) => {
+                const feedbackId = safeText(item.id, "");
+                const feedbackStatusKey = statusKey(item.status);
+                const feedbackCategoryKey = statusKey(item.category);
                 const linkedUser = users.find((u) => u.id === item.user_id || u.email === item.user_email);
-                const isPaymentRelated = item.category === "billing" || item.category === "payment_issue" || item.category === "refund_request";
+                const linkedUserPlan = linkedUser ? normalizePlan(linkedUser.plan) : "free";
+                const isPaymentRelated = feedbackCategoryKey === "billing" || feedbackCategoryKey === "payment_issue" || feedbackCategoryKey === "refund_request";
                 const userPayment = isPaymentRelated ? paymentRequests.find((r) => r.user_id === item.user_id || r.user_email === item.user_email) : null;
 
                 return (
-                  <Card key={item.id} className="border-border bg-surface shadow-sm hover:border-indigo-500/40 transition-colors">
+                  <Card key={feedbackId || `${item.user_email || "ticket"}-${item.created_at || "unknown"}`} className="border-border bg-surface shadow-sm hover:border-indigo-500/40 transition-colors">
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-mono text-xs font-bold text-indigo-400">
-                              #{item.ticket_ref || `VAY-${item.id.slice(0, 5).toUpperCase()}`}
+                              #{item.ticket_ref || `VAY-${(feedbackId || "00000").slice(0, 5).toUpperCase()}`}
                             </span>
-                            <span className="font-bold text-text-primary text-xs">{item.user_email}</span>
+                            <span className="font-bold text-text-primary text-xs">{item.user_email || "No email"}</span>
                             {linkedUser && (
-                              <Badge className={`text-[10px] ${PLAN_COLORS[linkedUser.plan] || PLAN_COLORS.free}`}>
-                                {linkedUser.plan.toUpperCase()}
+                              <Badge className={`text-[10px] ${PLAN_COLORS[linkedUserPlan] || PLAN_COLORS.free}`}>
+                                {planLabel(linkedUserPlan)}
                               </Badge>
                             )}
                             <Badge className="bg-surface-elevated border-border text-[10px] uppercase font-mono">
-                              {item.category}
+                              {feedbackCategoryKey || "general"}
                             </Badge>
                           </div>
                           <p className="text-[10px] text-text-muted font-mono">
-                            Submitted: {new Date(item.created_at).toLocaleString()}
+                            Submitted: {formatDateTime(item.created_at)}
                           </p>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <Badge className={`text-[10px] font-bold ${
-                            item.status === "resolved" || item.status === "closed"
+                            feedbackStatusKey === "resolved" || feedbackStatusKey === "closed"
                               ? "bg-success/20 text-success border border-success/30"
-                              : item.status === "in_progress"
+                              : feedbackStatusKey === "in_progress"
                               ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
                               : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                           }`}>
-                            {item.status.toUpperCase()}
+                            {upperLabel(feedbackStatusKey, "OPEN")}
                           </Badge>
                           {linkedUser && (
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => { setSelectedUser(linkedUser); setManualPlan(linkedUser.plan); }}
+                              onClick={() => { setSelectedUser(linkedUser); setManualPlan(linkedUserPlan); }}
                               className="h-7 px-2 text-[11px] border-accent/30 text-accent font-bold"
                             >
                               User Context
@@ -1302,10 +1352,10 @@ export default function AdminPage() {
                             <CreditCard className="w-4 h-4" /> Linked Payment Record:
                           </p>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-[11px] pt-1">
-                            <div>Status: <strong className="text-white uppercase">{userPayment.status}</strong></div>
+                            <div>Status: <strong className="text-white uppercase">{statusKey(userPayment.status) || "unknown"}</strong></div>
                             <div>Claimed: <strong className="text-emerald-400">₹{userPayment.amount_claimed}</strong></div>
-                            <div>UTR: <strong className="text-amber-200">{userPayment.utr_number}</strong></div>
-                            <div>Plan: <strong className="text-indigo-300">{(userPayment.requested_plan || "pro").toUpperCase()}</strong></div>
+                            <div>UTR: <strong className="text-amber-200">{userPayment.utr_number || "N/A"}</strong></div>
+                            <div>Plan: <strong className="text-indigo-300">{planLabel(userPayment.requested_plan, "pro")}</strong></div>
                           </div>
                         </div>
                       )}
@@ -1318,11 +1368,11 @@ export default function AdminPage() {
                         <div className="p-3 rounded-xl bg-accent/10 border border-accent/20 space-y-1 text-xs">
                           <div className="flex items-center justify-between text-[10px] text-accent font-bold">
                             <span>Admin Reply</span>
-                            <span>{item.responded_at ? new Date(item.responded_at).toLocaleString() : ""}</span>
+                            <span>{formatDateTime(item.responded_at, "")}</span>
                           </div>
                           <p className="text-text-primary leading-relaxed">{item.admin_response}</p>
                         </div>
-                      ) : replyingFeedbackId === item.id ? (
+                      ) : replyingFeedbackId === feedbackId ? (
                         <div className="space-y-2 pt-2 border-t border-border">
                           <Textarea
                             rows={3}
@@ -1343,7 +1393,7 @@ export default function AdminPage() {
                             <Button
                               size="sm"
                               disabled={actionLoading}
-                              onClick={() => handleReplyFeedback(item.id)}
+                              onClick={() => handleReplyFeedback(feedbackId)}
                               className="bg-accent hover:bg-accent-hover text-white text-xs font-bold gap-1.5"
                             >
                               <Send className="w-3.5 h-3.5" /> Send &amp; Resolve Ticket
@@ -1354,7 +1404,7 @@ export default function AdminPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => { setReplyingFeedbackId(item.id); setAdminReplyText(""); }}
+                          onClick={() => { setReplyingFeedbackId(feedbackId); setAdminReplyText(""); }}
                           className="h-7 text-xs border-accent/30 text-accent font-bold gap-1"
                         >
                           <MessageSquare className="w-3.5 h-3.5" /> Reply to Candidate Ticket
@@ -1418,13 +1468,13 @@ export default function AdminPage() {
               <CardTitle className="text-sm font-bold">Top Missing Skills Aggregation (Real Scans)</CardTitle>
             </CardHeader>
             <CardContent>
-              {(!analytics.topMissingKeywords || analytics.topMissingKeywords.length === 0) ? (
+              {topMissingKeywords.length === 0 ? (
                 <p className="text-xs text-text-muted py-4">No scan data aggregated yet.</p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  {analytics.topMissingKeywords.map((item: any) => (
-                    <div key={item.keyword} className="p-3 rounded-xl bg-surface-elevated border border-border text-center space-y-1">
-                      <p className="text-xs font-bold text-text-primary truncate">{item.keyword}</p>
+                  {topMissingKeywords.map((item: any) => (
+                    <div key={safeText(item.keyword, "keyword")} className="p-3 rounded-xl bg-surface-elevated border border-border text-center space-y-1">
+                      <p className="text-xs font-bold text-text-primary truncate">{safeText(item.keyword, "Unknown")}</p>
                       <Badge className="bg-accent/20 text-accent border-accent/30 text-[10px] font-bold">
                         {item.count} Scans
                       </Badge>
@@ -1453,7 +1503,7 @@ export default function AdminPage() {
                   {systemHealth.databaseStatus || "Healthy"}
                 </div>
                 <p className="text-[11px] text-text-muted mt-2 font-mono">
-                  Checked: {systemHealth.lastCheckedAt}
+                  Checked: {formatDateTime(systemHealth.lastCheckedAt)}
                 </p>
               </CardContent>
             </Card>
@@ -1468,7 +1518,7 @@ export default function AdminPage() {
                   {systemHealth.aiServiceStatus || "Operational"}
                 </div>
                 <p className="text-[11px] text-text-muted mt-2 font-mono">
-                  Checked: {systemHealth.lastCheckedAt}
+                  Checked: {formatDateTime(systemHealth.lastCheckedAt)}
                 </p>
               </CardContent>
             </Card>
@@ -1503,14 +1553,14 @@ export default function AdminPage() {
                   auditLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-surface-elevated/50 transition-colors">
                       <td className="py-3 px-4 font-mono text-text-muted">
-                        {new Date(log.created_at).toLocaleString()}
+                        {formatDateTime(log.created_at)}
                       </td>
                       <td className="py-3 px-4 font-bold text-accent">
                         {log.admin_email || "System Admin"}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-accent/20 text-accent border border-accent/30">
-                          {log.action}
+                          {safeText(log.action, "UNKNOWN_ACTION")}
                         </span>
                       </td>
                       <td className="py-3 px-4 font-mono text-text-primary">
@@ -1554,18 +1604,18 @@ export default function AdminPage() {
                   systemErrors.map((err) => (
                     <tr key={err.id} className="hover:bg-surface-elevated/50 transition-colors">
                       <td className="py-3 px-4 font-mono text-text-muted">
-                        {new Date(err.created_at).toLocaleString()}
+                        {formatDateTime(err.created_at)}
                       </td>
                       <td className="py-3 px-4 font-bold text-text-primary">
-                        {err.service} ({err.route})
+                        {safeText(err.service, "Unknown")} ({safeText(err.route, "N/A")})
                       </td>
                       <td className="py-3 px-4 text-center">
                         <Badge className="bg-rose-500/20 text-rose-400 border-rose-500/30 text-[10px]">
-                          {err.error_code}
+                          {safeText(err.error_code, "UNKNOWN")}
                         </Badge>
                       </td>
                       <td className="py-3 px-4 text-text-secondary break-word-safe">
-                        {err.safe_message}
+                        {safeText(err.safe_message, "No message")}
                       </td>
                     </tr>
                   ))
@@ -1601,16 +1651,16 @@ export default function AdminPage() {
                 </div>
                 <div>
                   <span className="text-[10px] text-text-muted font-semibold uppercase">Current Plan</span>
-                  <p className="font-bold text-accent">{selectedUser.plan.toUpperCase()}</p>
+                  <p className="font-bold text-accent">{planLabel(selectedUser.plan)}</p>
                 </div>
                 <div>
                   <span className="text-[10px] text-text-muted font-semibold uppercase">Signed Up</span>
-                  <p className="font-mono text-text-primary">{new Date(selectedUser.created_at).toLocaleDateString()}</p>
+                  <p className="font-mono text-text-primary">{formatDate(selectedUser.created_at)}</p>
                 </div>
                 <div>
                   <span className="text-[10px] text-text-muted font-semibold uppercase">Last Active</span>
                   <p className="font-mono text-text-primary">
-                    {selectedUser.last_seen_at ? new Date(selectedUser.last_seen_at).toLocaleDateString() : "Never"}
+                    {formatDate(selectedUser.last_seen_at, "Never")}
                   </p>
                 </div>
               </div>
