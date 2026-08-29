@@ -27,11 +27,19 @@ import {
   CheckCircle2,
   ExternalLink,
   Globe,
+  Plus,
+  FileText,
+  MessageSquareQuote,
+  Layers,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   PORTFOLIO_THEMES,
   PortfolioTemplateId,
   PortfolioData,
+  PortfolioProject,
+  PortfolioTestimonial,
   generatePortfolioHTML,
 } from "@/lib/portfolio-templates";
 import { createZipBlob } from "@/lib/zip-export";
@@ -85,6 +93,14 @@ function getSampleDataForRole(roleName: string, avatarUrl?: string): PortfolioDa
           summary: "Leading product design strategy, mentoring junior designers, and standardizing component libraries.",
         },
       ],
+      testimonials: [
+        {
+          author: "Elena Rostova",
+          role: "VP of Product",
+          company: "FinTech Global",
+          quote: "Diwanshu transformed our entire mobile UX and established a design system that cut our frontend turnaround time in half.",
+        },
+      ],
     };
   }
 
@@ -117,68 +133,12 @@ function getSampleDataForRole(roleName: string, avatarUrl?: string): PortfolioDa
           summary: "Architected real-time recommendation and ranking algorithms for high-throughput enterprise pipelines.",
         },
       ],
-    };
-  }
-
-  if (role.includes("marketing") || role.includes("growth")) {
-    return {
-      name: "Diwanshu",
-      title: "Growth Marketer & Builder",
-      bio: "Scaling customer acquisition, performance marketing funnels, and organic growth engines for high-velocity SaaS products.",
-      avatarUrl,
-      email: "diwanshu@example.com",
-      skills: ["SEO Strategy", "Paid Acquisition", "Lifecycle Marketing", "CRO", "Google Analytics 4", "Content Systems", "A/B Testing"],
-      stats: [
-        { label: "Organic Growth", value: "3.5x YoY" },
-        { label: "Campaigns Led", value: "40+" },
-        { label: "ROAS Benchmark", value: "4.2x Avg" },
-      ],
-      projects: [
+      testimonials: [
         {
-          title: "Global SaaS Launch Engine",
-          description: "Engineered multi-channel organic search and product hunt launch strategy resulting in 15,000 signups in week 1.",
-          tech: "SEO • CRO • Funnels",
-          metrics: "15,000 signups in Week 1",
-        },
-      ],
-      experience: [
-        {
-          role: "Growth Marketing Lead",
-          company: "HyperScale",
-          period: "2023 — Present",
-          summary: "Directing omnichannel growth campaigns and data-driven customer conversion pipelines.",
-        },
-      ],
-    };
-  }
-
-  if (role.includes("executive") || role.includes("finance") || role.includes("lead")) {
-    return {
-      name: "Diwanshu",
-      title: "Executive Director & Strategist",
-      bio: "Driving cross-functional execution, enterprise product strategy, and operational excellence for scalable organizations.",
-      avatarUrl,
-      email: "diwanshu@example.com",
-      skills: ["Executive Strategy", "P&L Management", "Team Leadership", "Cross-Functional Governance", "Stakeholder Relations"],
-      stats: [
-        { label: "Teams Scaled", value: "50+ Members" },
-        { label: "P&L Oversight", value: "$10M+ ARR" },
-        { label: "Initiatives Delivered", value: "25+ Key Projects" },
-      ],
-      projects: [
-        {
-          title: "Enterprise Digital Transformation",
-          description: "Spearheaded operational consolidation across 4 divisions, improving team velocity by 35% and reducing overhead.",
-          tech: "Enterprise Strategy • Operations",
-          metrics: "35% velocity improvement",
-        },
-      ],
-      experience: [
-        {
-          role: "Director of Technology & Operations",
-          company: "Summit Enterprise",
-          period: "2022 — Present",
-          summary: "Overseeing multidisciplinary engineering and operational teams to achieve strategic corporate milestones.",
+          author: "Dr. Marcus Vance",
+          role: "Head of AI Research",
+          company: "Neural Labs",
+          quote: "One of the sharpest ML engineers I've worked with. Delivered our low-latency embedding pipeline 3 weeks ahead of schedule.",
         },
       ],
     };
@@ -220,6 +180,14 @@ function getSampleDataForRole(roleName: string, avatarUrl?: string): PortfolioDa
         summary: "Developing core product features, improving system architecture, and optimizing continuous integration pipelines.",
       },
     ],
+    testimonials: [
+      {
+        author: "Alex Rivera",
+        role: "Engineering Director",
+        company: "Vaylo Systems",
+        quote: "Diwanshu is a high-velocity engineer with exceptional attention to system scalability, clean code, and user experience.",
+      },
+    ],
   };
 }
 
@@ -228,8 +196,10 @@ export default function PortfolioGeneratorPage() {
   const [targetRole, setTargetRole] = useState("Software Engineer");
   const [template, setTemplate] = useState<PortfolioTemplateId>("technical");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [resumeUrl, setResumeUrl] = useState<string>("");
   const [portfolioData, setPortfolioData] = useState<PortfolioData>(() => getSampleDataForRole("Software Engineer"));
   const [htmlCode, setHtmlCode] = useState<string>(() => generatePortfolioHTML(getSampleDataForRole("Software Engineer"), "technical"));
+  
   const [loading, setLoading] = useState(false);
   const [loadingLatest, setLoadingLatest] = useState(false);
   const [savingUrl, setSavingUrl] = useState(false);
@@ -242,14 +212,36 @@ export default function PortfolioGeneratorPage() {
   const [userLiveUrl, setUserLiveUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
+  
+  // Accordion Section Expanders
+  const [showProjectEditor, setShowProjectEditor] = useState(false);
+  const [showTestimonialEditor, setShowTestimonialEditor] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Load initial portfolio data and any previously saved live URL
+  // Load initial portfolio data and any previously saved live URL / draft
   useEffect(() => {
-    const initial = getSampleDataForRole(targetRole, avatarUrl || undefined);
-    setPortfolioData(initial);
-    setHtmlCode(generatePortfolioHTML(initial, template));
+    try {
+      const savedDraft = localStorage.getItem("vaylo_portfolio_draft");
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed && parsed.name && parsed.title) {
+          setPortfolioData(parsed);
+          setTargetRole(parsed.title);
+          if (parsed.avatarUrl) setAvatarUrl(parsed.avatarUrl);
+          if (parsed.resumeUrl) setResumeUrl(parsed.resumeUrl);
+          setHtmlCode(generatePortfolioHTML(parsed, template));
+        }
+      } else {
+        const initial = getSampleDataForRole(targetRole, avatarUrl || undefined);
+        setPortfolioData(initial);
+        setHtmlCode(generatePortfolioHTML(initial, template));
+      }
+    } catch {
+      const initial = getSampleDataForRole(targetRole, avatarUrl || undefined);
+      setPortfolioData(initial);
+      setHtmlCode(generatePortfolioHTML(initial, template));
+    }
 
     // Fetch saved deployment state from API
     fetch("/api/portfolio/deploy")
@@ -263,6 +255,17 @@ export default function PortfolioGeneratorPage() {
       .catch((err) => console.warn("Fetch deploy state notice:", err));
   }, []);
 
+  // Autosave to localStorage on data changes
+  useEffect(() => {
+    if (portfolioData) {
+      try {
+        localStorage.setItem("vaylo_portfolio_draft", JSON.stringify(portfolioData));
+      } catch (err) {
+        console.warn("Autosave draft notice:", err);
+      }
+    }
+  }, [portfolioData]);
+
   const handleSelectRole = (role: typeof ROLE_PRESETS[0]) => {
     setTargetRole(role.label);
     setTemplate(role.theme);
@@ -272,6 +275,7 @@ export default function PortfolioGeneratorPage() {
       ...baseData,
       title: role.label,
       avatarUrl: avatarUrl || baseData.avatarUrl,
+      resumeUrl: resumeUrl || baseData.resumeUrl,
     };
     setPortfolioData(updatedData);
     setHtmlCode(generatePortfolioHTML(updatedData, role.theme));
@@ -317,6 +321,78 @@ export default function PortfolioGeneratorPage() {
     }
     const currentData = portfolioData || getSampleDataForRole(targetRole);
     const updatedData: PortfolioData = { ...currentData, avatarUrl: undefined };
+    setPortfolioData(updatedData);
+    setHtmlCode(generatePortfolioHTML(updatedData, template));
+  };
+
+  const handleProjectScreenshotUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !portfolioData) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      const updatedProjects = [...portfolioData.projects];
+      updatedProjects[index] = { ...updatedProjects[index], imageUrl: base64 };
+      const updatedData: PortfolioData = { ...portfolioData, projects: updatedProjects };
+      setPortfolioData(updatedData);
+      setHtmlCode(generatePortfolioHTML(updatedData, template));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddProject = () => {
+    if (!portfolioData) return;
+    const newProj: PortfolioProject = {
+      title: "New Featured System",
+      description: "Briefly explain the architecture, stack, and quantifiable outcome.",
+      tech: "TypeScript • React • Node.js",
+      metrics: "Quantifiable Impact",
+    };
+    const updatedData: PortfolioData = {
+      ...portfolioData,
+      projects: [newProj, ...portfolioData.projects],
+    };
+    setPortfolioData(updatedData);
+    setHtmlCode(generatePortfolioHTML(updatedData, template));
+  };
+
+  const handleRemoveProject = (index: number) => {
+    if (!portfolioData) return;
+    const updatedProjects = portfolioData.projects.filter((_, i) => i !== index);
+    const updatedData: PortfolioData = { ...portfolioData, projects: updatedProjects };
+    setPortfolioData(updatedData);
+    setHtmlCode(generatePortfolioHTML(updatedData, template));
+  };
+
+  const handleAddTestimonial = () => {
+    if (!portfolioData) return;
+    const newTesti: PortfolioTestimonial = {
+      author: "Colleague / Leader Name",
+      role: "Engineering Manager",
+      company: "Tech Enterprise",
+      quote: "Exceptional teammate with high technical rigor and commitment to delivery.",
+    };
+    const updatedData: PortfolioData = {
+      ...portfolioData,
+      testimonials: [...(portfolioData.testimonials || []), newTesti],
+    };
+    setPortfolioData(updatedData);
+    setHtmlCode(generatePortfolioHTML(updatedData, template));
+  };
+
+  const handleRemoveTestimonial = (index: number) => {
+    if (!portfolioData || !portfolioData.testimonials) return;
+    const updated = portfolioData.testimonials.filter((_, i) => i !== index);
+    const updatedData: PortfolioData = { ...portfolioData, testimonials: updated };
+    setPortfolioData(updatedData);
+    setHtmlCode(generatePortfolioHTML(updatedData, template));
+  };
+
+  const handleResumeUrlChange = (val: string) => {
+    setResumeUrl(val);
+    if (!portfolioData) return;
+    const updatedData: PortfolioData = { ...portfolioData, resumeUrl: val.trim() || undefined };
     setPortfolioData(updatedData);
     setHtmlCode(generatePortfolioHTML(updatedData, template));
   };
@@ -371,6 +447,7 @@ export default function PortfolioGeneratorPage() {
           targetRole,
           template,
           avatarUrl: avatarUrl || undefined,
+          resumeUrl: resumeUrl || undefined,
         }),
       });
       const data = await res.json();
@@ -479,12 +556,15 @@ export default function PortfolioGeneratorPage() {
             <Badge variant="outline" className="text-blue-600 dark:text-blue-400 border-blue-500/30 bg-blue-50 dark:bg-blue-950/20 px-2.5 py-0.5 font-semibold text-xs">
               6 Responsive Themes
             </Badge>
+            <Badge variant="outline" className="text-purple-600 dark:text-purple-400 border-purple-500/30 bg-purple-50 dark:bg-purple-950/20 px-2.5 py-0.5 font-semibold text-xs">
+              Screenshots &amp; Testimonials
+            </Badge>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">
             AI Developer &amp; Executive Portfolio Studio
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 max-w-2xl leading-relaxed">
-            Transform your resume into a stunning, responsive portfolio website. Fully self-contained with photo support, zero dependencies, and instant free 1-click Netlify/Vercel export.
+            Transform your resume into a stunning, responsive portfolio website with project screenshots, endorsements, and 1-click Netlify/Vercel export.
           </p>
         </div>
 
@@ -610,10 +690,10 @@ export default function PortfolioGeneratorPage() {
             />
           </Card>
 
-          {/* Profile Photo Upload */}
+          {/* Profile Photo & Resume Link Upload */}
           <Card className="bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">2. Profile Photo (Optional)</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">2. Profile Photo &amp; Resume Link</label>
               <span className="text-[11px] text-slate-500 dark:text-slate-400">Max 5MB • JPG/PNG/WebP</span>
             </div>
 
@@ -669,11 +749,216 @@ export default function PortfolioGeneratorPage() {
                 </p>
               </div>
             </div>
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-1">
+                <FileText className="w-3.5 h-3.5 text-blue-500" /> Resume / CV Direct Download URL (Optional)
+              </label>
+              <Input
+                value={resumeUrl}
+                onChange={(e) => handleResumeUrlChange(e.target.value)}
+                placeholder="e.g. https://my-portfolio.com/resume.pdf or Google Drive link"
+                className="bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white"
+              />
+            </div>
+          </Card>
+
+          {/* Interactive Project Screenshots & Testimonials Accordion */}
+          <Card className="bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">3. Content Depth &amp; Screenshots</label>
+              <span className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold">Credibility Boost</span>
+            </div>
+
+            {/* Projects Editor Toggle */}
+            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowProjectEditor(!showProjectEditor)}
+                className="w-full p-3 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200"
+              >
+                <div className="flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-emerald-500" />
+                  <span>Featured Projects &amp; Screenshots ({portfolioData?.projects.length || 0})</span>
+                </div>
+                {showProjectEditor ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {showProjectEditor && (
+                <div className="p-3 space-y-3 bg-white dark:bg-slate-900/40">
+                  {portfolioData?.projects.map((proj, idx) => (
+                    <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">Project #{idx + 1}: {proj.title}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveProject(idx)}
+                          className="h-6 text-[10px] text-rose-500 hover:text-rose-600"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+
+                      <Input
+                        value={proj.title}
+                        onChange={(e) => {
+                          const updated = [...portfolioData.projects];
+                          updated[idx] = { ...proj, title: e.target.value };
+                          const newData = { ...portfolioData, projects: updated };
+                          setPortfolioData(newData);
+                          setHtmlCode(generatePortfolioHTML(newData, template));
+                        }}
+                        placeholder="Project Title"
+                        className="text-xs h-7"
+                      />
+
+                      <Textarea
+                        value={proj.description}
+                        onChange={(e) => {
+                          const updated = [...portfolioData.projects];
+                          updated[idx] = { ...proj, description: e.target.value };
+                          const newData = { ...portfolioData, projects: updated };
+                          setPortfolioData(newData);
+                          setHtmlCode(generatePortfolioHTML(newData, template));
+                        }}
+                        placeholder="Description"
+                        rows={2}
+                        className="text-xs font-normal"
+                      />
+
+                      {/* Project Screenshot Attachment */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <label className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold shrink-0">
+                          📸 Screenshot:
+                        </label>
+                        <input
+                          type="file"
+                          id={`proj-img-${idx}`}
+                          accept="image/*"
+                          onChange={(e) => handleProjectScreenshotUpload(idx, e)}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById(`proj-img-${idx}`)?.click()}
+                          className="h-6 text-[10px] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 gap-1"
+                        >
+                          <Upload className="w-3 h-3 text-emerald-500" />
+                          {proj.imageUrl ? "Replace Screenshot" : "Attach Screenshot"}
+                        </Button>
+                        {proj.imageUrl && (
+                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ Attached</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  <Button
+                    type="button"
+                    onClick={handleAddProject}
+                    variant="outline"
+                    className="w-full text-xs border-dashed border-slate-300 dark:border-slate-700 gap-1.5 h-8"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Another Project
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Testimonials Editor Toggle */}
+            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowTestimonialEditor(!showTestimonialEditor)}
+                className="w-full p-3 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquareQuote className="w-4 h-4 text-blue-500" />
+                  <span>Peer Testimonials &amp; Endorsements ({portfolioData?.testimonials?.length || 0})</span>
+                </div>
+                {showTestimonialEditor ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {showTestimonialEditor && (
+                <div className="p-3 space-y-3 bg-white dark:bg-slate-900/40">
+                  {(portfolioData?.testimonials || []).map((testi, idx) => (
+                    <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">Endorsement #{idx + 1}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveTestimonial(idx)}
+                          className="h-6 text-[10px] text-rose-500 hover:text-rose-600"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          value={testi.author}
+                          onChange={(e) => {
+                            const updated = [...(portfolioData.testimonials || [])];
+                            updated[idx] = { ...testi, author: e.target.value };
+                            const newData = { ...portfolioData, testimonials: updated };
+                            setPortfolioData(newData);
+                            setHtmlCode(generatePortfolioHTML(newData, template));
+                          }}
+                          placeholder="Author Name"
+                          className="text-xs h-7"
+                        />
+                        <Input
+                          value={testi.role}
+                          onChange={(e) => {
+                            const updated = [...(portfolioData.testimonials || [])];
+                            updated[idx] = { ...testi, role: e.target.value };
+                            const newData = { ...portfolioData, testimonials: updated };
+                            setPortfolioData(newData);
+                            setHtmlCode(generatePortfolioHTML(newData, template));
+                          }}
+                          placeholder="Role (e.g. VP Engineering)"
+                          className="text-xs h-7"
+                        />
+                      </div>
+
+                      <Textarea
+                        value={testi.quote}
+                        onChange={(e) => {
+                          const updated = [...(portfolioData.testimonials || [])];
+                          updated[idx] = { ...testi, quote: e.target.value };
+                          const newData = { ...portfolioData, testimonials: updated };
+                          setPortfolioData(newData);
+                          setHtmlCode(generatePortfolioHTML(newData, template));
+                        }}
+                        placeholder="Quote / Recommendation"
+                        rows={2}
+                        className="text-xs font-normal"
+                      />
+                    </div>
+                  ))}
+
+                  <Button
+                    type="button"
+                    onClick={handleAddTestimonial}
+                    variant="outline"
+                    className="w-full text-xs border-dashed border-slate-300 dark:border-slate-700 gap-1.5 h-8"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Endorsement Quote
+                  </Button>
+                </div>
+              )}
+            </div>
           </Card>
 
           {/* Theme Switcher */}
           <Card className="bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">3. Select Visual Theme</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">4. Select Visual Theme</label>
             <div className="grid grid-cols-2 gap-2.5">
               {PORTFOLIO_THEMES.map((th) => {
                 const isSelected = template === th.id;
@@ -707,7 +992,7 @@ export default function PortfolioGeneratorPage() {
           {/* Resume Input Area */}
           <Card className="bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">4. Source Resume / Experience Text</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">5. Source Resume / Experience Text</label>
               <Button
                 variant="ghost"
                 size="sm"
@@ -724,7 +1009,7 @@ export default function PortfolioGeneratorPage() {
               value={resumeText}
               onChange={(e) => setResumeText(e.target.value)}
               placeholder="Paste your resume text, LinkedIn profile summary, or key projects (min 200 characters)..."
-              rows={8}
+              rows={6}
               className="bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 font-mono leading-relaxed"
             />
 

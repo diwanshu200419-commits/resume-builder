@@ -3,6 +3,7 @@
 // Vaylo AI — Multi-Design Portfolio Template Engine
 // 6 Fully Responsive, Modern, Production-Ready, 100% Self-Contained Themes
 // Engineered for 320px Mobile, 768px Tablet, and 1440px+ Desktop Screens
+// Features: Project Screenshots, Testimonials, Resume Download Link, SEO Meta & Schema.org JSON-LD
 
 export type PortfolioTemplateId =
   | "technical"
@@ -24,6 +25,7 @@ export interface PortfolioProject {
   link?: string;
   github?: string;
   metrics?: string;
+  imageUrl?: string;
   designTags?: string[];
 }
 
@@ -43,11 +45,27 @@ export interface PortfolioEducation {
   score?: string;
 }
 
+export interface PortfolioTestimonial {
+  author: string;
+  role: string;
+  company?: string;
+  quote: string;
+  avatarUrl?: string;
+}
+
+export interface PortfolioCertification {
+  title: string;
+  issuer: string;
+  date: string;
+  credentialUrl?: string;
+}
+
 export interface PortfolioData {
   name: string;
   title: string;
   bio: string;
   avatarUrl?: string;
+  resumeUrl?: string;
   domain?: string;
   location?: string;
   email?: string;
@@ -60,6 +78,8 @@ export interface PortfolioData {
   projects: PortfolioProject[];
   experience: PortfolioExperience[];
   education?: PortfolioEducation[];
+  testimonials?: PortfolioTestimonial[];
+  certifications?: PortfolioCertification[];
 }
 
 export interface ThemeMeta {
@@ -207,6 +227,49 @@ export function renderAvatar(
   </div>`;
 }
 
+function formatUrl(url: string): string {
+  const clean = (url || "").trim();
+  if (!clean) return "";
+  if (clean.startsWith("http://") || clean.startsWith("https://")) {
+    return clean;
+  }
+  return `https://${clean}`;
+}
+
+function renderSeoHead(data: PortfolioData): string {
+  const safeName = escapeHtml(data.name || "Professional");
+  const safeTitle = escapeHtml(data.title || "Portfolio");
+  const safeBio = escapeHtml(data.bio || `Explore the portfolio and projects of ${data.name}.`);
+  const safeAvatar = data.avatarUrl ? escapeHtml(data.avatarUrl) : "https://www.vayloai.online/og-default.png";
+  
+  const schemaJson = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": data.name || "Candidate",
+    "jobTitle": data.title || "Professional",
+    "description": data.bio || "",
+    "email": data.email || undefined,
+    "url": data.website || undefined,
+    "sameAs": [
+      data.github ? formatUrl(data.github) : undefined,
+      data.linkedin ? formatUrl(data.linkedin) : undefined,
+    ].filter(Boolean),
+  }).replace(/</g, "\\u003c").replace(/>/g, "\\u003e");
+
+  return `
+  <meta name="description" content="${safeBio}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${safeName} — ${safeTitle}">
+  <meta property="og:description" content="${safeBio}">
+  <meta property="og:image" content="${safeAvatar}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${safeName} — ${safeTitle}">
+  <meta name="twitter:description" content="${safeBio}">
+  <script type="application/ld+json">
+    ${schemaJson}
+  </script>`;
+}
+
 // Global Common CSS Reset & Base Helpers
 const GLOBAL_RESPONSIVE_CSS = `
   html, body {
@@ -234,19 +297,39 @@ const GLOBAL_RESPONSIVE_CSS = `
     overflow-wrap: break-word;
     word-break: break-word;
   }
+  .proj-img-box {
+    width: 100%;
+    height: 160px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .proj-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .proj-img-box:hover img {
+    transform: scale(1.04);
+  }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .quote-icon {
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
 `;
 
-function formatUrl(url: string): string {
-  const clean = (url || "").trim();
-  if (!clean) return "";
-  if (clean.startsWith("http://") || clean.startsWith("https://")) {
-    return clean;
-  }
-  return `https://${clean}`;
-}
-
 // ---------------------------------------------------------------------------
-// 1. TEMPLATE 1: TECHNICAL / NEO-TERMINAL (RESPONSIVE)
+// 1. TEMPLATE 1: TECHNICAL / NEO-TERMINAL (RESPONSIVE + FULL FEATURES)
 // ---------------------------------------------------------------------------
 function renderTechnicalTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Developer");
@@ -255,6 +338,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
   const safeGithub = data.github ? escapeHtml(data.github) : null;
   const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
+  const safeResumeUrl = data.resumeUrl ? escapeHtml(formatUrl(data.resumeUrl)) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "terminal");
 
   const statsHtml = (data.stats || [
@@ -279,6 +363,10 @@ function renderTechnicalTemplate(data: PortfolioData): string {
     .map(
       (p) => `
       <div class="project-card">
+        ${p.imageUrl ? `
+        <div class="proj-img-box">
+          <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+        </div>` : ""}
         <div class="project-header">
           <h3 class="project-title">${escapeHtml(p.title)}</h3>
           <span class="badge-status">Active</span>
@@ -310,12 +398,30 @@ function renderTechnicalTemplate(data: PortfolioData): string {
         .join("")
     : "";
 
+  const hasTestimonials = Array.isArray(data.testimonials) && data.testimonials.length > 0;
+  const testimonialsHtml = hasTestimonials
+    ? (data.testimonials || [])
+        .map(
+          (t) => `
+        <div class="testi-card">
+          <div class="quote-icon" style="color: #38bdf8;">“</div>
+          <p class="testi-quote">${escapeHtml(t.quote)}</p>
+          <div class="testi-author">
+            <strong>${escapeHtml(t.author)}</strong>
+            <span>${escapeHtml(t.role)}${t.company ? ` @ ${escapeHtml(t.company)}` : ""}</span>
+          </div>
+        </div>`
+        )
+        .join("")
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>${safeName} — ${safeTitle}</title>
+  ${renderSeoHead(data)}
   <style>
     ${GLOBAL_RESPONSIVE_CSS}
     body {
@@ -337,6 +443,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
     .nav-links a { color: #94a3b8; text-decoration: none; transition: color 0.2s; }
     .nav-links a:hover { color: #38bdf8; }
     .btn-touch { background: #2563eb; color: #fff !important; padding: 6px 12px; border-radius: 8px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .btn-cv { background: #0f172a; border: 1px solid #38bdf8; color: #38bdf8 !important; padding: 6px 12px; border-radius: 8px; font-weight: 600; text-decoration: none; white-space: nowrap; }
 
     /* Hero Card */
     .hero-card {
@@ -402,6 +509,12 @@ function renderTechnicalTemplate(data: PortfolioData): string {
     .timeline-period { font-family: monospace; font-size: 11px; background: #0f172a; padding: 2px 6px; border-radius: 4px; border: 1px solid #1e293b; color: #94a3b8; }
     .timeline-desc { font-size: 13px; color: #cbd5e1; line-height: 1.6; }
 
+    /* Testimonials */
+    .testi-card { background: rgba(15, 23, 42, 0.7); border: 1px solid #1e3a8a; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; }
+    .testi-quote { font-size: 13px; color: #cbd5e1; font-style: italic; line-height: 1.6; margin-bottom: 12px; }
+    .testi-author strong { display: block; font-family: monospace; font-size: 13px; color: #fff; }
+    .testi-author span { font-size: 11px; color: #94a3b8; }
+
     /* Contact Box */
     .contact-card { text-align: center; background: #0f172a; border: 1px solid #1e3a8a; border-radius: 20px; padding: clamp(24px, 5vw, 40px) 16px; margin-top: 32px; }
     .contact-card h2 { font-family: monospace; font-size: clamp(18px, 4vw, 24px); color: #fff; margin-bottom: 8px; }
@@ -428,6 +541,8 @@ function renderTechnicalTemplate(data: PortfolioData): string {
         <a href="#skills">02. Stack</a>
         <a href="#projects">03. Projects</a>
         ${hasExperience ? '<a href="#experience">04. Timeline</a>' : ''}
+        ${hasTestimonials ? '<a href="#testimonials">05. Endorsements</a>' : ''}
+        ${safeResumeUrl ? `<a href="${safeResumeUrl}" target="_blank" class="btn-cv">View Resume 📄</a>` : ""}
         <a href="mailto:${safeEmail}" class="btn-touch">Get in Touch</a>
       </nav>
     </div>
@@ -450,6 +565,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
       <div class="social-row">
         ${safeGithub ? `<span>GitHub: <a href="${escapeHtml(formatUrl(safeGithub))}" target="_blank" class="social-link">${safeGithub} →</a></span>` : ""}
         ${safeLinkedin ? `<span>LinkedIn: <a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" class="social-link">${safeLinkedin} →</a></span>` : ""}
+        ${safeResumeUrl ? `<span>CV: <a href="${safeResumeUrl}" target="_blank" class="social-link">Download PDF ↗</a></span>` : ""}
         <span>Email: <a href="mailto:${safeEmail}" class="social-link">${safeEmail}</a></span>
       </div>
 
@@ -474,6 +590,12 @@ function renderTechnicalTemplate(data: PortfolioData): string {
       <div class="timeline">${expHtml}</div>
     </section>` : ''}
 
+    ${hasTestimonials ? `
+    <section id="testimonials" class="section">
+      <h2 class="section-title"><span>// 05.</span> Peer Recommendations &amp; Impact</h2>
+      <div class="testimonials-grid">${testimonialsHtml}</div>
+    </section>` : ''}
+
     <section class="contact-card">
       <h2>Let&#39;s Build Scalable Systems</h2>
       <p>Available for engineering roles, technical architecture, and consulting.</p>
@@ -489,7 +611,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
 }
 
 // ---------------------------------------------------------------------------
-// 2. TEMPLATE 2: MINIMAL / BENTO STUDIO (RESPONSIVE)
+// 2. TEMPLATE 2: MINIMAL / BENTO STUDIO (RESPONSIVE + FULL FEATURES)
 // ---------------------------------------------------------------------------
 function renderMinimalTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Designer");
@@ -497,6 +619,7 @@ function renderMinimalTemplate(data: PortfolioData): string {
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
   const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
+  const safeResumeUrl = data.resumeUrl ? escapeHtml(formatUrl(data.resumeUrl)) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "bento");
 
   const skillsHtml = (data.skills || [])
@@ -507,6 +630,10 @@ function renderMinimalTemplate(data: PortfolioData): string {
     .map(
       (p) => `
       <div class="bento-card">
+        ${p.imageUrl ? `
+        <div class="proj-img-box" style="background: #f1f5f9; border-color: #e2e8f0;">
+          <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+        </div>` : ""}
         <div class="card-tag">Case Study</div>
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
         <p class="card-desc">${escapeHtml(p.description)}</p>
@@ -536,12 +663,28 @@ function renderMinimalTemplate(data: PortfolioData): string {
         .join("")
     : "";
 
+  const hasTestimonials = Array.isArray(data.testimonials) && data.testimonials.length > 0;
+  const testimonialsHtml = hasTestimonials
+    ? (data.testimonials || [])
+        .map(
+          (t) => `
+        <div class="bento-card" style="background: #f8fafc;">
+          <div class="quote-icon" style="color: #4f46e5;">“</div>
+          <p style="font-size: 13px; color: #475569; font-style: italic; line-height: 1.6; margin-bottom: 10px;">${escapeHtml(t.quote)}</p>
+          <div style="font-size: 12px; font-weight: 700; color: #0f172a;">${escapeHtml(t.author)}</div>
+          <div style="font-size: 11px; color: #64748b;">${escapeHtml(t.role)}${t.company ? ` · ${escapeHtml(t.company)}` : ""}</div>
+        </div>`
+        )
+        .join("")
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>${safeName} — Portfolio</title>
+  ${renderSeoHead(data)}
   <style>
     ${GLOBAL_RESPONSIVE_CSS}
     body {
@@ -575,6 +718,11 @@ function renderMinimalTemplate(data: PortfolioData): string {
     .btn-say-hello {
       display: inline-flex; align-items: center; gap: 6px; background: #0f172a;
       color: #fff; padding: 10px 20px; border-radius: 9999px; font-size: 12px;
+      font-weight: 700; text-decoration: none; margin-top: 16px; width: fit-content;
+    }
+    .btn-bento-cv {
+      display: inline-flex; align-items: center; gap: 6px; background: #e0e7ff;
+      color: #4338ca; padding: 10px 20px; border-radius: 9999px; font-size: 12px;
       font-weight: 700; text-decoration: none; margin-top: 16px; width: fit-content;
     }
 
@@ -638,9 +786,10 @@ function renderMinimalTemplate(data: PortfolioData): string {
           </div>
           <p class="bio-p">${safeBio}</p>
         </div>
-        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 14px;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px;">
           <a href="mailto:${safeEmail}" class="btn-say-hello">Say Hello ↗</a>
-          ${safeLinkedin ? `<a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" style="font-size: 12px; font-weight: 700; color: #4f46e5; text-decoration: none;">LinkedIn ↗</a>` : ""}
+          ${safeResumeUrl ? `<a href="${safeResumeUrl}" target="_blank" class="btn-bento-cv">Resume 📄</a>` : ""}
+          ${safeLinkedin ? `<a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" style="font-size: 12px; font-weight: 700; color: #4f46e5; text-decoration: none; padding: 10px 0;">LinkedIn ↗</a>` : ""}
         </div>
       </div>
 
@@ -670,6 +819,10 @@ function renderMinimalTemplate(data: PortfolioData): string {
       <div>${expHtml}</div>
     </div>` : ''}
 
+    ${hasTestimonials ? `
+    <h2 class="sec-h2">Endorsements &amp; Recommendations</h2>
+    <div class="projects-grid">${testimonialsHtml}</div>` : ''}
+
     <footer>
       © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
     </footer>
@@ -679,7 +832,7 @@ function renderMinimalTemplate(data: PortfolioData): string {
 }
 
 // ---------------------------------------------------------------------------
-// 3. TEMPLATE 3: EXECUTIVE / MODERN GLASS (RESPONSIVE)
+// 3. TEMPLATE 3: EXECUTIVE / MODERN GLASS (RESPONSIVE + FULL FEATURES)
 // ---------------------------------------------------------------------------
 function renderExecutiveTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Leader");
@@ -687,6 +840,7 @@ function renderExecutiveTemplate(data: PortfolioData): string {
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "executive@example.com");
   const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
+  const safeResumeUrl = data.resumeUrl ? escapeHtml(formatUrl(data.resumeUrl)) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "glass");
 
   const statsHtml = (data.stats || [
@@ -711,6 +865,10 @@ function renderExecutiveTemplate(data: PortfolioData): string {
     .map(
       (p) => `
       <div class="exec-card">
+        ${p.imageUrl ? `
+        <div class="proj-img-box" style="background: #0f172a; border-color: #334155;">
+          <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+        </div>` : ""}
         <div class="exec-card-head">
           <h3 class="exec-card-title">${escapeHtml(p.title)}</h3>
           <span class="exec-tag">Initiative</span>
@@ -738,12 +896,28 @@ function renderExecutiveTemplate(data: PortfolioData): string {
         .join("")
     : "";
 
+  const hasTestimonials = Array.isArray(data.testimonials) && data.testimonials.length > 0;
+  const testimonialsHtml = hasTestimonials
+    ? (data.testimonials || [])
+        .map(
+          (t) => `
+        <div class="exec-card">
+          <div class="quote-icon" style="color: #38bdf8;">“</div>
+          <p style="font-size: 13px; color: #cbd5e1; font-style: italic; line-height: 1.6; margin-bottom: 10px;">${escapeHtml(t.quote)}</p>
+          <div style="font-size: 13px; font-weight: 700; color: #fff;">${escapeHtml(t.author)}</div>
+          <div style="font-size: 11px; color: #94a3b8;">${escapeHtml(t.role)}${t.company ? ` · ${escapeHtml(t.company)}` : ""}</div>
+        </div>`
+        )
+        .join("")
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>${safeName} — Executive Brief</title>
+  ${renderSeoHead(data)}
   <style>
     ${GLOBAL_RESPONSIVE_CSS}
     body {
@@ -814,7 +988,8 @@ function renderExecutiveTemplate(data: PortfolioData): string {
     .exec-cta { text-align: center; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 20px; padding: clamp(24px, 4vw, 36px) 16px; }
     .exec-cta h3 { font-size: clamp(18px, 4vw, 22px); font-weight: 700; color: #fff; margin-bottom: 8px; }
     .exec-cta p { font-size: 13px; color: #94a3b8; margin-bottom: 18px; }
-    .btn-exec { display: inline-block; background: #0284c7; color: #fff; padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; }
+    .btn-exec { display: inline-block; background: #0284c7; color: #fff; padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; margin-right: 8px; }
+    .btn-exec-cv { display: inline-block; background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; }
 
     footer { text-align: center; padding: 20px 0; font-size: 11px; color: #64748b; }
   </style>
@@ -832,10 +1007,10 @@ function renderExecutiveTemplate(data: PortfolioData): string {
       </div>
       <p class="exec-bio">${safeBio}</p>
       
-      ${safeLinkedin ? `
-      <div style="margin-top: 14px; font-size: 12px; color: #94a3b8;">
-        LinkedIn: <a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" style="color: #38bdf8; text-decoration: underline;">${safeLinkedin} ↗</a>
-      </div>` : ""}
+      <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 14px; font-size: 12px; color: #94a3b8;">
+        ${safeLinkedin ? `<span>LinkedIn: <a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" style="color: #38bdf8; text-decoration: underline;">${safeLinkedin} ↗</a></span>` : ""}
+        ${safeResumeUrl ? `<span>Curriculum Vitae: <a href="${safeResumeUrl}" target="_blank" style="color: #38bdf8; text-decoration: underline;">Executive PDF ↗</a></span>` : ""}
+      </div>
 
       <div class="exec-stats-grid">${statsHtml}</div>
     </div>
@@ -856,10 +1031,17 @@ function renderExecutiveTemplate(data: PortfolioData): string {
       <div class="exec-timeline">${expHtml}</div>
     </section>` : ''}
 
+    ${hasTestimonials ? `
+    <section class="section">
+      <h2 class="sec-h2">Executive Endorsements</h2>
+      <div class="exec-grid">${testimonialsHtml}</div>
+    </section>` : ''}
+
     <div class="exec-cta">
       <h3>Direct Advisory &amp; Leadership Inquiries</h3>
       <p>Confidential discussions for executive roles, board advisory, and consulting.</p>
       <a href="mailto:${safeEmail}" class="btn-exec">Contact Executive</a>
+      ${safeResumeUrl ? `<a href="${safeResumeUrl}" target="_blank" class="btn-exec-cv">Download CV PDF</a>` : ""}
     </div>
 
     <footer>
@@ -871,7 +1053,7 @@ function renderExecutiveTemplate(data: PortfolioData): string {
 }
 
 // ---------------------------------------------------------------------------
-// 4. TEMPLATE 4: VIBRANT / GRADIENT SAAS (RESPONSIVE)
+// 4. TEMPLATE 4: VIBRANT / GRADIENT SAAS (RESPONSIVE + FULL FEATURES)
 // ---------------------------------------------------------------------------
 function renderVibrantTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Creator");
@@ -879,6 +1061,7 @@ function renderVibrantTemplate(data: PortfolioData): string {
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
   const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
+  const safeResumeUrl = data.resumeUrl ? escapeHtml(formatUrl(data.resumeUrl)) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "gradient");
 
   const statsHtml = (data.stats || [
@@ -903,6 +1086,10 @@ function renderVibrantTemplate(data: PortfolioData): string {
     .map(
       (p) => `
       <div class="vib-card">
+        ${p.imageUrl ? `
+        <div class="proj-img-box" style="background: #180d2e; border-color: #4c1d95;">
+          <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+        </div>` : ""}
         <div class="vib-tag">Campaign</div>
         <h3 class="vib-card-title">${escapeHtml(p.title)}</h3>
         <p class="vib-card-desc">${escapeHtml(p.description)}</p>
@@ -929,12 +1116,28 @@ function renderVibrantTemplate(data: PortfolioData): string {
         .join("")
     : "";
 
+  const hasTestimonials = Array.isArray(data.testimonials) && data.testimonials.length > 0;
+  const testimonialsHtml = hasTestimonials
+    ? (data.testimonials || [])
+        .map(
+          (t) => `
+        <div class="vib-card">
+          <div class="quote-icon" style="color: #f472b6;">“</div>
+          <p style="font-size: 13px; color: #e9d5ff; font-style: italic; line-height: 1.6; margin-bottom: 10px;">${escapeHtml(t.quote)}</p>
+          <div style="font-size: 13px; font-weight: 700; color: #fff;">${escapeHtml(t.author)}</div>
+          <div style="font-size: 11px; color: #c084fc;">${escapeHtml(t.role)}${t.company ? ` · ${escapeHtml(t.company)}` : ""}</div>
+        </div>`
+        )
+        .join("")
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>${safeName} — Growth &amp; Strategy</title>
+  ${renderSeoHead(data)}
   <style>
     ${GLOBAL_RESPONSIVE_CSS}
     body {
@@ -1039,6 +1242,12 @@ function renderVibrantTemplate(data: PortfolioData): string {
       <div>${expHtml}</div>
     </section>` : ''}
 
+    ${hasTestimonials ? `
+    <section class="section">
+      <h2 class="sec-h2">Testimonials &amp; Growth Impact</h2>
+      <div class="vib-grid">${testimonialsHtml}</div>
+    </section>` : ''}
+
     <div class="vib-cta">
       <h3>Ready to accelerate your next milestone?</h3>
       <p>Open for growth marketing leadership, consulting, and ambitious collaborations.</p>
@@ -1054,14 +1263,14 @@ function renderVibrantTemplate(data: PortfolioData): string {
 }
 
 // ---------------------------------------------------------------------------
-// 5. TEMPLATE 5: EDITORIAL / WARM SERIF (RESPONSIVE)
+// 5. TEMPLATE 5: EDITORIAL / WARM SERIF (RESPONSIVE + FULL FEATURES)
 // ---------------------------------------------------------------------------
 function renderEditorialTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Scholar");
   const safeTitle = escapeHtml(data.title || "Writer, Researcher & Academic");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
-  const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
+  const safeResumeUrl = data.resumeUrl ? escapeHtml(formatUrl(data.resumeUrl)) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "serif");
 
   const skillsHtml = (data.skills || [])
@@ -1072,6 +1281,10 @@ function renderEditorialTemplate(data: PortfolioData): string {
     .map(
       (p) => `
       <article class="edit-card">
+        ${p.imageUrl ? `
+        <div class="proj-img-box" style="background: #f5f5f4; border-color: #e7e5e4;">
+          <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+        </div>` : ""}
         <div class="edit-tag">${escapeHtml(p.tech)}</div>
         <h3 class="edit-card-title">${escapeHtml(p.title)}</h3>
         <p class="edit-card-desc">${escapeHtml(p.description)}</p>
@@ -1102,6 +1315,7 @@ function renderEditorialTemplate(data: PortfolioData): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>${safeName} — Selected Works</title>
+  ${renderSeoHead(data)}
   <style>
     ${GLOBAL_RESPONSIVE_CSS}
     body {
@@ -1191,7 +1405,7 @@ function renderEditorialTemplate(data: PortfolioData): string {
 }
 
 // ---------------------------------------------------------------------------
-// 6. TEMPLATE 6: AURORA / DEEP SPACE (RESPONSIVE)
+// 6. TEMPLATE 6: AURORA / DEEP SPACE (RESPONSIVE + FULL FEATURES)
 // ---------------------------------------------------------------------------
 function renderAuroraTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Innovator");
@@ -1199,6 +1413,7 @@ function renderAuroraTemplate(data: PortfolioData): string {
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
   const safeGithub = data.github ? escapeHtml(data.github) : null;
+  const safeResumeUrl = data.resumeUrl ? escapeHtml(formatUrl(data.resumeUrl)) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "neon");
 
   const statsHtml = (data.stats || [
@@ -1223,6 +1438,10 @@ function renderAuroraTemplate(data: PortfolioData): string {
     .map(
       (p) => `
       <div class="aurora-card">
+        ${p.imageUrl ? `
+        <div class="proj-img-box" style="background: #020617; border-color: rgba(6, 182, 212, 0.35);">
+          <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy" />
+        </div>` : ""}
         <div class="aurora-tag">Neural Pipeline</div>
         <h3 class="aurora-card-title">${escapeHtml(p.title)}</h3>
         <p class="aurora-card-desc">${escapeHtml(p.description)}</p>
@@ -1248,12 +1467,28 @@ function renderAuroraTemplate(data: PortfolioData): string {
         .join("")
     : "";
 
+  const hasTestimonials = Array.isArray(data.testimonials) && data.testimonials.length > 0;
+  const testimonialsHtml = hasTestimonials
+    ? (data.testimonials || [])
+        .map(
+          (t) => `
+        <div class="aurora-card">
+          <div class="quote-icon" style="color: #22d3ee;">“</div>
+          <p style="font-size: 13px; color: #cbd5e1; font-style: italic; line-height: 1.6; margin-bottom: 10px;">${escapeHtml(t.quote)}</p>
+          <div style="font-size: 13px; font-weight: 700; color: #fff;">${escapeHtml(t.author)}</div>
+          <div style="font-size: 11px; color: #06b6d4;">${escapeHtml(t.role)}${t.company ? ` · ${escapeHtml(t.company)}` : ""}</div>
+        </div>`
+        )
+        .join("")
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>${safeName} — AI &amp; Intelligence</title>
+  ${renderSeoHead(data)}
   <style>
     ${GLOBAL_RESPONSIVE_CSS}
     body {
@@ -1364,6 +1599,12 @@ function renderAuroraTemplate(data: PortfolioData): string {
     <section class="section">
       <h2 class="sec-h2"><span>#</span> Systems Experience</h2>
       <div>${expHtml}</div>
+    </section>` : ''}
+
+    ${hasTestimonials ? `
+    <section class="section">
+      <h2 class="sec-h2"><span>#</span> Network Recommendations</h2>
+      <div class="aurora-grid">${testimonialsHtml}</div>
     </section>` : ''}
 
     <div class="aurora-cta">
