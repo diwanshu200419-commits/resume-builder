@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { VoiceInterviewSession } from "@/components/interview/VoiceInterviewSession";
+import { InterviewHistoryTracker } from "@/components/interview/InterviewHistoryTracker";
 import { INTERVIEWER_PERSONAS, VoicePersona } from "@/lib/interview/voice-personas";
 
 const DOMAIN_PRESETS = [
@@ -78,6 +79,7 @@ const DOMAIN_PRESETS = [
 ];
 
 export default function InterviewPrepLobbyPage() {
+  const [activeTab, setActiveTab] = useState<"studio" | "history">("studio");
   const [selectedDomain, setSelectedDomain] = useState("software_engineering");
   const [customRoleText, setCustomRoleText] = useState("");
   const [seniority, setSeniority] = useState<"entry-level" | "mid-level" | "senior" | "leadership">("mid-level");
@@ -85,6 +87,7 @@ export default function InterviewPrepLobbyPage() {
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [sessionQuestions, setSessionQuestions] = useState<any[]>([]);
+  const [askedQuestionsHistory, setAskedQuestionsHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const activePreset = DOMAIN_PRESETS.find((d) => d.id === selectedDomain) || DOMAIN_PRESETS[0];
@@ -93,18 +96,20 @@ export default function InterviewPrepLobbyPage() {
       ? customRoleText.trim()
       : activePreset.title;
 
-  const handleLaunchVoiceSession = async () => {
+  const handleLaunchVoiceSession = async (customExclude?: string[]) => {
     setLoadingQuestions(true);
     setError(null);
+    const excludeList = customExclude || askedQuestionsHistory;
 
     try {
       const res = await fetch("/api/ai/interview-questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          targetRole: targetRoleTitle,
+          target_role: targetRoleTitle,
           seniority: seniority,
-          companyStyle: activePreset.companyStyle,
+          company_style: activePreset.companyStyle,
+          previously_asked: excludeList,
         }),
       });
 
@@ -114,25 +119,65 @@ export default function InterviewPrepLobbyPage() {
       const questions = data.questionSet?.questions || data.questions || [];
       if (questions.length === 0) throw new Error("No questions generated for this domain.");
 
+      const newQTexts = questions.map((q: any) => q.question);
+      setAskedQuestionsHistory((prev) => [...prev, ...newQTexts]);
       setSessionQuestions(questions);
       setIsSessionActive(true);
     } catch (err: any) {
       console.warn("[Launch Session Warning]:", err);
-      // Fallback questions to guarantee session start
-      setSessionQuestions([
+      // Fallback 8 questions covering Behavioral, Technical, Culture & Curveball
+      const fallbackSet = [
         {
           id: "q1",
           type: "behavioral",
-          question: `Describe a challenging situation in your work as a ${targetRoleTitle} where you had to lead resolution under tight deadlines.`,
-          why_this_matters: "Evaluates situational leadership, composure, and problem-solving.",
+          question: `Describe a challenging situation in your work as a ${targetRoleTitle} where you had to make critical architectural or trade-off decisions under pressure.`,
+          why_this_matters: "Evaluates situational leadership, composure, and decision-making rigor.",
         },
         {
           id: "q2",
           type: "technical",
-          question: `What specific methodologies or metrics do you rely on to measure the quality and impact of your deliverables?`,
+          question: `What specific methodologies, metrics, or frameworks do you rely on to measure the quality, latency, and reliability of your deliverables?`,
           why_this_matters: "Assesses domain depth and data-driven accountability.",
         },
-      ]);
+        {
+          id: "q3",
+          type: "behavioral",
+          question: `Tell me about a time you had a strong technical or strategic disagreement with a teammate or executive stakeholder. How did you resolve it?`,
+          why_this_matters: "Tests conflict resolution, empathy, and constructive persuasion.",
+        },
+        {
+          id: "q4",
+          type: "technical",
+          question: `Walk me through how you would diagnose and resolve an unexpected 5x performance degradation in a live production environment.`,
+          why_this_matters: "Evaluates root-cause debugging under severe operational constraints.",
+        },
+        {
+          id: "q5",
+          type: "technical",
+          question: `How do you ensure balance between delivering new features quickly and maintaining high codebase health and test automation?`,
+          why_this_matters: "Measures sustainability and engineering excellence.",
+        },
+        {
+          id: "q6",
+          type: "behavioral",
+          question: `Describe a project where requirements changed significantly midway through development. How did you adapt your roadmap?`,
+          why_this_matters: "Tests agility and proactive risk mitigation.",
+        },
+        {
+          id: "q7",
+          type: "culture",
+          question: `How do you foster an environment of continuous learning and psychological safety within your engineering or cross-functional team?`,
+          why_this_matters: "Assesses cultural contribution, mentorship, and team leadership.",
+        },
+        {
+          id: "q8",
+          type: "curveball",
+          question: `If you inherited a legacy mission-critical system with zero documentation and failing tests, what would your plan for the first 30 days be?`,
+          why_this_matters: "Tests strategic prioritization, resilience, and executive vision.",
+        },
+      ];
+
+      setSessionQuestions(fallbackSet);
       setIsSessionActive(true);
     } finally {
       setLoadingQuestions(false);
@@ -141,6 +186,40 @@ export default function InterviewPrepLobbyPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8 pb-32">
+      {/* Top Tab Bar (Lobby / History Switcher) */}
+      {!isSessionActive && (
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 flex-wrap gap-2">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => setActiveTab("studio")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeTab === "studio"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              🎙️ Voice Practice Studio
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("history")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeTab === "history"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              📈 My Performance History
+            </button>
+          </div>
+
+          <Badge variant="outline" className="text-xs text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700">
+            4 Stock Personas • 100% Client-Side Web Speech &amp; Camera
+          </Badge>
+        </div>
+      )}
+
       {/* Active Studio View */}
       {isSessionActive ? (
         <div className="space-y-6">
@@ -174,8 +253,24 @@ export default function InterviewPrepLobbyPage() {
             initialQuestions={sessionQuestions}
             personaId={selectedPersonaId}
             onPersonaChange={setSelectedPersonaId}
+            onPracticeAgain={() => handleLaunchVoiceSession()}
+            onChangeRole={() => setIsSessionActive(false)}
+            onViewHistory={() => {
+              setIsSessionActive(false);
+              setActiveTab("history");
+            }}
           />
         </div>
+      ) : activeTab === "history" ? (
+        /* History View */
+        <InterviewHistoryTracker
+          onStartNewSession={() => setActiveTab("studio")}
+          onSelectRole={(roleName) => {
+            setSelectedDomain("custom_role");
+            setCustomRoleText(roleName);
+            setActiveTab("studio");
+          }}
+        />
       ) : (
         /* Lobby View */
         <div className="space-y-8">

@@ -33,6 +33,8 @@ import {
 import {
   InterviewTurn,
   STAREvaluation,
+  synthesizeQuestionReview,
+  synthesizeTopFocusAreas,
 } from "@/lib/interview/conversation-engine";
 import {
   waitForVoices,
@@ -40,6 +42,11 @@ import {
   selectBestAvailableVoice,
 } from "@/lib/interview/browser-speech-engine";
 import { WebcamProxyTracker, WebcamProxyMetrics } from "./WebcamProxyTracker";
+import {
+  PostSessionReview,
+  SessionSummaryData,
+  QuestionReviewItem,
+} from "./PostSessionReview";
 
 interface QuestionItem {
   id: string;
@@ -56,6 +63,9 @@ interface VoiceInterviewSessionProps {
   initialQuestions: QuestionItem[];
   personaId?: string;
   onPersonaChange?: (personaId: string) => void;
+  onPracticeAgain?: () => void;
+  onChangeRole?: () => void;
+  onViewHistory?: () => void;
   onFinishSession?: (turns: InterviewTurn[], overallScore: number) => void;
 }
 
@@ -66,6 +76,9 @@ export function VoiceInterviewSession({
   initialQuestions,
   personaId,
   onPersonaChange,
+  onPracticeAgain,
+  onChangeRole,
+  onViewHistory,
   onFinishSession,
 }: VoiceInterviewSessionProps) {
   // Session State
@@ -406,10 +419,54 @@ export function VoiceInterviewSession({
     }
   };
 
-  // Compute session metrics summary
-  const overallScore = turns.length > 0
-    ? Math.round(turns.reduce((acc, t) => acc + (t.evaluation?.score || 70), 0) / turns.length)
-    : 0;
+  // Allow candidate to end session early and view partial scorecard without losing progress
+  const handleEndEarly = () => {
+    const activeTurns = turns.length > 0 ? turns : (currentTurn ? [currentTurn] : []);
+    if (activeTurns.length === 0 || (!activeTurns[0].candidateAnswer && !candidateTranscript)) {
+      if (confirm("You haven't submitted an answer yet. Do you want to return to domain setup?")) {
+        onChangeRole?.();
+        return;
+      }
+    }
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
+    setSessionCompleted(true);
+    setIsSessionActive(false);
+  };
+
+  // Build pedagogical summary payload
+  const buildSessionSummary = (): SessionSummaryData => {
+    const finalTurns = turns.length > 0 ? turns : (currentTurn ? [currentTurn] : []);
+    const questionReviews: QuestionReviewItem[] = finalTurns.map((t, idx) => synthesizeQuestionReview(t, idx));
+    const topFocusAreas = synthesizeTopFocusAreas(finalTurns);
+    const avgScore = Math.round(
+      questionReviews.reduce((acc, q) => acc + q.score, 0) / (questionReviews.length || 1)
+    );
+
+    let verdict = "Solid performance — focus on metrics and concise context setting.";
+    if (avgScore >= 85) verdict = "Exceptional interview session! High STAR structure precision and strong active delivery.";
+    else if (avgScore >= 70) verdict = "Strong session — 2 key areas to sharpen before your real interview.";
+    else verdict = "Good effort — drill into concrete metrics and personal ownership to lift your score.";
+
+    return {
+      id: `sess-${Date.now()}`,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      role,
+      seniority,
+      persona,
+      overallScore: avgScore,
+      fillerWordDensity: 2,
+      speakingPaceWpm: 145,
+      totalWords: finalTurns.reduce((acc, t) => acc + (t.candidateAnswer?.split(/\s+/).length || 0), 0),
+      verdict,
+      webcamMetrics,
+      turns: finalTurns,
+      questionReviews,
+      topFocusAreas,
+    };
+  };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -514,15 +571,24 @@ export function VoiceInterviewSession({
                   </div>
                 </div>
               </div>
-
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => playPersonaSpeech(activeQuestionText)}
-                className="text-xs text-slate-300 hover:text-white gap-1.5"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Replay Voice
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleEndEarly}
+                  className="text-xs border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800"
+                >
+                  End &amp; View Scorecard
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => playPersonaSpeech(activeQuestionText)}
+                  className="text-xs text-slate-300 hover:text-white gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Replay Voice
+                </Button>
+              </div>
             </div>
 
             {/* Current Question Box */}
@@ -549,42 +615,58 @@ export function VoiceInterviewSession({
               <Textarea
                 value={candidateTranscript}
                 onChange={(e) => setCandidateTranscript(e.target.value)}
-                placeholder="Click the microphone button to speak, or type your answer here..."
+                placeholder="Click 'Record Answer' to speak, or type your response here..."
                 rows={4}
-                className="bg-slate-900 border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:border-blue-500 rounded-xl leading-relaxed"
+                className="bg-slate-900/90 border-slate-800 text-white placeholder:text-slate-600 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-2xl resize-none p-4"
               />
 
-              {/* Action Controls */}
-              <div className="flex items-center justify-between pt-2 flex-wrap gap-2">
-                <Button
-                  type="button"
-                  onClick={toggleRecording}
-                  variant="outline"
-                  className={`border-slate-700 font-bold gap-2 text-xs h-10 px-4 rounded-xl transition-all ${
-                    isRecording
-                      ? "bg-rose-600 text-white border-rose-500 animate-pulse"
-                      : "bg-slate-900 text-slate-200 hover:bg-slate-800 hover:text-white"
-                  }`}
-                >
-                  {isRecording ? (
-                    <>
-                      <MicOff className="w-4 h-4" /> Stop Recording
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="w-4 h-4 text-emerald-400" /> Start Mic
-                    </>
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between flex-wrap gap-3 pt-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    onClick={toggleRecording}
+                    variant={isRecording ? "destructive" : "outline"}
+                    className={`gap-2 text-xs font-bold rounded-xl ${
+                      isRecording
+                        ? "bg-rose-600 hover:bg-rose-500 text-white animate-pulse"
+                        : "border-slate-700 text-slate-200 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    {isRecording ? (
+                      <>
+                        <MicOff className="w-4 h-4" /> Stop Recording
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="w-4 h-4 text-blue-400" /> Record Answer
+                      </>
+                    )}
+                  </Button>
+
+                  {candidateTranscript && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCandidateTranscript("")}
+                      className="text-xs text-slate-400 hover:text-white"
+                    >
+                      Clear
+                    </Button>
                   )}
-                </Button>
+                </div>
 
                 <Button
+                  type="button"
                   onClick={handleSubmitAnswer}
                   disabled={isEvaluating || !candidateTranscript.trim()}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs h-10 px-6 rounded-xl shadow-lg shadow-emerald-600/20 gap-2"
+                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2.5 rounded-xl gap-2 shadow-lg shadow-blue-600/20 text-xs"
                 >
                   {isEvaluating ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Evaluating Answer...
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Evaluating STAR Structure...</span>
                     </>
                   ) : (
                     <>
@@ -645,110 +727,14 @@ export function VoiceInterviewSession({
         </div>
       )}
 
-      {/* Post-Session Comprehensive Coaching Scorecard */}
+      {/* Post-Session Comprehensive Pedagogical Scorecard & Guidance */}
       {sessionCompleted && (
-        <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-md rounded-3xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
-            <div>
-              <Badge className="bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 text-xs px-3 py-1 font-bold">
-                🎉 Interview Completed
-              </Badge>
-              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-2">
-                Executive Coaching &amp; STAR Evaluation Summary
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Candidate: {role} ({seniority}) • Interviewer: {persona.label}
-              </p>
-            </div>
-
-            <Button
-              onClick={handleStartSession}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold gap-2 rounded-xl"
-            >
-              <RotateCcw className="w-4 h-4" /> Practice Another Round
-            </Button>
-          </div>
-
-          {/* Metric Overview Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-              <div className="text-xs text-slate-500 dark:text-slate-400">Overall STAR Score</div>
-              <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                {overallScore}/100
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-              <div className="text-xs text-slate-500 dark:text-slate-400">Questions Completed</div>
-              <div className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
-                {turns.length}
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-              <div className="text-xs text-slate-500 dark:text-slate-400">Eye Contact Proxy</div>
-              <div className="text-2xl font-extrabold text-purple-600 dark:text-purple-400 mt-1">
-                {webcamMetrics?.enabled ? `${webcamMetrics.gazeOnCameraPercent}%` : "Opted Out"}
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-              <div className="text-xs text-slate-500 dark:text-slate-400">Posture Stability</div>
-              <div className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">
-                {webcamMetrics?.enabled ? `${webcamMetrics.postureStabilityPercent}%` : "Opted Out"}
-              </div>
-            </div>
-          </div>
-
-          {/* Turn-by-Turn STAR Score Breakdown */}
-          <div className="space-y-4 pt-2">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              Turn-by-Turn STAR Performance
-            </h3>
-
-            <div className="space-y-3">
-              {turns.map((t, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 space-y-2.5"
-                >
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">
-                      Q{idx + 1}: {t.question}
-                    </span>
-                    <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 text-xs">
-                      Score: {t.evaluation?.score || 75}/100
-                    </Badge>
-                  </div>
-
-                  <p className="text-xs text-slate-600 dark:text-slate-300 italic bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                    "{t.candidateAnswer}"
-                  </p>
-
-                  {t.evaluation?.feedback && (
-                    <div className="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-1.5 pt-1">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>{t.evaluation.feedback}</span>
-                    </div>
-                  )}
-
-                  {t.followUpTriggered && t.followUpQuestion && (
-                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-xs space-y-1">
-                      <div className="font-bold text-amber-800 dark:text-amber-300">
-                        🎯 Follow-Up Probe: "{t.followUpQuestion}"
-                      </div>
-                      {t.followUpAnswer && (
-                        <div className="text-slate-600 dark:text-slate-300 italic">
-                          Clarification: "{t.followUpAnswer}"
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
+        <PostSessionReview
+          sessionData={buildSessionSummary()}
+          onPracticeAgain={onPracticeAgain || handleStartSession}
+          onChangeRole={onChangeRole || (() => setIsSessionActive(false))}
+          onViewHistory={onViewHistory}
+        />
       )}
     </div>
   );

@@ -15,6 +15,10 @@ import {
   PERSONA_SPEECH_PARAMS,
   selectBestAvailableVoice,
 } from "../lib/interview/browser-speech-engine.ts";
+import {
+  synthesizeQuestionReview,
+  synthesizeTopFocusAreas,
+} from "../lib/interview/conversation-engine.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -658,6 +662,66 @@ const tests = [
           throw new Error(`Persona ${k} label '${p.label}' does not contain persona name '${p.name}'`);
         }
       }
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #33: Voice Interview Post-Session Review & Pedagogical Guidance Test",
+    test: () => {
+      const mockTurn = {
+        questionId: "q1",
+        questionType: "behavioral",
+        question: "Tell me about a complex project where you had to make critical architectural decisions.",
+        candidateAnswer: "When working at Stripe, we needed to reduce latency on payment webhooks. I architected and implemented an async worker pool in Go, which reduced P99 latency by 45%.",
+        evaluation: {
+          score: 88,
+          situation_context_score: 22,
+          task_action_score: 44,
+          result_metrics_score: 22,
+          feedback: "Outstanding STAR delivery with concrete numbers.",
+          strengths: ["Strong quantitative results", "Clear personal ownership"],
+          missing_elements: [],
+          is_vague_or_incomplete: false,
+        },
+        followUpTriggered: false,
+      };
+
+      // 1. Synthesize Question Review
+      const review = synthesizeQuestionReview(mockTurn, 0);
+      if (!review.starBreakdown.situation.present || !review.starBreakdown.action.present || !review.starBreakdown.result.present) {
+        throw new Error("STAR breakdown failed to detect present Situation/Action/Result components");
+      }
+      if (!review.suggestedRewrite || review.suggestedRewrite.length < 20) {
+        throw new Error("Suggested fact-preserving rewrite is missing or empty");
+      }
+      if (!review.strengthNote || !review.improvementNote) {
+        throw new Error("Strength and improvement notes must not be empty");
+      }
+
+      // 2. Synthesize Top Focus Areas
+      const mockTurns = [
+        mockTurn,
+        {
+          questionId: "q2",
+          questionType: "technical",
+          question: "How do you handle production outages?",
+          candidateAnswer: "I investigate the logs and fix the issue.",
+          evaluation: { score: 50 },
+          followUpTriggered: false,
+        }
+      ];
+
+      const focusAreas = synthesizeTopFocusAreas(mockTurns);
+      if (!Array.isArray(focusAreas) || focusAreas.length === 0 || focusAreas.length > 3) {
+        throw new Error("Top focus areas should return 1 to 3 prioritized recommendations");
+      }
+
+      // 3. Assert Component Files Exist
+      const reviewCompPath = path.join(process.cwd(), "components", "interview", "PostSessionReview.tsx");
+      const historyCompPath = path.join(process.cwd(), "components", "interview", "InterviewHistoryTracker.tsx");
+      if (!fs.existsSync(reviewCompPath)) throw new Error("PostSessionReview.tsx component is missing");
+      if (!fs.existsSync(historyCompPath)) throw new Error("InterviewHistoryTracker.tsx component is missing");
 
       return true;
     }
