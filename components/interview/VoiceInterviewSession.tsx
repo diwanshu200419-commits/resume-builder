@@ -34,6 +34,11 @@ import {
   InterviewTurn,
   STAREvaluation,
 } from "@/lib/interview/conversation-engine";
+import {
+  waitForVoices,
+  speakAsPersona,
+  selectBestAvailableVoice,
+} from "@/lib/interview/browser-speech-engine";
 import { WebcamProxyTracker, WebcamProxyMetrics } from "./WebcamProxyTracker";
 
 interface QuestionItem {
@@ -71,6 +76,7 @@ export function VoiceInterviewSession({
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   // Turn History
   const [turns, setTurns] = useState<InterviewTurn[]>([]);
@@ -84,6 +90,19 @@ export function VoiceInterviewSession({
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
   const persona: VoicePersona = getPersona(selectedPersonaId);
+
+  // Preload and cache browser voices asynchronously
+  useEffect(() => {
+    let isMounted = true;
+    waitForVoices().then((voices) => {
+      if (isMounted && voices.length > 0) {
+        setAvailableVoices(voices);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Initialize questions
   const questionsList = initialQuestions.length > 0 ? initialQuestions : [
@@ -101,34 +120,7 @@ export function VoiceInterviewSession({
     },
   ];
 
-  // Browser Speech Synthesis fallback helper
-  const speakWithBrowserSynthesis = useCallback((text: string, currentPersona: VoicePersona) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = currentPersona.style === "formal" ? 0.95 : 1.0;
-    utterance.pitch = currentPersona.gender === "female" ? 1.1 : 0.9;
-
-    // Pick matching voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const matchingVoice = voices.find(
-      (v) =>
-        v.lang.startsWith("en") &&
-        (currentPersona.gender === "female"
-          ? v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("zira") || v.name.toLowerCase().includes("samantha")
-          : v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("david") || v.name.toLowerCase().includes("george"))
-    );
-    if (matchingVoice) utterance.voice = matchingVoice;
-
-    utterance.onstart = () => setIsPlayingAudio(true);
-    utterance.onend = () => setIsPlayingAudio(false);
-    utterance.onerror = () => setIsPlayingAudio(false);
-
-    window.speechSynthesis.speak(utterance);
-  }, []);
-
-  // Play Persona Audio (Server TTS with Web Speech fallback)
+  // Play Persona Audio (Multi-Tier TTS: Server Neural -> Optimized Browser Engine)
   const playPersonaSpeech = useCallback(
     async (text: string) => {
       if (!text) return;
@@ -146,7 +138,7 @@ export function VoiceInterviewSession({
         });
 
         const contentType = res.headers.get("content-type");
-        if (res.ok && contentType?.includes("audio/mpeg")) {
+        if (res.ok && (contentType?.includes("audio/mpeg") || contentType?.includes("audio/wav"))) {
           const blob = await res.blob();
           const audioUrl = URL.createObjectURL(blob);
 
@@ -154,21 +146,43 @@ export function VoiceInterviewSession({
             audioPlayerRef.current.src = audioUrl;
             audioPlayerRef.current.onended = () => setIsPlayingAudio(false);
             audioPlayerRef.current.onerror = () => {
-              setIsPlayingAudio(false);
-              speakWithBrowserSynthesis(text, persona);
+              // Fallback to tuned browser voice
+              speakAsPersona(
+                text,
+                persona.id,
+                availableVoices,
+                () => setIsPlayingAudio(true),
+                () => setIsPlayingAudio(false),
+                () => setIsPlayingAudio(false)
+              );
             };
             await audioPlayerRef.current.play();
+            return;
           }
-        } else {
-          // Fallback to client browser speech synthesis
-          speakWithBrowserSynthesis(text, persona);
         }
+
+        // Fallback to tuned browser speech engine
+        speakAsPersona(
+          text,
+          persona.id,
+          availableVoices,
+          () => setIsPlayingAudio(true),
+          () => setIsPlayingAudio(false),
+          () => setIsPlayingAudio(false)
+        );
       } catch (err) {
         console.warn("[TTS Playback Notice]:", err);
-        speakWithBrowserSynthesis(text, persona);
+        speakAsPersona(
+          text,
+          persona.id,
+          availableVoices,
+          () => setIsPlayingAudio(true),
+          () => setIsPlayingAudio(false),
+          () => setIsPlayingAudio(false)
+        );
       }
     },
-    [persona, speakWithBrowserSynthesis]
+    [persona, availableVoices]
   );
 
   // Initialize Speech Recognition (Web Speech API)
@@ -402,6 +416,9 @@ export function VoiceInterviewSession({
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Choose an interviewer tone suited for your target role: {role} ({seniority})
               </p>
+              <div className="text-[11px] text-blue-600 dark:text-blue-400/90 font-medium flex items-center gap-1.5 mt-1">
+                <span>💡 Voice quality depends on your device and browser — Chrome and Edge typically sound most natural.</span>
+              </div>
             </div>
 
             <Button

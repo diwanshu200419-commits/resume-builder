@@ -11,6 +11,10 @@ import {
   isCivilServiceOrGovtRole,
   CIVIL_SERVICE_FALLBACK_QUESTION_SET,
 } from "../lib/interview/civil-service-questions.ts";
+import {
+  PERSONA_SPEECH_PARAMS,
+  selectBestAvailableVoice,
+} from "../lib/interview/browser-speech-engine.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -595,6 +599,52 @@ const tests = [
       const serverPyContent = fs.readFileSync(serverPyPath, "utf-8");
       if (!serverPyContent.includes("/synthesize") || !serverPyContent.includes("/health")) {
         throw new Error("Piper TTS server.py missing /synthesize or /health endpoints");
+      }
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #32: Browser Speech Synthesis Natural Voice Selection & Persona Tuning Test",
+    test: () => {
+      // 1. Assert Persona Speech Parameters
+      const adam = PERSONA_SPEECH_PARAMS.adam_formal;
+      const josh = PERSONA_SPEECH_PARAMS.josh_neutral;
+      const rachel = PERSONA_SPEECH_PARAMS.rachel_warm;
+      const bella = PERSONA_SPEECH_PARAMS.bella_neutral;
+
+      if (!adam || !josh || !rachel || !bella) {
+        throw new Error("Missing persona speech parameters in PERSONA_SPEECH_PARAMS");
+      }
+
+      // Adam: Deeper pitch for authoritative executive style
+      if (adam.pitch >= 1.0 || adam.rate > 1.0 || adam.gender !== "male") {
+        throw new Error("Adam speech params should have deeper pitch (<1.0) and male gender");
+      }
+
+      // Rachel: Higher pitch and faster rate for friendly encouraging style
+      if (rachel.pitch <= 1.0 || rachel.rate < 1.0 || rachel.gender !== "female") {
+        throw new Error("Rachel speech params should have higher pitch (>1.0) and female gender");
+      }
+
+      // 2. Assert Voice Prioritization Logic
+      const mockVoices = [
+        { name: "Microsoft David Desktop - English (United States)", lang: "en-US" },
+        { name: "Microsoft Zira Desktop - English (United States)", lang: "en-US" },
+        { name: "Microsoft Guy Online (Natural) - English (United States)", lang: "en-US" },
+        { name: "Microsoft Aria Online (Natural) - English (United States)", lang: "en-US" },
+      ];
+
+      // Adam should match Microsoft Guy Online (Natural) over David Desktop
+      const bestAdam = selectBestAvailableVoice(mockVoices, "adam_formal");
+      if (!bestAdam || !bestAdam.name.includes("Microsoft Guy")) {
+        throw new Error(`Expected Adam to select Microsoft Guy Natural voice, got ${bestAdam?.name}`);
+      }
+
+      // Bella should match Microsoft Aria Online (Natural) over Zira Desktop
+      const bestBella = selectBestAvailableVoice(mockVoices, "bella_neutral");
+      if (!bestBella || !bestBella.name.includes("Microsoft Aria")) {
+        throw new Error(`Expected Bella to select Microsoft Aria Natural voice, got ${bestBella?.name}`);
       }
 
       return true;

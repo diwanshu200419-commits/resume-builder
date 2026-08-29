@@ -278,6 +278,9 @@ export default function InterviewPrepLobbyPage() {
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Select your preferred interviewer persona — powered by licensed stock voices
               </p>
+              <div className="text-[11px] text-blue-600 dark:text-blue-400 font-medium mt-1">
+                💡 Voice quality depends on your device and browser — Chrome and Edge typically sound most natural.
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
