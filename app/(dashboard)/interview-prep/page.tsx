@@ -291,7 +291,8 @@ export default function InterviewPrepLobbyPage() {
 
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <Button
-                  onClick={handleLaunchVoiceSession}
+                  type="button"
+                  onClick={() => handleLaunchVoiceSession()}
                   disabled={loadingQuestions}
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-5 text-sm gap-2 shadow-lg shadow-emerald-600/25 rounded-xl"
                 >
@@ -432,7 +433,7 @@ export default function InterviewPrepLobbyPage() {
 
               <Button
                 type="button"
-                onClick={handleLaunchVoiceSession}
+                onClick={() => handleLaunchVoiceSession()}
                 disabled={loadingQuestions}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-5 text-sm gap-2 shadow-lg shadow-emerald-600/30 rounded-xl shrink-0 transition-transform active:scale-95"
               >

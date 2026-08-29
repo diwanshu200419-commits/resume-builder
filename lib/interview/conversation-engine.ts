@@ -43,7 +43,7 @@ export async function generateTargetedFollowUp(
   const missingText = missingElements.join(", ") || "specific metrics or concrete actions";
 
   try {
-    const { getModel, withRetryAndTimeout } = await import("../gemini.ts").catch(() => ({} as any));
+    const { getModel, withRetryAndTimeout } = await import("@/lib/gemini").catch(() => ({} as any));
     if (!getModel) {
       return `Can you share a specific quantifiable outcome or metric that resulted from that initiative?`;
     }
