@@ -78,10 +78,10 @@ export function VoiceInterviewSession({
     onPersonaChange?.(id);
   };
 
-  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isSessionActive, setIsSessionActive] = useState(true);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isFollowUpTurn, setIsFollowUpTurn] = useState(false);
-  const [activeQuestionText, setActiveQuestionText] = useState("");
+  const [activeQuestionText, setActiveQuestionText] = useState(initialQuestions[0]?.question || "");
   const [candidateTranscript, setCandidateTranscript] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -92,7 +92,13 @@ export function VoiceInterviewSession({
 
   // Turn History
   const [turns, setTurns] = useState<InterviewTurn[]>([]);
-  const [currentTurn, setCurrentTurn] = useState<InterviewTurn | null>(null);
+  const [currentTurn, setCurrentTurn] = useState<InterviewTurn | null>({
+    questionId: initialQuestions[0]?.id || "q1",
+    questionType: (initialQuestions[0]?.type as any) || "behavioral",
+    question: initialQuestions[0]?.question || "Describe a complex project you led.",
+    candidateAnswer: "",
+    followUpTriggered: false,
+  });
 
   // Webcam Metrics
   const [webcamMetrics, setWebcamMetrics] = useState<WebcamProxyMetrics | null>(null);
@@ -100,8 +106,6 @@ export function VoiceInterviewSession({
   // Speech Recognition Ref
   const recognitionRef = useRef<any>(null);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
-
-  const persona: VoicePersona = getPersona(selectedPersonaId);
 
   // Preload and cache browser voices asynchronously
   useEffect(() => {

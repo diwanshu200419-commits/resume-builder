@@ -140,7 +140,7 @@ export default function InterviewPrepLobbyPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8">
+    <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8 pb-32">
       {/* Active Studio View */}
       {isSessionActive ? (
         <div className="space-y-6">
@@ -285,39 +285,65 @@ export default function InterviewPrepLobbyPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative z-10">
               {Object.values(INTERVIEWER_PERSONAS).map((p) => {
                 const isSelected = selectedPersonaId === p.id;
                 return (
-                  <div
+                  <button
                     key={p.id}
+                    type="button"
                     onClick={() => setSelectedPersonaId(p.id)}
-                    className={`p-4 rounded-2xl border text-left cursor-pointer transition-all space-y-2 relative flex flex-col justify-between ${
+                    className={`p-4 rounded-2xl border text-left cursor-pointer transition-all space-y-2 relative flex flex-col justify-between focus:outline-none focus:ring-2 focus:ring-blue-500 w-full ${
                       isSelected
-                        ? "bg-slate-50 dark:bg-slate-800/90 border-blue-500 shadow-md ring-1 ring-blue-500"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                        ? "bg-blue-50/60 dark:bg-slate-800/95 border-blue-500 shadow-md ring-2 ring-blue-500"
+                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-slate-700 hover:shadow-sm"
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between">
                         <span
-                          className="w-3 h-3 rounded-full"
+                          className="w-3.5 h-3.5 rounded-full ring-2 ring-white dark:ring-slate-800"
                           style={{ backgroundColor: p.avatarColor }}
                         />
-                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize">
+                        <Badge variant="outline" className={`text-[9px] px-1.5 py-0 capitalize ${isSelected ? "border-blue-400 text-blue-700 dark:text-blue-300 bg-blue-100/50 dark:bg-blue-950/40" : ""}`}>
                           {p.gender} • {p.style}
                         </Badge>
                       </div>
-                      <div className="font-bold text-sm text-slate-900 dark:text-white mt-1.5">{p.label}</div>
+                      <div className="font-bold text-sm text-slate-900 dark:text-white mt-2 flex items-center justify-between">
+                        <span>{p.label}</span>
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />}
+                      </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">{p.tagline}</p>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 w-full">
                       <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold block">{p.bestFor}</span>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
+            </div>
+
+            {/* Prominent Action Bar Below Persona Selection */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl relative z-10">
+              <div>
+                <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> Ready for your evaluation?
+                </div>
+                <div className="text-sm font-semibold text-white mt-1">
+                  Selected Role: <span className="text-emerald-300">{targetRoleTitle}</span> • Persona: <span className="text-blue-300">{INTERVIEWER_PERSONAS[selectedPersonaId]?.label}</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={handleLaunchVoiceSession}
+                disabled={loadingQuestions}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-5 text-sm gap-2 shadow-lg shadow-emerald-600/30 rounded-xl shrink-0 transition-transform active:scale-95"
+              >
+                <Play className="w-4 h-4 fill-white" />
+                {loadingQuestions ? "Generating Domain Questions..." : `Start Voice Interview with ${INTERVIEWER_PERSONAS[selectedPersonaId]?.name || "Josh"} →`}
+              </Button>
             </div>
           </div>
 
