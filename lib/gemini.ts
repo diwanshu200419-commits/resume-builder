@@ -94,7 +94,7 @@ CRITICAL ANTI-FABRICATION RULES:
 // ----------------------------
 // Helper: JSON Extraction & Repair
 // ----------------------------
-function cleanAndExtractJSON(text: string): string {
+export function cleanAndExtractJSON(text: string): string {
   let cleaned = text.replace(/```json|```/g, "").trim();
   const match = cleaned.match(/\{[\s\S]*\}/);
   if (match) cleaned = match[0];
@@ -134,7 +134,7 @@ const OptimizationSchema = z.object({
 // ----------------------------
 // Helper: Retry with Timeout
 // ----------------------------
-async function withRetryAndTimeout<T>(
+export async function withRetryAndTimeout<T>(
   fn: () => Promise<T>,
   retries = 2,
   timeoutMs = 12000
@@ -613,7 +613,10 @@ Produce exactly 8 questions for this role/seniority, distributed as:
 Each question must:
 - Be something a real interviewer in this field would plausibly ask this year — not textbook-generic
 - Match the seniority level (entry-level ≠ leadership scrutiny)
-- If company_style is given, reflect that company's known interview culture (e.g., Amazon → Leadership Principles framing, Google → structured/analytical framing, Netflix → high-autonomy/direct framing). If you are not confident about a real company's actual interview style, default to general industry-standard framing and do not fabricate specific claims about that company's process.
+- If company_style is given, reflect that company's known interview culture (e.g., Amazon → Leadership Principles framing, Google → structured/analytical framing, Netflix → high-autonomy/direct framing). If you are not confident about a real company's actual interview style, default to general industry-standard framing.
+- SPECIAL CIVIL SERVICE / GOVERNMENT / BANKING PANEL HANDLING: If target_role or company_style references government, civil services, public administration, UPSC, state PSC, banking exams (e.g. SBI/IBPS/RBI), or regulatory bodies, calibrate questions to a formal panel interview format:
+  * Emphasize constitutional ethics, administrative integrity, balancing public interest under budget/political constraints, crisis containment, and policy implementation.
+  * Curveball question should test ethical dilemmas (e.g. pressure to bypass standard procurement or handling conflicting directives between seniors and public welfare).
 
 EVALUATION RUBRIC (return alongside each question):
 For each question, also generate a scoring rubric with 4 dimensions, weighted for that specific question type:

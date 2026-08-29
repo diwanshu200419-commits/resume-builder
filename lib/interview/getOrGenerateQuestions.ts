@@ -130,6 +130,9 @@ export const GENERIC_FALLBACK_QUESTION_SET = {
   ]
 };
 
+export { CIVIL_SERVICE_FALLBACK_QUESTION_SET, isCivilServiceOrGovtRole } from "./civil-service-questions";
+import { CIVIL_SERVICE_FALLBACK_QUESTION_SET, isCivilServiceOrGovtRole } from "./civil-service-questions";
+
 async function callGeminiForQuestionsWithRetry(req: QuestionRequest) {
   const seniority = req.seniority || "mid-level";
   const companyStyle = req.companyStyle || "general industry standard";
@@ -168,7 +171,10 @@ async function callGeminiForQuestionsWithRetry(req: QuestionRequest) {
     console.warn("[getOrGenerateQuestions] Gemini retry failed:", err);
   }
 
-  // Fallback to static generic question set if all Gemini calls fail validation
+  // Fallback to role-appropriate static question set if all Gemini calls fail validation
+  if (isCivilServiceOrGovtRole(req.targetRole, req.companyStyle)) {
+    return CIVIL_SERVICE_FALLBACK_QUESTION_SET;
+  }
   return GENERIC_FALLBACK_QUESTION_SET;
 }
 

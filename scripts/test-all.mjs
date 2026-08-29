@@ -6,6 +6,11 @@ import {
   escapeHtml,
   validatePortfolioInput,
 } from "../lib/portfolio-templates.ts";
+import { INTERVIEWER_PERSONAS } from "../lib/interview/voice-personas.ts";
+import {
+  isCivilServiceOrGovtRole,
+  CIVIL_SERVICE_FALLBACK_QUESTION_SET,
+} from "../lib/interview/civil-service-questions.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -506,6 +511,53 @@ const tests = [
         if (!html.includes("diwanshu200419-commits") || !html.includes("linkedin.com/in/diwanshu")) {
           throw new Error(`Social links missing in theme ${th}`);
         }
+      }
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #30: AI Voice Interview Coach Persona & Civil Service Question Engine Test",
+    test: () => {
+      // 1. Assert Voice Personas
+      const expectedPersonas = ["adam_formal", "josh_neutral", "rachel_warm", "bella_neutral"];
+      for (const pId of expectedPersonas) {
+        const persona = INTERVIEWER_PERSONAS[pId];
+        if (!persona) {
+          throw new Error(`Voice persona ${pId} missing from INTERVIEWER_PERSONAS`);
+        }
+        if (!persona.elevenLabsVoiceId || persona.elevenLabsVoiceId.length < 10) {
+          throw new Error(`Voice persona ${pId} has invalid official voice ID`);
+        }
+        if (!persona.label || !persona.gender || !persona.description) {
+          throw new Error(`Voice persona ${pId} has incomplete metadata`);
+        }
+      }
+
+      // 2. Assert Civil Service Role Detection
+      if (!isCivilServiceOrGovtRole("UPSC Civil Services Officer")) {
+        throw new Error("Failed to detect UPSC Civil Services as civil service role");
+      }
+      if (!isCivilServiceOrGovtRole("Banking PO & Probationary Officer", "SBI / IBPS Exam Panel")) {
+        throw new Error("Failed to detect Banking PO as civil service/public sector role");
+      }
+      if (isCivilServiceOrGovtRole("React Frontend Developer", "Startup")) {
+        throw new Error("Incorrectly matched React Developer as civil service");
+      }
+
+      // 3. Assert Civil Service Question Set Quality & Rubric
+      if (!CIVIL_SERVICE_FALLBACK_QUESTION_SET || !CIVIL_SERVICE_FALLBACK_QUESTION_SET.questions) {
+        throw new Error("CIVIL_SERVICE_FALLBACK_QUESTION_SET is missing");
+      }
+      if (CIVIL_SERVICE_FALLBACK_QUESTION_SET.questions.length < 8) {
+        throw new Error("Civil service fallback question set has less than 8 questions");
+      }
+
+      const hasEthicsQuestion = CIVIL_SERVICE_FALLBACK_QUESTION_SET.questions.some(
+        (q) => q.question.toLowerCase().includes("ethic") || q.question.toLowerCase().includes("constitutional")
+      );
+      if (!hasEthicsQuestion) {
+        throw new Error("Civil service questions missing administrative ethics / constitutional questions");
       }
 
       return true;
