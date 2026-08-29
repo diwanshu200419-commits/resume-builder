@@ -245,14 +245,14 @@ function renderSeoHead(data: PortfolioData): string {
   const schemaJson = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": data.name || "Candidate",
-    "jobTitle": data.title || "Professional",
-    "description": data.bio || "",
-    "email": data.email || undefined,
-    "url": data.website || undefined,
+    "name": escapeHtml(data.name || "Candidate"),
+    "jobTitle": escapeHtml(data.title || "Professional"),
+    "description": escapeHtml(data.bio || ""),
+    "email": data.email ? escapeHtml(data.email) : undefined,
+    "url": data.website ? escapeHtml(data.website) : undefined,
     "sameAs": [
-      data.github ? formatUrl(data.github) : undefined,
-      data.linkedin ? formatUrl(data.linkedin) : undefined,
+      data.github ? escapeHtml(formatUrl(data.github)) : undefined,
+      data.linkedin ? escapeHtml(formatUrl(data.linkedin)) : undefined,
     ].filter(Boolean),
   }).replace(/</g, "\\u003c").replace(/>/g, "\\u003e");
 
@@ -522,6 +522,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
     .btn-main { display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 10px 24px; border-radius: 10px; font-family: monospace; font-weight: bold; font-size: 13px; text-decoration: none; box-shadow: 0 0 20px rgba(16,185,129,0.3); }
 
     footer { text-align: center; padding: 24px 0; font-family: monospace; font-size: 11px; color: #64748b; border-top: 1px solid #1e293b; margin-top: 32px; }
+    footer a { color: #38bdf8; text-decoration: none; }
 
     @media (max-width: 640px) {
       .hero-top { flex-direction: column; align-items: flex-start; }
@@ -603,7 +604,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
     </section>
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
     </footer>
   </div>
 </body>
@@ -765,6 +766,7 @@ function renderMinimalTemplate(data: PortfolioData): string {
     .exp-period { font-size: 11px; color: #94a3b8; font-weight: 500; }
 
     footer { text-align: center; padding: 20px 0; font-size: 11px; color: #94a3b8; }
+    footer a { color: #4f46e5; text-decoration: none; font-weight: bold; }
 
     @media (max-width: 768px) {
       .hero-grid { grid-template-columns: 1fr; }
@@ -824,7 +826,7 @@ function renderMinimalTemplate(data: PortfolioData): string {
     <div class="projects-grid">${testimonialsHtml}</div>` : ''}
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
     </footer>
   </div>
 </body>
@@ -992,6 +994,7 @@ function renderExecutiveTemplate(data: PortfolioData): string {
     .btn-exec-cv { display: inline-block; background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; }
 
     footer { text-align: center; padding: 20px 0; font-size: 11px; color: #64748b; }
+    footer a { color: #38bdf8; text-decoration: none; }
   </style>
 </head>
 <body>
@@ -1045,7 +1048,7 @@ function renderExecutiveTemplate(data: PortfolioData): string {
     </div>
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
     </footer>
   </div>
 </body>
@@ -1206,9 +1209,11 @@ function renderVibrantTemplate(data: PortfolioData): string {
     .vib-cta { text-align: center; background: linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%); border: 1px solid #4c1d95; border-radius: 20px; padding: clamp(24px, 5vw, 36px) 16px; }
     .vib-cta h3 { font-size: clamp(18px, 4vw, 22px); font-weight: 800; color: #fff; margin-bottom: 8px; }
     .vib-cta p { font-size: 13px; color: #d8b4fe; margin-bottom: 18px; }
-    .btn-vib { display: inline-block; background: linear-gradient(90deg, #9333ea 0%, #db2777 100%); color: #fff; padding: 10px 24px; border-radius: 9999px; font-size: 13px; font-weight: 800; text-decoration: none; }
+    .btn-vib { display: inline-block; background: linear-gradient(90deg, #9333ea 0%, #db2777 100%); color: #fff; padding: 10px 24px; border-radius: 9999px; font-size: 13px; font-weight: 800; text-decoration: none; margin-right: 8px; }
+    .btn-vib-cv { display: inline-block; background: rgba(255,255,255,0.1); border: 1px solid #f472b6; color: #fff; padding: 10px 24px; border-radius: 9999px; font-size: 13px; font-weight: 800; text-decoration: none; }
 
     footer { text-align: center; padding: 20px 0; font-size: 11px; color: #64748b; }
+    footer a { color: #f472b6; text-decoration: none; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -1223,6 +1228,12 @@ function renderVibrantTemplate(data: PortfolioData): string {
         </div>
       </div>
       <p class="vib-bio">${safeBio}</p>
+      
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 12px; font-size: 12px;">
+        ${safeLinkedin ? `<a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" style="color: #f472b6; text-decoration: underline;">LinkedIn ↗</a>` : ""}
+        ${safeResumeUrl ? `<a href="${safeResumeUrl}" target="_blank" style="color: #f472b6; text-decoration: underline;">Download Resume 📄</a>` : ""}
+      </div>
+
       <div class="vib-stats-grid">${statsHtml}</div>
     </div>
 
@@ -1252,10 +1263,11 @@ function renderVibrantTemplate(data: PortfolioData): string {
       <h3>Ready to accelerate your next milestone?</h3>
       <p>Open for growth marketing leadership, consulting, and ambitious collaborations.</p>
       <a href="mailto:${safeEmail}" class="btn-vib">Let&#39;s Talk Growth 🚀</a>
+      ${safeResumeUrl ? `<a href="${safeResumeUrl}" target="_blank" class="btn-vib-cv">Download CV PDF</a>` : ""}
     </div>
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
     </footer>
   </div>
 </body>
@@ -1304,6 +1316,21 @@ function renderEditorialTemplate(data: PortfolioData): string {
             <span class="edit-time-period">${escapeHtml(e.period)}</span>
           </div>
           <p class="edit-time-desc">${escapeHtml(e.summary)}</p>
+        </div>`
+        )
+        .join("")
+    : "";
+
+  const hasTestimonials = Array.isArray(data.testimonials) && data.testimonials.length > 0;
+  const testimonialsHtml = hasTestimonials
+    ? (data.testimonials || [])
+        .map(
+          (t) => `
+        <div class="edit-card">
+          <div class="quote-icon" style="color: #92400e;">“</div>
+          <p style="font-size: 14px; color: #44403c; font-style: italic; margin-bottom: 10px;">${escapeHtml(t.quote)}</p>
+          <div style="font-size: 14px; font-weight: bold; color: #1c1917;">${escapeHtml(t.author)}</div>
+          <div style="font-size: 12px; color: #78716c;">${escapeHtml(t.role)}${t.company ? ` — ${escapeHtml(t.company)}` : ""}</div>
         </div>`
         )
         .join("")
@@ -1377,6 +1404,7 @@ function renderEditorialTemplate(data: PortfolioData): string {
         </div>
       </div>
       <p class="edit-bio">${safeBio}</p>
+      ${safeResumeUrl ? `<div style="margin-top: 10px;"><a href="${safeResumeUrl}" target="_blank" style="font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 700; color: #92400e; text-decoration: underline;">Download Curriculum Vitae (PDF) ↗</a></div>` : ""}
     </header>
 
     <section class="section">
@@ -1395,9 +1423,18 @@ function renderEditorialTemplate(data: PortfolioData): string {
       <div class="edit-timeline">${expHtml}</div>
     </section>` : ''}
 
+    ${hasTestimonials ? `
+    <section class="section">
+      <h2 class="sec-h2">Selected Recommendations &amp; Endorsements</h2>
+      <div>${testimonialsHtml}</div>
+    </section>` : ''}
+
     <footer>
-      <span>© ${new Date().getFullYear()} ${safeName}.</span>
-      <a href="mailto:${safeEmail}">Correspond via Email →</a>
+      <span>© ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.</span>
+      <div>
+        <a href="mailto:${safeEmail}">Correspond via Email →</a>
+        ${safeResumeUrl ? ` · <a href="${safeResumeUrl}" target="_blank">Download Resume PDF</a>` : ""}
+      </div>
     </footer>
   </div>
 </body>
@@ -1559,9 +1596,11 @@ function renderAuroraTemplate(data: PortfolioData): string {
     .aurora-cta { text-align: center; background: #0b1222; border: 1px solid rgba(6, 182, 212, 0.35); border-radius: 20px; padding: clamp(24px, 5vw, 36px) 16px; }
     .aurora-cta h3 { font-family: monospace; font-size: clamp(18px, 4vw, 22px); font-weight: 800; color: #fff; margin-bottom: 8px; }
     .aurora-cta p { font-size: 13px; color: #94a3b8; margin-bottom: 18px; }
-    .btn-aurora { display: inline-block; background: #06b6d4; color: #020617; padding: 10px 24px; border-radius: 10px; font-family: monospace; font-size: 13px; font-weight: 800; text-decoration: none; }
+    .btn-aurora { display: inline-block; background: #06b6d4; color: #020617; padding: 10px 24px; border-radius: 10px; font-family: monospace; font-size: 13px; font-weight: 800; text-decoration: none; margin-right: 8px; }
+    .btn-aurora-cv { display: inline-block; background: transparent; border: 1px solid #06b6d4; color: #06b6d4; padding: 10px 24px; border-radius: 10px; font-family: monospace; font-size: 13px; font-weight: 800; text-decoration: none; }
 
     footer { text-align: center; padding: 20px 0; font-family: monospace; font-size: 11px; color: #64748b; }
+    footer a { color: #06b6d4; text-decoration: none; }
   </style>
 </head>
 <body>
@@ -1577,10 +1616,10 @@ function renderAuroraTemplate(data: PortfolioData): string {
       </div>
       <p class="hero-bio">${safeBio}</p>
       
-      ${safeGithub ? `
-      <div style="margin-top: 14px; font-family: monospace; font-size: 12px; color: #94a3b8;">
-        GitHub: <a href="${escapeHtml(formatUrl(safeGithub))}" target="_blank" style="color: #22d3ee; text-decoration: underline;">${safeGithub} →</a>
-      </div>` : ""}
+      <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 14px; font-family: monospace; font-size: 12px; color: #94a3b8;">
+        ${safeGithub ? `<span>GitHub: <a href="${escapeHtml(formatUrl(safeGithub))}" target="_blank" style="color: #22d3ee; text-decoration: underline;">${safeGithub} →</a></span>` : ""}
+        ${safeResumeUrl ? `<span>Resume: <a href="${safeResumeUrl}" target="_blank" style="color: #22d3ee; text-decoration: underline;">View CV (PDF) ↗</a></span>` : ""}
+      </div>
 
       <div class="aurora-stats-grid">${statsHtml}</div>
     </div>
@@ -1611,10 +1650,11 @@ function renderAuroraTemplate(data: PortfolioData): string {
       <h3>Deploy Machine Learning Systems</h3>
       <p>Open for generative AI pipelines, LLM fine-tuning, and machine learning infrastructure roles.</p>
       <a href="mailto:${safeEmail}" class="btn-aurora">Connect &gt;</a>
+      ${safeResumeUrl ? `<a href="${safeResumeUrl}" target="_blank" class="btn-aurora-cv">Download CV PDF</a>` : ""}
     </div>
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
     </footer>
   </div>
 </body>

@@ -427,6 +427,90 @@ const tests = [
       return true;
     }
   },
+  {
+    name: "Suite #29: Portfolio Studio Content Depth, Project Screenshots, Testimonials, Resume Link & Open Graph SEO Test",
+    test: () => {
+      const richTestData = {
+        name: "Diwanshu Sharma",
+        title: "Staff Software Engineer & Cloud Architect",
+        bio: "Specializing in high-throughput distributed systems and event-driven architectures.",
+        avatarUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+        resumeUrl: "https://example.com/diwanshu-resume.pdf",
+        email: "diwanshu@example.com",
+        github: "diwanshu200419-commits",
+        linkedin: "https://linkedin.com/in/diwanshu",
+        skills: ["TypeScript", "Next.js", "Docker", "Kubernetes", "PostgreSQL", "AWS", "gRPC", "Redis"],
+        stats: [
+          { label: "Systems Scaled", value: "10M+ QPS" },
+          { label: "Uptime SLA", value: "99.999%" },
+        ],
+        projects: [
+          {
+            title: "Global Distributed Message Bus",
+            description: "Engineered ultra-low latency event streaming engine processing 500k msg/sec.",
+            tech: "Go • Kafka • Redis • gRPC",
+            metrics: "<5ms P99 Latency",
+            imageUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+          },
+        ],
+        experience: [
+          {
+            role: "Principal Infrastructure Engineer",
+            company: "Apex Cloud",
+            period: "2022 — Present",
+            summary: "Led cloud infrastructure migrations and core data pipeline scaling.",
+          },
+        ],
+        testimonials: [
+          {
+            author: "Sarah Connor",
+            role: "VP Engineering",
+            company: "Cyberdyne Systems",
+            quote: "Diwanshu delivered our most mission-critical systems with zero downtime.",
+          },
+        ],
+      };
+
+      const themes = ["technical", "minimal", "executive", "vibrant", "editorial", "aurora"];
+
+      for (const th of themes) {
+        const html = generatePortfolioHTML(richTestData, th);
+
+        // 1. Assert Project Screenshot container & image tag
+        if (!html.includes("proj-img-box") || !html.includes("<img src=")) {
+          throw new Error(`Project screenshot container missing in theme ${th}`);
+        }
+
+        // 2. Assert Testimonial quote & author
+        if (!html.includes("Sarah Connor") || !html.includes("zero downtime")) {
+          throw new Error(`Testimonial content missing in theme ${th}`);
+        }
+
+        // 3. Assert Resume PDF download link in nav/hero
+        if (!html.includes("diwanshu-resume.pdf")) {
+          throw new Error(`Resume PDF download link missing in theme ${th}`);
+        }
+
+        // 4. Assert Open Graph & SEO Meta tags
+        if (
+          !html.includes('property="og:title"') ||
+          !html.includes('property="og:description"') ||
+          !html.includes('name="twitter:card"') ||
+          !html.includes('application/ld+json') ||
+          !html.includes('"@type":"Person"')
+        ) {
+          throw new Error(`SEO / Open Graph / JSON-LD tags missing in theme ${th}`);
+        }
+
+        // 5. Assert Social Links
+        if (!html.includes("diwanshu200419-commits") || !html.includes("linkedin.com/in/diwanshu")) {
+          throw new Error(`Social links missing in theme ${th}`);
+        }
+      }
+
+      return true;
+    }
+  },
 ];
 let passed = 0;
 
