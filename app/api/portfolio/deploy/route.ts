@@ -49,8 +49,6 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9]/g, "-")
       .replace(/-+/g, "-");
 
-    const liveSubdomainUrl = `https://${subdomainSlug}.vaylo.ai`;
-
     // Career Pack Custom Domain Verification
     const plan = getEffectivePlan(profile);
     const isCareerPack = plan === "career_pack";
@@ -62,43 +60,29 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error: "career_pack_required",
-            message: "Custom domain connection (e.g. priya-sharma.com) requires the Career Pack tier.",
+            message: "Custom domain connection (e.g. yourname.dev) requires the Career Pack tier.",
           },
           { status: 403 }
         );
       }
       const cleanCustomDomain = customDomain.toLowerCase().trim().replace(/^https?:\/\//, "");
       customDomainUrl = `https://${cleanCustomDomain}`;
-      customDomainStatus = "pending_cname_verification";
-    }
-
-    // Upsert into deployments table or save to profiles
-    try {
-      const serviceClient = await createServiceClient();
-      await serviceClient
-        .from("profiles")
-        .update({
-          avatar_url: liveSubdomainUrl,
-        })
-        .eq("id", profile.id);
-    } catch (err) {
-      console.warn("[/api/portfolio/deploy] DB update notice:", err);
+      customDomainStatus = "pending_cname_configuration";
     }
 
     return NextResponse.json({
       success: true,
       subdomain: subdomainSlug,
-      liveUrl: liveSubdomainUrl,
       customDomainUrl,
       customDomainStatus,
-      cnameRecordNeeded: "cname.vaylo.ai",
+      deployMethod: "netlify_drop_or_self_host",
+      instructions: "Deploy in 10 seconds via Netlify Drop or your preferred hosting provider.",
       dnsDocumentation: {
-        wildcardDns: "*.vaylo.ai -> Vercel Edge Server",
-        customDomainCname: `Add CNAME record pointing your domain to cname.vaylo.ai`,
+        customDomainCname: "Point your custom domain DNS CNAME to your hosting provider endpoint (e.g. Netlify/Vercel/Cloudflare).",
       },
     });
   } catch (error: any) {
     console.error("[/api/portfolio/deploy] error:", error);
-    return NextResponse.json({ error: error.message || "Failed to deploy portfolio" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to process deployment request" }, { status: 500 });
   }
 }

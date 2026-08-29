@@ -98,11 +98,17 @@ export function FloatingAICopilot() {
   };
 
   return (
-    <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-50 print:hidden">
+    <div
+      className="fixed z-[60] print:hidden"
+      style={{
+        bottom: "max(1rem, env(safe-area-inset-bottom))",
+        right: "max(1rem, env(safe-area-inset-right))",
+      }}
+    >
       {!isOpen ? (
         <Button
           onClick={() => setIsOpen(true)}
-          className="h-12 w-12 sm:w-auto sm:px-4 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-2xl gap-2 font-bold transition-all transform hover:scale-105"
+          className="h-12 w-12 sm:w-auto sm:px-4 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-2xl gap-2 font-bold transition-all transform hover:scale-105 active:scale-95"
           aria-label="Open Vaylo AI Copilot"
         >
           <Bot className="w-5 h-5 animate-pulse" />
@@ -110,7 +116,7 @@ export function FloatingAICopilot() {
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
         </Button>
       ) : (
-        <Card className="w-[min(92vw,384px)] max-h-[85dvh] border-slate-800 bg-slate-900/95 backdrop-blur-xl shadow-2xl overflow-hidden rounded-2xl animate-in fade-in slide-in-from-bottom-2 flex flex-col">
+        <Card className="w-[min(92vw,380px)] max-h-[min(90dvh,600px)] border-slate-800 bg-slate-900/95 backdrop-blur-xl shadow-2xl overflow-hidden rounded-2xl animate-in fade-in slide-in-from-bottom-2 flex flex-col">
           <CardHeader className="p-3.5 bg-slate-950/80 border-b border-slate-800 flex flex-row items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md">

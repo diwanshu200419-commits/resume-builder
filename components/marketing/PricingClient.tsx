@@ -66,7 +66,7 @@ const plans = [
     badgeColor: "bg-accent/20 text-accent border-accent/30",
     features: [
       { text: "Everything in Pro Engineer Tier", included: true },
-      { text: "1-Click Hosted Developer Portfolio (subdomain.vaylo.ai)", included: true },
+      { text: "AI Portfolio Website Builder (6 Pro Themes, Code Export & Free Host Hub)", included: true },
       { text: "STAR Voice Interview Practice Engine", included: true },
       { text: "Recruiter 10s Eye-Screen Simulation", included: true },
       { text: "Hiring Probability Predictor", included: true },

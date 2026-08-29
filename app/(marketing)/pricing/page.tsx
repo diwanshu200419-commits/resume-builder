@@ -70,7 +70,7 @@ export default function PricingPage() {
             "name": "What is the Career Pack lifetime plan?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "The Career Pack is a ₹499 one-time payment for lifetime access to all Premium features, custom portfolio domain CNAME setup, STAR voice interview practice, and priority AI compute."
+              "text": "The Career Pack is a ₹499 one-time payment for lifetime access to all Premium features, AI Portfolio Website Builder (6 Pro Themes, Code Export & Free Host Hub), STAR voice interview practice, and priority AI compute."
             }
           }
         ]

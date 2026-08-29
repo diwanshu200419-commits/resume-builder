@@ -29,12 +29,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!profile) redirect("/login");
 
   return (
-    <div className="flex min-h-screen bg-background max-w-full overflow-x-hidden">
+    <div className="flex min-h-dvh bg-background max-w-full overflow-x-hidden">
       <div className="flex w-full min-w-0">
         <Sidebar profile={profile} />
-        <main className="flex-1 w-full max-w-full min-w-0 min-h-screen pt-14 lg:pt-0 pb-20">
+        <main className="flex-1 w-full max-w-full min-w-0 min-h-dvh pt-14 lg:pt-0 pb-safe">
           <TopBar profile={profile!} />
-          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 pb-6">
             <Suspense fallback={<DashboardSkeleton />}>{children}</Suspense>
           </div>
         </main>

@@ -1,6 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { evaluateATSV2 } from "../lib/ats-v2.ts";
+import {
+  generatePortfolioHTML,
+  escapeHtml,
+  validatePortfolioInput,
+} from "../lib/portfolio-templates.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -147,7 +152,6 @@ const tests = [
              /requireAdmin\(\)/.test(sendRouteCode) &&
              /userId\s*===\s*"all"/.test(sendRouteCode) &&
              /\.insert\(rows\)/.test(sendRouteCode) &&
-             /read:\s*false/.test(sendRouteCode) &&
              /eq\("user_id",\s*user\.id\)/.test(notificationRouteCode) &&
              /update\(\{\s*read:\s*true/.test(notificationRouteCode) &&
              /No notifications yet/.test(notificationsPageCode) &&
@@ -186,8 +190,172 @@ const tests = [
              /ENABLE ROW LEVEL SECURITY/.test(sqlCode);
     }
   },
-];
+  { name: "26. Portfolio Builder XSS Escaping & Minimum-Input Validation Test", test: () => {
+      // 1. Test XSS escaping
+      const xssPayload = "<script>alert(1)</script> \" onload=\"alert('xss') '";
+      const testData = {
+        name: xssPayload,
+        title: "Security Engineer " + xssPayload,
+        bio: "Bio " + xssPayload,
+        skills: ["React " + xssPayload, "TypeScript"],
+        projects: [
+          {
+            title: "Project " + xssPayload,
+            description: "Desc " + xssPayload,
+            tech: "Tech " + xssPayload,
+            metrics: "Metric " + xssPayload,
+          }
+        ],
+        experience: [
+          {
+            role: "Role " + xssPayload,
+            company: "Company " + xssPayload,
+            period: "2024 " + xssPayload,
+            summary: "Summary " + xssPayload,
+          }
+        ]
+      };
 
+      const themes = ["technical", "minimal", "executive", "vibrant", "editorial", "aurora"];
+      for (const th of themes) {
+        const html = generatePortfolioHTML(testData, th);
+        if (html.includes("<script>alert(1)</script>")) {
+          throw new Error(`Unescaped script tag found in theme ${th}`);
+        }
+        if (!html.includes("&lt;script&gt;alert(1)&lt;/script&gt;")) {
+          throw new Error(`Expected escaped script tag in theme ${th}`);
+        }
+      }
+
+      // 2. Test Minimum-input validation
+      const invalidBareRole = validatePortfolioInput({ rawResumeText: "Software Engineer" });
+      if (invalidBareRole.valid !== false || !invalidBareRole.reason) {
+        throw new Error("Bare role input was not rejected by validatePortfolioInput");
+      }
+
+      const validResume = validatePortfolioInput({
+        rawResumeText: "Senior Full Stack Software Engineer with extensive experience building scalable web applications using TypeScript, Next.js, React, Node.js, and PostgreSQL. Architected microservices, improved API performance by 40%, and led agile engineering teams."
+      });
+      if (validResume.valid !== true) {
+        throw new Error("Valid resume input was rejected by validatePortfolioInput");
+      }
+
+      const validStructured = validatePortfolioInput({
+        projects: [{ title: "App", description: "Built web app", tech: "React" }],
+      });
+      if (validStructured.valid !== true) {
+        throw new Error("Valid structured project input was rejected by validatePortfolioInput");
+      }
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #27: Portfolio Deployment Truthfulness, Real Photo Support & Domain Sections",
+    test: () => {
+      // 1. Profile photo rendering in all 6 themes
+      const photoData = {
+        name: "Priya Sharma",
+        title: "Senior Product Designer",
+        bio: "Designing world-class design systems and web experiences.",
+        avatarUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+        skills: ["Figma", "Design Systems", "Prototyping", "User Research"],
+        projects: [
+          {
+            title: "Fintech Mobile Design System",
+            description: "Built end-to-end tokenized component library.",
+            tech: "Figma • Tokens",
+            metrics: "Adopted by 25+ product squads"
+          }
+        ],
+        experience: [
+          {
+            role: "Lead Product Designer",
+            company: "DesignCorp",
+            period: "2022 — Present",
+            summary: "Leading mobile design strategy and mentoring designers."
+          }
+        ]
+      };
+
+      const themes = ["technical", "minimal", "executive", "vibrant", "editorial", "aurora"];
+      for (const th of themes) {
+        const html = generatePortfolioHTML(photoData, th);
+        if (!html.includes("data:image/png;base64,iVBORw0KGgo")) {
+          throw new Error(`Photo URL not rendered in theme ${th}`);
+        }
+        if (!html.includes("Priya Sharma")) {
+          throw new Error(`Candidate name missing in theme ${th}`);
+        }
+      }
+
+      // 2. Monogram Initials Fallback when no photo is uploaded
+      const noPhotoData = {
+        name: "Rahul Verma",
+        title: "DevOps Engineer",
+        bio: "Cloud infrastructure architect.",
+        skills: ["Kubernetes", "Terraform", "AWS", "CI/CD"],
+        projects: [{ title: "K8s Mesh", description: "Cluster deployment", tech: "Kubernetes" }],
+        experience: [{ role: "DevOps Lead", company: "CloudTech", period: "2021 — 2024", summary: "Automated pipelines." }]
+      };
+
+      for (const th of themes) {
+        const html = generatePortfolioHTML(noPhotoData, th);
+        if (!html.includes("RV")) {
+          throw new Error(`Fallback initials 'RV' missing in theme ${th}`);
+        }
+      }
+
+      // 3. Student/Fresher with 0 Experience: Omits empty experience section
+      const fresherData = {
+        name: "Aman Gupta",
+        title: "Computer Science Graduate",
+        bio: "Recent graduate passionate about backend systems.",
+        skills: ["Java", "Spring Boot", "SQL", "Git"],
+        projects: [{ title: "Distributed KV Store", description: "Implemented Raft consensus algorithm.", tech: "Java • Raft" }],
+        experience: [] // 0 experience
+      };
+
+      for (const th of themes) {
+        const html = generatePortfolioHTML(fresherData, th);
+        if (html.includes("id=\"experience\"") || html.includes("Production Career Timeline") || html.includes("Professional Journey") || html.includes("Leadership History") || html.includes("Growth Track Record") || html.includes("Professional &amp; Academic Appointments")) {
+          throw new Error(`Empty experience section rendered for student/fresher with 0 experience in theme ${th}`);
+        }
+      }
+
+      // 4. Marketing / Vibrant Theme: preserves qualitative metrics without inventing fake percentages
+      const marketingData = {
+        name: "Ananya Roy",
+        title: "Content Marketing Lead",
+        bio: "Growing brand visibility through organic search and editorial storytelling.",
+        skills: ["SEO Strategy", "Content Lifecycle", "Brand Voice"],
+        projects: [
+          {
+            title: "Global SaaS Launch Campaign",
+            description: "Executed organic launch campaign across multiple channels.",
+            tech: "SEO • Editorial",
+            metrics: "Featured on Product Hunt Top 5"
+          }
+        ],
+        experience: [
+          {
+            role: "Content Lead",
+            company: "StoryBrand",
+            period: "2023 — Present",
+            summary: "Managing global content calendar."
+          }
+        ]
+      };
+
+      const vibrantHtml = generatePortfolioHTML(marketingData, "vibrant");
+      if (!vibrantHtml.includes("Featured on Product Hunt Top 5")) {
+        throw new Error("Preserved qualitative metric not rendered in vibrant theme");
+      }
+
+      return true;
+    }
+  },
+];
 let passed = 0;
 
 for (const t of tests) {

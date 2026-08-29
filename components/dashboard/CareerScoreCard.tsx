@@ -25,14 +25,15 @@ export function CareerScoreCard() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 border border-border bg-surface rounded-2xl p-6 h-[190px] animate-pulse space-y-4">
-          <div className="h-4 w-32 bg-surface-elevated rounded" />
-          <div className="h-10 w-24 bg-surface-elevated rounded" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="md:col-span-1 border border-border bg-surface rounded-2xl p-5 sm:p-6 h-[180px] sm:h-[190px] animate-pulse space-y-4">
+          <div className="h-4 w-28 bg-surface-elevated rounded" />
+          <div className="h-10 w-20 bg-surface-elevated rounded" />
           <div className="h-2 w-full bg-surface-elevated rounded" />
+          <div className="h-3 w-3/4 bg-surface-elevated rounded" />
         </div>
-        <div className="md:col-span-2 border border-border bg-surface rounded-2xl p-6 h-[190px] animate-pulse space-y-4">
-          <div className="h-4 w-32 bg-surface-elevated rounded" />
+        <div className="md:col-span-2 border border-border bg-surface rounded-2xl p-5 sm:p-6 h-[180px] sm:h-[190px] animate-pulse space-y-4">
+          <div className="h-4 w-28 bg-surface-elevated rounded" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
             <div className="h-12 bg-surface-elevated rounded" />
             <div className="h-12 bg-surface-elevated rounded" />

@@ -41,15 +41,17 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
     <header
       className="sticky top-0 z-30 w-full h-14 bg-surface/80 backdrop-blur border-b border-border flex items-center justify-between px-4 sm:px-6 lg:px-8"
     >
-      <div className="flex items-center min-w-0 flex-1 pl-12 lg:pl-0">
+      <div className="flex items-center min-w-0 flex-1 pl-10 lg:pl-0 gap-2">
         {pageTitle ? (
-          <h1 className="text-lg font-bold text-text-primary truncate">
+          <h1 className="text-base sm:text-lg font-bold text-text-primary truncate leading-tight">
             {pageTitle}
           </h1>
-        ) : null}
+        ) : (
+          <span className="hidden lg:block text-sm font-medium text-text-muted select-none">Dashboard</span>
+        )}
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <NotificationCenter />
 
         <DropdownMenu.Root>

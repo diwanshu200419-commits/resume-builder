@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     const userId = cleanRequiredText((body as any).userId);
     const title = cleanRequiredText((body as any).title);
     const notificationBody = cleanRequiredText((body as any).body);
+    const link = typeof (body as any).link === "string" ? (body as any).link.trim() || null : null;
 
     if (!userId || !title || !notificationBody) {
       return NextResponse.json(
@@ -43,7 +44,6 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createServiceClient();
-    const createdAt = new Date().toISOString();
 
     if (userId === "all") {
       const { data: users, error: usersError } = await supabase
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         .not("id", "is", null);
 
       if (usersError) {
-        console.error("[Admin Notifications Send] User fetch error:", usersError.message);
+        console.error("[Admin Notifications Send] User fetch error:", usersError.message, usersError);
         return NextResponse.json({ error: "Failed to load notification recipients" }, { status: 500 });
       }
 
@@ -61,8 +61,7 @@ export async function POST(request: NextRequest) {
         title,
         body: notificationBody,
         type: "admin_broadcast",
-        read: false,
-        created_at: createdAt,
+        ...(link ? { link } : {}),
       }));
 
       if (rows.length === 0) {
@@ -71,8 +70,11 @@ export async function POST(request: NextRequest) {
 
       const { error: insertError } = await supabase.from("notifications").insert(rows);
       if (insertError) {
-        console.error("[Admin Notifications Send] Broadcast insert error:", insertError.message);
-        return NextResponse.json({ error: "Failed to create notifications" }, { status: 500 });
+        console.error("[Admin Notifications Send] Broadcast insert error:", insertError.message, insertError);
+        return NextResponse.json(
+          { error: `Failed to create notifications: ${insertError.message}` },
+          { status: 500 }
+        );
       }
 
       await logAdminAudit({
@@ -90,6 +92,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, createdCount: rows.length });
     }
 
+    // Single user — look up by UUID
     const { data: targetProfile, error: profileError } = await supabase
       .from("profiles")
       .select("id, email")
@@ -97,6 +100,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (profileError || !targetProfile) {
+      console.error("[Admin Notifications Send] Profile lookup error:", profileError?.message);
       return NextResponse.json({ error: "Target user not found" }, { status: 404 });
     }
 
@@ -105,13 +109,15 @@ export async function POST(request: NextRequest) {
       title,
       body: notificationBody,
       type: "admin_broadcast",
-      read: false,
-      created_at: createdAt,
+      ...(link ? { link } : {}),
     });
 
     if (insertError) {
-      console.error("[Admin Notifications Send] Insert error:", insertError.message);
-      return NextResponse.json({ error: "Failed to create notification" }, { status: 500 });
+      console.error("[Admin Notifications Send] Insert error:", insertError.message, insertError);
+      return NextResponse.json(
+        { error: `Failed to create notification: ${insertError.message}` },
+        { status: 500 }
+      );
     }
 
     await logAdminAudit({
@@ -128,7 +134,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, createdCount: 1 });
   } catch (error: any) {
-    console.error("[Admin Notifications Send] Error:", error);
-    return NextResponse.json({ error: "Failed to send notification" }, { status: 500 });
+    console.error("[Admin Notifications Send] Unexpected error:", error);
+    return NextResponse.json({ error: error?.message || "Failed to send notification" }, { status: 500 });
   }
 }
+

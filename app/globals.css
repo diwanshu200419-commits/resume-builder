@@ -38,11 +38,13 @@
     overflow-x: hidden;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
   }
 
   /* Interactive Cursor & Pointer Safety */
   button, [role="button"], a, input[type="submit"], input[type="button"] {
     cursor: pointer;
+    -webkit-touch-callout: none;
   }
 
   /* Prevent iOS Safari unwanted zoom on form focus */
@@ -77,6 +79,8 @@
       radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.08) 0%, rgba(250, 250, 252, 0) 60%),
       radial-gradient(circle at 100% 40%, rgba(16, 185, 129, 0.04) 0%, rgba(250, 250, 252, 0) 50%);
     background-attachment: fixed;
+    /* iOS Safari background-attachment fix */
+    -webkit-overflow-scrolling: touch;
   }
 
   .dark body {
@@ -155,15 +159,48 @@
     max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    /* Show subtle scroll indicator on mobile */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-active) transparent;
   }
 
-  /* Mobile safe area padding helpers */
+  .table-scroll-wrapper::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .table-scroll-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .table-scroll-wrapper::-webkit-scrollbar-thumb {
+    background-color: var(--border-active);
+    border-radius: 2px;
+  }
+
+  /* Mobile safe area padding helpers — uses dvh-aware env() */
   .pb-safe {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
   }
 
   .pt-safe {
     padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  .mb-safe {
+    margin-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Dynamic viewport height utilities */
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+
+  .h-dvh {
+    height: 100dvh;
+  }
+
+  .max-h-dvh {
+    max-height: 100dvh;
   }
 
   /* Hide scrollbar for Chrome, Safari, Opera, Edge, and Firefox */
@@ -176,5 +213,24 @@
   .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Thin scrollbar for sidebar nav */
+  .scrollbar-thin-sidebar::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .scrollbar-thin-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin-sidebar::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 2px;
+  }
+
+  .scrollbar-thin-sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
 }

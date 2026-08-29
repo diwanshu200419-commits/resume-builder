@@ -270,7 +270,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
   };
 
   const NavContent = () => (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <div className="flex flex-col h-full overflow-y-auto scrollbar-thin-sidebar">
       <div className="p-5 border-b border-border flex items-center justify-between shrink-0">
         <Link href="/" className="text-xl font-bold text-text-primary">
           Vaylo<span className="text-accent">AI</span>
@@ -284,7 +284,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
         </button>
       </div>
 
-      <nav className="flex-1 p-3 pb-5">
+      <nav className="flex-1 p-3 pb-5 overflow-y-auto scrollbar-thin-sidebar">
         {navSections.map((section, sectionIndex) => (
           <div
             key={section.heading}
@@ -318,7 +318,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-border space-y-3 shrink-0">
+      <div className="p-4 border-t border-border space-y-3 shrink-0 pb-safe">
         <div className="flex items-center justify-between">
           <span className="text-xs text-text-muted">Theme</span>
           <ThemeToggle />
@@ -355,7 +355,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
         <Menu size={20} />
       </button>
 
-      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-surface h-screen sticky top-0 shrink-0">
+      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-surface h-dvh sticky top-0 shrink-0">
         <NavContent />
       </aside>
 
@@ -365,7 +365,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative flex flex-col w-[min(85vw,320px)] bg-surface h-[100dvh] shadow-2xl border-r border-border animate-in slide-in-from-left">
+          <div className="relative flex flex-col w-[min(85vw,320px)] bg-surface h-dvh shadow-2xl border-r border-border animate-in slide-in-from-left">
             <NavContent />
           </div>
         </aside>
@@ -373,3 +373,4 @@ export function Sidebar({ profile }: { profile: Profile }) {
     </>
   );
 }
+

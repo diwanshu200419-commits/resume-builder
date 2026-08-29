@@ -33,7 +33,7 @@ import { UpgradeHandler } from "@/components/dashboard/UpgradeHandler";
 import { CareerScoreCard } from "@/components/dashboard/CareerScoreCard";
 import { NotificationBar } from "@/components/dashboard/NotificationBar";
 import { AIFeed } from "@/components/dashboard/AIFeed";
-import { formatDate, getScoreColor } from "@/lib/utils";
+import { formatDate, getScoreColor, cn } from "@/lib/utils";
 
 function calculateProfileStrength(p: any): number {
   let count = 0;
@@ -310,7 +310,7 @@ export default async function DashboardPage() {
 
       <NotificationBar />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6 min-w-0">
           <CareerScoreCard />
           <StatsBar profile={profile!} analyses={analysisList} />
@@ -350,8 +350,18 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tools.map((t) => (
-            <Link key={t.title} href={t.href} className="min-w-0">
+          {tools.map((t, i) => (
+            <Link
+              key={t.title}
+              href={t.href}
+              className={cn(
+                "min-w-0",
+                // On sm 2-col grid, the 5th item (index 4) spans full width to avoid orphan
+                i === tools.length - 1 && tools.length % 2 !== 0
+                  ? "sm:col-span-2 lg:col-span-1"
+                  : ""
+              )}
+            >
               <Card className="border-border bg-surface hover:border-border-active transition-all hover:scale-[1.01] h-full cursor-pointer shadow-md group">
                 <CardContent className="p-4 sm:p-5 flex items-start gap-3.5">
                   <div className={`p-2.5 sm:p-3 rounded-xl border shrink-0 ${t.color}`}>

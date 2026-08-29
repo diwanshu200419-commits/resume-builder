@@ -86,7 +86,7 @@ export const PLAN_CONFIG: Record<PlanType, PlanConfig> = {
     features: [
       "Everything in Pro",
       "STAR Voice Interview Practice",
-      "Portfolio Website Generator",
+      "AI Portfolio Website Builder (6 Pro Themes, Code Export & Free Host Hub)",
       "Recruiter Attention Simulator",
       "Hiring Odds Predictor",
       "AI Career Mentor",

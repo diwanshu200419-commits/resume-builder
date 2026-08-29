@@ -16,15 +16,15 @@ You have expert knowledge across all Vaylo AI features and pricing plans:
 5. AI Recruiter 10-Second Eye Screen (/recruiter-simulation): Heatmap eye-tracking simulation showing visual focal points and why recruiters shortlist or reject.
 6. AI Hiring Probability Predictor (/hiring-probability): Heuristic logistic regression estimating callback odds and confidence for target companies.
 7. AI Personal Branding & LinkedIn Studio (/branding-studio): Custom SVG LinkedIn cover banners, developer GitHub README profiles, and recruiter-search optimized bio summaries.
-8. One-Click Portfolio Deployment (/portfolio/deploy): Instant single-page HTML portfolio deployment to username.vaylo.ai or custom domains with SSL.
+8. AI Portfolio Website Builder (/portfolio): 6 modern responsive themes with code export & guided free deployment to Netlify, Vercel, and GitHub Pages.
 9. Tech Salary Negotiator (/salary-calculator): Pay bands for India (₹ LPA) & Global Remote ($ USD) with word-for-word counter offer scripts.
 10. Multi-Language Resume Translator (/translate): Professional translation into German, French, Spanish, Japanese, Hindi, and English.
 11. Career Intelligence Blog (/blog): Expert guides on ATS compliance, interview prep, salary negotiation, and fresher resumes.
 12. Pricing Plans:
     - Free Tier (₹0): 2 ATS Scans/month, basic builder, watermarked PDF export.
     - Pro Plan (₹99/month): 30 ATS Scans/day, 50 Bullet Auto-Fixes, LinkedIn Studio, Cover Letter Generator, unwatermarked PDF & DOCX exports.
-    - Premium Plan (₹299/month): Everything in Pro + STAR Voice Interview Coach, Recruiter Simulation, Hiring Odds Predictor, Salary Negotiator, portfolio subdomain.
-    - Career Pack (₹499 lifetime): Everything in Premium + Custom CNAME Domain setup, priority AI compute, lifetime access.
+    - Premium Plan (₹299/month): Everything in Pro + STAR Voice Interview Coach, Recruiter Simulation, Hiring Odds Predictor, Salary Negotiator, AI Portfolio Builder.
+    - Career Pack (₹499 lifetime): Everything in Premium + Lifetime Career Roadmap Access, priority AI compute, lifetime access.
     - UPI Payment ID: jattshiv32@okaxis
 
 Instructions:
@@ -83,7 +83,7 @@ function getTrainedFallbackAnswer(msg: string): string {
     return "Explore expert career intelligence guides, ATS formatting tips, STAR interview scripts, and salary negotiation secrets on our blog at /blog!";
   }
   if (m.includes("create") || m.includes("build") || m.includes("make") || m.includes("generator") || m.includes("new")) {
-    return "To create a new resume or portfolio, go to /builder for our interactive resume builder, /portfolio/deploy to publish your single-page HTML site to username.vaylo.ai, or /branding-studio for LinkedIn banners!";
+    return "To create a new resume or portfolio, go to /builder for our interactive resume builder, /portfolio for our 6-theme AI Portfolio Builder with 1-click code export, or /branding-studio for LinkedIn banners!";
   }
   if (m.includes("github") || m.includes("repo") || m.includes("code")) {
     return "Connect your GitHub on /github-sync to auto-import repositories, generate AI project summaries, and sync your live developer portfolio!";
@@ -107,7 +107,7 @@ function getTrainedFallbackAnswer(msg: string): string {
     return "To boost your ATS score above 85%, test your resume at /free-ats-checker and use our 1-Click 'Auto-Fix All ATS Errors' button to inject missing keywords and upgrade action verbs!";
   }
   if (m.includes("price") || m.includes("plan") || m.includes("cost") || m.includes("free") || m.includes("pro") || m.includes("premium") || m.includes("upi")) {
-    return "Vaylo AI offers 4 plans: Free (₹0 for 2 scans/mo), Pro (₹99/mo for 50 auto-fixes & unwatermarked downloads), Premium (₹299/mo for STAR Voice Interviews & Portfolio subdomain), and Career Pack (₹499 lifetime access)! UPI ID: jattshiv32@okaxis.";
+    return "Vaylo AI offers 4 plans: Free (₹0 for 2 scans/mo), Pro (₹99/mo for 50 auto-fixes & unwatermarked downloads), Premium (₹299/mo for STAR Voice Interviews & AI Portfolio Builder), and Career Pack (₹499 lifetime access)! UPI ID: jattshiv32@okaxis.";
   }
   if (m.includes("interview") || m.includes("star") || m.includes("voice") || m.includes("speak")) {
     return "Master behavioral interviews using our STAR Voice Practice Sandbox on /interview-prep! Speak your answers into your microphone for instant 1-10 STAR scoring and filler word analysis.";
@@ -119,5 +119,5 @@ function getTrainedFallbackAnswer(msg: string): string {
     return "Translate your resume into German, French, Spanish, Japanese, Hindi, or English on /translate for international job applications!";
   }
 
-  return "I am Vaylo AI, your AI Career Copilot for https://www.vayloai.online! I can help you optimize your resume for ATS filters (/free-ats-checker), build resumes (/builder), deploy portfolios (/portfolio/deploy), calculate hiring odds (/hiring-probability), and practice STAR voice interviews (/interview-prep)! How can I help you today?";
+  return "I am Vaylo AI, your AI Career Copilot for https://www.vayloai.online! I can help you optimize your resume for ATS filters (/free-ats-checker), build resumes (/builder), create portfolios (/portfolio), calculate hiring odds (/hiring-probability), and practice STAR voice interviews (/interview-prep)! How can I help you today?";
 }
