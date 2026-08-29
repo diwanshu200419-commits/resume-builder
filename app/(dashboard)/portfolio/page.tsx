@@ -25,6 +25,8 @@ import {
   Trash2,
   AlertCircle,
   CheckCircle2,
+  ExternalLink,
+  Globe,
 } from "lucide-react";
 import {
   PORTFOLIO_THEMES,
@@ -230,29 +232,41 @@ export default function PortfolioGeneratorPage() {
   const [htmlCode, setHtmlCode] = useState<string>(() => generatePortfolioHTML(getSampleDataForRole("Software Engineer"), "technical"));
   const [loading, setLoading] = useState(false);
   const [loadingLatest, setLoadingLatest] = useState(false);
+  const [savingUrl, setSavingUrl] = useState(false);
   const [copied, setCopied] = useState(false);
   const [deviceView, setDeviceView] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [activeTab, setActiveTab] = useState<"visual" | "code">("visual");
   const [deployModalOpen, setDeployModalOpen] = useState(false);
   const [deployPlatform, setDeployPlatform] = useState<"netlify" | "vercel" | "github">("netlify");
-  const [deployStatus, setDeployStatus] = useState<"not_deployed" | "deploying" | "live" | "failed">("not_deployed");
+  const [savedLiveUrl, setSavedLiveUrl] = useState<string | null>(null);
   const [userLiveUrl, setUserLiveUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Sync initial render
+  // Load initial portfolio data and any previously saved live URL
   useEffect(() => {
     const initial = getSampleDataForRole(targetRole, avatarUrl || undefined);
     setPortfolioData(initial);
     setHtmlCode(generatePortfolioHTML(initial, template));
+
+    // Fetch saved deployment state from API
+    fetch("/api/portfolio/deploy")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.savedLiveUrl) {
+          setSavedLiveUrl(data.savedLiveUrl);
+          setUserLiveUrl(data.savedLiveUrl);
+        }
+      })
+      .catch((err) => console.warn("Fetch deploy state notice:", err));
   }, []);
 
   const handleSelectRole = (role: typeof ROLE_PRESETS[0]) => {
     setTargetRole(role.label);
     setTemplate(role.theme);
     
-    // Update data with role sample if user hasn't generated custom resume yet
     const baseData = portfolioData || getSampleDataForRole(role.label, avatarUrl || undefined);
     const updatedData: PortfolioData = {
       ...baseData,
@@ -388,7 +402,7 @@ export default function PortfolioGeneratorPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const fileName = (portfolioData?.name || "portfolio").toLowerCase().replace(/\s+/g, "-") + ".html";
+    const fileName = "index.html";
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
@@ -403,7 +417,7 @@ export default function PortfolioGeneratorPage() {
       { name: "index.html", content: htmlCode },
       {
         name: "README.md",
-        content: `# ${candidateName}'s Portfolio Website\n\nGenerated with Vaylo AI Multi-Design Portfolio Engine.\n\n## Quick Deploy Instructions\n1. Netlify Drop: Drag and drop index.html to https://app.netlify.com/drop\n2. Vercel: Run 'npx vercel' in this folder\n3. GitHub Pages: Upload index.html to your repository`,
+        content: `# ${candidateName}'s Portfolio Website\n\nGenerated with Vaylo AI Multi-Design Portfolio Engine.\n\n## Quick 1-Click Hosting\n1. Netlify Drop: Drag and drop this folder or index.html to https://app.netlify.com/drop\n2. Vercel: Run 'npx vercel' in this folder\n3. GitHub Pages: Upload index.html to your <username>.github.io repository`,
       },
     ]);
     const url = URL.createObjectURL(zipBlob);
@@ -419,16 +433,42 @@ export default function PortfolioGeneratorPage() {
   const handleLaunchNetlifyDrop = () => {
     handleDownloadHtml();
     window.open("https://app.netlify.com/drop", "_blank");
-    setDeployStatus("deploying");
   };
 
-  const handleVerifyLiveUrl = () => {
+  const handleLaunchNetlifyDropZip = () => {
+    handleDownloadZip();
+    window.open("https://app.netlify.com/drop", "_blank");
+  };
+
+  const handleSaveLiveUrl = async () => {
     if (!userLiveUrl.trim()) return;
-    setDeployStatus("live");
+    setSavingUrl(true);
+    setError(null);
+    setSaveSuccessMessage(null);
+
+    try {
+      const res = await fetch("/api/portfolio/deploy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          liveUrl: userLiveUrl.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save portfolio URL");
+      
+      setSavedLiveUrl(data.savedLiveUrl || userLiveUrl.trim());
+      setSaveSuccessMessage("🎉 Live portfolio saved to your profile!");
+      setTimeout(() => setSaveSuccessMessage(null), 4000);
+    } catch (err: any) {
+      setError(err.message || "Failed to save portfolio link");
+    } finally {
+      setSavingUrl(false);
+    }
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>
@@ -448,26 +488,64 @@ export default function PortfolioGeneratorPage() {
           </p>
         </div>
 
-        {htmlCode && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            onClick={handleDownloadHtml}
+            variant="outline"
+            size="sm"
+            className="border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 gap-1.5"
+          >
+            <Download className="w-4 h-4 text-emerald-400" /> Download HTML
+          </Button>
+          <Button
+            onClick={() => setDeployModalOpen(true)}
+            size="sm"
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-1.5 shadow-lg shadow-emerald-600/20"
+          >
+            <Rocket className="w-4 h-4" /> Deploy Free
+          </Button>
+        </div>
+      </div>
+
+      {/* Persistent Live Portfolio Banner */}
+      {savedLiveUrl && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-blue-950/80 border border-emerald-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+              <Globe className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Your Live Portfolio is Connected</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+              <a
+                href={savedLiveUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-semibold text-white hover:text-emerald-300 underline flex items-center gap-1 mt-0.5"
+              >
+                {savedLiveUrl} <ExternalLink className="w-3.5 h-3.5 inline text-emerald-400" />
+              </a>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
+            <a href={savedLiveUrl} target="_blank" rel="noreferrer">
+              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-1.5 text-xs">
+                Visit Live Site ↗
+              </Button>
+            </a>
             <Button
-              onClick={handleDownloadHtml}
               variant="outline"
               size="sm"
-              className="border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 gap-1.5"
-            >
-              <Download className="w-4 h-4 text-emerald-400" /> Download HTML
-            </Button>
-            <Button
               onClick={() => setDeployModalOpen(true)}
-              size="sm"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-1.5 shadow-lg shadow-emerald-600/20"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 text-xs"
             >
-              <Rocket className="w-4 h-4" /> Deploy Free
+              Change URL
             </Button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {error && (
         <div className="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-sm flex items-center justify-between">
@@ -478,6 +556,13 @@ export default function PortfolioGeneratorPage() {
           <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-rose-400 hover:text-white">
             Dismiss
           </Button>
+        </div>
+      )}
+
+      {saveSuccessMessage && (
+        <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/60 text-emerald-300 text-sm flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+          <span>{saveSuccessMessage}</span>
         </div>
       )}
 
@@ -842,24 +927,33 @@ export default function PortfolioGeneratorPage() {
                 <ol className="space-y-2.5 text-xs text-slate-300 leading-relaxed">
                   <li className="flex items-start gap-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold flex items-center justify-center shrink-0">1</span>
-                    <span>Click the button below to download your <code className="text-emerald-300">index.html</code> and launch Netlify Drop.</span>
+                    <span>Click below to download your ready-to-host file and launch Netlify Drop.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold flex items-center justify-center shrink-0">2</span>
-                    <span>Drag and drop the downloaded <code className="text-emerald-300">index.html</code> directly into the Netlify dropzone.</span>
+                    <span>Drag and drop the downloaded file (or unzipped folder) directly into Netlify.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold flex items-center justify-center shrink-0">3</span>
-                    <span>Your portfolio goes live instantly with an HTTPS link (e.g. <code className="text-emerald-300">https://your-name.netlify.app</code>).</span>
+                    <span>Your portfolio goes live instantly with a free SSL URL (e.g. <code className="text-emerald-300">https://yourname.netlify.app</code>).</span>
                   </li>
                 </ol>
 
-                <Button
-                  onClick={handleLaunchNetlifyDrop}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 gap-2"
-                >
-                  <Rocket className="w-4 h-4" /> Download HTML &amp; Launch Netlify Drop ↗
-                </Button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  <Button
+                    onClick={handleLaunchNetlifyDrop}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 text-xs gap-2"
+                  >
+                    <Rocket className="w-4 h-4" /> Download HTML &amp; Open Netlify ↗
+                  </Button>
+                  <Button
+                    onClick={handleLaunchNetlifyDropZip}
+                    variant="outline"
+                    className="w-full border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs gap-2"
+                  >
+                    <FolderArchive className="w-4 h-4 text-blue-400" /> Download ZIP &amp; Open Netlify ↗
+                  </Button>
+                </div>
               </div>
             )}
 
@@ -902,34 +996,37 @@ export default function PortfolioGeneratorPage() {
               </div>
             )}
 
-            {/* Truthful Deployment Status Verification */}
-            <div className="pt-2 border-t border-slate-800 space-y-3">
+            {/* Truthful Deployment Status & Persistence */}
+            <div className="pt-3 border-t border-slate-800 space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
-                <span>Have you deployed your site? Enter your URL below:</span>
-                {deployStatus === "live" ? (
+                <span>Save Your Deployed Portfolio URL</span>
+                {savedLiveUrl ? (
                   <span className="text-emerald-400 font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Verified Live
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Saved to Profile
                   </span>
                 ) : (
-                  <span className="text-slate-500 font-normal">Optional</span>
+                  <span className="text-slate-500 font-normal">Connects to your dashboard</span>
                 )}
               </label>
               <div className="flex items-center gap-2">
                 <Input
                   value={userLiveUrl}
                   onChange={(e) => setUserLiveUrl(e.target.value)}
-                  placeholder="e.g. https://my-portfolio.netlify.app or https://john.dev"
+                  placeholder="e.g. https://my-portfolio.netlify.app or https://diwanshu.dev"
                   className="bg-slate-950 border-slate-800 text-xs text-white"
                 />
                 <Button
-                  onClick={handleVerifyLiveUrl}
-                  disabled={!userLiveUrl.trim()}
-                  variant="outline"
-                  className="border-slate-700 text-slate-200 hover:bg-slate-800 text-xs shrink-0"
+                  onClick={handleSaveLiveUrl}
+                  disabled={savingUrl || !userLiveUrl.trim()}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0 gap-1.5"
                 >
+                  {savingUrl ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   Save URL
                 </Button>
               </div>
+              <p className="text-[11px] text-slate-400">
+                Once saved, your portfolio link will be displayed across your Vaylo dashboard and profile for easy sharing with recruiters.
+              </p>
             </div>
           </Card>
         </div>

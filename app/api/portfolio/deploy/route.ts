@@ -11,10 +11,32 @@ import { canDeployPortfolio, getEffectivePlan } from "@/lib/plans";
 import { z } from "zod";
 
 const DeploySchema = z.object({
-  htmlCode: z.string().min(100),
+  htmlCode: z.string().optional(),
   subdomain: z.string().optional(),
   customDomain: z.string().optional(),
+  liveUrl: z.string().optional(),
 });
+
+export async function GET() {
+  try {
+    const profile = await getProfile();
+    if (!profile) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const emailPrefix = (profile.email || profile.id).split("@")[0];
+    const subdomainSlug = emailPrefix.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
+
+    return NextResponse.json({
+      success: true,
+      subdomain: subdomainSlug,
+      savedLiveUrl: profile.website || null,
+    });
+  } catch (error: any) {
+    console.error("[/api/portfolio/deploy] GET error:", error);
+    return NextResponse.json({ error: error.message || "Failed to fetch deployment state" }, { status: 500 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,24 +45,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Tier-Gating Check
-    if (!canDeployPortfolio(profile)) {
-      return NextResponse.json(
-        {
-          error: "upgrade_required",
-          message: "Live subdomain deployment requires Premium or Career Pack plan. Free/Pro tiers support preview-only mode.",
-        },
-        { status: 403 }
-      );
-    }
-
     const body = await req.json().catch(() => ({}));
     const parse = DeploySchema.safeParse(body);
     if (!parse.success) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
-    const { htmlCode, customDomain } = parse.data;
+    const { customDomain, liveUrl } = parse.data;
 
     // Derived unique subdomain slug from email or name
     const emailPrefix = (profile.email || profile.id).split("@")[0];
@@ -49,40 +60,38 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9]/g, "-")
       .replace(/-+/g, "-");
 
-    // Career Pack Custom Domain Verification
-    const plan = getEffectivePlan(profile);
-    const isCareerPack = plan === "career_pack";
-    let customDomainStatus: string | null = null;
-    let customDomainUrl: string | null = null;
+    const targetUrl = liveUrl || customDomain || "";
+    let cleanUrl: string | null = null;
 
-    if (customDomain && customDomain.trim()) {
-      if (!isCareerPack) {
-        return NextResponse.json(
-          {
-            error: "career_pack_required",
-            message: "Custom domain connection (e.g. yourname.dev) requires the Career Pack tier.",
-          },
-          { status: 403 }
-        );
+    if (targetUrl.trim()) {
+      cleanUrl = targetUrl.trim();
+      if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+        cleanUrl = `https://${cleanUrl}`;
       }
-      const cleanCustomDomain = customDomain.toLowerCase().trim().replace(/^https?:\/\//, "");
-      customDomainUrl = `https://${cleanCustomDomain}`;
-      customDomainStatus = "pending_cname_configuration";
+
+      // Persist to user profile website field
+      try {
+        const serviceClient = await createServiceClient();
+        await serviceClient
+          .from("profiles")
+          .update({
+            website: cleanUrl,
+          })
+          .eq("id", profile.id);
+      } catch (dbErr) {
+        console.warn("[/api/portfolio/deploy] Profile DB update notice:", dbErr);
+      }
     }
 
     return NextResponse.json({
       success: true,
       subdomain: subdomainSlug,
-      customDomainUrl,
-      customDomainStatus,
+      savedLiveUrl: cleanUrl,
       deployMethod: "netlify_drop_or_self_host",
-      instructions: "Deploy in 10 seconds via Netlify Drop or your preferred hosting provider.",
-      dnsDocumentation: {
-        customDomainCname: "Point your custom domain DNS CNAME to your hosting provider endpoint (e.g. Netlify/Vercel/Cloudflare).",
-      },
+      instructions: "Your live portfolio URL has been saved and linked to your profile!",
     });
   } catch (error: any) {
-    console.error("[/api/portfolio/deploy] error:", error);
+    console.error("[/api/portfolio/deploy] POST error:", error);
     return NextResponse.json({ error: error.message || "Failed to process deployment request" }, { status: 500 });
   }
 }

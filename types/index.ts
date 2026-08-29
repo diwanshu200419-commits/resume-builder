@@ -30,6 +30,8 @@ export interface Profile {
   skills?: string[] | null;
   preferred_location?: string | null;
   onboarding_completed?: boolean | null;
+  website?: string | null;
+  portfolio_url?: string | null;
 }
 
 export interface Analysis {
