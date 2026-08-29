@@ -355,6 +355,78 @@ const tests = [
       return true;
     }
   },
+  {
+    name: "Suite #28: Portfolio Preview-to-Export Visual Parity & Self-Contained CSS Test",
+    test: () => {
+      const sampleData = {
+        name: "Diwanshu",
+        title: "Software Engineer",
+        bio: "Building distributed systems and cloud infrastructure.",
+        avatarUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+        skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "Docker"],
+        stats: [
+          { label: "Production Deployments", value: "20+" },
+          { label: "API Latency", value: "<50ms" }
+        ],
+        projects: [
+          {
+            title: "Microservices Mesh",
+            description: "High throughput event driven architecture.",
+            tech: "Node.js • PostgreSQL",
+            metrics: "99.99% uptime"
+          }
+        ],
+        experience: [
+          {
+            role: "Software Engineer",
+            company: "TechCorp",
+            period: "2023 — Present",
+            summary: "Core platform engineering and API design."
+          }
+        ]
+      };
+
+      const themes = [
+        { id: "technical", bg: "#030712", keyClass: "hero-card" },
+        { id: "minimal", bg: "#f8fafc", keyClass: "bento-hero" },
+        { id: "executive", bg: "#0b1120", keyClass: "exec-hero" },
+        { id: "vibrant", bg: "#070714", keyClass: "vib-hero" },
+        { id: "editorial", bg: "#faf8f5", keyClass: "edit-head" },
+        { id: "aurora", bg: "#020617", keyClass: "aurora-hero" },
+      ];
+
+      for (const th of themes) {
+        const html = generatePortfolioHTML(sampleData, th.id);
+        
+        // Assert self-contained style block exists
+        if (!html.includes("<style>") || !html.includes("</style>")) {
+          throw new Error(`Embedded <style> block missing in theme ${th.id}`);
+        }
+        
+        // Assert theme characteristic color palette
+        if (!html.includes(th.bg)) {
+          throw new Error(`Characteristic background color ${th.bg} missing in theme ${th.id}`);
+        }
+
+        // Assert characteristic layout structure
+        if (!html.includes(th.keyClass)) {
+          throw new Error(`Key layout class ${th.keyClass} missing in theme ${th.id}`);
+        }
+
+        // Assert avatar & photo rendering
+        if (!html.includes("avatar-wrap") || !html.includes("avatar-img")) {
+          throw new Error(`Avatar image structure missing in theme ${th.id}`);
+        }
+
+        // Assert responsive viewport meta tag
+        if (!html.includes('name="viewport"')) {
+          throw new Error(`Viewport meta tag missing in theme ${th.id}`);
+        }
+      }
+
+      return true;
+    }
+  },
 ];
 let passed = 0;
 

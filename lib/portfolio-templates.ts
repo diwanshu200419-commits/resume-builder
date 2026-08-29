@@ -1,13 +1,13 @@
 // lib/portfolio-templates.ts
 //
 // Vaylo AI — Multi-Design Portfolio Template Engine
-// 6 Distinct, Modern, Production-Ready Responsive Portfolio Themes:
-// 1. Technical / Neo-Terminal (Cyberpunk Dark glow for Developers/DevOps/Cloud)
-// 2. Minimal / Bento Studio (Ultra-clean Bento grid for Designers & Product)
-// 3. Executive / Modern Glass (Deep navy glassmorphism & metrics for Leaders & Consultants)
-// 4. Vibrant / Gradient SaaS (Bold Indigo/Purple gradients for Growth, Creators & Marketers)
-// 5. Editorial / Warm Serif (Timeless ivory/paper serif typography for Academics & Writers)
-// 6. Aurora / Deep Space (Obsidian mesh gradient glow for AI/ML & Web3)
+// 6 Distinct, Modern, Production-Ready, 100% Self-Contained Responsive Themes:
+// 1. Technical / Neo-Terminal (Terminal Dark, Cyberpunk Glow for Developers/DevOps)
+// 2. Minimal / Bento Studio (Apple / Linear-inspired clean Bento grid for Designers & PMs)
+// 3. Executive / Modern Glass (Deep Slate Glassmorphism & Metrics for Leaders & Consultants)
+// 4. Vibrant / Gradient SaaS (Bold Indigo/Purple gradients for Growth Marketers & Creators)
+// 5. Editorial / Warm Serif (Timeless linen/paper serif typography for Academics & Writers)
+// 6. Aurora / Deep Space (Obsidian Dark with Ambient Cyan Mesh Glow for AI/ML & Web3)
 
 export type PortfolioTemplateId =
   | "technical"
@@ -202,73 +202,18 @@ export function renderAvatar(
 
   if (avatarUrl && avatarUrl.trim()) {
     const safeUrl = escapeHtml(avatarUrl.trim());
-    if (style === "terminal") {
-      return `<div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.3)] bg-slate-900 shrink-0">
-        <img src="${safeUrl}" alt="${safeName}" class="w-full h-full object-cover" />
-      </div>`;
-    }
-    if (style === "bento") {
-      return `<div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden ring-4 ring-indigo-500/20 shadow-xl bg-slate-100 shrink-0">
-        <img src="${safeUrl}" alt="${safeName}" class="w-full h-full object-cover" />
-      </div>`;
-    }
-    if (style === "glass") {
-      return `<div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-slate-700/80 shadow-2xl bg-slate-900 shrink-0">
-        <img src="${safeUrl}" alt="${safeName}" class="w-full h-full object-cover" />
-      </div>`;
-    }
-    if (style === "gradient") {
-      return `<div class="relative p-1 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-amber-400 shadow-xl shrink-0">
-        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-slate-950">
-          <img src="${safeUrl}" alt="${safeName}" class="w-full h-full object-cover" />
-        </div>
-      </div>`;
-    }
-    if (style === "serif") {
-      return `<div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-amber-900/30 shadow-md bg-stone-100 shrink-0">
-        <img src="${safeUrl}" alt="${safeName}" class="w-full h-full object-cover" />
-      </div>`;
-    }
-    return `<div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden ring-2 ring-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.4)] bg-slate-950 shrink-0">
-      <img src="${safeUrl}" alt="${safeName}" class="w-full h-full object-cover" />
+    return `<div class="avatar-wrap avatar-${style}">
+      <img src="${safeUrl}" alt="${safeName}" class="avatar-img" />
     </div>`;
   }
 
-  // Fallback Initials Component
-  if (style === "terminal") {
-    return `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-emerald-500/50 bg-slate-900 text-emerald-400 font-mono font-bold text-xl sm:text-2xl flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.25)] shrink-0">
-      ${initials}
-    </div>`;
-  }
-  if (style === "bento") {
-    return `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl ring-4 ring-indigo-500/20 bg-indigo-600 text-white font-sans font-bold text-xl sm:text-2xl flex items-center justify-center shadow-xl shrink-0">
-      ${initials}
-    </div>`;
-  }
-  if (style === "glass") {
-    return `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-slate-700 bg-slate-800/90 text-blue-400 font-sans font-bold text-xl sm:text-2xl flex items-center justify-center shadow-xl shrink-0">
-      ${initials}
-    </div>`;
-  }
-  if (style === "gradient") {
-    return `<div class="p-1 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-amber-400 shadow-xl shrink-0">
-      <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-slate-950 text-pink-400 font-bold text-xl sm:text-2xl flex items-center justify-center">
-        ${initials}
-      </div>
-    </div>`;
-  }
-  if (style === "serif") {
-    return `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-amber-900/30 bg-amber-100 text-amber-900 font-serif font-bold text-xl sm:text-2xl flex items-center justify-center shadow-md shrink-0">
-      ${initials}
-    </div>`;
-  }
-  return `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl ring-2 ring-cyan-400 bg-slate-900 text-cyan-300 font-mono font-bold text-xl sm:text-2xl flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.35)] shrink-0">
+  return `<div class="avatar-wrap avatar-${style} avatar-initials">
     ${initials}
   </div>`;
 }
 
 // ---------------------------------------------------------------------------
-// TEMPLATE 1: TECHNICAL / NEO-TERMINAL (Developers, DevOps, Cloud)
+// 1. TEMPLATE 1: TECHNICAL / NEO-TERMINAL
 // ---------------------------------------------------------------------------
 function renderTechnicalTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Developer");
@@ -276,7 +221,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
   const safeGithub = data.github ? escapeHtml(data.github) : null;
-  const avatarElement = renderAvatar(data.avatarUrl, data.name, "terminal");
+  const avatarHtml = renderAvatar(data.avatarUrl, data.name, "terminal");
 
   const statsHtml = (data.stats || [
     { label: "Code Architecture", value: "Production" },
@@ -285,36 +230,30 @@ function renderTechnicalTemplate(data: PortfolioData): string {
   ])
     .map(
       (s) => `
-      <div class="bg-slate-900/90 border border-emerald-900/40 p-4 rounded-xl text-center">
-        <div class="text-2xl font-mono font-bold text-emerald-400">${escapeHtml(s.value)}</div>
-        <div class="text-xs text-slate-400 font-mono mt-1">${escapeHtml(s.label)}</div>
+      <div class="stat-card">
+        <div class="stat-val">${escapeHtml(s.value)}</div>
+        <div class="stat-lbl">${escapeHtml(s.label)}</div>
       </div>`
     )
     .join("");
 
   const skillsHtml = (data.skills || [])
-    .map(
-      (s) => `
-      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 font-mono text-xs hover:border-emerald-400 transition-colors">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-        ${escapeHtml(s)}
-      </span>`
-    )
+    .map((s) => `<span class="skill-tag"><span class="tag-dot"></span>${escapeHtml(s)}</span>`)
     .join("");
 
   const projectsHtml = (data.projects || [])
     .map(
       (p) => `
-      <div class="group bg-slate-900/80 border border-slate-800 hover:border-emerald-500/60 p-6 rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5">
-        <div class="flex items-center justify-between gap-2 mb-3">
-          <h3 class="text-lg font-mono font-bold text-white group-hover:text-emerald-400 transition-colors">${escapeHtml(p.title)}</h3>
-          <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-300">Active</span>
+      <div class="project-card">
+        <div class="project-header">
+          <h3 class="project-title">${escapeHtml(p.title)}</h3>
+          <span class="badge-status">Active</span>
         </div>
-        <p class="text-sm text-slate-300 leading-relaxed mb-4">${escapeHtml(p.description)}</p>
-        ${p.metrics ? `<div class="text-xs font-mono text-emerald-400 mb-3">⚡ ${escapeHtml(p.metrics)}</div>` : ""}
-        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
-          <span class="text-emerald-300/80">${escapeHtml(p.tech)}</span>
-          ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" class="text-emerald-400 hover:underline">Launch →</a>` : ""}
+        <p class="project-desc">${escapeHtml(p.description)}</p>
+        ${p.metrics ? `<div class="project-metric">⚡ ${escapeHtml(p.metrics)}</div>` : ""}
+        <div class="project-footer">
+          <span class="project-tech">${escapeHtml(p.tech)}</span>
+          ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" class="link-btn">Launch →</a>` : ""}
         </div>
       </div>`
     )
@@ -325,152 +264,224 @@ function renderTechnicalTemplate(data: PortfolioData): string {
     ? (data.experience || [])
         .map(
           (e) => `
-        <div class="relative pl-6 pb-8 border-l border-emerald-900/50 last:pb-0">
-          <div class="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950"></div>
-          <div class="flex flex-wrap items-baseline justify-between gap-2 mb-1">
-            <h4 class="text-base font-mono font-bold text-white">${escapeHtml(e.role)} <span class="text-emerald-400">@ ${escapeHtml(e.company)}</span></h4>
-            <span class="text-xs font-mono text-slate-400 bg-slate-900 px-2.5 py-1 rounded border border-slate-800">${escapeHtml(e.period)}</span>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-header">
+            <h4 class="timeline-role">${escapeHtml(e.role)} <span class="accent-text">@ ${escapeHtml(e.company)}</span></h4>
+            <span class="timeline-period">${escapeHtml(e.period)}</span>
           </div>
-          <p class="text-sm text-slate-300 leading-relaxed mt-2">${escapeHtml(e.summary)}</p>
+          <p class="timeline-desc">${escapeHtml(e.summary)}</p>
         </div>`
         )
         .join("")
     : "";
 
   return `<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeName} — ${safeTitle}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #030712; color: #e2e8f0; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #030712;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+    }
+    .font-mono { font-family: 'Courier New', Courier, monospace; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 32px 20px; }
+    header.top-nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1e293b; padding: 14px 20px;
+    }
+    .nav-inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .brand-logo { font-family: monospace; font-size: 14px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; }
+    .nav-links { display: flex; align-items: center; gap: 16px; font-size: 12px; font-family: monospace; color: #94a3b8; }
+    .nav-links a { color: #94a3b8; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: #38bdf8; }
+    .btn-touch { background: #2563eb; color: #fff !important; padding: 6px 14px; border-radius: 8px; font-weight: 600; text-decoration: none; }
+    .btn-touch:hover { background: #1d4ed8; }
+
+    /* Hero Card */
+    .hero-card {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(3, 7, 18, 0.98) 100%);
+      border: 1px solid #1e3a8a; border-radius: 24px; padding: 36px 28px;
+      margin-top: 24px; margin-bottom: 40px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+    }
+    .hero-top { display: flex; align-items: center; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px; font-family: monospace;
+      font-size: 11px; color: #10b981; margin-bottom: 8px;
+    }
+    .hero-title { font-family: monospace; font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+    .hero-subtitle { font-family: monospace; font-size: 18px; color: #38bdf8; font-weight: 600; margin-top: 4px; }
+    .hero-bio { color: #cbd5e1; font-size: 15px; line-height: 1.7; max-width: 800px; margin-top: 16px; }
+
+    /* Avatars */
+    .avatar-wrap { width: 90px; height: 90px; border-radius: 18px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .avatar-terminal { border: 2px solid #10b981; background: #0f172a; box-shadow: 0 0 20px rgba(16,185,129,0.3); }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-initials { font-family: monospace; font-weight: bold; font-size: 28px; color: #10b981; background: #0f172a; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-top: 28px; padding-top: 24px; border-top: 1px solid #1e293b; }
+    .stat-card { background: rgba(15, 23, 42, 0.8); border: 1px solid #1e3a8a; border-radius: 12px; padding: 14px; text-align: center; }
+    .stat-val { font-family: monospace; font-size: 22px; font-weight: bold; color: #38bdf8; }
+    .stat-lbl { font-family: monospace; font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+    /* Sections */
+    .section-title { font-family: monospace; font-size: 20px; font-weight: bold; color: #ffffff; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .section-title span { color: #38bdf8; }
+    .section { margin-bottom: 40px; }
+
+    /* Skills */
+    .skills-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .skill-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(30, 58, 138, 0.3); border: 1px solid #1e40af; color: #93c5fd; font-family: monospace; font-size: 12px; }
+    .tag-dot { width: 6px; height: 6px; border-radius: 50%; background: #38bdf8; }
+
+    /* Projects */
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+    .project-card { background: rgba(15, 23, 42, 0.75); border: 1px solid #1e293b; border-radius: 16px; padding: 22px; transition: transform 0.2s, border-color 0.2s; display: flex; flex-col; justify-content: space-between; }
+    .project-card:hover { transform: translateY(-3px); border-color: #38bdf8; }
+    .project-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .project-title { font-family: monospace; font-size: 16px; font-weight: bold; color: #ffffff; }
+    .badge-status { font-family: monospace; font-size: 10px; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); border: 1px solid #059669; color: #34d399; }
+    .project-desc { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 14px; }
+    .project-metric { font-family: monospace; font-size: 12px; color: #34d399; margin-bottom: 12px; }
+    .project-footer { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-family: monospace; color: #94a3b8; border-top: 1px solid #1e293b; padding-top: 12px; margin-top: 10px; }
+    .project-tech { color: #93c5fd; }
+    .link-btn { color: #38bdf8; text-decoration: none; font-weight: bold; }
+    .link-btn:hover { text-decoration: underline; }
+
+    /* Timeline */
+    .timeline { background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 20px; padding: 24px 28px; }
+    .timeline-item { position: relative; padding-left: 24px; padding-bottom: 24px; border-left: 2px solid #1e3a8a; }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-dot { position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 2px solid #030712; }
+    .timeline-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+    .timeline-role { font-family: monospace; font-size: 15px; font-weight: bold; color: #ffffff; }
+    .accent-text { color: #38bdf8; }
+    .timeline-period { font-family: monospace; font-size: 11px; background: #0f172a; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; color: #94a3b8; }
+    .timeline-desc { font-size: 13px; color: #cbd5e1; line-height: 1.6; }
+
+    /* Contact Box */
+    .contact-card { text-align: center; background: #0f172a; border: 1px solid #1e3a8a; border-radius: 24px; padding: 40px 24px; margin-top: 40px; }
+    .contact-card h2 { font-family: monospace; font-size: 24px; color: #fff; margin-bottom: 8px; }
+    .contact-card p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
+    .btn-main { display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 28px; border-radius: 12px; font-family: monospace; font-weight: bold; font-size: 14px; text-decoration: none; box-shadow: 0 0 20px rgba(16,185,129,0.3); }
+    .btn-main:hover { background: #059669; }
+
+    footer { text-align: center; padding: 32px 0; font-family: monospace; font-size: 11px; color: #64748b; border-top: 1px solid #1e293b; margin-top: 40px; }
+
+    @media (max-width: 640px) {
+      .hero-title { font-size: 28px; }
+      .hero-top { flex-direction: column; align-items: flex-start; }
+      .nav-links { display: none; }
+    }
   </style>
 </head>
-<body class="min-h-screen selection:bg-emerald-500 selection:text-white">
-  <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
-    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2 font-mono text-sm font-bold text-white">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-        <span class="text-emerald-400">~/</span>${safeName.toLowerCase().replace(/\s+/g, "-")}
+<body>
+  <header class="top-nav">
+    <div class="nav-inner">
+      <div class="brand-logo">
+        <span class="online-dot"></span>
+        <span>~/${safeName.toLowerCase().replace(/\s+/g, "-")}</span>
       </div>
-      <nav class="hidden sm:flex items-center gap-6 text-xs font-mono text-slate-400">
-        <a href="#about" class="hover:text-emerald-400 transition-colors">01. About</a>
-        <a href="#skills" class="hover:text-emerald-400 transition-colors">02. Stack</a>
-        <a href="#projects" class="hover:text-emerald-400 transition-colors">03. Projects</a>
-        ${hasExperience ? '<a href="#experience" class="hover:text-emerald-400 transition-colors">04. Experience</a>' : ''}
-        <a href="#contact" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all">Get in Touch</a>
+      <nav class="nav-links">
+        <a href="#about">01. About</a>
+        <a href="#skills">02. Stack</a>
+        <a href="#projects">03. Projects</a>
+        ${hasExperience ? '<a href="#experience">04. Timeline</a>' : ''}
+        <a href="mailto:${safeEmail}" class="btn-touch">Get in Touch</a>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-6 py-12 space-y-20">
-    <section id="about" class="pt-6">
-      <div class="rounded-3xl border border-emerald-900/50 bg-gradient-to-b from-slate-900/90 to-slate-950 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
-          ${avatarElement}
-          <div>
-            <div class="flex items-center gap-2 text-xs font-mono text-emerald-400 mb-2">
-              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span> STATUS: ACTIVE_DEV
-            </div>
-            <h1 class="text-3xl sm:text-5xl font-extrabold font-mono text-white tracking-tight leading-tight">
-              &gt; ${safeName}
-            </h1>
-            <p class="text-lg sm:text-xl font-mono text-emerald-400 mt-1 font-semibold">[ ${safeTitle} ]</p>
+  <div class="container">
+    <section id="about" class="hero-card">
+      <div class="hero-top">
+        ${avatarHtml}
+        <div>
+          <div class="status-badge">
+            <span class="online-dot"></span> STATUS: OPEN_FOR_ROLES
           </div>
+          <h1 class="hero-title">&gt; ${safeName}</h1>
+          <div class="hero-subtitle">[ ${safeTitle} ]</div>
         </div>
-        <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-3xl mt-4">${safeBio}</p>
-        
-        ${safeGithub ? `
-        <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-3">
-          <span class="text-xs font-mono text-slate-400">GitHub:</span>
-          <a href="${safeGithub.startsWith('http') ? safeGithub : `https://github.com/${safeGithub}`}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-mono">
-            🐙 github.com/${safeGithub.replace(/^https?:\/\/github\.com\//, '')} →
-          </a>
-        </div>` : ""}
+      </div>
+      <p class="hero-bio">${safeBio}</p>
+      
+      ${safeGithub ? `
+      <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #1e293b; font-family: monospace; font-size: 12px; color: #94a3b8;">
+        GitHub: <a href="${safeGithub.startsWith('http') ? safeGithub : `https://github.com/${safeGithub}`}" target="_blank" style="color: #38bdf8; text-decoration: underline;">${safeGithub} →</a>
+      </div>` : ""}
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-slate-800">
-          ${statsHtml}
-        </div>
+      <div class="stats-grid">
+        ${statsHtml}
       </div>
     </section>
 
-    <section id="skills" class="space-y-6">
-      <h2 class="text-xl sm:text-2xl font-mono font-bold text-white flex items-center gap-3">
-        <span class="text-emerald-400">//</span> Technical Skills &amp; Stack
-      </h2>
-      <div class="flex flex-wrap gap-2.5">
-        ${skillsHtml}
-      </div>
+    <section id="skills" class="section">
+      <h2 class="section-title"><span>// 02.</span> Core Competencies &amp; Stack</h2>
+      <div class="skills-grid">${skillsHtml}</div>
     </section>
 
-    <section id="projects" class="space-y-6">
-      <h2 class="text-xl sm:text-2xl font-mono font-bold text-white flex items-center gap-3">
-        <span class="text-emerald-400">//</span> Featured Code Repositories &amp; Systems
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        ${projectsHtml}
-      </div>
+    <section id="projects" class="section">
+      <h2 class="section-title"><span>// 03.</span> Featured Systems &amp; Projects</h2>
+      <div class="projects-grid">${projectsHtml}</div>
     </section>
 
     ${hasExperience ? `
-    <section id="experience" class="space-y-6">
-      <h2 class="text-xl sm:text-2xl font-mono font-bold text-white flex items-center gap-3">
-        <span class="text-emerald-400">//</span> Production Career Timeline
-      </h2>
-      <div class="bg-slate-900/60 border border-slate-800/80 p-8 rounded-3xl">
-        ${expHtml}
-      </div>
+    <section id="experience" class="section">
+      <h2 class="section-title"><span>// 04.</span> Engineering Career Timeline</h2>
+      <div class="timeline">${expHtml}</div>
     </section>` : ''}
 
-    <section id="contact" class="rounded-3xl border border-emerald-900/40 bg-slate-950 p-8 sm:p-12 text-center space-y-6">
-      <h2 class="text-3xl font-mono font-bold text-white">Let&#39;s Build Something Scalable</h2>
-      <p class="text-slate-400 text-sm max-w-xl mx-auto font-mono">Open for architecture consultations, software engineering roles, and innovative projects.</p>
-      <a href="mailto:${safeEmail}" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold transition-all shadow-lg shadow-emerald-600/20">
-        Initiate Contact &gt;
-      </a>
+    <section class="contact-card">
+      <h2>Let&#39;s Build Scalable Systems</h2>
+      <p>Available for engineering roles, technical architecture, and consulting.</p>
+      <a href="mailto:${safeEmail}" class="btn-main">Initiate Contact &gt;</a>
     </section>
-  </main>
 
-  <footer class="border-t border-slate-900 py-8 text-center text-xs font-mono text-slate-600">
-    © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI.
-  </footer>
+    <footer>
+      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Multi-Design Portfolio Studio.
+    </footer>
+  </div>
 </body>
 </html>`;
 }
 
 // ---------------------------------------------------------------------------
-// TEMPLATE 2: MINIMAL / BENTO STUDIO (Designers, PMs, Creators)
+// 2. TEMPLATE 2: MINIMAL / BENTO STUDIO
 // ---------------------------------------------------------------------------
 function renderMinimalTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Designer");
   const safeTitle = escapeHtml(data.title || "Product Designer & Strategist");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
-  const avatarElement = renderAvatar(data.avatarUrl, data.name, "bento");
+  const avatarHtml = renderAvatar(data.avatarUrl, data.name, "bento");
 
   const skillsHtml = (data.skills || [])
-    .map((s) => `<span class="px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-800 font-medium text-xs border border-slate-200">${escapeHtml(s)}</span>`)
+    .map((s) => `<span class="bento-pill">${escapeHtml(s)}</span>`)
     .join("");
 
   const projectsHtml = (data.projects || [])
     .map(
       (p) => `
-      <div class="bg-white border border-slate-200/80 p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
-        <div>
-          <div class="flex items-center justify-between gap-2 mb-3">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Case Study</span>
-            ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" class="text-xs font-bold text-slate-400 group-hover:text-indigo-600">View ↗</a>` : ""}
-          </div>
-          <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">${escapeHtml(p.title)}</h3>
-          <p class="text-sm text-slate-600 leading-relaxed mb-4">${escapeHtml(p.description)}</p>
-          ${p.metrics ? `<div class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl inline-block mb-3">✦ ${escapeHtml(p.metrics)}</div>` : ""}
-        </div>
-        <div class="pt-4 border-t border-slate-100 text-xs font-medium text-slate-400">
-          ${escapeHtml(p.tech)}
+      <div class="bento-card">
+        <div class="card-tag">Case Study</div>
+        <h3 class="card-title">${escapeHtml(p.title)}</h3>
+        <p class="card-desc">${escapeHtml(p.description)}</p>
+        ${p.metrics ? `<div class="card-metric">✦ ${escapeHtml(p.metrics)}</div>` : ""}
+        <div class="card-footer">
+          <span>${escapeHtml(p.tech)}</span>
+          ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank">View ↗</a>` : ""}
         </div>
       </div>`
     )
@@ -481,92 +492,151 @@ function renderMinimalTemplate(data: PortfolioData): string {
     ? (data.experience || [])
         .map(
           (e) => `
-        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 py-4 border-b border-slate-100 last:border-none">
+        <div class="exp-row">
           <div>
-            <h4 class="text-base font-bold text-slate-900">${escapeHtml(e.role)}</h4>
-            <div class="text-xs font-semibold text-indigo-600 mt-0.5">${escapeHtml(e.company)}</div>
-            <p class="text-sm text-slate-600 mt-1">${escapeHtml(e.summary)}</p>
+            <div class="exp-role">${escapeHtml(e.role)}</div>
+            <div class="exp-company">${escapeHtml(e.company)}</div>
+            <p class="exp-desc">${escapeHtml(e.summary)}</p>
           </div>
-          <span class="text-xs text-slate-400 font-medium whitespace-nowrap">${escapeHtml(e.period)}</span>
+          <div class="exp-period">${escapeHtml(e.period)}</div>
         </div>`
         )
         .join("")
     : "";
 
   return `<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeName} — Portfolio</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #f8fafc; color: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', Roboto, sans-serif;
+      line-height: 1.6; margin: 0; padding: 32px 16px;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    
+    /* Bento Hero Grid */
+    .hero-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .bento-hero {
+      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 28px;
+      padding: 36px 32px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .hero-header { display: flex; align-items: center; gap: 20px; margin-bottom: 16px; }
+    .bento-side {
+      background: #4f46e5; color: #ffffff; border-radius: 28px;
+      padding: 36px 28px; display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: 0 15px 35px -10px rgba(79, 70, 229, 0.4);
+    }
+    .badge-soft {
+      display: inline-block; padding: 4px 12px; border-radius: 9999px;
+      background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .name-h1 { font-size: 32px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+    .role-p { font-size: 16px; font-weight: 600; color: #4f46e5; margin-top: 2px; }
+    .bio-p { color: #475569; font-size: 14px; line-height: 1.7; margin-top: 12px; }
+    .btn-say-hello {
+      display: inline-flex; align-items: center; gap: 6px; background: #0f172a;
+      color: #fff; padding: 10px 22px; border-radius: 9999px; font-size: 12px;
+      font-weight: 700; text-decoration: none; margin-top: 20px; width: fit-content;
+    }
+
+    /* Avatars */
+    .avatar-wrap { width: 84px; height: 84px; border-radius: 24px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .avatar-bento { border: 4px solid #e0e7ff; background: #f1f5f9; }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-initials { font-weight: 800; font-size: 28px; color: #ffffff; background: #4f46e5; }
+
+    /* Bento Boxes */
+    .bento-box {
+      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px;
+      padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 20px -5px rgba(0,0,0,0.03);
+    }
+    .box-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 14px; }
+    .pills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .bento-pill { background: #f1f5f9; border: 1px solid #e2e8f0; color: #1e293b; padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+
+    /* Projects Grid */
+    .sec-h2 { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 16px; }
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 24px; }
+    .bento-card {
+      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px;
+      padding: 24px; box-shadow: 0 4px 15px -3px rgba(0,0,0,0.03);
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .card-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #4f46e5; background: #eef2ff; padding: 3px 10px; border-radius: 9999px; width: fit-content; margin-bottom: 10px; }
+    .card-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 14px; }
+    .card-metric { font-size: 11px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 4px 10px; border-radius: 8px; width: fit-content; margin-bottom: 12px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; font-weight: 600; border-top: 1px solid #f1f5f9; padding-top: 10px; }
+    .card-footer a { color: #4f46e5; text-decoration: none; font-weight: 700; }
+
+    /* Experience */
+    .exp-row { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+    .exp-row:last-child { border-bottom: none; }
+    .exp-role { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .exp-company { font-size: 12px; font-weight: 600; color: #4f46e5; margin-top: 2px; }
+    .exp-desc { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .exp-period { font-size: 12px; color: #94a3b8; font-weight: 500; white-space: nowrap; }
+
+    footer { text-align: center; padding: 24px 0; font-size: 12px; color: #94a3b8; }
+
+    @media (max-width: 768px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
-<body class="min-h-screen">
-  <div class="max-w-5xl mx-auto px-6 py-12 sm:py-20 space-y-12">
-    <!-- Bento Hero Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="md:col-span-2 bg-white border border-slate-200/80 p-8 sm:p-12 rounded-3xl shadow-sm space-y-4 flex flex-col justify-between">
-        <div class="space-y-4">
-          <div class="flex items-center gap-5">
-            ${avatarElement}
+<body>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="bento-hero">
+        <div>
+          <div class="hero-header">
+            ${avatarHtml}
             <div>
-              <span class="inline-block px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider">Portfolio</span>
-              <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mt-1">${safeName}</h1>
-              <p class="text-base sm:text-lg font-semibold text-indigo-600 mt-0.5">${safeTitle}</p>
+              <span class="badge-soft">Portfolio</span>
+              <h1 class="name-h1">${safeName}</h1>
+              <div class="role-p">${safeTitle}</div>
             </div>
           </div>
-          <p class="text-slate-600 text-sm sm:text-base leading-relaxed pt-2">${safeBio}</p>
+          <p class="bio-p">${safeBio}</p>
         </div>
-        <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
-          <a href="mailto:${safeEmail}" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-md">
-            Say Hello ↗
-          </a>
-        </div>
+        <a href="mailto:${safeEmail}" class="btn-say-hello">Say Hello ↗</a>
       </div>
 
-      <div class="bg-indigo-600 text-white p-8 sm:p-10 rounded-3xl shadow-xl flex flex-col justify-between space-y-6">
+      <div class="bento-side">
         <div>
-          <span class="text-xs font-bold uppercase tracking-widest text-indigo-200">Design Focus</span>
-          <h3 class="text-2xl font-bold mt-2 leading-snug">Crafting intuitive digital experiences.</h3>
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #c7d2fe;">Design Focus</div>
+          <h3 style="font-size: 20px; font-weight: 800; margin-top: 8px; line-height: 1.4;">Crafting intuitive user-first experiences.</h3>
         </div>
-        <div class="space-y-2">
-          <div class="text-3xl font-extrabold">${(data.skills || []).length}+</div>
-          <div class="text-xs text-indigo-200 font-medium">Core design &amp; product capabilities</div>
+        <div style="margin-top: 20px;">
+          <div style="font-size: 32px; font-weight: 800;">${(data.skills || []).length}+</div>
+          <div style="font-size: 12px; color: #c7d2fe;">Core capabilities &amp; toolsets</div>
         </div>
       </div>
     </div>
 
-    <!-- Skills Bento Box -->
-    <div class="bg-white border border-slate-200/80 p-8 rounded-3xl shadow-sm space-y-4">
-      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Toolkit &amp; Methodologies</h3>
-      <div class="flex flex-wrap gap-2">
-        ${skillsHtml}
-      </div>
+    <div class="bento-box">
+      <div class="box-title">Toolkit &amp; Methodologies</div>
+      <div class="pills-wrap">${skillsHtml}</div>
     </div>
 
-    <!-- Projects Grid -->
-    <div class="space-y-6">
-      <h2 class="text-2xl font-bold text-slate-900">Featured Work &amp; Case Studies</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        ${projectsHtml}
-      </div>
-    </div>
+    <h2 class="sec-h2">Featured Work &amp; Case Studies</h2>
+    <div class="projects-grid">${projectsHtml}</div>
 
     ${hasExperience ? `
-    <!-- Experience Bento -->
-    <div class="bg-white border border-slate-200/80 p-8 sm:p-10 rounded-3xl shadow-sm space-y-4">
-      <h2 class="text-2xl font-bold text-slate-900 mb-2">Professional Journey</h2>
-      <div class="divide-y divide-slate-100">
-        ${expHtml}
-      </div>
+    <div class="bento-box">
+      <div class="box-title">Professional Journey</div>
+      <div>${expHtml}</div>
     </div>` : ''}
 
-    <footer class="text-center text-xs text-slate-400 py-6">
-      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI.
+    <footer>
+      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
     </footer>
   </div>
 </body>
@@ -574,46 +644,44 @@ function renderMinimalTemplate(data: PortfolioData): string {
 }
 
 // ---------------------------------------------------------------------------
-// TEMPLATE 3: EXECUTIVE GLASS (Leaders, Directors, Consultants, Finance)
+// 3. TEMPLATE 3: EXECUTIVE / MODERN GLASS
 // ---------------------------------------------------------------------------
 function renderExecutiveTemplate(data: PortfolioData): string {
-  const safeName = escapeHtml(data.name || "Executive");
-  const safeTitle = escapeHtml(data.title || "Senior Leadership & Strategy");
+  const safeName = escapeHtml(data.name || "Leader");
+  const safeTitle = escapeHtml(data.title || "Executive Director & Strategist");
   const safeBio = escapeHtml(data.bio || "");
-  const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
-  const avatarElement = renderAvatar(data.avatarUrl, data.name, "glass");
+  const safeEmail = escapeHtml(data.email || "executive@example.com");
+  const avatarHtml = renderAvatar(data.avatarUrl, data.name, "glass");
 
   const statsHtml = (data.stats || [
-    { label: "Strategic Leadership", value: "Executive" },
+    { label: "Strategic Focus", value: "Executive" },
     { label: "Core Competencies", value: `${(data.skills || []).length}+` },
     { label: "Key Initiatives", value: `${(data.projects || []).length}` },
   ])
     .map(
       (s) => `
-      <div class="bg-slate-800/60 border border-slate-700/60 p-6 rounded-2xl backdrop-blur-md text-center">
-        <div class="text-3xl font-bold text-blue-400">${escapeHtml(s.value)}</div>
-        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">${escapeHtml(s.label)}</div>
+      <div class="exec-stat-card">
+        <div class="exec-stat-val">${escapeHtml(s.value)}</div>
+        <div class="exec-stat-lbl">${escapeHtml(s.label)}</div>
       </div>`
     )
     .join("");
 
   const skillsHtml = (data.skills || [])
-    .map((s) => `<span class="px-4 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-semibold">${escapeHtml(s)}</span>`)
+    .map((s) => `<span class="exec-skill">${escapeHtml(s)}</span>`)
     .join("");
 
   const projectsHtml = (data.projects || [])
     .map(
       (p) => `
-      <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl backdrop-blur-md space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold text-white">${escapeHtml(p.title)}</h3>
-          <span class="text-xs font-semibold text-blue-400 bg-blue-950/60 border border-blue-800/60 px-3 py-1 rounded-full">Initiative</span>
+      <div class="exec-card">
+        <div class="exec-card-head">
+          <h3 class="exec-card-title">${escapeHtml(p.title)}</h3>
+          <span class="exec-tag">Initiative</span>
         </div>
-        <p class="text-sm text-slate-300 leading-relaxed">${escapeHtml(p.description)}</p>
-        ${p.metrics ? `<div class="text-xs font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-3 py-1.5 rounded-lg inline-block">⚡ ${escapeHtml(p.metrics)}</div>` : ""}
-        <div class="pt-3 border-t border-slate-800 text-xs text-slate-400 font-medium">
-          Strategic Focus: <span class="text-slate-300">${escapeHtml(p.tech)}</span>
-        </div>
+        <p class="exec-card-desc">${escapeHtml(p.description)}</p>
+        ${p.metrics ? `<div class="exec-metric">⚡ Impact: ${escapeHtml(p.metrics)}</div>` : ""}
+        <div class="exec-card-foot">Focus: ${escapeHtml(p.tech)}</div>
       </div>`
     )
     .join("");
@@ -623,80 +691,138 @@ function renderExecutiveTemplate(data: PortfolioData): string {
     ? (data.experience || [])
         .map(
           (e) => `
-        <div class="border-l-2 border-blue-500/40 pl-6 py-2 space-y-1">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <h4 class="text-lg font-bold text-white">${escapeHtml(e.role)}</h4>
-            <span class="text-xs font-semibold text-blue-400">${escapeHtml(e.period)}</span>
+        <div class="exec-timeline-row">
+          <div class="exec-time-head">
+            <h4 class="exec-time-role">${escapeHtml(e.role)} · <span style="color: #38bdf8;">${escapeHtml(e.company)}</span></h4>
+            <span class="exec-time-period">${escapeHtml(e.period)}</span>
           </div>
-          <div class="text-xs font-semibold text-slate-400">${escapeHtml(e.company)}</div>
-          <p class="text-sm text-slate-300 leading-relaxed pt-1">${escapeHtml(e.summary)}</p>
+          <p class="exec-time-desc">${escapeHtml(e.summary)}</p>
         </div>`
         )
         .join("")
     : "";
 
   return `<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeName} — Executive Brief</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #0b1120; color: #f1f5f9; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0b1120; color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      line-height: 1.6; margin: 0; padding: 40px 20px;
+    }
+    .container { max-width: 980px; margin: 0 auto; }
+    
+    .exec-hero {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 28px;
+      padding: 40px 36px; box-shadow: 0 20px 45px -10px rgba(0,0,0,0.6);
+      margin-bottom: 36px; backdrop-filter: blur(12px);
+    }
+    .hero-top { display: flex; align-items: center; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
+    .exec-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .exec-name { font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+    .exec-title { font-size: 18px; font-weight: 600; color: #94a3b8; margin-top: 2px; }
+    .exec-bio { color: #cbd5e1; font-size: 15px; line-height: 1.7; max-width: 820px; margin-top: 14px; }
+
+    /* Avatars */
+    .avatar-wrap { width: 88px; height: 88px; border-radius: 20px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .avatar-glass { border: 2px solid #334155; background: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-initials { font-weight: 800; font-size: 26px; color: #38bdf8; background: #1e293b; }
+
+    /* Exec Stats */
+    .exec-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-top: 28px; padding-top: 24px; border-top: 1px solid #334155; }
+    .exec-stat-card { background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 14px; padding: 16px; text-align: center; }
+    .exec-stat-val { font-size: 24px; font-weight: 800; color: #38bdf8; }
+    .exec-stat-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #94a3b8; margin-top: 4px; }
+
+    /* Sections */
+    .sec-h2 { font-size: 20px; font-weight: 700; color: #ffffff; margin-bottom: 16px; border-left: 4px solid #38bdf8; padding-left: 12px; }
+    .section { margin-bottom: 36px; }
+    
+    .exec-skills-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+    .exec-skill { background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; color: #cbd5e1; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+
+    /* Cards */
+    .exec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+    .exec-card {
+      background: rgba(15, 23, 42, 0.75); border: 1px solid #334155; border-radius: 20px;
+      padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .exec-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .exec-card-title { font-size: 17px; font-weight: 700; color: #ffffff; }
+    .exec-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #38bdf8; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 3px 10px; border-radius: 9999px; }
+    .exec-card-desc { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 12px; }
+    .exec-metric { font-size: 12px; font-weight: 700; color: #34d399; background: rgba(16, 185, 129, 0.1); padding: 6px 12px; border-radius: 8px; width: fit-content; margin-bottom: 12px; }
+    .exec-card-foot { font-size: 11px; color: #64748b; font-weight: 500; border-top: 1px solid #1e293b; padding-top: 10px; }
+
+    /* Timeline */
+    .exec-timeline { background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 24px; padding: 28px; }
+    .exec-timeline-row { padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid #1e293b; }
+    .exec-timeline-row:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: none; }
+    .exec-time-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+    .exec-time-role { font-size: 16px; font-weight: 700; color: #ffffff; }
+    .exec-time-period { font-size: 11px; font-weight: 600; color: #38bdf8; }
+    .exec-time-desc { font-size: 13px; color: #94a3b8; line-height: 1.6; }
+
+    /* CTA Box */
+    .exec-cta { text-align: center; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 24px; padding: 36px 20px; }
+    .exec-cta h3 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .exec-cta p { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+    .btn-exec { display: inline-block; background: #0284c7; color: #fff; padding: 12px 28px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; box-shadow: 0 10px 20px rgba(2, 132, 199, 0.3); }
+    .btn-exec:hover { background: #0369a1; }
+
+    footer { text-align: center; padding: 24px 0; font-size: 11px; color: #64748b; }
   </style>
 </head>
-<body class="min-h-screen">
-  <div class="max-w-5xl mx-auto px-6 py-16 space-y-16">
-    <header class="bg-gradient-to-b from-slate-800/80 to-slate-900/90 border border-slate-700/80 p-8 sm:p-14 rounded-3xl shadow-2xl backdrop-blur-lg">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
-        ${avatarElement}
+<body>
+  <div class="container">
+    <div class="exec-hero">
+      <div class="hero-top">
+        ${avatarHtml}
         <div>
-          <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Executive Profile</span>
-          <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-1">${safeName}</h1>
-          <p class="text-lg sm:text-xl font-semibold text-slate-300 mt-1">${safeTitle}</p>
+          <span class="exec-badge">Executive Profile</span>
+          <h1 class="exec-name">${safeName}</h1>
+          <div class="exec-title">${safeTitle}</div>
         </div>
       </div>
-      <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-3xl pt-2">${safeBio}</p>
-      
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 pt-8 border-t border-slate-700/80">
-        ${statsHtml}
-      </div>
-    </header>
+      <p class="exec-bio">${safeBio}</p>
+      <div class="exec-stats-grid">${statsHtml}</div>
+    </div>
 
-    <section class="space-y-6">
-      <h2 class="text-2xl font-bold text-white tracking-tight">Core Competencies &amp; Governance</h2>
-      <div class="flex flex-wrap gap-2.5">
-        ${skillsHtml}
-      </div>
+    <section class="section">
+      <h2 class="sec-h2">Core Competencies &amp; Governance</h2>
+      <div class="exec-skills-wrap">${skillsHtml}</div>
     </section>
 
-    <section class="space-y-6">
-      <h2 class="text-2xl font-bold text-white tracking-tight">Strategic Initiatives &amp; Results</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        ${projectsHtml}
-      </div>
+    <section class="section">
+      <h2 class="sec-h2">Strategic Initiatives &amp; Impact</h2>
+      <div class="exec-grid">${projectsHtml}</div>
     </section>
 
     ${hasExperience ? `
-    <section class="space-y-6">
-      <h2 class="text-2xl font-bold text-white tracking-tight">Leadership History</h2>
-      <div class="bg-slate-900/70 border border-slate-800 p-8 rounded-3xl space-y-6">
-        ${expHtml}
-      </div>
+    <section class="section">
+      <h2 class="sec-h2">Leadership History</h2>
+      <div class="exec-timeline">${expHtml}</div>
     </section>` : ''}
 
-    <section class="text-center py-10 bg-slate-900/40 border border-slate-800/80 rounded-3xl p-8">
-      <h3 class="text-2xl font-bold text-white">Direct Advisory &amp; Engagement</h3>
-      <p class="text-slate-400 text-sm mt-2 mb-6">Reach out to discuss strategic advisory, board roles, or leadership opportunities.</p>
-      <a href="mailto:${safeEmail}" class="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-lg shadow-blue-600/20">
-        Contact Executive
-      </a>
-    </section>
+    <div class="exec-cta">
+      <h3>Direct Advisory &amp; Leadership Inquiries</h3>
+      <p>Confidential discussions for executive roles, board advisory, and consulting.</p>
+      <a href="mailto:${safeEmail}" class="btn-exec">Contact Executive</a>
+    </div>
 
-    <footer class="text-center text-xs text-slate-500 py-4">
-      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI.
+    <footer>
+      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
     </footer>
   </div>
 </body>
@@ -704,14 +830,14 @@ function renderExecutiveTemplate(data: PortfolioData): string {
 }
 
 // ---------------------------------------------------------------------------
-// TEMPLATE 4: VIBRANT / GRADIENT SAAS (Marketing, Growth, Creators, Founders)
+// 4. TEMPLATE 4: VIBRANT / GRADIENT SAAS
 // ---------------------------------------------------------------------------
 function renderVibrantTemplate(data: PortfolioData): string {
-  const safeName = escapeHtml(data.name || "Growth Lead");
+  const safeName = escapeHtml(data.name || "Creator");
   const safeTitle = escapeHtml(data.title || "Growth Marketer & Builder");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
-  const avatarElement = renderAvatar(data.avatarUrl, data.name, "gradient");
+  const avatarHtml = renderAvatar(data.avatarUrl, data.name, "gradient");
 
   const statsHtml = (data.stats || [
     { label: "Growth Focus", value: "Metrics" },
@@ -720,30 +846,26 @@ function renderVibrantTemplate(data: PortfolioData): string {
   ])
     .map(
       (s) => `
-      <div class="bg-purple-950/40 border border-purple-800/40 p-6 rounded-2xl text-center backdrop-blur-md">
-        <div class="text-3xl font-extrabold text-pink-400">${escapeHtml(s.value)}</div>
-        <div class="text-xs font-bold uppercase tracking-wider text-purple-300 mt-1">${escapeHtml(s.label)}</div>
+      <div class="vib-stat-card">
+        <div class="vib-stat-val">${escapeHtml(s.value)}</div>
+        <div class="vib-stat-lbl">${escapeHtml(s.label)}</div>
       </div>`
     )
     .join("");
 
   const skillsHtml = (data.skills || [])
-    .map((s) => `<span class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-950 to-indigo-950 border border-purple-800/60 text-purple-200 text-xs font-bold">${escapeHtml(s)}</span>`)
+    .map((s) => `<span class="vib-skill">✨ ${escapeHtml(s)}</span>`)
     .join("");
 
   const projectsHtml = (data.projects || [])
     .map(
       (p) => `
-      <div class="bg-slate-900/90 border border-purple-900/40 hover:border-pink-500/60 p-8 rounded-3xl transition-all duration-300 space-y-4 group">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold text-white group-hover:text-pink-400 transition-colors">${escapeHtml(p.title)}</h3>
-          <span class="text-xs font-bold text-pink-400 bg-pink-950/60 px-3 py-1 rounded-full border border-pink-800/60">Campaign</span>
-        </div>
-        <p class="text-sm text-slate-300 leading-relaxed">${escapeHtml(p.description)}</p>
-        ${p.metrics ? `<div class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-3 py-1.5 rounded-xl inline-block">🚀 Impact: ${escapeHtml(p.metrics)}</div>` : ""}
-        <div class="pt-3 border-t border-slate-800 text-xs text-purple-300">
-          Channels / Stack: <span class="text-slate-300">${escapeHtml(p.tech)}</span>
-        </div>
+      <div class="vib-card">
+        <div class="vib-tag">Campaign</div>
+        <h3 class="vib-card-title">${escapeHtml(p.title)}</h3>
+        <p class="vib-card-desc">${escapeHtml(p.description)}</p>
+        ${p.metrics ? `<div class="vib-metric">🚀 Impact: ${escapeHtml(p.metrics)}</div>` : ""}
+        <div class="vib-card-foot">Channels: ${escapeHtml(p.tech)}</div>
       </div>`
     )
     .join("");
@@ -753,82 +875,136 @@ function renderVibrantTemplate(data: PortfolioData): string {
     ? (data.experience || [])
         .map(
           (e) => `
-        <div class="p-6 rounded-2xl bg-purple-950/20 border border-purple-900/30 space-y-1">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <h4 class="text-lg font-bold text-white">${escapeHtml(e.role)}</h4>
-            <span class="text-xs font-bold text-pink-400">${escapeHtml(e.period)}</span>
+        <div class="vib-exp-card">
+          <div class="vib-exp-head">
+            <h4 class="vib-exp-role">${escapeHtml(e.role)}</h4>
+            <span class="vib-exp-period">${escapeHtml(e.period)}</span>
           </div>
-          <div class="text-xs font-bold text-purple-300">${escapeHtml(e.company)}</div>
-          <p class="text-sm text-slate-300 pt-2">${escapeHtml(e.summary)}</p>
+          <div class="vib-exp-comp">${escapeHtml(e.company)}</div>
+          <p class="vib-exp-desc">${escapeHtml(e.summary)}</p>
         </div>`
         )
         .join("")
     : "";
 
   return `<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeName} — Growth &amp; Strategy</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #090d16; color: #f8fafc; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #070714; color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; margin: 0; padding: 40px 20px;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+
+    .vib-hero {
+      background: linear-gradient(135deg, #180d2e 0%, #0c071e 100%);
+      border: 1px solid #4c1d95; border-radius: 28px;
+      padding: 40px 36px; box-shadow: 0 20px 50px -10px rgba(139, 92, 246, 0.25);
+      margin-bottom: 36px; position: relative; overflow: hidden;
+    }
+    .hero-top { display: flex; align-items: center; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
+    .vib-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 9999px;
+      background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.4);
+      color: #f472b6; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .vib-name { font-size: 36px; font-weight: 800; color: #ffffff; background: linear-gradient(90deg, #fff 0%, #f472b6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .vib-title { font-size: 18px; font-weight: 700; color: #c084fc; margin-top: 2px; }
+    .vib-bio { color: #cbd5e1; font-size: 15px; line-height: 1.7; max-width: 800px; margin-top: 14px; }
+
+    /* Avatars */
+    .avatar-wrap { width: 88px; height: 88px; border-radius: 50%; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 3px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .avatar-initials { font-weight: 800; font-size: 26px; color: #f472b6; background: #0c071e; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    /* Stats */
+    .vib-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-top: 28px; padding-top: 24px; border-top: 1px solid #2e1065; }
+    .vib-stat-card { background: rgba(30, 15, 60, 0.6); border: 1px solid #4c1d95; border-radius: 16px; padding: 16px; text-align: center; }
+    .vib-stat-val { font-size: 24px; font-weight: 800; color: #f472b6; }
+    .vib-stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #c084fc; margin-top: 4px; }
+
+    /* Sections */
+    .sec-h2 { font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 16px; }
+    .section { margin-bottom: 36px; }
+    
+    .vib-skills-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+    .vib-skill { background: linear-gradient(90deg, #2e1065 0%, #1e1b4b 100%); border: 1px solid #4c1d95; color: #e9d5ff; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+
+    /* Cards */
+    .vib-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; }
+    .vib-card {
+      background: #0f0b24; border: 1px solid #2e1065; border-radius: 20px;
+      padding: 24px; transition: transform 0.2s, border-color 0.2s;
+    }
+    .vib-card:hover { transform: translateY(-3px); border-color: #ec4899; }
+    .vib-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #f472b6; background: rgba(236, 72, 153, 0.15); padding: 3px 10px; border-radius: 9999px; width: fit-content; margin-bottom: 10px; }
+    .vib-card-title { font-size: 17px; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+    .vib-card-desc { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px; }
+    .vib-metric { font-size: 12px; font-weight: 700; color: #34d399; background: rgba(16, 185, 129, 0.15); padding: 6px 12px; border-radius: 8px; width: fit-content; margin-bottom: 12px; }
+    .vib-card-foot { font-size: 11px; color: #a855f7; font-weight: 600; border-top: 1px solid #1f1640; padding-top: 10px; }
+
+    /* Experience */
+    .vib-exp-card { background: rgba(30, 15, 60, 0.3); border: 1px solid #2e1065; border-radius: 16px; padding: 18px; margin-bottom: 12px; }
+    .vib-exp-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+    .vib-exp-role { font-size: 16px; font-weight: 700; color: #ffffff; }
+    .vib-exp-period { font-size: 11px; font-weight: 700; color: #f472b6; }
+    .vib-exp-comp { font-size: 12px; font-weight: 700; color: #c084fc; margin-top: 2px; }
+    .vib-exp-desc { font-size: 13px; color: #cbd5e1; margin-top: 6px; }
+
+    /* CTA */
+    .vib-cta { text-align: center; background: linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%); border: 1px solid #4c1d95; border-radius: 24px; padding: 40px 20px; }
+    .vib-cta h3 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .vib-cta p { font-size: 13px; color: #d8b4fe; margin-bottom: 20px; }
+    .btn-vib { display: inline-block; background: linear-gradient(90deg, #9333ea 0%, #db2777 100%); color: #fff; padding: 12px 30px; border-radius: 9999px; font-size: 13px; font-weight: 800; text-decoration: none; box-shadow: 0 10px 25px rgba(219, 39, 119, 0.4); }
+
+    footer { text-align: center; padding: 24px 0; font-size: 11px; color: #64748b; }
   </style>
 </head>
-<body class="min-h-screen">
-  <div class="max-w-5xl mx-auto px-6 py-16 space-y-16">
-    <header class="relative p-8 sm:p-14 rounded-3xl bg-gradient-to-tr from-purple-950/80 via-slate-900 to-slate-950 border border-purple-800/40 shadow-2xl overflow-hidden">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
-        ${avatarElement}
+<body>
+  <div class="container">
+    <div class="vib-hero">
+      <div class="hero-top">
+        ${avatarHtml}
         <div>
-          <span class="inline-block px-3 py-1 rounded-full bg-pink-500/10 text-pink-400 text-xs font-extrabold uppercase tracking-wider">Growth Architect</span>
-          <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-pink-300">
-            ${safeName}
-          </h1>
-          <p class="text-lg sm:text-xl font-bold text-purple-300 mt-1">${safeTitle}</p>
+          <span class="vib-badge">Growth Architect</span>
+          <h1 class="vib-name">${safeName}</h1>
+          <div class="vib-title">${safeTitle}</div>
         </div>
       </div>
-      <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-3xl pt-2">${safeBio}</p>
-      
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 pt-8 border-t border-purple-900/40">
-        ${statsHtml}
-      </div>
-    </header>
+      <p class="vib-bio">${safeBio}</p>
+      <div class="vib-stats-grid">${statsHtml}</div>
+    </div>
 
-    <section class="space-y-6">
-      <h2 class="text-2xl font-bold text-white">Growth Stack &amp; Channels</h2>
-      <div class="flex flex-wrap gap-2.5">
-        ${skillsHtml}
-      </div>
+    <section class="section">
+      <h2 class="sec-h2">Growth Stack &amp; Channels</h2>
+      <div class="vib-skills-wrap">${skillsHtml}</div>
     </section>
 
-    <section class="space-y-6">
-      <h2 class="text-2xl font-bold text-white">Campaign Case Studies</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        ${projectsHtml}
-      </div>
+    <section class="section">
+      <h2 class="sec-h2">Campaign Case Studies</h2>
+      <div class="vib-grid">${projectsHtml}</div>
     </section>
 
     ${hasExperience ? `
-    <section class="space-y-6">
-      <h2 class="text-2xl font-bold text-white">Growth Track Record</h2>
-      <div class="space-y-4">
-        ${expHtml}
-      </div>
+    <section class="section">
+      <h2 class="sec-h2">Growth Track Record</h2>
+      <div>${expHtml}</div>
     </section>` : ''}
 
-    <section class="text-center py-12 rounded-3xl bg-gradient-to-r from-purple-950/60 to-pink-950/60 border border-purple-800/40 p-8">
-      <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Ready to accelerate your next milestone?</h3>
-      <p class="text-purple-200 text-sm mt-2 mb-6">Open for growth marketing leadership, consulting, and ambitious collaborations.</p>
-      <a href="mailto:${safeEmail}" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold transition-all shadow-xl shadow-pink-600/25">
-        Let&#39;s Talk Growth 🚀
-      </a>
-    </section>
+    <div class="vib-cta">
+      <h3>Ready to accelerate your next milestone?</h3>
+      <p>Open for growth marketing leadership, consulting, and ambitious collaborations.</p>
+      <a href="mailto:${safeEmail}" class="btn-vib">Let&#39;s Talk Growth 🚀</a>
+    </div>
 
-    <footer class="text-center text-xs text-slate-500 py-4">
-      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI.
+    <footer>
+      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
     </footer>
   </div>
 </body>
@@ -836,27 +1012,27 @@ function renderVibrantTemplate(data: PortfolioData): string {
 }
 
 // ---------------------------------------------------------------------------
-// TEMPLATE 5: EDITORIAL / WARM SERIF (Writers, Academics, Healthcare, Legal)
+// 5. TEMPLATE 5: EDITORIAL / WARM SERIF
 // ---------------------------------------------------------------------------
 function renderEditorialTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Scholar");
   const safeTitle = escapeHtml(data.title || "Writer, Researcher & Academic");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
-  const avatarElement = renderAvatar(data.avatarUrl, data.name, "serif");
+  const avatarHtml = renderAvatar(data.avatarUrl, data.name, "serif");
 
   const skillsHtml = (data.skills || [])
-    .map((s) => `<span class="px-3.5 py-1.5 rounded-md bg-stone-200/80 text-stone-800 text-xs font-serif m-1 border border-stone-300">${escapeHtml(s)}</span>`)
+    .map((s) => `<span class="edit-skill">${escapeHtml(s)}</span>`)
     .join("");
 
   const projectsHtml = (data.projects || [])
     .map(
       (p) => `
-      <article class="p-6 border border-stone-300/80 rounded-2xl bg-white space-y-2 shadow-xs">
-        <div class="text-xs uppercase tracking-wider text-amber-900 font-bold">${escapeHtml(p.tech)}</div>
-        <h3 class="text-2xl font-serif font-bold text-stone-900">${escapeHtml(p.title)}</h3>
-        <p class="text-stone-700 text-sm leading-relaxed font-serif">${escapeHtml(p.description)}</p>
-        ${p.link ? `<div class="pt-2"><a href="${escapeHtml(p.link)}" target="_blank" class="text-xs font-serif font-bold text-amber-900 underline">Read Publication ↗</a></div>` : ""}
+      <article class="edit-card">
+        <div class="edit-tag">${escapeHtml(p.tech)}</div>
+        <h3 class="edit-card-title">${escapeHtml(p.title)}</h3>
+        <p class="edit-card-desc">${escapeHtml(p.description)}</p>
+        ${p.link ? `<div style="margin-top: 10px;"><a href="${escapeHtml(p.link)}" target="_blank" class="edit-link">Read Publication ↗</a></div>` : ""}
       </article>`
     )
     .join("");
@@ -866,76 +1042,120 @@ function renderEditorialTemplate(data: PortfolioData): string {
     ? (data.experience || [])
         .map(
           (e) => `
-        <div class="pb-6 border-b border-stone-200 last:border-b-0 space-y-1">
-          <div class="flex justify-between items-baseline flex-wrap gap-2">
-            <h4 class="text-lg font-serif font-bold text-stone-900">${escapeHtml(e.role)} — <span class="italic font-normal text-stone-700">${escapeHtml(e.company)}</span></h4>
-            <span class="text-xs font-mono text-stone-500">${escapeHtml(e.period)}</span>
+        <div class="edit-time-row">
+          <div class="edit-time-head">
+            <h4 class="edit-time-role">${escapeHtml(e.role)} — <span style="font-style: italic; font-weight: normal; color: #44403c;">${escapeHtml(e.company)}</span></h4>
+            <span class="edit-time-period">${escapeHtml(e.period)}</span>
           </div>
-          <p class="text-stone-700 text-sm leading-relaxed font-serif">${escapeHtml(e.summary)}</p>
+          <p class="edit-time-desc">${escapeHtml(e.summary)}</p>
         </div>`
         )
         .join("")
     : "";
 
   return `<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeName} — Selected Works</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,400&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Newsreader', serif; background-color: #faf9f6; color: #292524; }
-    h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #faf8f5; color: #1c1917;
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.7; margin: 0; padding: 48px 20px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+
+    header.edit-head { border-bottom: 2px solid #e7e5e4; padding-bottom: 32px; margin-bottom: 36px; }
+    .hero-top { display: flex; align-items: center; gap: 24px; margin-bottom: 16px; }
+    .cv-badge { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #92400e; }
+    .edit-name { font-size: 38px; font-weight: normal; color: #0c0a09; line-height: 1.2; }
+    .edit-title { font-size: 18px; font-style: italic; color: #57534e; margin-top: 4px; }
+    .edit-bio { font-size: 16px; color: #292524; line-height: 1.8; margin-top: 14px; }
+
+    /* Avatars */
+    .avatar-wrap { width: 84px; height: 84px; border-radius: 50%; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .avatar-serif { border: 2px solid #b45309; background: #fef3c7; }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-initials { font-weight: bold; font-size: 26px; color: #92400e; background: #fef3c7; }
+
+    /* Sections */
+    .sec-h2 { font-size: 22px; font-weight: bold; color: #1c1917; border-bottom: 1px solid #e7e5e4; padding-bottom: 8px; margin-bottom: 18px; }
+    .section { margin-bottom: 36px; }
+
+    .skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .edit-skill { background: #f5f5f4; border: 1px solid #d6d3d1; color: #292524; padding: 4px 12px; border-radius: 4px; font-size: 12px; }
+
+    /* Articles */
+    .edit-card { background: #ffffff; border: 1px solid #e7e5e4; border-radius: 16px; padding: 22px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .edit-tag { font-family: -apple-system, sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #92400e; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .edit-card-title { font-size: 18px; font-weight: bold; color: #0c0a09; margin-bottom: 8px; }
+    .edit-card-desc { font-size: 14px; color: #44403c; line-height: 1.7; }
+    .edit-link { font-size: 12px; font-weight: bold; color: #92400e; text-decoration: underline; }
+
+    /* Timeline */
+    .edit-timeline { background: #ffffff; border: 1px solid #e7e5e4; border-radius: 16px; padding: 24px; }
+    .edit-time-row { padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f5f5f4; }
+    .edit-time-row:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: none; }
+    .edit-time-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+    .edit-time-role { font-size: 16px; font-weight: bold; color: #1c1917; }
+    .edit-time-period { font-family: monospace; font-size: 11px; color: #78716c; }
+    .edit-time-desc { font-size: 14px; color: #44403c; margin-top: 4px; }
+
+    footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #e7e5e4; padding-top: 20px; font-family: -apple-system, sans-serif; font-size: 11px; color: #78716c; }
+    footer a { color: #92400e; font-weight: bold; text-decoration: underline; }
   </style>
 </head>
-<body class="min-h-screen p-6 sm:p-12 md:p-20 max-w-4xl mx-auto space-y-16">
-  <header class="space-y-6 border-b border-stone-300 pb-12">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-      ${avatarElement}
-      <div class="space-y-1">
-        <div class="text-xs uppercase tracking-widest text-stone-500 font-sans font-bold">Curriculum Vitae &amp; Selected Works</div>
-        <h1 class="text-3xl sm:text-5xl font-normal text-stone-950">${safeName}</h1>
-        <p class="text-xl italic text-stone-800">${safeTitle}</p>
+<body>
+  <div class="container">
+    <header class="edit-head">
+      <div class="hero-top">
+        ${avatarHtml}
+        <div>
+          <div class="cv-badge">Curriculum Vitae &amp; Selected Works</div>
+          <h1 class="edit-name">${safeName}</h1>
+          <div class="edit-title">${safeTitle}</div>
+        </div>
       </div>
-    </div>
-    <p class="text-stone-700 text-lg leading-relaxed max-w-3xl pt-2 font-serif">${safeBio}</p>
-  </header>
+      <p class="edit-bio">${safeBio}</p>
+    </header>
 
-  <section class="space-y-4">
-    <h2 class="text-2xl font-bold text-stone-900 border-b border-stone-200 pb-2">Areas of Inquiry &amp; Competence</h2>
-    <div>${skillsHtml}</div>
-  </section>
+    <section class="section">
+      <h2 class="sec-h2">Areas of Inquiry &amp; Competence</h2>
+      <div class="skills-wrap">${skillsHtml}</div>
+    </section>
 
-  <section class="space-y-6">
-    <h2 class="text-2xl font-bold text-stone-900 border-b border-stone-200 pb-2">Selected Publications &amp; Projects</h2>
-    <div class="space-y-6">${projectsHtml}</div>
-  </section>
+    <section class="section">
+      <h2 class="sec-h2">Selected Publications &amp; Projects</h2>
+      <div>${projectsHtml}</div>
+    </section>
 
-  ${hasExperience ? `
-  <section class="space-y-6">
-    <h2 class="text-2xl font-bold text-stone-900 border-b border-stone-200 pb-2">Professional &amp; Academic Appointments</h2>
-    <div class="space-y-6">${expHtml}</div>
-  </section>` : ''}
+    ${hasExperience ? `
+    <section class="section">
+      <h2 class="sec-h2">Professional &amp; Academic Appointments</h2>
+      <div class="edit-timeline">${expHtml}</div>
+    </section>` : ''}
 
-  <footer class="border-t border-stone-300 pt-8 flex justify-between items-center text-xs font-sans text-stone-500">
-    <span>© ${new Date().getFullYear()} ${safeName}.</span>
-    <a href="mailto:${safeEmail}" class="underline font-bold text-stone-800">${safeEmail}</a>
-  </footer>
+    <footer>
+      <span>© ${new Date().getFullYear()} ${safeName}.</span>
+      <a href="mailto:${safeEmail}">Correspond via Email →</a>
+    </footer>
+  </div>
 </body>
 </html>`;
 }
 
 // ---------------------------------------------------------------------------
-// TEMPLATE 6: AURORA / DEEP SPACE (AI/ML, Data Science, Web3)
+// 6. TEMPLATE 6: AURORA / DEEP SPACE
 // ---------------------------------------------------------------------------
 function renderAuroraTemplate(data: PortfolioData): string {
   const safeName = escapeHtml(data.name || "Innovator");
   const safeTitle = escapeHtml(data.title || "AI & Data Scientist");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
-  const avatarElement = renderAvatar(data.avatarUrl, data.name, "neon");
+  const avatarHtml = renderAvatar(data.avatarUrl, data.name, "neon");
 
   const statsHtml = (data.stats || [
     { label: "Intelligence Focus", value: "Neural" },
@@ -944,30 +1164,26 @@ function renderAuroraTemplate(data: PortfolioData): string {
   ])
     .map(
       (s) => `
-      <div class="bg-slate-900/80 border border-cyan-500/30 p-6 rounded-2xl text-center backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-        <div class="text-3xl font-mono font-bold text-cyan-300">${escapeHtml(s.value)}</div>
-        <div class="text-xs font-mono text-cyan-500 uppercase tracking-widest mt-1">${escapeHtml(s.label)}</div>
+      <div class="aurora-stat-card">
+        <div class="aurora-stat-val">${escapeHtml(s.value)}</div>
+        <div class="aurora-stat-lbl">${escapeHtml(s.label)}</div>
       </div>`
     )
     .join("");
 
   const skillsHtml = (data.skills || [])
-    .map((s) => `<span class="px-4 py-2 rounded-xl bg-slate-900 border border-cyan-500/40 text-cyan-300 font-mono text-xs shadow-[0_0_10px_rgba(6,182,212,0.1)]">${escapeHtml(s)}</span>`)
+    .map((s) => `<span class="aurora-skill">&gt; ${escapeHtml(s)}</span>`)
     .join("");
 
   const projectsHtml = (data.projects || [])
     .map(
       (p) => `
-      <div class="bg-slate-900/90 border border-cyan-500/30 hover:border-cyan-400 p-8 rounded-3xl transition-all duration-300 space-y-4 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] group">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xl font-mono font-bold text-white group-hover:text-cyan-300 transition-colors">${escapeHtml(p.title)}</h3>
-          <span class="text-xs font-mono text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800">Neural Net</span>
-        </div>
-        <p class="text-sm text-slate-300 leading-relaxed font-sans">${escapeHtml(p.description)}</p>
-        ${p.metrics ? `<div class="text-xs font-mono text-emerald-400 bg-emerald-950/60 px-3 py-1.5 rounded-xl inline-block">⚡ ${escapeHtml(p.metrics)}</div>` : ""}
-        <div class="pt-3 border-t border-slate-800 text-xs font-mono text-cyan-400/80">
-          Architecture: ${escapeHtml(p.tech)}
-        </div>
+      <div class="aurora-card">
+        <div class="aurora-tag">Neural Pipeline</div>
+        <h3 class="aurora-card-title">${escapeHtml(p.title)}</h3>
+        <p class="aurora-card-desc">${escapeHtml(p.description)}</p>
+        ${p.metrics ? `<div class="aurora-metric">⚡ ${escapeHtml(p.metrics)}</div>` : ""}
+        <div class="aurora-card-foot">Architecture: ${escapeHtml(p.tech)}</div>
       </div>`
     )
     .join("");
@@ -977,73 +1193,141 @@ function renderAuroraTemplate(data: PortfolioData): string {
     ? (data.experience || [])
         .map(
           (e) => `
-        <div class="p-6 rounded-2xl bg-slate-900/60 border border-cyan-900/40 space-y-1 font-mono">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <h4 class="text-lg font-bold text-white">${escapeHtml(e.role)}</h4>
-            <span class="text-xs text-cyan-400">${escapeHtml(e.period)}</span>
+        <div class="aurora-time-card">
+          <div class="aurora-time-head">
+            <h4 class="aurora-time-role">${escapeHtml(e.role)} <span style="color: #06b6d4;">· ${escapeHtml(e.company)}</span></h4>
+            <span class="aurora-time-period">${escapeHtml(e.period)}</span>
           </div>
-          <div class="text-xs text-cyan-500">${escapeHtml(e.company)}</div>
-          <p class="text-sm text-slate-300 font-sans pt-2">${escapeHtml(e.summary)}</p>
+          <p class="aurora-time-desc">${escapeHtml(e.summary)}</p>
         </div>`
         )
         .join("")
     : "";
 
   return `<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${safeName} — ${safeTitle}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>${safeName} — AI &amp; Intelligence</title>
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #030712; color: #f1f5f9; }
-    .heading { font-family: 'Space Grotesk', sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #020617; color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; margin: 0; padding: 40px 20px;
+    }
+    .font-mono { font-family: 'Courier New', Courier, monospace; }
+    .container { max-width: 960px; margin: 0 auto; }
+
+    .aurora-hero {
+      background: radial-gradient(circle at top right, rgba(6, 182, 212, 0.15), rgba(2, 6, 23, 0.95)), #020617;
+      border: 1px solid rgba(6, 182, 212, 0.35); border-radius: 28px;
+      padding: 40px 36px; box-shadow: 0 0 50px rgba(6, 182, 212, 0.12);
+      margin-bottom: 36px;
+    }
+    .hero-top { display: flex; align-items: center; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
+    .aurora-badge {
+      display: inline-flex; align-items: center; gap: 6px; font-family: monospace;
+      padding: 4px 12px; border-radius: 9999px; background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.4); color: #22d3ee; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .aurora-name { font-family: monospace; font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+    .aurora-title { font-family: monospace; font-size: 18px; color: #22d3ee; margin-top: 2px; }
+    .aurora-bio { color: #cbd5e1; font-size: 15px; line-height: 1.7; max-width: 800px; margin-top: 14px; }
+
+    /* Avatars */
+    .avatar-wrap { width: 88px; height: 88px; border-radius: 24px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .avatar-neon { border: 2px solid #06b6d4; background: #0f172a; box-shadow: 0 0 25px rgba(6, 182, 212, 0.4); }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-initials { font-family: monospace; font-weight: bold; font-size: 26px; color: #22d3ee; background: #0f172a; }
+
+    /* Stats */
+    .aurora-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-top: 28px; padding-top: 24px; border-top: 1px solid #1e293b; }
+    .aurora-stat-card { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 16px; padding: 16px; text-align: center; }
+    .aurora-stat-val { font-family: monospace; font-size: 24px; font-weight: 800; color: #22d3ee; }
+    .aurora-stat-lbl { font-family: monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #0891b2; margin-top: 4px; }
+
+    /* Sections */
+    .sec-h2 { font-family: monospace; font-size: 20px; font-weight: 700; color: #ffffff; margin-bottom: 16px; }
+    .sec-h2 span { color: #22d3ee; }
+    .section { margin-bottom: 36px; }
+    
+    .aurora-skills-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+    .aurora-skill { background: #0f172a; border: 1px solid rgba(6, 182, 212, 0.35); color: #67e8f9; font-family: monospace; padding: 8px 16px; border-radius: 12px; font-size: 12px; box-shadow: 0 0 10px rgba(6,182,212,0.1); }
+
+    /* Cards */
+    .aurora-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; }
+    .aurora-card {
+      background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 20px;
+      padding: 24px; transition: all 0.2s;
+    }
+    .aurora-card:hover { transform: translateY(-3px); border-color: #22d3ee; box-shadow: 0 0 30px rgba(6,182,212,0.15); }
+    .aurora-tag { font-family: monospace; font-size: 10px; text-transform: uppercase; color: #22d3ee; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); padding: 3px 10px; border-radius: 9999px; width: fit-content; margin-bottom: 10px; }
+    .aurora-card-title { font-family: monospace; font-size: 17px; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+    .aurora-card-desc { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px; }
+    .aurora-metric { font-family: monospace; font-size: 12px; color: #34d399; background: rgba(16, 185, 129, 0.15); padding: 6px 12px; border-radius: 8px; width: fit-content; margin-bottom: 12px; }
+    .aurora-card-foot { font-family: monospace; font-size: 11px; color: #06b6d4; border-top: 1px solid #1e293b; padding-top: 10px; }
+
+    /* Timeline */
+    .aurora-time-card { background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 16px; padding: 18px; margin-bottom: 12px; font-family: monospace; }
+    .aurora-time-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+    .aurora-time-role { font-size: 15px; font-weight: 700; color: #ffffff; }
+    .aurora-time-period { font-size: 11px; color: #22d3ee; }
+    .aurora-time-desc { font-family: -apple-system, sans-serif; font-size: 13px; color: #cbd5e1; margin-top: 6px; }
+
+    /* CTA */
+    .aurora-cta { text-align: center; background: #0b1222; border: 1px solid rgba(6, 182, 212, 0.35); border-radius: 24px; padding: 40px 20px; box-shadow: 0 0 30px rgba(6,182,212,0.1); }
+    .aurora-cta h3 { font-family: monospace; font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .aurora-cta p { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+    .btn-aurora { display: inline-block; background: #06b6d4; color: #020617; padding: 12px 30px; border-radius: 12px; font-family: monospace; font-size: 13px; font-weight: 800; text-decoration: none; box-shadow: 0 0 25px rgba(6, 182, 212, 0.3); }
+    .btn-aurora:hover { background: #22d3ee; }
+
+    footer { text-align: center; padding: 24px 0; font-family: monospace; font-size: 11px; color: #64748b; }
   </style>
 </head>
-<body class="min-h-screen p-6 sm:p-12 md:p-16 max-w-5xl mx-auto space-y-16">
-  <header class="p-8 sm:p-14 rounded-3xl bg-gradient-to-br from-slate-950 via-cyan-950 to-emerald-950 border border-cyan-900/50 space-y-6 shadow-2xl relative overflow-hidden">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-      ${avatarElement}
-      <div class="space-y-2">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-mono">
-          ● NEURAL_MESH_ONLINE
+<body>
+  <div class="container">
+    <div class="aurora-hero">
+      <div class="hero-top">
+        ${avatarHtml}
+        <div>
+          <span class="aurora-badge">● Neural Mesh Online</span>
+          <h1 class="aurora-name">${safeName}</h1>
+          <div class="aurora-title">${safeTitle}</div>
         </div>
-        <h1 class="text-3xl sm:text-5xl font-bold heading text-white">${safeName}</h1>
-        <p class="text-xl font-semibold text-cyan-400 heading">${safeTitle}</p>
       </div>
+      <p class="aurora-bio">${safeBio}</p>
+      <div class="aurora-stats-grid">${statsHtml}</div>
     </div>
-    <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-3xl pt-2">${safeBio}</p>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 pt-8 border-t border-slate-800">
-      ${statsHtml}
+
+    <section class="section">
+      <h2 class="sec-h2"><span>#</span> Algorithms &amp; AI Stack</h2>
+      <div class="aurora-skills-wrap">${skillsHtml}</div>
+    </section>
+
+    <section class="section">
+      <h2 class="sec-h2"><span>#</span> Machine Learning Deployments</h2>
+      <div class="aurora-grid">${projectsHtml}</div>
+    </section>
+
+    ${hasExperience ? `
+    <section class="section">
+      <h2 class="sec-h2"><span>#</span> Systems Experience</h2>
+      <div>${expHtml}</div>
+    </section>` : ''}
+
+    <div class="aurora-cta">
+      <h3>Deploy Machine Learning Systems</h3>
+      <p>Open for generative AI pipelines, LLM fine-tuning, and machine learning infrastructure roles.</p>
+      <a href="mailto:${safeEmail}" class="btn-aurora">Connect &gt;</a>
     </div>
-  </header>
 
-  <section class="space-y-6">
-    <h2 class="text-2xl font-bold heading text-white font-mono">// Algorithms &amp; Tech Stack</h2>
-    <div class="flex flex-wrap gap-2.5">${skillsHtml}</div>
-  </section>
-
-  <section class="space-y-6">
-    <h2 class="text-2xl font-bold heading text-white font-mono">// AI Research &amp; Machine Learning Pipelines</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">${projectsHtml}</div>
-  </section>
-
-  ${hasExperience ? `
-  <section class="space-y-6">
-    <h2 class="text-2xl font-bold heading text-white font-mono">// Engineering Experience</h2>
-    <div class="space-y-4">${expHtml}</div>
-  </section>` : ''}
-
-  <footer class="p-8 rounded-3xl bg-slate-900/80 border border-cyan-900/40 flex justify-between items-center flex-wrap gap-4 text-xs font-mono text-slate-400">
-    <span>© ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI.</span>
-    <a href="mailto:${safeEmail}" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-all">
-      Connect: ${safeEmail}
-    </a>
-  </footer>
+    <footer>
+      © ${new Date().getFullYear()} ${safeName}. Built with Vaylo AI Studio.
+    </footer>
+  </div>
 </body>
 </html>`;
 }
