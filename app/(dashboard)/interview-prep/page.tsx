@@ -172,6 +172,8 @@ export default function InterviewPrepLobbyPage() {
             seniority={seniority}
             companyStyle={activePreset.companyStyle}
             initialQuestions={sessionQuestions}
+            personaId={selectedPersonaId}
+            onPersonaChange={setSelectedPersonaId}
           />
         </div>
       ) : (

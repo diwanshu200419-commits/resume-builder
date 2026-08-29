@@ -54,6 +54,8 @@ interface VoiceInterviewSessionProps {
   seniority: string;
   companyStyle?: string;
   initialQuestions: QuestionItem[];
+  personaId?: string;
+  onPersonaChange?: (personaId: string) => void;
   onFinishSession?: (turns: InterviewTurn[], overallScore: number) => void;
 }
 
@@ -62,10 +64,20 @@ export function VoiceInterviewSession({
   seniority,
   companyStyle,
   initialQuestions,
+  personaId,
+  onPersonaChange,
   onFinishSession,
 }: VoiceInterviewSessionProps) {
   // Session State
-  const [selectedPersonaId, setSelectedPersonaId] = useState<string>("josh_neutral");
+  const [internalPersonaId, setInternalPersonaId] = useState<string>(personaId || "josh_neutral");
+  const activePersonaId = personaId || internalPersonaId;
+  const persona: VoicePersona = getPersona(activePersonaId);
+
+  const handleSelectPersona = (id: string) => {
+    setInternalPersonaId(id);
+    onPersonaChange?.(id);
+  };
+
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isFollowUpTurn, setIsFollowUpTurn] = useState(false);
@@ -431,11 +443,11 @@ export function VoiceInterviewSession({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {Object.values(INTERVIEWER_PERSONAS).map((p) => {
-              const isSelected = selectedPersonaId === p.id;
+              const isSelected = activePersonaId === p.id;
               return (
                 <div
                   key={p.id}
-                  onClick={() => setSelectedPersonaId(p.id)}
+                  onClick={() => handleSelectPersona(p.id)}
                   className={`p-4 rounded-2xl border text-left cursor-pointer transition-all space-y-2 relative flex flex-col justify-between ${
                     isSelected
                       ? "bg-slate-50 dark:bg-slate-800/90 border-blue-500 shadow-md ring-1 ring-blue-500"

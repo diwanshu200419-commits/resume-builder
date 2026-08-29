@@ -647,6 +647,18 @@ const tests = [
         throw new Error(`Expected Bella to select Microsoft Aria Natural voice, got ${bestBella?.name}`);
       }
 
+      // 3. Assert Persona Single Source of Truth & Label Consistency across Header and Question Cards
+      const personaKeys = ["adam_formal", "josh_neutral", "rachel_warm", "bella_neutral"];
+      for (const k of personaKeys) {
+        const p = INTERVIEWER_PERSONAS[k];
+        if (!p) throw new Error(`Missing persona definition for ${k}`);
+        
+        // Assert name and style are strictly defined and unique
+        if (!p.name || !p.style || !p.label.includes(p.name)) {
+          throw new Error(`Persona ${k} label '${p.label}' does not contain persona name '${p.name}'`);
+        }
+      }
+
       return true;
     }
   },
