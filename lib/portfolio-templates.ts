@@ -242,17 +242,18 @@ function renderSeoHead(data: PortfolioData): string {
   const safeBio = escapeHtml(data.bio || `Explore the portfolio and projects of ${data.name}.`);
   const safeAvatar = data.avatarUrl ? escapeHtml(data.avatarUrl) : "https://www.vayloai.online/og-default.png";
   
+  // Clean unescaped values for JSON-LD (JSON.stringify handles string escaping; unicode replacement prevents HTML script injection)
   const schemaJson = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": escapeHtml(data.name || "Candidate"),
-    "jobTitle": escapeHtml(data.title || "Professional"),
-    "description": escapeHtml(data.bio || ""),
-    "email": data.email ? escapeHtml(data.email) : undefined,
-    "url": data.website ? escapeHtml(data.website) : undefined,
+    "name": data.name || "Candidate",
+    "jobTitle": data.title || "Professional",
+    "description": data.bio || "",
+    "email": data.email || undefined,
+    "url": data.website || undefined,
     "sameAs": [
-      data.github ? escapeHtml(formatUrl(data.github)) : undefined,
-      data.linkedin ? escapeHtml(formatUrl(data.linkedin)) : undefined,
+      data.github ? formatUrl(data.github) : undefined,
+      data.linkedin ? formatUrl(data.linkedin) : undefined,
     ].filter(Boolean),
   }).replace(/</g, "\\u003c").replace(/>/g, "\\u003e");
 
