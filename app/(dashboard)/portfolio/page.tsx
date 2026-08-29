@@ -468,22 +468,22 @@ export default function PortfolioGeneratorPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="max-w-7xl mx-auto p-3 sm:p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-emerald-400 border-emerald-500/30 bg-emerald-950/20 px-2.5 py-0.5">
-              <Sparkles className="w-3.5 h-3.5 mr-1 text-emerald-400" /> Multi-Design Portfolio Studio
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-0.5 font-semibold text-xs">
+              <Sparkles className="w-3.5 h-3.5 mr-1 text-emerald-600 dark:text-emerald-400" /> Multi-Design Portfolio Studio
             </Badge>
-            <Badge variant="outline" className="text-blue-400 border-blue-500/30 bg-blue-950/20 px-2.5 py-0.5">
+            <Badge variant="outline" className="text-blue-600 dark:text-blue-400 border-blue-500/30 bg-blue-50 dark:bg-blue-950/20 px-2.5 py-0.5 font-semibold text-xs">
               6 Responsive Themes
             </Badge>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">
             AI Developer &amp; Executive Portfolio Studio
           </h1>
-          <p className="text-slate-400 text-sm mt-1 max-w-2xl">
+          <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 max-w-2xl leading-relaxed">
             Transform your resume into a stunning, responsive portfolio website. Fully self-contained with photo support, zero dependencies, and instant free 1-click Netlify/Vercel export.
           </p>
         </div>
@@ -493,9 +493,9 @@ export default function PortfolioGeneratorPage() {
             onClick={handleDownloadHtml}
             variant="outline"
             size="sm"
-            className="border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 gap-1.5"
+            className="border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 gap-1.5 font-medium shadow-sm"
           >
-            <Download className="w-4 h-4 text-emerald-400" /> Download HTML
+            <Download className="w-4 h-4 text-emerald-500" /> Download HTML
           </Button>
           <Button
             onClick={() => setDeployModalOpen(true)}
@@ -509,23 +509,23 @@ export default function PortfolioGeneratorPage() {
 
       {/* Persistent Live Portfolio Banner */}
       {savedLiveUrl && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-blue-950/80 border border-emerald-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-slate-900/5 to-blue-500/10 dark:from-emerald-950/80 dark:via-slate-900 dark:to-blue-950/80 border border-emerald-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
               <Globe className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Your Live Portfolio is Connected</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Your Live Portfolio is Connected</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <a
                 href={savedLiveUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-sm font-semibold text-white hover:text-emerald-300 underline flex items-center gap-1 mt-0.5"
+                className="text-sm font-semibold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-300 underline flex items-center gap-1 mt-0.5"
               >
-                {savedLiveUrl} <ExternalLink className="w-3.5 h-3.5 inline text-emerald-400" />
+                {savedLiveUrl} <ExternalLink className="w-3.5 h-3.5 inline text-emerald-600 dark:text-emerald-400" />
               </a>
             </div>
           </div>
@@ -539,7 +539,7 @@ export default function PortfolioGeneratorPage() {
               variant="outline"
               size="sm"
               onClick={() => setDeployModalOpen(true)}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 text-xs"
+              className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs"
             >
               Change URL
             </Button>
@@ -548,33 +548,33 @@ export default function PortfolioGeneratorPage() {
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-sm flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <span>{error}</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-rose-400 hover:text-white">
+          <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-white">
             Dismiss
           </Button>
         </div>
       )}
 
       {saveSuccessMessage && (
-        <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/60 text-emerald-300 text-sm flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+        <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/60 text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span>{saveSuccessMessage}</span>
         </div>
       )}
 
       {/* Main Studio Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Left Config Panel */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="xl:col-span-5 space-y-6 w-full">
           {/* Role Presets */}
-          <Card className="bg-slate-900/60 border-slate-800 p-5 space-y-4">
+          <Card className="bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">1. Select Target Role Preset</label>
-              <span className="text-[11px] text-emerald-400 font-medium">Domain Adaptive</span>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">1. Select Target Role Preset</label>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Domain Adaptive</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {ROLE_PRESETS.map((role) => {
@@ -585,11 +585,11 @@ export default function PortfolioGeneratorPage() {
                     onClick={() => handleSelectRole(role)}
                     className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-medium text-left transition-all ${
                       isSelected
-                        ? "bg-emerald-950/40 border-emerald-500/80 text-white shadow-sm"
-                        : "bg-slate-950/40 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                        ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-white shadow-sm font-bold"
+                        : "bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700"
                     }`}
                   >
-                    <span className="text-base">{role.icon}</span>
+                    <span className="text-base shrink-0">{role.icon}</span>
                     <span className="truncate">{role.label}</span>
                   </button>
                 );
@@ -606,15 +606,15 @@ export default function PortfolioGeneratorPage() {
                 }
               }}
               placeholder="Or type custom role (e.g. Lead DevOps Engineer)"
-              className="bg-slate-950/80 border-slate-800 text-xs text-white"
+              className="bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white"
             />
           </Card>
 
           {/* Profile Photo Upload */}
-          <Card className="bg-slate-900/60 border-slate-800 p-5 space-y-4">
+          <Card className="bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">2. Profile Photo (Optional)</label>
-              <span className="text-[11px] text-slate-400">Max 5MB • JPG/PNG/WebP</span>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">2. Profile Photo (Optional)</label>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">Max 5MB • JPG/PNG/WebP</span>
             </div>
 
             <input
@@ -627,11 +627,11 @@ export default function PortfolioGeneratorPage() {
 
             <div className="flex items-center gap-4">
               {avatarUrl ? (
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-emerald-500/80 shadow-md shrink-0 bg-slate-950">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-md shrink-0 bg-slate-100 dark:bg-slate-950">
                   <img src={avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950 flex flex-col items-center justify-center text-slate-500 shrink-0">
+                <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 shrink-0">
                   <ImageIcon className="w-5 h-5" />
                   <span className="text-[9px] mt-0.5">Initials</span>
                 </div>
@@ -644,9 +644,9 @@ export default function PortfolioGeneratorPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs gap-1.5"
+                    className="border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs gap-1.5"
                   >
-                    <Upload className="w-3.5 h-3.5 text-emerald-400" />
+                    <Upload className="w-3.5 h-3.5 text-emerald-500" />
                     {avatarUrl ? "Change Photo" : "Upload Picture"}
                   </Button>
 
@@ -656,13 +656,13 @@ export default function PortfolioGeneratorPage() {
                       variant="ghost"
                       size="sm"
                       onClick={handleRemovePhoto}
-                      className="text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 text-xs gap-1"
+                      className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs gap-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Remove
                     </Button>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-400 leading-tight">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
                   {avatarUrl
                     ? "Photo stored directly in standalone HTML bundle (no broken images on export)."
                     : "If no photo uploaded, an elegant monogram initials badge is used automatically."}
@@ -672,8 +672,8 @@ export default function PortfolioGeneratorPage() {
           </Card>
 
           {/* Theme Switcher */}
-          <Card className="bg-slate-900/60 border-slate-800 p-5 space-y-4">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">3. Select Visual Theme</label>
+          <Card className="bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">3. Select Visual Theme</label>
             <div className="grid grid-cols-2 gap-2.5">
               {PORTFOLIO_THEMES.map((th) => {
                 const isSelected = template === th.id;
@@ -683,19 +683,19 @@ export default function PortfolioGeneratorPage() {
                     onClick={() => handleTemplateChange(th.id)}
                     className={`p-3 rounded-2xl border text-left transition-all space-y-1.5 ${
                       isSelected
-                        ? "bg-slate-800/90 border-blue-500 shadow-md"
-                        : "bg-slate-950/40 border-slate-800 hover:border-slate-700"
+                        ? "bg-slate-100 dark:bg-slate-800/90 border-blue-500 shadow-md font-bold"
+                        : "bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">{th.name}</span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">{th.name}</span>
                       <span
                         className="w-2.5 h-2.5 rounded-full"
                         style={{ backgroundColor: th.accentColor }}
                       />
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-tight">{th.tagline}</p>
-                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-slate-700 text-slate-300">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{th.tagline}</p>
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
                       {th.badge}
                     </Badge>
                   </button>
@@ -705,15 +705,15 @@ export default function PortfolioGeneratorPage() {
           </Card>
 
           {/* Resume Input Area */}
-          <Card className="bg-slate-900/60 border-slate-800 p-5 space-y-4">
+          <Card className="bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">4. Source Resume / Experience Text</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400">4. Source Resume / Experience Text</label>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleLoadLatestResume}
                 disabled={loadingLatest}
-                className="text-xs text-blue-400 hover:text-blue-300 gap-1.5 h-7 px-2"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 gap-1.5 h-7 px-2"
               >
                 {loadingLatest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                 Load Latest Scan
@@ -725,7 +725,7 @@ export default function PortfolioGeneratorPage() {
               onChange={(e) => setResumeText(e.target.value)}
               placeholder="Paste your resume text, LinkedIn profile summary, or key projects (min 200 characters)..."
               rows={8}
-              className="bg-slate-950/80 border-slate-800 text-xs text-slate-200 font-mono leading-relaxed"
+              className="bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 font-mono leading-relaxed"
             />
 
             <Button
@@ -747,9 +747,9 @@ export default function PortfolioGeneratorPage() {
         </div>
 
         {/* Right Preview Studio */}
-        <div className="lg:col-span-7 space-y-4 flex flex-col">
+        <div className="xl:col-span-7 space-y-4 flex flex-col w-full min-w-0">
           {/* Preview Controls Bar */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-900/80 border border-slate-800">
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-800 text-white flex-wrap gap-2">
             <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
               <button
                 onClick={() => setActiveTab("visual")}
@@ -757,7 +757,7 @@ export default function PortfolioGeneratorPage() {
                   activeTab === "visual" ? "bg-slate-800 text-white shadow" : "text-slate-400 hover:text-slate-200"
                 }`}
               >
-                <Eye className="w-3.5 h-3.5" /> Visual Preview
+                <Eye className="w-3.5 h-3.5 text-emerald-400" /> Visual Preview
               </button>
               <button
                 onClick={() => setActiveTab("code")}
@@ -765,7 +765,7 @@ export default function PortfolioGeneratorPage() {
                   activeTab === "code" ? "bg-slate-800 text-white shadow" : "text-slate-400 hover:text-slate-200"
                 }`}
               >
-                <Code className="w-3.5 h-3.5" /> HTML Source
+                <Code className="w-3.5 h-3.5 text-blue-400" /> HTML Source
               </button>
             </div>
 
@@ -775,7 +775,7 @@ export default function PortfolioGeneratorPage() {
                   onClick={() => setDeviceView("desktop")}
                   title="Desktop View"
                   className={`p-1.5 rounded-lg text-xs transition-colors ${
-                    deviceView === "desktop" ? "bg-slate-800 text-emerald-400" : "text-slate-400 hover:text-slate-200"
+                    deviceView === "desktop" ? "bg-slate-800 text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
                   <Laptop className="w-4 h-4" />
@@ -784,7 +784,7 @@ export default function PortfolioGeneratorPage() {
                   onClick={() => setDeviceView("tablet")}
                   title="Tablet View"
                   className={`p-1.5 rounded-lg text-xs transition-colors ${
-                    deviceView === "tablet" ? "bg-slate-800 text-emerald-400" : "text-slate-400 hover:text-slate-200"
+                    deviceView === "tablet" ? "bg-slate-800 text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
                   <Tablet className="w-4 h-4" />
@@ -793,7 +793,7 @@ export default function PortfolioGeneratorPage() {
                   onClick={() => setDeviceView("mobile")}
                   title="Mobile View"
                   className={`p-1.5 rounded-lg text-xs transition-colors ${
-                    deviceView === "mobile" ? "bg-slate-800 text-emerald-400" : "text-slate-400 hover:text-slate-200"
+                    deviceView === "mobile" ? "bg-slate-800 text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
                   <Smartphone className="w-4 h-4" />
@@ -825,15 +825,15 @@ export default function PortfolioGeneratorPage() {
           </div>
 
           {/* Viewport Frame */}
-          <div className="flex-1 min-h-[620px] flex items-center justify-center bg-slate-950/60 rounded-3xl border border-slate-800/80 p-4 relative overflow-hidden">
+          <div className="w-full flex items-center justify-center bg-slate-950 rounded-3xl border border-slate-800 p-2 sm:p-4 relative overflow-hidden shadow-2xl">
             {activeTab === "visual" ? (
               <div
-                className={`h-[680px] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl transition-all duration-300 relative ${
+                className={`h-[680px] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl transition-all duration-300 relative w-full ${
                   deviceView === "desktop"
-                    ? "w-full"
+                    ? "max-w-full"
                     : deviceView === "tablet"
-                    ? "w-[768px] max-w-full"
-                    : "w-[375px] max-w-full"
+                    ? "max-w-[768px]"
+                    : "max-w-[375px]"
                 }`}
               >
                 <iframe
@@ -857,7 +857,7 @@ export default function PortfolioGeneratorPage() {
       {/* Deployment Center Modal */}
       {deployModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <Card className="bg-slate-900 border-slate-700 max-w-2xl w-full p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+          <Card className="bg-slate-900 border-slate-700 max-w-2xl w-full p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto text-white">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -884,7 +884,7 @@ export default function PortfolioGeneratorPage() {
                 onClick={() => setDeployPlatform("netlify")}
                 className={`p-3.5 rounded-2xl border text-center space-y-1 transition-all ${
                   deployPlatform === "netlify"
-                    ? "bg-emerald-950/40 border-emerald-500 text-white"
+                    ? "bg-emerald-950/40 border-emerald-500 text-white font-bold"
                     : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
                 }`}
               >
@@ -895,7 +895,7 @@ export default function PortfolioGeneratorPage() {
                 onClick={() => setDeployPlatform("vercel")}
                 className={`p-3.5 rounded-2xl border text-center space-y-1 transition-all ${
                   deployPlatform === "vercel"
-                    ? "bg-blue-950/40 border-blue-500 text-white"
+                    ? "bg-blue-950/40 border-blue-500 text-white font-bold"
                     : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
                 }`}
               >
@@ -906,7 +906,7 @@ export default function PortfolioGeneratorPage() {
                 onClick={() => setDeployPlatform("github")}
                 className={`p-3.5 rounded-2xl border text-center space-y-1 transition-all ${
                   deployPlatform === "github"
-                    ? "bg-purple-950/40 border-purple-500 text-white"
+                    ? "bg-purple-950/40 border-purple-500 text-white font-bold"
                     : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
                 }`}
               >
