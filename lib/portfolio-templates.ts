@@ -236,6 +236,15 @@ const GLOBAL_RESPONSIVE_CSS = `
   }
 `;
 
+function formatUrl(url: string): string {
+  const clean = (url || "").trim();
+  if (!clean) return "";
+  if (clean.startsWith("http://") || clean.startsWith("https://")) {
+    return clean;
+  }
+  return `https://${clean}`;
+}
+
 // ---------------------------------------------------------------------------
 // 1. TEMPLATE 1: TECHNICAL / NEO-TERMINAL (RESPONSIVE)
 // ---------------------------------------------------------------------------
@@ -245,6 +254,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
   const safeGithub = data.github ? escapeHtml(data.github) : null;
+  const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "terminal");
 
   const statsHtml = (data.stats || [
@@ -277,7 +287,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
         ${p.metrics ? `<div class="project-metric">⚡ ${escapeHtml(p.metrics)}</div>` : ""}
         <div class="project-footer">
           <span class="project-tech">${escapeHtml(p.tech)}</span>
-          ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" class="link-btn">Launch →</a>` : ""}
+          ${p.link ? `<a href="${escapeHtml(formatUrl(p.link))}" target="_blank" class="link-btn">Launch →</a>` : ""}
         </div>
       </div>`
     )
@@ -347,8 +357,13 @@ function renderTechnicalTemplate(data: PortfolioData): string {
     .avatar-img { width: 100%; height: 100%; object-fit: cover; }
     .avatar-initials { font-family: monospace; font-weight: bold; font-size: clamp(22px, 4vw, 28px); color: #10b981; background: #0f172a; }
 
+    /* Links Row */
+    .social-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #1e293b; font-family: monospace; font-size: 12px; flex-wrap: wrap; }
+    .social-link { color: #38bdf8; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+    .social-link:hover { text-decoration: underline; }
+
     /* Stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #1e293b; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 20px; }
     .stat-card { background: rgba(15, 23, 42, 0.8); border: 1px solid #1e3a8a; border-radius: 12px; padding: 12px; text-align: center; }
     .stat-val { font-family: monospace; font-size: clamp(18px, 3.5vw, 22px); font-weight: bold; color: #38bdf8; }
     .stat-lbl { font-family: monospace; font-size: 10px; color: #94a3b8; margin-top: 4px; }
@@ -432,10 +447,11 @@ function renderTechnicalTemplate(data: PortfolioData): string {
       </div>
       <p class="hero-bio">${safeBio}</p>
       
-      ${safeGithub ? `
-      <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #1e293b; font-family: monospace; font-size: 12px; color: #94a3b8;">
-        GitHub: <a href="${safeGithub.startsWith('http') ? safeGithub : `https://github.com/${safeGithub}`}" target="_blank" style="color: #38bdf8; text-decoration: underline;">${safeGithub} →</a>
-      </div>` : ""}
+      <div class="social-row">
+        ${safeGithub ? `<span>GitHub: <a href="${escapeHtml(formatUrl(safeGithub))}" target="_blank" class="social-link">${safeGithub} →</a></span>` : ""}
+        ${safeLinkedin ? `<span>LinkedIn: <a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" class="social-link">${safeLinkedin} →</a></span>` : ""}
+        <span>Email: <a href="mailto:${safeEmail}" class="social-link">${safeEmail}</a></span>
+      </div>
 
       <div class="stats-grid">
         ${statsHtml}
@@ -480,6 +496,7 @@ function renderMinimalTemplate(data: PortfolioData): string {
   const safeTitle = escapeHtml(data.title || "Product Designer & Strategist");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
+  const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "bento");
 
   const skillsHtml = (data.skills || [])
@@ -496,7 +513,7 @@ function renderMinimalTemplate(data: PortfolioData): string {
         ${p.metrics ? `<div class="card-metric">✦ ${escapeHtml(p.metrics)}</div>` : ""}
         <div class="card-footer">
           <span>${escapeHtml(p.tech)}</span>
-          ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank">View ↗</a>` : ""}
+          ${p.link ? `<a href="${escapeHtml(formatUrl(p.link))}" target="_blank">View ↗</a>` : ""}
         </div>
       </div>`
     )
@@ -621,7 +638,10 @@ function renderMinimalTemplate(data: PortfolioData): string {
           </div>
           <p class="bio-p">${safeBio}</p>
         </div>
-        <a href="mailto:${safeEmail}" class="btn-say-hello">Say Hello ↗</a>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 14px;">
+          <a href="mailto:${safeEmail}" class="btn-say-hello">Say Hello ↗</a>
+          ${safeLinkedin ? `<a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" style="font-size: 12px; font-weight: 700; color: #4f46e5; text-decoration: none;">LinkedIn ↗</a>` : ""}
+        </div>
       </div>
 
       <div class="bento-side">
@@ -666,6 +686,7 @@ function renderExecutiveTemplate(data: PortfolioData): string {
   const safeTitle = escapeHtml(data.title || "Executive Director & Strategist");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "executive@example.com");
+  const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "glass");
 
   const statsHtml = (data.stats || [
@@ -810,6 +831,12 @@ function renderExecutiveTemplate(data: PortfolioData): string {
         </div>
       </div>
       <p class="exec-bio">${safeBio}</p>
+      
+      ${safeLinkedin ? `
+      <div style="margin-top: 14px; font-size: 12px; color: #94a3b8;">
+        LinkedIn: <a href="${escapeHtml(formatUrl(safeLinkedin))}" target="_blank" style="color: #38bdf8; text-decoration: underline;">${safeLinkedin} ↗</a>
+      </div>` : ""}
+
       <div class="exec-stats-grid">${statsHtml}</div>
     </div>
 
@@ -851,6 +878,7 @@ function renderVibrantTemplate(data: PortfolioData): string {
   const safeTitle = escapeHtml(data.title || "Growth Marketer & Builder");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
+  const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "gradient");
 
   const statsHtml = (data.stats || [
@@ -1033,6 +1061,7 @@ function renderEditorialTemplate(data: PortfolioData): string {
   const safeTitle = escapeHtml(data.title || "Writer, Researcher & Academic");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
+  const safeLinkedin = data.linkedin ? escapeHtml(data.linkedin) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "serif");
 
   const skillsHtml = (data.skills || [])
@@ -1046,7 +1075,7 @@ function renderEditorialTemplate(data: PortfolioData): string {
         <div class="edit-tag">${escapeHtml(p.tech)}</div>
         <h3 class="edit-card-title">${escapeHtml(p.title)}</h3>
         <p class="edit-card-desc">${escapeHtml(p.description)}</p>
-        ${p.link ? `<div style="margin-top: 10px;"><a href="${escapeHtml(p.link)}" target="_blank" class="edit-link">Read Publication ↗</a></div>` : ""}
+        ${p.link ? `<div style="margin-top: 10px;"><a href="${escapeHtml(formatUrl(p.link))}" target="_blank" class="edit-link">Read Publication ↗</a></div>` : ""}
       </article>`
     )
     .join("");
@@ -1169,6 +1198,7 @@ function renderAuroraTemplate(data: PortfolioData): string {
   const safeTitle = escapeHtml(data.title || "AI & Data Scientist");
   const safeBio = escapeHtml(data.bio || "");
   const safeEmail = escapeHtml(data.email || "contact@vayloai.online");
+  const safeGithub = data.github ? escapeHtml(data.github) : null;
   const avatarHtml = renderAvatar(data.avatarUrl, data.name, "neon");
 
   const statsHtml = (data.stats || [
@@ -1310,7 +1340,13 @@ function renderAuroraTemplate(data: PortfolioData): string {
           <div class="aurora-title">${safeTitle}</div>
         </div>
       </div>
-      <p class="aurora-bio">${safeBio}</p>
+      <p class="hero-bio">${safeBio}</p>
+      
+      ${safeGithub ? `
+      <div style="margin-top: 14px; font-family: monospace; font-size: 12px; color: #94a3b8;">
+        GitHub: <a href="${escapeHtml(formatUrl(safeGithub))}" target="_blank" style="color: #22d3ee; text-decoration: underline;">${safeGithub} →</a>
+      </div>` : ""}
+
       <div class="aurora-stats-grid">${statsHtml}</div>
     </div>
 

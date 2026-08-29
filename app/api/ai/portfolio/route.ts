@@ -107,7 +107,13 @@ Return ONLY valid raw JSON matching this exact TypeScript structure:
       const response = await model.generateContent(prompt);
       const output = response.response.text();
       if (output) {
-        const parsed = JSON.parse(output);
+        let clean = output.trim();
+        if (clean.startsWith("```json")) {
+          clean = clean.replace(/^```json\s*/i, "").replace(/```\s*$/, "");
+        } else if (clean.startsWith("```")) {
+          clean = clean.replace(/^```\s*/, "").replace(/```\s*$/, "");
+        }
+        const parsed = JSON.parse(clean.trim());
         if (parsed && parsed.name && parsed.title && Array.isArray(parsed.skills)) {
           return parsed as PortfolioData;
         }
