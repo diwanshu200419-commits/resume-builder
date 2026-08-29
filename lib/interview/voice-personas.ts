@@ -12,6 +12,7 @@ export interface VoicePersona {
   style: "formal" | "neutral" | "warm";
   elevenLabsVoiceId: string;
   azureVoiceName?: string;
+  piperVoiceModel: string; // Open-Source self-hosted Piper TTS model identifier
   tagline: string;
   description: string;
   bestFor: string;
@@ -28,6 +29,7 @@ export const INTERVIEWER_PERSONAS: Record<string, VoicePersona> = {
     style: "formal",
     elevenLabsVoiceId: "pNInz6obpgDQGcFmaJgB", // ElevenLabs official stock voice: Adam
     azureVoiceName: "en-US-GuyNeural",
+    piperVoiceModel: "en_US-ryan-high", // Piper neural open-source voice
     tagline: "Direct, authoritative, structured evaluation",
     description: "Deep, rigorous executive interviewer tone. Evaluates architectural depth, leadership decisions, and high-impact metrics.",
     bestFor: "Executive & Staff roles, Leadership rounds, Bar-raiser evaluations",
@@ -42,6 +44,7 @@ export const INTERVIEWER_PERSONAS: Record<string, VoicePersona> = {
     style: "neutral",
     elevenLabsVoiceId: "TxGEqnHWrfWFTfGW9XjX", // ElevenLabs official stock voice: Josh
     azureVoiceName: "en-US-DavisNeural",
+    piperVoiceModel: "en_US-lessac-medium", // Piper neural open-source voice
     tagline: "Calm, objective, technical peer interviewer",
     description: "Clear, conversational professional cadence. Focuses on practical problem-solving and domain knowledge.",
     bestFor: "Standard technical loops, Engineering, Product & Strategy rounds",
@@ -56,6 +59,7 @@ export const INTERVIEWER_PERSONAS: Record<string, VoicePersona> = {
     style: "warm",
     elevenLabsVoiceId: "21m00Tcm4TlvDq8ikWAM", // ElevenLabs official stock voice: Rachel
     azureVoiceName: "en-US-JennyNeural",
+    piperVoiceModel: "en_US-amy-medium", // Piper neural open-source voice
     tagline: "Supportive, friendly, confidence-building mentor",
     description: "Friendly, low-intimidation interviewer. Helps candidates overcome interview anxiety and articulate their best experiences.",
     bestFor: "Entry-level roles, Campus placements, First-time practice sessions",
@@ -70,6 +74,7 @@ export const INTERVIEWER_PERSONAS: Record<string, VoicePersona> = {
     style: "neutral",
     elevenLabsVoiceId: "EXAVITQu4vr4xnSDxMaL", // ElevenLabs official stock voice: Bella
     azureVoiceName: "en-US-AriaNeural",
+    piperVoiceModel: "en_US-libritts-high", // Piper neural open-source voice
     tagline: "Crisp, balanced, culture & situational evaluator",
     description: "Balanced, articulate female interviewer. Great for behavioral scenarios, cross-functional collaboration, and values alignment.",
     bestFor: "Behavioral rounds, Culture fit, Cross-functional & Consulting interviews",

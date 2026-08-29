@@ -563,6 +563,43 @@ const tests = [
       return true;
     }
   },
+  {
+    name: "Suite #31: Self-Hosted TTS Latency & Fallback Resilience Test",
+    test: () => {
+      // 1. Assert Piper Voice Model mappings
+      const expectedModels = {
+        adam_formal: "en_US-ryan-high",
+        josh_neutral: "en_US-lessac-medium",
+        rachel_warm: "en_US-amy-medium",
+        bella_neutral: "en_US-libritts-high",
+      };
+
+      for (const [pId, model] of Object.entries(expectedModels)) {
+        const p = INTERVIEWER_PERSONAS[pId];
+        if (!p || p.piperVoiceModel !== model) {
+          throw new Error(`Voice persona ${pId} has incorrect Piper model mapping (expected ${model}, got ${p?.piperVoiceModel})`);
+        }
+      }
+
+      // 2. Assert Piper Microservice Service Artifacts exist
+      const serverPyPath = path.join(process.cwd(), "services", "tts-piper", "server.py");
+      const dockerfilePath = path.join(process.cwd(), "services", "tts-piper", "Dockerfile");
+
+      if (!fs.existsSync(serverPyPath)) {
+        throw new Error("Self-hosted Piper TTS server.py microservice is missing");
+      }
+      if (!fs.existsSync(dockerfilePath)) {
+        throw new Error("Self-hosted Piper TTS Dockerfile is missing");
+      }
+
+      const serverPyContent = fs.readFileSync(serverPyPath, "utf-8");
+      if (!serverPyContent.includes("/synthesize") || !serverPyContent.includes("/health")) {
+        throw new Error("Piper TTS server.py missing /synthesize or /health endpoints");
+      }
+
+      return true;
+    }
+  },
 ];
 let passed = 0;
 
