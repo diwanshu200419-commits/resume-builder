@@ -20,6 +20,8 @@ import {
   synthesizeTopFocusAreas,
 } from "../lib/interview/conversation-engine.ts";
 import { mapLegacySessionToSchema } from "../lib/interview/history-sync.ts";
+import { scoreLinkedInProfile } from "../lib/ai/linkedin/linkedin-score.ts";
+import { canAccessBrandingStudio } from "../lib/plans.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -869,6 +871,98 @@ const tests = [
             // Network fallback
           }
         }
+      }
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #35: LinkedIn Branding Studio Deterministic Scoring & Plan Gating Test",
+    test: () => {
+      // 1. Plan Gating Authorization Matrix
+      if (canAccessBrandingStudio(null) !== false) {
+        throw new Error("canAccessBrandingStudio should block null/unauthenticated user");
+      }
+      if (canAccessBrandingStudio({ plan: "free" }) !== false) {
+        throw new Error("canAccessBrandingStudio should block free plan");
+      }
+      if (canAccessBrandingStudio({ plan: "pro" }) !== true) {
+        throw new Error("canAccessBrandingStudio should allow pro plan");
+      }
+      if (canAccessBrandingStudio({ plan: "premium" }) !== true) {
+        throw new Error("canAccessBrandingStudio should allow premium plan");
+      }
+      if (canAccessBrandingStudio({ plan: "career_pack" }) !== true) {
+        throw new Error("canAccessBrandingStudio should allow career_pack plan");
+      }
+
+      // 2. Deterministic Scoring Reproducibility Check
+      const sampleCandidateInput = {
+        targetRole: "Software Engineer",
+        industry: "Technology & SaaS",
+        experienceLevel: "1–3 years",
+        currentHeadline: "Full Stack Engineer | React, Next.js, Node.js & Cloud Systems | Building Scalable Web Apps",
+        currentAbout: "Experienced Full Stack Engineer specializing in TypeScript, React, and high-throughput Node.js microservices.\n\n• Engineered robust backend systems with PostgreSQL.\n• Reduced page load times by 40% using Next.js.\n\nOpen to exciting opportunities — reach out at user@example.com",
+        skills: ["React", "Next.js", "Node.js", "TypeScript", "PostgreSQL", "Tailwind CSS", "GraphQL", "AWS"],
+        achievements: "Optimized database query performance by 40% and built automated CI/CD pipelines.",
+        education: "B.Tech in Computer Science",
+        projects: "Vaylo AI Career Platform, Realtime Voice Mock Interview Engine",
+        targetLocation: "Bangalore, India / Remote",
+        targetCompanies: "Google, Microsoft, Amazon",
+      };
+
+      // Run scoring twice on identical input
+      const run1 = scoreLinkedInProfile(sampleCandidateInput);
+      const run2 = scoreLinkedInProfile(sampleCandidateInput);
+
+      if (JSON.stringify(run1) !== JSON.stringify(run2)) {
+        throw new Error("LinkedIn Scoring Engine failed determinism check: Output differed between identical runs!");
+      }
+
+      // Assert Score Bounds and Subcategory Mathematical Integrity
+      const sum = run1.headline + run1.about + run1.keywords + run1.experience + run1.skills + run1.completeness + run1.discoverability;
+      if (run1.total !== sum) {
+        throw new Error(`Total score (${run1.total}) does not equal mathematical sum of sub-scores (${sum})`);
+      }
+
+      if (run1.total < 0 || run1.total > 100) {
+        throw new Error(`Total score (${run1.total}) outside valid 0-100 range`);
+      }
+      if (run1.headline < 0 || run1.headline > 20) {
+        throw new Error(`Headline score (${run1.headline}) outside 0-20 range`);
+      }
+      if (run1.about < 0 || run1.about > 20) {
+        throw new Error(`About score (${run1.about}) outside 0-20 range`);
+      }
+      if (run1.keywords < 0 || run1.keywords > 20) {
+        throw new Error(`Keywords score (${run1.keywords}) outside 0-20 range`);
+      }
+      if (run1.experience < 0 || run1.experience > 15) {
+        throw new Error(`Experience score (${run1.experience}) outside 0-15 range`);
+      }
+      if (run1.skills < 0 || run1.skills > 10) {
+        throw new Error(`Skills score (${run1.skills}) outside 0-10 range`);
+      }
+      if (run1.completeness < 0 || run1.completeness > 10) {
+        throw new Error(`Completeness score (${run1.completeness}) outside 0-10 range`);
+      }
+      if (run1.discoverability < 0 || run1.discoverability > 5) {
+        throw new Error(`Discoverability score (${run1.discoverability}) outside 0-5 range`);
+      }
+
+      // 3. Sparse Input vs Rich Input Differential Assertion
+      const sparseInput = {
+        targetRole: "Software Engineer",
+        currentHeadline: "",
+        currentAbout: "",
+        skills: [],
+      };
+      const sparseScore = scoreLinkedInProfile(sparseInput);
+      if (sparseScore.total >= run1.total) {
+        throw new Error(`Sparse input score (${sparseScore.total}) should be strictly lower than rich input score (${run1.total})`);
+      }
+      if (sparseScore.breakdown.headline.issues.length === 0) {
+        throw new Error("Sparse input headline failed to report missing headline issue");
       }
 
       return true;

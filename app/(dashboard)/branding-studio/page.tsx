@@ -79,9 +79,16 @@ export default function BrandingStudioPage() {
         const analysisData = await resAnalyses.json();
         const a = analysisData.analysis;
         if (a) {
-          if (a.job_title) setTargetRole(a.job_title);
-          if (a.missing_keywords && Array.isArray(a.missing_keywords)) {
+          if (a.job_title) {
+            setTargetRole(a.job_title);
+          }
+          if (a.found_keywords && Array.isArray(a.found_keywords) && a.found_keywords.length > 0) {
+            setSkills(a.found_keywords.slice(0, 10).join(", "));
+          } else if (a.missing_keywords && Array.isArray(a.missing_keywords)) {
             setSkills((prev) => `${prev}, ${a.missing_keywords.join(", ")}`);
+          }
+          if (a.summary) {
+            setCurrentAbout(a.summary);
           }
         }
       }

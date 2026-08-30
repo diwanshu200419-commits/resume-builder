@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildLinkedinSystemInstruction, buildLinkedinUserPrompt } from "@/lib/ai/linkedin/prompts";
 import { linkedinOptimizationSchema } from "@/lib/ai/linkedin/linkedin-schema";
+import { scoreLinkedInProfile } from "@/lib/ai/linkedin/linkedin-score";
 import { logAiUsage } from "@/lib/admin/logger";
 
 export const dynamic = "force-dynamic";
@@ -57,7 +58,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Target Role is required" }, { status: 400 });
     }
 
-    // 2. Build AI Prompts
+    // 2. Pure Deterministic Mathematical Scoring (0ms, 0 AI tokens, 100% reproducible)
+    const deterministicScore = scoreLinkedInProfile({
+      targetRole,
+      industry,
+      experienceLevel,
+      currentHeadline,
+      currentAbout,
+      skills: Array.isArray(skills) ? skills : [skills],
+      achievements,
+      education,
+      certifications,
+      projects,
+      targetLocation,
+      targetCompanies,
+    });
+
+    // 3. Build AI Prompts for text generation ONLY
     const systemInstruction = buildLinkedinSystemInstruction();
     const userPrompt = buildLinkedinUserPrompt({
       targetRole,
@@ -103,7 +120,7 @@ export async function POST(req: NextRequest) {
           optimizationResult = validated.data;
         } else {
           console.warn("[Branding Studio API] Zod validation fallback:", validated.error.flatten());
-          optimizationResult = parsedJson; // Fallback to raw JSON if valid structure
+          optimizationResult = parsedJson;
         }
       } catch (geminiErr: any) {
         console.error("[Branding Studio API] Gemini call error:", geminiErr);
@@ -111,18 +128,33 @@ export async function POST(req: NextRequest) {
     }
 
     // High availability fallback response if Gemini is unavailable or rate limited
-    if (!optimizationResult || !optimizationResult.profileScore) {
+    if (!optimizationResult || !optimizationResult.headlines) {
       optimizationResult = generateHighAvailabilityFallback({
         targetRole,
         experienceLevel,
         skills: Array.isArray(skills) ? skills : [],
         currentHeadline,
+        deterministicScore,
       });
     }
 
+    // ALWAYS enforce the deterministic mathematical score over any AI-hallucinated score
+    optimizationResult.profileScore = {
+      total: deterministicScore.total,
+      headline: deterministicScore.headline,
+      about: deterministicScore.about,
+      keywords: deterministicScore.keywords,
+      experience: deterministicScore.experience,
+      skills: deterministicScore.skills,
+      completeness: deterministicScore.completeness,
+      discoverability: deterministicScore.discoverability,
+      scoreExplanation: deterministicScore.scoreExplanation,
+      breakdown: deterministicScore.breakdown,
+    };
+
     const latencyMs = Date.now() - startTime;
 
-    // 3. Log AI Usage & Costs (Vaylo shared AI logging)
+    // 4. Log AI Usage & Costs
     await logAiUsage({
       userId: profile.id,
       feature: "linkedin_branding",
@@ -135,7 +167,7 @@ export async function POST(req: NextRequest) {
       latencyMs,
     });
 
-    // 4. Save to Database History (`linkedin_optimizations` table)
+    // 5. Save to Database History (`linkedin_optimizations` table)
     try {
       const supabase = await createServiceClient();
       await supabase.from("linkedin_optimizations").insert({
@@ -143,7 +175,7 @@ export async function POST(req: NextRequest) {
         target_role: targetRole,
         industry: industry || "General",
         experience_level: experienceLevel,
-        score: optimizationResult.profileScore?.total || 75,
+        score: deterministicScore.total,
         output_json: optimizationResult,
         created_at: new Date().toISOString(),
       });
@@ -166,22 +198,25 @@ function generateHighAvailabilityFallback(params: {
   experienceLevel: string;
   skills: string[];
   currentHeadline?: string;
+  deterministicScore?: any;
 }) {
   const roleTitle = params.targetRole || "Professional";
   const skillList = params.skills.length > 0 ? params.skills.slice(0, 4).join(" • ") : "Core Expertise • Strategy • Execution";
 
+  const defaultScore = params.deterministicScore || {
+    total: 75,
+    headline: 15,
+    about: 15,
+    keywords: 15,
+    experience: 12,
+    skills: 8,
+    completeness: 7,
+    discoverability: 3,
+    scoreExplanation: "Your profile has strong core positioning. Aligning keywords with target recruiter searches will boost discoverability.",
+  };
+
   return {
-    profileScore: {
-      total: 78,
-      headline: 16,
-      about: 16,
-      keywords: 15,
-      experience: 12,
-      skills: 8,
-      completeness: 7,
-      discoverability: 4,
-      scoreExplanation: "Your profile has strong core positioning. Aligning keywords with target recruiter searches will boost discoverability.",
-    },
+    profileScore: defaultScore,
     roleAnalysis: {
       targetRole: roleTitle,
       industry: "Technology & Business",

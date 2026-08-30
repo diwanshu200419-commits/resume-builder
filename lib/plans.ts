@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import type { Profile } from "@/types";
 
 export type PlanType = "free" | "pro" | "premium" | "career_pack";

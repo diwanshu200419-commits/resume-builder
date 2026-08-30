@@ -31,15 +31,29 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await createClient();
-    const { data: analysis } = await supabase
-      .from("analyses")
-      .select("*")
-      .eq("id", id)
-      .eq("user_id", profile.id)
-      .single();
+    if (id === "latest") {
+      const { data: latestAnalysis } = await supabase
+        .from("analyses")
+        .select("*")
+        .eq("user_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    if (analysis) {
-      return NextResponse.json({ analysis });
+      if (latestAnalysis) {
+        return NextResponse.json({ analysis: latestAnalysis });
+      }
+    } else {
+      const { data: analysis } = await supabase
+        .from("analyses")
+        .select("*")
+        .eq("id", id)
+        .eq("user_id", profile.id)
+        .maybeSingle();
+
+      if (analysis) {
+        return NextResponse.json({ analysis });
+      }
     }
   } catch {}
 
