@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     if (hasResult) starScore += 10;
 
     // Calculate Specificity Score from Evidence Keyword Matching (out of 30)
-    const specificityScore = Math.round((evidenceResult.score / 100) * 30);
+    const specificityScore = Math.round(evidenceResult.matchPercentage * 30);
 
     // Calculate Pacing Score (out of 15)
     const pacingScore = totalWords >= 40 && totalWords <= 200 ? 15 : totalWords < 20 ? 5 : 10;
