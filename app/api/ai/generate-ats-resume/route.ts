@@ -5,6 +5,7 @@ import { generateATSResume, GenerateATSResumeInput } from "@/lib/gemini";
 import { canAnalyze } from "@/lib/plans";
 import { withRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
+import { logAIUsage } from "@/lib/logging/ai-usage";
 
 const InputSchema = z.object({
   rawInput: z.string().min(20, "Please provide at least 20 characters of resume text or experience details."),
@@ -15,14 +16,37 @@ const InputSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  let profile: any = null;
+
   return withRateLimit(request, async () => {
     try {
-      const profile = await getProfile();
+      profile = await getProfile();
+      const planAtTime = profile?.plan || (profile ? "free" : "unauthenticated");
+
       if (!profile) {
+        await logAIUsage({
+          userId: null,
+          route: "/api/ai/generate-ats-resume",
+          requestType: "generate_ats_resume",
+          planAtTime: "unauthenticated",
+          status: "blocked_auth",
+          httpStatus: 401,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
       if (!canAnalyze(profile)) {
+        await logAIUsage({
+          userId: profile.id,
+          route: "/api/ai/generate-ats-resume",
+          requestType: "generate_ats_resume",
+          planAtTime,
+          status: "blocked_rate_limit",
+          httpStatus: 403,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json(
           { error: "Free tier limit reached. Upgrade to Pro for 30 scans per month." },
           { status: 403 }
@@ -33,6 +57,16 @@ export async function POST(request: NextRequest) {
       const validation = InputSchema.safeParse(body);
 
       if (!validation.success) {
+        await logAIUsage({
+          userId: profile.id,
+          route: "/api/ai/generate-ats-resume",
+          requestType: "generate_ats_resume",
+          planAtTime,
+          status: "error",
+          httpStatus: 400,
+          errorMessage: validation.error.issues[0].message,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json(
           { error: validation.error.issues[0].message },
           { status: 400 }
@@ -44,7 +78,7 @@ export async function POST(request: NextRequest) {
       // 1. Generate Unified ATS Resume + Category Score
       const result = await generateATSResume(inputData);
 
-      // 2. Persist in Supabase 'analyses' & 'ai_logs'
+      // 2. Persist in Supabase 'analyses' & 'ai_usage_logs'
       try {
         const supabase = await createClient();
         const { data: dbAnalysis } = await supabase
@@ -63,17 +97,8 @@ export async function POST(request: NextRequest) {
           .select()
           .single();
 
-        // Log AI usage in 'ai_logs'
-        const serviceClient = await createServiceClient();
-        await serviceClient.from("ai_logs").insert({
-          user_id: profile.id,
-          model: "gemini-2.0-flash",
-          tokens_used: 1200,
-          feature: "generate_ats_resume",
-          success: true,
-        });
-
         // Increment analyses_used on user profile
+        const serviceClient = await createServiceClient();
         await serviceClient
           .from("profiles")
           .update({
@@ -89,9 +114,31 @@ export async function POST(request: NextRequest) {
         console.warn("[generate-ats-resume] Supabase logging warning:", err);
       }
 
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/ai/generate-ats-resume",
+        requestType: "generate_ats_resume",
+        planAtTime,
+        status: "success",
+        httpStatus: 200,
+        geminiModel: "gemini-2.0-flash",
+        estimatedTokens: 1200,
+        latencyMs: Date.now() - startTime,
+      });
+
       return NextResponse.json({ success: true, data: result });
     } catch (error: any) {
       console.error("[generate-ats-resume API Error]:", error);
+      await logAIUsage({
+        userId: profile?.id || null,
+        route: "/api/ai/generate-ats-resume",
+        requestType: "generate_ats_resume",
+        planAtTime: profile?.plan || "unknown",
+        status: "error",
+        httpStatus: 500,
+        errorMessage: error?.message || "Internal error",
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json(
         { error: "Failed to generate ATS resume. Please try again." },
         { status: 500 }

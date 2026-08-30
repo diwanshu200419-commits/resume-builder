@@ -20,6 +20,7 @@ import {
   PortfolioTemplateId,
 } from "@/lib/portfolio-templates";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { logAIUsage } from "@/lib/logging/ai-usage";
 
 export const dynamic = "force-dynamic";
 
@@ -127,9 +128,23 @@ Return ONLY valid raw JSON matching this exact TypeScript structure:
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  let profile: any = null;
+
   try {
-    const profile = await getProfile();
+    profile = await getProfile();
+    const planAtTime = profile?.plan || (profile ? "free" : "unauthenticated");
+
     if (!profile) {
+      await logAIUsage({
+        userId: null,
+        route: "/api/ai/portfolio",
+        requestType: "portfolio_generation",
+        planAtTime: "unauthenticated",
+        status: "blocked_auth",
+        httpStatus: 401,
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -173,6 +188,16 @@ export async function POST(request: NextRequest) {
     });
 
     if (!validation.valid) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/ai/portfolio",
+        requestType: "portfolio_generation",
+        planAtTime,
+        status: "error",
+        httpStatus: 400,
+        errorMessage: validation.reason,
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json(
         { error: validation.reason },
         { status: 400 }
@@ -188,6 +213,8 @@ export async function POST(request: NextRequest) {
       targetRole,
       profile.full_name || undefined
     );
+
+    const usedModel = portfolioData ? "gemini-2.0-flash" : "rule-based-fallback";
 
     // Fallback if AI offline or returned null
     if (!portfolioData) {
@@ -234,6 +261,19 @@ export async function POST(request: NextRequest) {
     }
 
     const htmlCode = generatePortfolioHTML(portfolioData, selectedTemplate);
+
+    await logAIUsage({
+      userId: profile.id,
+      route: "/api/ai/portfolio",
+      requestType: "portfolio_generation",
+      planAtTime,
+      status: "success",
+      httpStatus: 200,
+      geminiModel: usedModel,
+      estimatedTokens: 1200,
+      latencyMs: Date.now() - startTime,
+    });
+
     return NextResponse.json({
       html: htmlCode,
       data: portfolioData,
@@ -242,6 +282,16 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Portfolio error:", error);
+    await logAIUsage({
+      userId: profile?.id || null,
+      route: "/api/ai/portfolio",
+      requestType: "portfolio_generation",
+      planAtTime: profile?.plan || "unknown",
+      status: "error",
+      httpStatus: 500,
+      errorMessage: error?.message || "Internal error",
+      latencyMs: Date.now() - startTime,
+    });
     return NextResponse.json(
       { error: error.message || "Failed to generate portfolio" },
       { status: 500 }

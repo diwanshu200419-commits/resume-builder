@@ -6,6 +6,7 @@ import { canAnalyze } from "@/lib/plans";
 import { analyzeSchema } from "@/lib/validations";
 import { withRateLimit } from "@/lib/rate-limit";
 import { detectDomainFromJD } from "@/lib/domain-intelligence";
+import { logAIUsage } from "@/lib/logging/ai-usage";
 
 // In-memory fallback cache for high availability
 const analysisCache = new Map<string, any>();
@@ -65,14 +66,37 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  let profile: any = null;
+
   return withRateLimit(request, async () => {
     try {
-      const profile = await getProfile();
+      profile = await getProfile();
+      const planAtTime = profile?.plan || (profile ? "free" : "unauthenticated");
+
       if (!profile) {
+        await logAIUsage({
+          userId: null,
+          route: "/api/analyze",
+          requestType: "ats_scan",
+          planAtTime: "unauthenticated",
+          status: "blocked_auth",
+          httpStatus: 401,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
       if (!canAnalyze(profile)) {
+        await logAIUsage({
+          userId: profile.id,
+          route: "/api/analyze",
+          requestType: "ats_scan",
+          planAtTime,
+          status: "blocked_rate_limit",
+          httpStatus: 403,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json({ error: "limit_reached" }, { status: 403 });
       }
 
@@ -80,6 +104,16 @@ export async function POST(request: NextRequest) {
       const validation = analyzeSchema.safeParse(body);
 
       if (!validation.success) {
+        await logAIUsage({
+          userId: profile.id,
+          route: "/api/analyze",
+          requestType: "ats_scan",
+          planAtTime,
+          status: "error",
+          httpStatus: 400,
+          errorMessage: validation.error.issues[0].message,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json({
           error: validation.error.issues[0].message
         }, { status: 400 });
@@ -188,9 +222,31 @@ export async function POST(request: NextRequest) {
           .eq("id", profile.id);
       } catch {}
 
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/analyze",
+        requestType: "ats_scan",
+        planAtTime,
+        status: "success",
+        httpStatus: 200,
+        geminiModel: "gemini-2.0-flash",
+        estimatedTokens: 2200,
+        latencyMs: Date.now() - startTime,
+      });
+
       return NextResponse.json({ id: dbAnalysisId });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Server error:", error);
+      await logAIUsage({
+        userId: profile?.id || null,
+        route: "/api/analyze",
+        requestType: "ats_scan",
+        planAtTime: profile?.plan || "unknown",
+        status: "error",
+        httpStatus: 500,
+        errorMessage: error?.message || "Internal error",
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
     }
   });

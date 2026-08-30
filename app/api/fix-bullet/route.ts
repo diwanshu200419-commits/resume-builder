@@ -11,6 +11,7 @@ import { z } from "zod";
 import { detectDomainFromJD, getDomainPromptContext, DOMAIN_VOCABULARY } from "@/lib/domain-intelligence";
 import { getProfile } from "@/lib/auth";
 import { canAutoFix } from "@/lib/plans";
+import { logAIUsage } from "@/lib/logging/ai-usage";
 
 // ---------- Request validation ----------
 
@@ -194,64 +195,155 @@ async function callGeminiForRewrite(
 // ---------- Route handler ----------
 
 export async function POST(req: NextRequest) {
-  const profile = await getProfile();
-  if (!profile) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (!canAutoFix(profile)) {
-    return NextResponse.json(
-      { error: "Auto-Fix Bullet Rewriter requires Pro or higher plan." },
-      { status: 403 }
-    );
-  }
-
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-
-  const parsedInput = RequestSchema.safeParse(body);
-  if (!parsedInput.success) {
-    return NextResponse.json(
-      { error: "Invalid request", details: parsedInput.error.flatten() },
-      { status: 400 }
-    );
-  }
-
-  const input = parsedInput.data;
-  const domain = detectDomainFromJD(input.job_description);
-  const key = cacheKey(input, domain);
-
-  const cached = fallbackCache.get(key);
-  if (cached) {
-    return NextResponse.json({ ...cached, domain, cached: true }, { status: 200 });
-  }
+  const startTime = Date.now();
+  let profile: any = null;
 
   try {
-    const rewriteResult = await callGeminiForRewrite(input, domain);
-    setCache(key, rewriteResult);
-    return NextResponse.json({ ...rewriteResult, domain, cached: false }, { status: 200 });
-  } catch (err) {
-    console.error("[/api/fix-bullet] Gemini call failed:", err);
+    profile = await getProfile();
+    const planAtTime = profile?.plan || (profile ? "free" : "unauthenticated");
 
-    const fallback: GeminiResult & { domain: string; cached: boolean; error: true } = {
-      original: input.original_bullet,
-      rewritten: input.original_bullet,
-      verbs_changed: false,
-      keywords_added: [],
-      metrics_added: false,
-      has_measurable_outcome: false,
-      seniority_match: "appropriate",
-      needs_input: "AI rewrite temporarily unavailable — this bullet was left unchanged.",
-      domain,
-      cached: false,
-      error: true,
-    };
+    if (!profile) {
+      await logAIUsage({
+        userId: null,
+        route: "/api/fix-bullet",
+        requestType: "bullet_rewrite",
+        planAtTime: "unauthenticated",
+        status: "blocked_auth",
+        httpStatus: 401,
+        latencyMs: Date.now() - startTime,
+      });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    return NextResponse.json(fallback, { status: 200 });
+    if (!canAutoFix(profile)) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/fix-bullet",
+        requestType: "bullet_rewrite",
+        planAtTime,
+        status: "blocked_plan",
+        httpStatus: 403,
+        latencyMs: Date.now() - startTime,
+      });
+      return NextResponse.json(
+        { error: "Auto-Fix Bullet Rewriter requires Pro or higher plan." },
+        { status: 403 }
+      );
+    }
+
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/fix-bullet",
+        requestType: "bullet_rewrite",
+        planAtTime,
+        status: "error",
+        httpStatus: 400,
+        errorMessage: "Invalid JSON body",
+        latencyMs: Date.now() - startTime,
+      });
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const parsedInput = RequestSchema.safeParse(body);
+    if (!parsedInput.success) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/fix-bullet",
+        requestType: "bullet_rewrite",
+        planAtTime,
+        status: "error",
+        httpStatus: 400,
+        errorMessage: "Validation error",
+        latencyMs: Date.now() - startTime,
+      });
+      return NextResponse.json(
+        { error: "Invalid request", details: parsedInput.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const input = parsedInput.data;
+    const domain = detectDomainFromJD(input.job_description);
+    const key = cacheKey(input, domain);
+
+    const cached = fallbackCache.get(key);
+    if (cached) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/fix-bullet",
+        requestType: "bullet_rewrite",
+        planAtTime,
+        status: "success",
+        httpStatus: 200,
+        geminiModel: "cache-hit",
+        estimatedTokens: 0,
+        latencyMs: Date.now() - startTime,
+      });
+      return NextResponse.json({ ...cached, domain, cached: true }, { status: 200 });
+    }
+
+    try {
+      const rewriteResult = await callGeminiForRewrite(input, domain);
+      setCache(key, rewriteResult);
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/fix-bullet",
+        requestType: "bullet_rewrite",
+        planAtTime,
+        status: "success",
+        httpStatus: 200,
+        geminiModel: "gemini-2.0-flash",
+        estimatedTokens: 350,
+        latencyMs: Date.now() - startTime,
+      });
+      return NextResponse.json({ ...rewriteResult, domain, cached: false }, { status: 200 });
+    } catch (err) {
+      console.error("[/api/fix-bullet] Gemini call failed:", err);
+
+      const fallback: GeminiResult & { domain: string; cached: boolean; error: true } = {
+        original: input.original_bullet,
+        rewritten: input.original_bullet,
+        verbs_changed: false,
+        keywords_added: [],
+        metrics_added: false,
+        has_measurable_outcome: false,
+        seniority_match: "appropriate",
+        needs_input: "AI rewrite temporarily unavailable — this bullet was left unchanged.",
+        domain,
+        cached: false,
+        error: true,
+      };
+
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/fix-bullet",
+        requestType: "bullet_rewrite",
+        planAtTime,
+        status: "success",
+        httpStatus: 200,
+        geminiModel: "rule-based-fallback",
+        estimatedTokens: 50,
+        latencyMs: Date.now() - startTime,
+      });
+
+      return NextResponse.json(fallback, { status: 200 });
+    }
+  } catch (error: any) {
+    await logAIUsage({
+      userId: profile?.id || null,
+      route: "/api/fix-bullet",
+      requestType: "bullet_rewrite",
+      planAtTime: profile?.plan || "unknown",
+      status: "error",
+      httpStatus: 500,
+      errorMessage: error?.message || "Internal error",
+      latencyMs: Date.now() - startTime,
+    });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 

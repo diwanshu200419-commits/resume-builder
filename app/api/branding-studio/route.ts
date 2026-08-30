@@ -7,6 +7,7 @@ import { buildLinkedinSystemInstruction, buildLinkedinUserPrompt } from "@/lib/a
 import { linkedinOptimizationSchema } from "@/lib/ai/linkedin/linkedin-schema";
 import { scoreLinkedInProfile } from "@/lib/ai/linkedin/linkedin-score";
 import { logAiUsage } from "@/lib/admin/logger";
+import { logAIUsage } from "@/lib/logging/ai-usage";
 
 export const dynamic = "force-dynamic";
 
@@ -15,14 +16,36 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
+  let profile: any = null;
+
   try {
     // 1. Auth & Server-Side Plan Gating
-    const profile = await getProfile();
+    profile = await getProfile();
+    const planAtTime = profile?.plan || (profile ? "free" : "unauthenticated");
+
     if (!profile) {
+      await logAIUsage({
+        userId: null,
+        route: "/api/branding-studio",
+        requestType: "linkedin_branding",
+        planAtTime: "unauthenticated",
+        status: "blocked_auth",
+        httpStatus: 401,
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json({ error: "Unauthorized: Authentication required" }, { status: 401 });
     }
 
     if (!canAccessBrandingStudio(profile)) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/branding-studio",
+        requestType: "linkedin_branding",
+        planAtTime,
+        status: "blocked_plan",
+        httpStatus: 403,
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json(
         {
           error: "Upgrade required",
@@ -55,6 +78,16 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!targetRole.trim()) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/branding-studio",
+        requestType: "linkedin_branding",
+        planAtTime,
+        status: "error",
+        httpStatus: 400,
+        errorMessage: "Target Role is required",
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json({ error: "Target Role is required" }, { status: 400 });
     }
 
@@ -155,15 +188,15 @@ export async function POST(req: NextRequest) {
     const latencyMs = Date.now() - startTime;
 
     // 4. Log AI Usage & Costs
-    await logAiUsage({
+    await logAIUsage({
       userId: profile.id,
-      feature: "linkedin_branding",
-      provider: "google",
-      model: "gemini-1.5-flash",
-      inputTokens: 850,
-      outputTokens: 650,
-      totalTokens: 1500,
-      requestStatus: "success",
+      route: "/api/branding-studio",
+      requestType: "linkedin_branding",
+      planAtTime,
+      status: "success",
+      httpStatus: 200,
+      geminiModel: "gemini-1.5-flash",
+      estimatedTokens: 1500,
       latencyMs,
     });
 
@@ -189,6 +222,16 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("[Branding Studio API Error]:", error);
+    await logAIUsage({
+      userId: profile?.id || null,
+      route: "/api/branding-studio",
+      requestType: "linkedin_branding",
+      planAtTime: profile?.plan || "unknown",
+      status: "error",
+      httpStatus: 500,
+      errorMessage: error?.message || "Internal error",
+      latencyMs: Date.now() - startTime,
+    });
     return NextResponse.json({ error: error?.message || "Internal server error" }, { status: 500 });
   }
 }

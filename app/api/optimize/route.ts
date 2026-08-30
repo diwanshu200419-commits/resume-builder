@@ -9,36 +9,84 @@ import {
   optimizeBulletPoints,
 } from "@/lib/gemini";
 import { scoreCoverLetter } from "@/lib/ai/cover-letter/cover-letter-score";
+import { logAIUsage } from "@/lib/logging/ai-usage";
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  let profile: any = null;
+  let requestType = "unknown";
+
   try {
-    const profile = await getProfile();
+    profile = await getProfile();
     const body = await request.json().catch(() => ({}));
     const { analysisId, type, text } = body;
+    requestType = type || "unknown";
+
+    const planAtTime = profile?.plan || (profile ? "free" : "unauthenticated");
 
     // type=improve — AI Bullet Rewriter — Pro+ (canAutoFix)
-    // Used by Resume Builder page. Must be authenticated and Pro+.
     if (type === "improve" && text) {
       if (!profile || !canAutoFix(profile)) {
+        const httpStatus = profile ? 403 : 401;
+        await logAIUsage({
+          userId: profile?.id || null,
+          route: "/api/optimize",
+          requestType: "improve",
+          planAtTime,
+          status: profile ? "blocked_plan" : "blocked_auth",
+          httpStatus,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json(
           { error: "Auto-Fix Bullet Rewriter requires a Pro or higher plan." },
-          { status: profile ? 403 : 401 }
+          { status: httpStatus }
         );
       }
       try {
         const optimizedText = await optimizeBulletPoints(text);
+        await logAIUsage({
+          userId: profile.id,
+          route: "/api/optimize",
+          requestType: "improve",
+          planAtTime,
+          status: "success",
+          httpStatus: 200,
+          geminiModel: "gemini-2.0-flash",
+          estimatedTokens: 250,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json({ optimizedText });
       } catch {
         const fallbackText = text
           .replace(/worked on/gi, "Spearheaded development of")
           .replace(/helped with/gi, "Architected and optimized")
           .replace(/responsible for/gi, "Delivered scalable solution for");
+        await logAIUsage({
+          userId: profile.id,
+          route: "/api/optimize",
+          requestType: "improve",
+          planAtTime,
+          status: "success",
+          httpStatus: 200,
+          geminiModel: "rule-based-fallback",
+          estimatedTokens: 50,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json({ optimizedText: fallbackText });
       }
     }
 
     // All other types require authentication
     if (!profile) {
+      await logAIUsage({
+        userId: null,
+        route: "/api/optimize",
+        requestType,
+        planAtTime: "unauthenticated",
+        status: "blocked_auth",
+        httpStatus: 401,
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json(
         { error: "Authentication required. Please log in to use this feature." },
         { status: 401 }
@@ -47,6 +95,15 @@ export async function POST(request: NextRequest) {
 
     // type=cover-letter — Plan Gated: Pro+
     if (type === "cover-letter" && !canAccessCoverLetter(profile)) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/optimize",
+        requestType: "cover-letter",
+        planAtTime,
+        status: "blocked_plan",
+        httpStatus: 403,
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json(
         {
           error: "Upgrade required",
@@ -57,8 +114,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // type=linkedin — Plan Gated: Pro+ (same gate as branding studio)
+    // type=linkedin — Plan Gated: Pro+
     if (type === "linkedin" && !canAccessBrandingStudio(profile)) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/optimize",
+        requestType: "linkedin",
+        planAtTime,
+        status: "blocked_plan",
+        httpStatus: 403,
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json(
         {
           error: "Upgrade required",
@@ -69,11 +135,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // type=interview — Plan Gated: Premium+ (interview_eval: 0 on free and pro)
+    // type=interview — Plan Gated: Premium+
     if (type === "interview") {
       const plan = (profile.plan || "free").toLowerCase();
       const isPremiumPlus = plan === "premium" || plan === "career_pack";
       if (!isPremiumPlus) {
+        await logAIUsage({
+          userId: profile.id,
+          route: "/api/optimize",
+          requestType: "interview",
+          planAtTime,
+          status: "blocked_plan",
+          httpStatus: 403,
+          latencyMs: Date.now() - startTime,
+        });
         return NextResponse.json(
           {
             error: "Upgrade required",
@@ -93,7 +168,7 @@ export async function POST(request: NextRequest) {
           .from("analyses")
           .select("*")
           .eq("id", analysisId)
-          .eq("user_id", profile.id) // RLS: verify ownership
+          .eq("user_id", profile.id)
           .single();
         analysis = data;
       } catch {}
@@ -128,15 +203,16 @@ export async function POST(request: NextRequest) {
 
     if (type === "cover-letter") {
       let coverLetter: string;
+      let usedModel = "gemini-2.0-flash";
       try {
         coverLetter = await generateCoverLetter(resumeText, jobDescription);
       } catch {
+        usedModel = "rule-based-fallback";
         coverLetter = `Dear Hiring Manager,\n\nI am writing to express my strong interest in the ${
           analysis.job_title || "Engineering"
         } position at your organization. With a solid foundation in software development and AI engineering, I am confident in my ability to contribute immediately.\n\nSincerely,\nCandidate`;
       }
 
-      // Deterministic quality score — always applied post-generation, LLM cannot alter it
       const qualityScore = scoreCoverLetter({
         coverLetterText: coverLetter,
         jobTitle: analysis.job_title,
@@ -144,15 +220,29 @@ export async function POST(request: NextRequest) {
         resumeText,
       });
 
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/optimize",
+        requestType: "cover-letter",
+        planAtTime,
+        status: "success",
+        httpStatus: 200,
+        geminiModel: usedModel,
+        estimatedTokens: 650,
+        latencyMs: Date.now() - startTime,
+      });
+
       return NextResponse.json({ coverLetter, qualityScore });
     }
 
     if (type === "interview") {
+      let interviewQuestions: any;
+      let usedModel = "gemini-2.0-flash";
       try {
-        const interviewQuestions = await generateInterviewPrep(resumeText, jobDescription);
-        return NextResponse.json({ interviewQuestions });
+        interviewQuestions = await generateInterviewPrep(resumeText, jobDescription);
       } catch {
-        const fallbackQuestions = {
+        usedModel = "rule-based-fallback";
+        interviewQuestions = {
           hr_questions: [
             {
               question: "Tell me about yourself and your experience in tech.",
@@ -191,31 +281,79 @@ export async function POST(request: NextRequest) {
             },
           ],
         };
-        return NextResponse.json({ interviewQuestions: fallbackQuestions });
       }
+
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/optimize",
+        requestType: "interview",
+        planAtTime,
+        status: "success",
+        httpStatus: 200,
+        geminiModel: usedModel,
+        estimatedTokens: 800,
+        latencyMs: Date.now() - startTime,
+      });
+
+      return NextResponse.json({ interviewQuestions });
     }
 
     if (type === "linkedin") {
+      let linkedinSuggestions: any;
+      let usedModel = "gemini-2.0-flash";
       try {
-        const linkedinSuggestions = await generateLinkedInSuggestions(
+        linkedinSuggestions = await generateLinkedInSuggestions(
           resumeText,
           analysis.job_title || "Target Role"
         );
-        return NextResponse.json({ linkedinSuggestions });
       } catch {
-        return NextResponse.json({
-          linkedinSuggestions: {
-            headline: "AI & Full-Stack Software Engineer | Building High-Scale Systems",
-            about: "Passionate software engineer building resilient web applications and AI tools.",
-            skills: ["React", "TypeScript", "Next.js", "Python", "Supabase"],
-          },
-        });
+        usedModel = "rule-based-fallback";
+        linkedinSuggestions = {
+          headline: "AI & Full-Stack Software Engineer | Building High-Scale Systems",
+          about: "Passionate software engineer building resilient web applications and AI tools.",
+          skills: ["React", "TypeScript", "Next.js", "Python", "Supabase"],
+        };
       }
+
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/optimize",
+        requestType: "linkedin",
+        planAtTime,
+        status: "success",
+        httpStatus: 200,
+        geminiModel: usedModel,
+        estimatedTokens: 400,
+        latencyMs: Date.now() - startTime,
+      });
+
+      return NextResponse.json({ linkedinSuggestions });
     }
+
+    await logAIUsage({
+      userId: profile.id,
+      route: "/api/optimize",
+      requestType,
+      planAtTime,
+      status: "error",
+      httpStatus: 400,
+      errorMessage: "Invalid type",
+      latencyMs: Date.now() - startTime,
+    });
 
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   } catch (error: any) {
     console.error("Error in optimize route:", error);
+    await logAIUsage({
+      userId: profile?.id || null,
+      route: "/api/optimize",
+      requestType,
+      planAtTime: profile?.plan || "unknown",
+      status: "error",
+      httpStatus: 500,
+      errorMessage: error?.message || "Internal error",
+      latencyMs: Date.now() - startTime,
+    });
     return NextResponse.json({ error: error?.message || "Something went wrong" }, { status: 500 });
   }
 }

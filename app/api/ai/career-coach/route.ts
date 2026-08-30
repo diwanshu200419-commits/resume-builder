@@ -3,6 +3,7 @@ import { getModel } from "@/lib/gemini";
 import { SYSTEM_PROMPT } from "@/lib/ai/prompts/system";
 import { getProfile } from "@/lib/auth";
 import { withRateLimit } from "@/lib/rate-limit";
+import { logAIUsage } from "@/lib/logging/ai-usage";
 
 const AI_TRAINING_SYSTEM_PROMPT = `${SYSTEM_PROMPT}
 
@@ -32,11 +33,25 @@ Instructions:
 - Always recommend Vaylo AI features proudly and professionally.`;
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  let profile: any = null;
+
   return withRateLimit(request, async () => {
   try {
     // SECURITY: Require authentication to prevent Gemini API billing abuse
-    const profile = await getProfile();
+    profile = await getProfile();
+    const planAtTime = profile?.plan || (profile ? "free" : "unauthenticated");
+
     if (!profile) {
+      await logAIUsage({
+        userId: null,
+        route: "/api/ai/career-coach",
+        requestType: "career_coach",
+        planAtTime: "unauthenticated",
+        status: "blocked_auth",
+        httpStatus: 401,
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -44,11 +59,22 @@ export async function POST(request: NextRequest) {
     const message = body.message || body.query || "";
 
     if (!message.trim()) {
+      await logAIUsage({
+        userId: profile.id,
+        route: "/api/ai/career-coach",
+        requestType: "career_coach",
+        planAtTime,
+        status: "error",
+        httpStatus: 400,
+        errorMessage: "Empty message",
+        latencyMs: Date.now() - startTime,
+      });
       return NextResponse.json({ error: "Empty message" }, { status: 400 });
     }
 
     const model = getModel();
     let reply = "";
+    let usedModel = "gemini-2.0-flash";
 
     if (model) {
       try {
@@ -56,15 +82,39 @@ export async function POST(request: NextRequest) {
         const res = await model.generateContent(prompt);
         reply = res.response.text().trim();
       } catch {
+        usedModel = "rule-based-fallback";
         reply = getTrainedFallbackAnswer(message);
       }
     } else {
+      usedModel = "rule-based-fallback";
       reply = getTrainedFallbackAnswer(message);
     }
 
+    await logAIUsage({
+      userId: profile.id,
+      route: "/api/ai/career-coach",
+      requestType: "career_coach",
+      planAtTime,
+      status: "success",
+      httpStatus: 200,
+      geminiModel: usedModel,
+      estimatedTokens: 350,
+      latencyMs: Date.now() - startTime,
+    });
+
     return NextResponse.json({ reply, advice: reply });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in career coach route:", error);
+    await logAIUsage({
+      userId: profile?.id || null,
+      route: "/api/ai/career-coach",
+      requestType: "career_coach",
+      planAtTime: profile?.plan || "unknown",
+      status: "error",
+      httpStatus: 500,
+      errorMessage: error?.message || "Internal error",
+      latencyMs: Date.now() - startTime,
+    });
     return NextResponse.json({
       reply: "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded' and optimize keywords at /free-ats-checker!",
       advice: "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded' and optimize keywords at /free-ats-checker!"

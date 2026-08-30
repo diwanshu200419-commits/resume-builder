@@ -32,6 +32,7 @@ import {
   canAccessSalaryNegotiator,
 } from "../lib/plans.ts";
 import { scoreCoverLetter } from "../lib/ai/cover-letter/cover-letter-score.ts";
+import { logAIUsage } from "../lib/logging/ai-usage.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -1084,6 +1085,61 @@ const tests = [
       if (canAccessTranslator({ plan: "pro" }) !== true) throw new Error("canAccessTranslator(pro) must be true");
       if (canAccessTranslator({ plan: "premium" }) !== true) throw new Error("canAccessTranslator(premium) must be true");
       if (canAccessTranslator({ plan: "career_pack" }) !== true) throw new Error("canAccessTranslator(career_pack) must be true");
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #38: Centralized AI Usage Logging & Security Observability Verification",
+    test: async () => {
+      // 1. Verify logAIUsage is a callable function
+      if (typeof logAIUsage !== "function") throw new Error("logAIUsage must be an exported function");
+
+      // 2. Test logging a rejection event (blocked_plan)
+      await logAIUsage({
+        userId: "00000000-0000-0000-0000-000000000000",
+        route: "/api/optimize",
+        requestType: "cover-letter",
+        planAtTime: "free",
+        status: "blocked_plan",
+        httpStatus: 403,
+        estimatedTokens: 0,
+      });
+
+      // 3. Test logging an unauthenticated rejection (blocked_auth)
+      await logAIUsage({
+        userId: null,
+        route: "/api/analyze",
+        requestType: "ats_scan",
+        planAtTime: "unauthenticated",
+        status: "blocked_auth",
+        httpStatus: 401,
+        estimatedTokens: 0,
+      });
+
+      // 4. Test logging a successful AI invocation with token accounting
+      await logAIUsage({
+        userId: "00000000-0000-0000-0000-000000000000",
+        route: "/api/branding-studio",
+        requestType: "linkedin_branding",
+        planAtTime: "pro",
+        status: "success",
+        httpStatus: 200,
+        geminiModel: "gemini-2.0-flash",
+        estimatedTokens: 1500,
+        latencyMs: 120,
+      });
+
+      // 5. Test logging an error event
+      await logAIUsage({
+        userId: null,
+        route: "/api/ai/career-coach",
+        requestType: "career_coach",
+        planAtTime: "unknown",
+        status: "error",
+        httpStatus: 500,
+        errorMessage: "Test simulation error",
+      });
 
       return true;
     }
