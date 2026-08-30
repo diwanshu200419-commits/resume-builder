@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { canAccessCoverLetter } from "@/lib/plans";
 import {
   generateCoverLetter,
   generateInterviewPrep,
   generateLinkedInSuggestions,
   optimizeBulletPoints,
 } from "@/lib/gemini";
+import { scoreCoverLetter } from "@/lib/ai/cover-letter/cover-letter-score";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +16,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const { analysisId, type, text } = body;
 
-    // Direct Text Improve / AI Bullet Refiner Handler
+    // Direct Text Improve / AI Bullet Refiner Handler — auth optional (used in builder)
     if (type === "improve" && text) {
       try {
         const optimizedText = await optimizeBulletPoints(text);
@@ -28,6 +30,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // All other types require authentication
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in to use this feature." },
+        { status: 401 }
+      );
+    }
+
+    // Cover Letter — Plan Gated: Pro+
+    if (type === "cover-letter") {
+      if (!canAccessCoverLetter(profile)) {
+        return NextResponse.json(
+          {
+            error: "Upgrade required",
+            requiredPlan: "pro",
+            message: "AI Cover Letter Generator requires a Pro or Premium plan. Free tier: 0 cover letters.",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     let analysis: any = null;
     if (analysisId) {
       try {
@@ -36,6 +60,7 @@ export async function POST(request: NextRequest) {
           .from("analyses")
           .select("*")
           .eq("id", analysisId)
+          .eq("user_id", profile.id) // RLS: verify ownership
           .single();
         analysis = data;
       } catch {}
@@ -64,13 +89,22 @@ export async function POST(request: NextRequest) {
     const jobDescription = analysis.job_description || "Software Engineer role";
 
     if (type === "cover-letter") {
+      let coverLetter: string;
       try {
-        const coverLetter = await generateCoverLetter(resumeText, jobDescription);
-        return NextResponse.json({ coverLetter });
+        coverLetter = await generateCoverLetter(resumeText, jobDescription);
       } catch {
-        const fallbackCoverLetter = `Dear Hiring Manager,\n\nI am writing to express my strong interest in the ${analysis.job_title || "Engineering"} position at your organization. With a solid foundation in software development and AI engineering, I am confident in my ability to contribute immediately.\n\nSincerely,\nCandidate`;
-        return NextResponse.json({ coverLetter: fallbackCoverLetter });
+        coverLetter = `Dear Hiring Manager,\n\nI am writing to express my strong interest in the ${analysis.job_title || "Engineering"} position at your organization. With a solid foundation in software development and AI engineering, I am confident in my ability to contribute immediately.\n\nSincerely,\nCandidate`;
       }
+
+      // Deterministic quality score on the generated letter
+      const qualityScore = scoreCoverLetter({
+        coverLetterText: coverLetter,
+        jobTitle: analysis.job_title,
+        candidateSkills: Array.isArray(analysis.found_keywords) ? analysis.found_keywords : [],
+        resumeText,
+      });
+
+      return NextResponse.json({ coverLetter, qualityScore });
     }
 
     if (type === "interview") {

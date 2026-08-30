@@ -21,7 +21,8 @@ import {
 } from "../lib/interview/conversation-engine.ts";
 import { mapLegacySessionToSchema } from "../lib/interview/history-sync.ts";
 import { scoreLinkedInProfile } from "../lib/ai/linkedin/linkedin-score.ts";
-import { canAccessBrandingStudio } from "../lib/plans.ts";
+import { canAccessBrandingStudio, canAccessCoverLetter } from "../lib/plans.ts";
+import { scoreCoverLetter } from "../lib/ai/cover-letter/cover-letter-score.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -963,6 +964,70 @@ const tests = [
       }
       if (sparseScore.breakdown.headline.issues.length === 0) {
         throw new Error("Sparse input headline failed to report missing headline issue");
+      }
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #36: Cover Letter Generator — Plan Gating, Deterministic Scoring & Security Fix Verification",
+    test: () => {
+      // 1. Plan Gating Matrix
+      if (canAccessCoverLetter(null) !== false) throw new Error("canAccessCoverLetter(null) should return false");
+      if (canAccessCoverLetter({ plan: "free" }) !== false) throw new Error("canAccessCoverLetter(free) should return false");
+      if (canAccessCoverLetter({ plan: "pro" }) !== true) throw new Error("canAccessCoverLetter(pro) should return true");
+      if (canAccessCoverLetter({ plan: "premium" }) !== true) throw new Error("canAccessCoverLetter(premium) should return true");
+      if (canAccessCoverLetter({ plan: "career_pack" }) !== true) throw new Error("canAccessCoverLetter(career_pack) should return true");
+
+      // 2. Determinism: Run identical input twice — must be byte-identical
+      const richLetterInput = {
+        coverLetterText: `Dear Sarah Chen,\n\nI am excited to apply for the Senior Software Engineer role at Google. As a Full-Stack Engineer with 3 years of production experience architecting React and Node.js microservices, I have built high-throughput systems that reduced API latency by 40% and served 100k+ active users.\n\nAt Vaylo AI, I developed a multi-module SaaS platform using Next.js, TypeScript, and PostgreSQL, integrating Gemini AI APIs for intelligent resume parsing. This role at Google aligns directly with my passion for scalable distributed systems.\n\nI would love to discuss how my experience maps to your team's goals. Please feel free to reach me at diwanshu@example.com.\n\nSincerely,\nDiwanshu`,
+        companyName: "Google",
+        jobTitle: "Senior Software Engineer",
+        candidateSkills: ["React", "Node.js", "TypeScript", "PostgreSQL", "Next.js", "Docker"],
+        resumeText: "Full-Stack Engineer. Built systems reducing API latency by 40%, served 100k users. Skills: React, Next.js, Node.js, TypeScript, PostgreSQL.",
+      };
+
+      const run1 = scoreCoverLetter(richLetterInput);
+      const run2 = scoreCoverLetter(richLetterInput);
+
+      if (JSON.stringify(run1) !== JSON.stringify(run2)) {
+        throw new Error("Cover letter scoring failed determinism: Outputs differed on identical input!");
+      }
+
+      // 3. Sub-score mathematical integrity
+      const subSum = run1.personalization + run1.keywordAlignment + run1.structure + run1.factualGrounding;
+      if (run1.total !== subSum) {
+        throw new Error(`Total score (${run1.total}) !== sub-score sum (${subSum})`);
+      }
+      if (run1.total < 0 || run1.total > 100) throw new Error(`Total score ${run1.total} out of 0-100 range`);
+      if (run1.personalization < 0 || run1.personalization > 30) throw new Error("Personalization out of range");
+      if (run1.keywordAlignment < 0 || run1.keywordAlignment > 25) throw new Error("Keyword alignment out of range");
+      if (run1.structure < 0 || run1.structure > 25) throw new Error("Structure out of range");
+      if (run1.factualGrounding < 0 || run1.factualGrounding > 20) throw new Error("Factual grounding out of range");
+
+      // 4. Sparse input produces lower score than rich input
+      const sparseInput = {
+        coverLetterText: "Dear Hiring Manager, I want this job. I am a good developer. Thanks.",
+        companyName: "Google",
+        jobTitle: "Senior Software Engineer",
+        candidateSkills: ["React", "Node.js"],
+      };
+      const sparseScore = scoreCoverLetter(sparseInput);
+      if (sparseScore.total >= run1.total) {
+        throw new Error(`Sparse score (${sparseScore.total}) should be lower than rich score (${run1.total})`);
+      }
+
+      // 5. Personalization: letter missing company name gets penalised
+      const noCompanyInput = {
+        coverLetterText: "Dear Hiring Manager, I have 3 years of React, Node.js and TypeScript experience. I built systems at scale. I look forward to discussing this opportunity.",
+        companyName: "Google",
+        jobTitle: "Senior Software Engineer",
+        candidateSkills: ["React", "Node.js", "TypeScript"],
+      };
+      const noCompanyScore = scoreCoverLetter(noCompanyInput);
+      if (!noCompanyScore.breakdown.personalization.issues.some(i => i.includes("Google"))) {
+        throw new Error("Missing company name in letter should trigger personalization issue flagging 'Google'");
       }
 
       return true;
