@@ -729,7 +729,7 @@ const tests = [
   },
   {
     name: "Suite #34: Interview History & Portfolio Draft Supabase Persistence & Cross-Device Sync Test",
-    test: () => {
+    test: async () => {
       // 1. Validate Migration SQL File exists and contains mandatory RLS and schema definitions
       const migrationPath = path.join(process.cwd(), "supabase", "migrations", "20260830_session_history_and_drafts.sql");
       if (!fs.existsSync(migrationPath)) {
@@ -849,26 +849,53 @@ const tests = [
         throw new Error("Portfolio draft failed to persist and retrieve from cloud database");
       }
 
+      // 6. Live Remote Database Schema Verification Probe
+      const envPath = path.join(process.cwd(), ".env.local");
+      if (fs.existsSync(envPath)) {
+        const envContent = fs.readFileSync(envPath, "utf8");
+        const urlMatch = envContent.match(/NEXT_PUBLIC_SUPABASE_URL\s*=\s*([^\r\n]+)/);
+        const keyMatch = envContent.match(/SUPABASE_SERVICE_ROLE_KEY\s*=\s*([^\r\n]+)/) || envContent.match(/NEXT_PUBLIC_SUPABASE_ANON_KEY\s*=\s*([^\r\n]+)/);
+        if (urlMatch && keyMatch) {
+          const supabaseUrl = urlMatch[1].trim();
+          const apiKey = keyMatch[1].trim();
+          try {
+            const checkRes = await fetch(`${supabaseUrl}/rest/v1/interview_sessions?select=id&limit=1`, {
+              headers: { apikey: apiKey, Authorization: `Bearer ${apiKey}` }
+            });
+            if (checkRes.status === 404) {
+              console.warn(`\n  ⚠️ [LIVE DB PROBE]: Table 'interview_sessions' not yet created on remote database (${supabaseUrl}).\n     Apply 'supabase/migrations/20260830_session_history_and_drafts.sql' in the Supabase SQL editor to enable cloud persistence.`);
+            }
+          } catch (netErr) {
+            // Network fallback
+          }
+        }
+      }
+
       return true;
     }
   },
 ];
-let passed = 0;
 
-for (const t of tests) {
-  try {
-    const res = t.test();
-    if (res) {
-      console.log(`✓ [PASS] ${t.name}`);
-      passed++;
-    } else {
-      console.error(`✗ [FAIL] ${t.name}`);
+async function runAllAudits() {
+  let passed = 0;
+
+  for (const t of tests) {
+    try {
+      const res = await t.test();
+      if (res) {
+        console.log(`✓ [PASS] ${t.name}`);
+        passed++;
+      } else {
+        console.error(`✗ [FAIL] ${t.name}`);
+      }
+    } catch (err) {
+      console.error(`✗ [FAIL] ${t.name}:`, err);
     }
-  } catch (err) {
-    console.error(`✗ [FAIL] ${t.name}:`, err);
   }
+
+  console.log("-----------------------------------------");
+  console.log(`Results: ${passed}/${tests.length} Audit Suites Passed (${Math.round((passed / tests.length) * 100)}% Health)`);
+  console.log("=========================================");
 }
 
-console.log("-----------------------------------------");
-console.log(`Results: ${passed}/${tests.length} Audit Suites Passed (100% Health)`);
-console.log("=========================================");
+await runAllAudits();
