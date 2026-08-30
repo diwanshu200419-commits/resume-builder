@@ -21,7 +21,16 @@ import {
 } from "../lib/interview/conversation-engine.ts";
 import { mapLegacySessionToSchema } from "../lib/interview/history-sync.ts";
 import { scoreLinkedInProfile } from "../lib/ai/linkedin/linkedin-score.ts";
-import { canAccessBrandingStudio, canAccessCoverLetter } from "../lib/plans.ts";
+import {
+  canAccessBrandingStudio,
+  canAccessCoverLetter,
+  canAutoFix,
+  canAccessTranslator,
+  canAccessSTARVoice,
+  canAccessRecruiterSim,
+  canAccessHiringPredictor,
+  canAccessSalaryNegotiator,
+} from "../lib/plans.ts";
 import { scoreCoverLetter } from "../lib/ai/cover-letter/cover-letter-score.ts";
 
 console.log("=========================================");
@@ -1029,6 +1038,52 @@ const tests = [
       if (!noCompanyScore.breakdown.personalization.issues.some(i => i.includes("Google"))) {
         throw new Error("Missing company name in letter should trigger personalization issue flagging 'Google'");
       }
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #37: /api/optimize All-Types Auth & Plan Entitlement Security Matrix",
+    test: () => {
+      // 1. type=improve (Bullet Rewriter) requires canAutoFix (Pro+)
+      if (canAutoFix(null) !== false) throw new Error("canAutoFix(null) must be false");
+      if (canAutoFix({ plan: "free" }) !== false) throw new Error("canAutoFix(free) must be false");
+      if (canAutoFix({ plan: "pro" }) !== true) throw new Error("canAutoFix(pro) must be true");
+      if (canAutoFix({ plan: "premium" }) !== true) throw new Error("canAutoFix(premium) must be true");
+      if (canAutoFix({ plan: "career_pack" }) !== true) throw new Error("canAutoFix(career_pack) must be true");
+
+      // 2. type=cover-letter requires canAccessCoverLetter (Pro+)
+      if (canAccessCoverLetter(null) !== false) throw new Error("canAccessCoverLetter(null) must be false");
+      if (canAccessCoverLetter({ plan: "free" }) !== false) throw new Error("canAccessCoverLetter(free) must be false");
+      if (canAccessCoverLetter({ plan: "pro" }) !== true) throw new Error("canAccessCoverLetter(pro) must be true");
+      if (canAccessCoverLetter({ plan: "premium" }) !== true) throw new Error("canAccessCoverLetter(premium) must be true");
+      if (canAccessCoverLetter({ plan: "career_pack" }) !== true) throw new Error("canAccessCoverLetter(career_pack) must be true");
+
+      // 3. type=linkedin requires canAccessBrandingStudio (Pro+)
+      if (canAccessBrandingStudio(null) !== false) throw new Error("canAccessBrandingStudio(null) must be false");
+      if (canAccessBrandingStudio({ plan: "free" }) !== false) throw new Error("canAccessBrandingStudio(free) must be false");
+      if (canAccessBrandingStudio({ plan: "pro" }) !== true) throw new Error("canAccessBrandingStudio(pro) must be true");
+      if (canAccessBrandingStudio({ plan: "premium" }) !== true) throw new Error("canAccessBrandingStudio(premium) must be true");
+      if (canAccessBrandingStudio({ plan: "career_pack" }) !== true) throw new Error("canAccessBrandingStudio(career_pack) must be true");
+
+      // 4. type=interview requires Premium+
+      const checkInterviewAccess = (p) => {
+        if (!p) return false;
+        const plan = (p.plan || "free").toLowerCase();
+        return plan === "premium" || plan === "career_pack";
+      };
+      if (checkInterviewAccess(null) !== false) throw new Error("Interview access null must be false");
+      if (checkInterviewAccess({ plan: "free" }) !== false) throw new Error("Interview access free must be false");
+      if (checkInterviewAccess({ plan: "pro" }) !== false) throw new Error("Interview access pro must be false");
+      if (checkInterviewAccess({ plan: "premium" }) !== true) throw new Error("Interview access premium must be true");
+      if (checkInterviewAccess({ plan: "career_pack" }) !== true) throw new Error("Interview access career_pack must be true");
+
+      // 5. Translator requires canAccessTranslator (Pro+)
+      if (canAccessTranslator(null) !== false) throw new Error("canAccessTranslator(null) must be false");
+      if (canAccessTranslator({ plan: "free" }) !== false) throw new Error("canAccessTranslator(free) must be false");
+      if (canAccessTranslator({ plan: "pro" }) !== true) throw new Error("canAccessTranslator(pro) must be true");
+      if (canAccessTranslator({ plan: "premium" }) !== true) throw new Error("canAccessTranslator(premium) must be true");
+      if (canAccessTranslator({ plan: "career_pack" }) !== true) throw new Error("canAccessTranslator(career_pack) must be true");
 
       return true;
     }

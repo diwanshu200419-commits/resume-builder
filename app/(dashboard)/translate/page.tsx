@@ -28,22 +28,25 @@ export default function ResumeTranslatorPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/optimize", {
+      const res = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: `Translate the following professional resume content into ${LANGUAGES.find(l => l.code === targetLang)?.name}. Preserve professional terminology, tech stack names, and bullet point formatting:\n\n${sourceText}`,
-          type: "improve"
+          targetLanguage: LANGUAGES.find(l => l.code === targetLang)?.name || "German",
+          resumeText: sourceText,
         }),
       });
       const data = await res.json();
-      if (data.optimizedText) {
-        setTranslatedText(data.optimizedText);
+      if (!res.ok) {
+        throw new Error(data.error || data.message || "Translation failed");
+      }
+      if (data.translatedText) {
+        setTranslatedText(data.translatedText);
       } else {
         setTranslatedText(`[${LANGUAGES.find(l => l.code === targetLang)?.name} Translation]\n\n` + sourceText);
       }
-    } catch {
-      setTranslatedText(`[${LANGUAGES.find(l => l.code === targetLang)?.name} Translation]\n\n` + sourceText);
+    } catch (err: any) {
+      setTranslatedText(`[Error: ${err.message || "Failed to translate"}]`);
     } finally {
       setLoading(false);
     }
