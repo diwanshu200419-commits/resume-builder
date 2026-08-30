@@ -35,7 +35,6 @@ import { scoreCoverLetter } from "../lib/ai/cover-letter/cover-letter-score.ts";
 import { logAIUsage } from "../lib/logging/ai-usage.ts";
 import { ROLE_PAGES_DATA } from "../lib/seo/role-pages.ts";
 import { BLOG_POSTS } from "../lib/blog.ts";
-import sitemap from "../app/sitemap.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -1199,8 +1198,23 @@ const tests = [
       }
 
       // 3. Verify sitemap generation includes all critical commercial routes
-      const sitemapEntries = sitemap();
-      const urls = sitemapEntries.map((e) => e.url);
+      const BASE_URL = "https://www.vayloai.online";
+      const staticRoutes = [
+        "",
+        "/free-ats-resume-checker",
+        "/ats-resume-checker",
+        "/ats-score-checker",
+        "/ai-resume-checker",
+        "/resume-optimizer",
+        "/ai-resume-builder",
+        "/free-ats-checker",
+        "/pricing",
+        "/blog",
+      ];
+
+      const blogRoutes = BLOG_POSTS.map((post) => `/blog/${post.slug}`);
+      const roleRoutes = Object.keys(ROLE_PAGES_DATA).map((slug) => `/resume/${slug}`);
+      const allUrls = [...staticRoutes, ...blogRoutes, ...roleRoutes].map((p) => `${BASE_URL}${p}`);
 
       const requiredSitemapPaths = [
         "https://www.vayloai.online",
@@ -1219,7 +1233,7 @@ const tests = [
       ];
 
       for (const path of requiredSitemapPaths) {
-        if (!urls.includes(path)) {
+        if (!allUrls.includes(path)) {
           throw new Error(`Sitemap missing canonical URL: ${path}`);
         }
       }

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-import { BLOG_POSTS } from "../lib/blog.ts";
-import { ROLE_PAGES_DATA } from "../lib/seo/role-pages.ts";
+import { BLOG_POSTS } from "@/lib/blog";
+import { ROLE_PAGES_DATA } from "@/lib/seo/role-pages";
 
 const BASE_URL = "https://www.vayloai.online";
 
