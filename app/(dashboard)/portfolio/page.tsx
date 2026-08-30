@@ -43,6 +43,12 @@ import {
   generatePortfolioHTML,
 } from "@/lib/portfolio-templates";
 import { createZipBlob } from "@/lib/zip-export";
+import { createClient } from "@/lib/supabase/client";
+import {
+  loadPortfolioDraft,
+  savePortfolioDraftToCloud,
+  migrateLocalPortfolioDraftIfNeeded,
+} from "@/lib/portfolio/draft-sync";
 
 const ROLE_PRESETS = [
   { id: "software", label: "Software Engineer", icon: "💻", theme: "technical" as PortfolioTemplateId },
@@ -218,53 +224,81 @@ export default function PortfolioGeneratorPage() {
   const [showTestimonialEditor, setShowTestimonialEditor] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [draftSyncStatus, setDraftSyncStatus] = useState<"synced" | "saving" | "local">("synced");
 
   // Load initial portfolio data and any previously saved live URL / draft
   useEffect(() => {
-    try {
-      const savedDraft = localStorage.getItem("vaylo_portfolio_draft");
-      if (savedDraft) {
-        const parsed = JSON.parse(savedDraft);
-        if (parsed && parsed.name && parsed.title) {
-          setPortfolioData(parsed);
-          setTargetRole(parsed.title);
-          if (parsed.avatarUrl) setAvatarUrl(parsed.avatarUrl);
-          if (parsed.resumeUrl) setResumeUrl(parsed.resumeUrl);
-          setHtmlCode(generatePortfolioHTML(parsed, template));
+    let isMounted = true;
+    const supabase = createClient();
+
+    async function initPortfolio() {
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        const currentUserId = authData?.user?.id || null;
+        if (isMounted) setUserId(currentUserId);
+
+        if (currentUserId) {
+          await migrateLocalPortfolioDraftIfNeeded(supabase, currentUserId);
         }
-      } else {
+
+        const cloudDraft = await loadPortfolioDraft(supabase, currentUserId);
+        if (cloudDraft && cloudDraft.name && cloudDraft.title) {
+          if (isMounted) {
+            setPortfolioData(cloudDraft);
+            setTargetRole(cloudDraft.title);
+            if (cloudDraft.avatarUrl) setAvatarUrl(cloudDraft.avatarUrl);
+            if (cloudDraft.resumeUrl) setResumeUrl(cloudDraft.resumeUrl);
+            setHtmlCode(generatePortfolioHTML(cloudDraft, template));
+          }
+        } else {
+          const initial = getSampleDataForRole(targetRole, avatarUrl || undefined);
+          if (isMounted) {
+            setPortfolioData(initial);
+            setHtmlCode(generatePortfolioHTML(initial, template));
+          }
+        }
+      } catch (err) {
+        console.warn("[Portfolio] Draft loading notice:", err);
         const initial = getSampleDataForRole(targetRole, avatarUrl || undefined);
-        setPortfolioData(initial);
-        setHtmlCode(generatePortfolioHTML(initial, template));
+        if (isMounted) {
+          setPortfolioData(initial);
+          setHtmlCode(generatePortfolioHTML(initial, template));
+        }
       }
-    } catch {
-      const initial = getSampleDataForRole(targetRole, avatarUrl || undefined);
-      setPortfolioData(initial);
-      setHtmlCode(generatePortfolioHTML(initial, template));
     }
+
+    initPortfolio();
 
     // Fetch saved deployment state from API
     fetch("/api/portfolio/deploy")
-      .then((res) => res.ok ? res.json() : null)
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.savedLiveUrl) {
+        if (data?.savedLiveUrl && isMounted) {
           setSavedLiveUrl(data.savedLiveUrl);
           setUserLiveUrl(data.savedLiveUrl);
         }
       })
       .catch((err) => console.warn("Fetch deploy state notice:", err));
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Autosave to localStorage on data changes
+  // Debounced autosave to Supabase cloud (3 second debounce) with localStorage write-through
   useEffect(() => {
-    if (portfolioData) {
-      try {
-        localStorage.setItem("vaylo_portfolio_draft", JSON.stringify(portfolioData));
-      } catch (err) {
-        console.warn("Autosave draft notice:", err);
-      }
-    }
-  }, [portfolioData]);
+    if (!portfolioData) return;
+    setDraftSyncStatus("saving");
+
+    const timer = setTimeout(async () => {
+      const supabase = createClient();
+      const res = await savePortfolioDraftToCloud(supabase, userId, portfolioData);
+      setDraftSyncStatus(res.source === "supabase" ? "synced" : "local");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [portfolioData, userId]);
 
   const handleSelectRole = (role: typeof ROLE_PRESETS[0]) => {
     setTargetRole(role.label);

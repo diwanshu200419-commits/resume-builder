@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,9 @@ import {
 import { InterviewTurn, STAREvaluation } from "@/lib/interview/conversation-engine";
 import { VoicePersona } from "@/lib/interview/voice-personas";
 import { WebcamProxyMetrics } from "./WebcamProxyTracker";
+import { createClient } from "@/lib/supabase/client";
+import { saveInterviewSessionToCloud } from "@/lib/interview/history-sync";
+import { Cloud, CloudOff, Loader2 } from "lucide-react";
 
 export interface QuestionReviewItem {
   questionIndex: number;
@@ -66,6 +69,7 @@ export interface SessionSummaryData {
   turns: InterviewTurn[];
   questionReviews: QuestionReviewItem[];
   topFocusAreas: string[];
+  completed?: boolean;
 }
 
 interface PostSessionReviewProps {
@@ -82,7 +86,8 @@ export function PostSessionReview({
   onViewHistory,
 }: PostSessionReviewProps) {
   const [expandedQuestionIdx, setExpandedQuestionIdx] = useState<number | null>(0);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<"synced" | "saving" | "local_only">("saving");
+  const [userId, setUserId] = useState<string | null>(null);
 
   const {
     role,
@@ -97,36 +102,68 @@ export function PostSessionReview({
     topFocusAreas,
   } = sessionData;
 
+  // Auto-sync session to Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    const supabase = createClient();
+
+    async function persist() {
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        const currentUserId = authData?.user?.id || null;
+        if (isMounted) setUserId(currentUserId);
+
+        const res = await saveInterviewSessionToCloud(supabase, currentUserId, {
+          id: sessionData.id,
+          role: sessionData.role,
+          seniority: sessionData.seniority,
+          personaId: sessionData.persona.id,
+          turns: sessionData.turns,
+          questionReviews: sessionData.questionReviews,
+          overallScore: sessionData.overallScore,
+          fillerWordDensity: sessionData.fillerWordDensity,
+          speakingPaceWpm: sessionData.speakingPaceWpm,
+          webcamMetrics: sessionData.webcamMetrics,
+          completed: sessionData.completed !== false,
+        });
+
+        if (isMounted) {
+          setSyncStatus(res.source === "supabase" ? "synced" : "local_only");
+        }
+      } catch (err) {
+        console.warn("[PostSessionReview] Sync error:", err);
+        if (isMounted) setSyncStatus("local_only");
+      }
+    }
+
+    persist();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [sessionData]);
+
   const toggleAccordion = (idx: number) => {
     setExpandedQuestionIdx((prev) => (prev === idx ? null : idx));
   };
 
-  const handleSaveToHistory = () => {
-    try {
-      const existingRaw = localStorage.getItem("vaylo_interview_history");
-      const history = existingRaw ? JSON.parse(existingRaw) : [];
-      const updated = [
-        {
-          id: sessionData.id,
-          date: sessionData.date,
-          role: sessionData.role,
-          seniority: sessionData.seniority,
-          personaName: sessionData.persona.name,
-          personaStyle: sessionData.persona.style,
-          overallScore: sessionData.overallScore,
-          questionsCount: sessionData.questionReviews.length,
-          fillerWordDensity: sessionData.fillerWordDensity,
-          speakingPaceWpm: sessionData.speakingPaceWpm,
-          gazePercent: sessionData.webcamMetrics?.enabled ? sessionData.webcamMetrics.gazeOnCameraPercent : null,
-          posturePercent: sessionData.webcamMetrics?.enabled ? sessionData.webcamMetrics.postureStabilityPercent : null,
-        },
-        ...history.filter((h: any) => h.id !== sessionData.id),
-      ];
-      localStorage.setItem("vaylo_interview_history", JSON.stringify(updated.slice(0, 30)));
-      setSavedSuccess(true);
-    } catch (e) {
-      console.warn("Failed to persist session to localStorage", e);
-    }
+  const handleManualSave = async () => {
+    setSyncStatus("saving");
+    const supabase = createClient();
+    const res = await saveInterviewSessionToCloud(supabase, userId, {
+      id: sessionData.id,
+      role: sessionData.role,
+      seniority: sessionData.seniority,
+      personaId: sessionData.persona.id,
+      turns: sessionData.turns,
+      questionReviews: sessionData.questionReviews,
+      overallScore: sessionData.overallScore,
+      fillerWordDensity: sessionData.fillerWordDensity,
+      speakingPaceWpm: sessionData.speakingPaceWpm,
+      webcamMetrics: sessionData.webcamMetrics,
+      completed: sessionData.completed !== false,
+    });
+    setSyncStatus(res.source === "supabase" ? "synced" : "local_only");
   };
 
   return (
@@ -141,6 +178,19 @@ export function PostSessionReview({
             <Badge variant="outline" className="text-xs text-slate-300 border-slate-700">
               Interviewer: {persona.name} ({persona.style})
             </Badge>
+            {syncStatus === "synced" ? (
+              <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/40 bg-emerald-950/30 flex items-center gap-1">
+                <Cloud className="w-3 h-3" /> Account Synced
+              </Badge>
+            ) : syncStatus === "saving" ? (
+              <Badge variant="outline" className="text-[10px] text-blue-400 border-blue-500/40 bg-blue-950/30 flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" /> Syncing to Account...
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/40 bg-amber-950/30 flex items-center gap-1">
+                <CloudOff className="w-3 h-3" /> Local Session Cache
+              </Badge>
+            )}
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Interview Coaching &amp; STAR Scorecard
@@ -162,12 +212,12 @@ export function PostSessionReview({
             <RotateCcw className="w-4 h-4" /> Practice Fresh Round
           </Button>
           <Button
-            onClick={handleSaveToHistory}
+            onClick={handleManualSave}
             variant="outline"
             className="border-slate-700 text-white hover:bg-slate-800 text-xs gap-1.5"
           >
             <Bookmark className="w-3.5 h-3.5" />
-            {savedSuccess ? "Saved to History ✓" : "Save Session"}
+            {syncStatus === "synced" ? "Saved to Account ✓" : syncStatus === "saving" ? "Saving..." : "Save Session"}
           </Button>
         </div>
       </div>

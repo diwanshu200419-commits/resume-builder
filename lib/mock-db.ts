@@ -36,6 +36,8 @@ const DEFAULT_DB = {
   payments: [],
   payment_requests: [],
   sessions: [],
+  interview_sessions: [],
+  portfolio_drafts: [],
   career_profiles: [],
   career_scores: [],
   subscriptions: []

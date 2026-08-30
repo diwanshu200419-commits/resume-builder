@@ -1,7 +1,8 @@
 // components/interview/InterviewHistoryTracker.tsx
 //
 // Vaylo AI — Cross-Session Progress & Historical Interview Trends Component
-// Visualizes multi-session STAR performance improvements, filler word reductions, and pace metrics over time.
+// Visualizes multi-session STAR performance improvements, filler word reductions, and pace metrics over time
+// Backed by Supabase persistence with automatic legacy localStorage migration.
 
 "use client";
 
@@ -20,7 +21,17 @@ import {
   Eye,
   CheckCircle2,
   ArrowRight,
+  Loader2,
+  Cloud,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import {
+  loadInterviewSessionHistory,
+  clearInterviewSessionHistory,
+  migrateLocalHistoryIfNeeded,
+  PersistedInterviewSession,
+} from "@/lib/interview/history-sync";
+import { getPersona } from "@/lib/interview/voice-personas";
 
 export interface HistoricalSessionRecord {
   id: string;
@@ -35,6 +46,7 @@ export interface HistoricalSessionRecord {
   speakingPaceWpm: number;
   gazePercent?: number | null;
   posturePercent?: number | null;
+  completed?: boolean;
 }
 
 interface InterviewHistoryTrackerProps {
@@ -48,24 +60,69 @@ export function InterviewHistoryTracker({
 }: InterviewHistoryTrackerProps) {
   const [history, setHistory] = useState<HistoricalSessionRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isCloudSynced, setIsCloudSynced] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("vaylo_interview_history");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setHistory(Array.isArray(parsed) ? parsed : []);
+    let isMounted = true;
+    const supabase = createClient();
+
+    async function loadData() {
+      setLoading(true);
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        const currentUserId = authData?.user?.id || null;
+        if (isMounted) setUserId(currentUserId);
+
+        if (currentUserId) {
+          // 1. One-time migration for legacy localStorage records if needed
+          await migrateLocalHistoryIfNeeded(supabase, currentUserId);
+        }
+
+        // 2. Fetch full historical sessions from Supabase
+        const records = await loadInterviewSessionHistory(supabase, currentUserId);
+
+        const mapped: HistoricalSessionRecord[] = records.map((r) => {
+          const persona = getPersona(r.persona_id);
+          return {
+            id: r.id,
+            date: new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            role: r.role,
+            seniority: r.seniority || "mid-level",
+            personaName: persona.name,
+            personaStyle: persona.style,
+            overallScore: Number(r.overall_score || 70),
+            questionsCount: Array.isArray(r.questions) ? r.questions.length : (Array.isArray(r.star_scores) ? r.star_scores.length : 1),
+            fillerWordDensity: Number(r.filler_word_density || 2),
+            speakingPaceWpm: Number(r.speaking_pace_wpm || 140),
+            gazePercent: r.webcam_metrics?.gazeOnCameraPercent != null ? r.webcam_metrics.gazeOnCameraPercent : null,
+            posturePercent: r.webcam_metrics?.postureStabilityPercent != null ? r.webcam_metrics.postureStabilityPercent : null,
+            completed: r.completed !== false,
+          };
+        });
+
+        if (isMounted) {
+          setHistory(mapped);
+          setIsCloudSynced(Boolean(currentUserId));
+        }
+      } catch (err) {
+        console.warn("[InterviewHistoryTracker] Load error:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-    } catch (e) {
-      console.warn("Failed to load interview history", e);
-    } finally {
-      setLoading(false);
     }
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const handleClearHistory = () => {
-    if (confirm("Are you sure you want to clear your local interview session history?")) {
-      localStorage.removeItem("vaylo_interview_history");
+  const handleClearHistory = async () => {
+    if (confirm("Are you sure you want to clear your practice session history?")) {
+      const supabase = createClient();
+      await clearInterviewSessionHistory(supabase, userId);
       setHistory([]);
     }
   };
@@ -91,6 +148,15 @@ export function InterviewHistoryTracker({
             <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
               <TrendingUp className="w-3.5 h-3.5 mr-1" /> Longitudinal Progress
             </Badge>
+            {isCloudSynced ? (
+              <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/40 bg-emerald-950/20 flex items-center gap-1">
+                <Cloud className="w-3 h-3" /> Account Synced
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-700">
+                Local Session Cache
+              </Badge>
+            )}
           </div>
           <h2 className="text-xl sm:text-2xl font-bold mt-1">My Interview Performance History</h2>
           <p className="text-xs text-slate-400">
@@ -120,8 +186,16 @@ export function InterviewHistoryTracker({
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="p-12 text-center text-slate-400 flex flex-col items-center gap-2">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+          <span className="text-xs">Loading historical session scorecard data...</span>
+        </div>
+      )}
+
       {/* Aggregate Lifetime Metrics */}
-      {history.length > 0 && (
+      {!loading && history.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Card className="p-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm text-center">
             <div className="text-xs text-slate-500 dark:text-slate-400">Total Practice Rounds</div>
@@ -154,14 +228,14 @@ export function InterviewHistoryTracker({
       )}
 
       {/* Historical List */}
-      {history.length === 0 ? (
+      {!loading && history.length === 0 ? (
         <Card className="p-10 text-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto">
             <Trophy className="w-6 h-6" />
           </div>
           <h3 className="text-base font-bold text-slate-900 dark:text-white">No Practice Sessions Recorded Yet</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            Complete your first voice interview session to start tracking your STAR scores and verbal delivery trends over time.
+            Complete your first voice interview session to start tracking your STAR scores and verbal delivery trends across all your devices.
           </p>
           {onStartNewSession && (
             <Button
@@ -172,7 +246,7 @@ export function InterviewHistoryTracker({
             </Button>
           )}
         </Card>
-      ) : (
+      ) : !loading ? (
         <div className="space-y-3">
           {history.map((rec) => (
             <Card
@@ -188,6 +262,11 @@ export function InterviewHistoryTracker({
                     {rec.seniority}
                   </Badge>
                   <span className="text-xs text-slate-400">• Interviewer: {rec.personaName}</span>
+                  {rec.completed === false && (
+                    <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">
+                      Partial Session
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 flex-wrap pt-0.5">
                   <span className="flex items-center gap-1">
@@ -224,7 +303,7 @@ export function InterviewHistoryTracker({
             </Card>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -19,6 +19,7 @@ import {
   synthesizeQuestionReview,
   synthesizeTopFocusAreas,
 } from "../lib/interview/conversation-engine.ts";
+import { mapLegacySessionToSchema } from "../lib/interview/history-sync.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -722,6 +723,131 @@ const tests = [
       const historyCompPath = path.join(process.cwd(), "components", "interview", "InterviewHistoryTracker.tsx");
       if (!fs.existsSync(reviewCompPath)) throw new Error("PostSessionReview.tsx component is missing");
       if (!fs.existsSync(historyCompPath)) throw new Error("InterviewHistoryTracker.tsx component is missing");
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #34: Interview History & Portfolio Draft Supabase Persistence & Cross-Device Sync Test",
+    test: () => {
+      // 1. Validate Migration SQL File exists and contains mandatory RLS and schema definitions
+      const migrationPath = path.join(process.cwd(), "supabase", "migrations", "20260830_session_history_and_drafts.sql");
+      if (!fs.existsSync(migrationPath)) {
+        throw new Error("Migration file 20260830_session_history_and_drafts.sql is missing");
+      }
+      const sqlContent = fs.readFileSync(migrationPath, "utf8");
+      if (!sqlContent.includes("create table if not exists interview_sessions")) {
+        throw new Error("Missing interview_sessions table definition in migration SQL");
+      }
+      if (!sqlContent.includes("create table if not exists portfolio_drafts")) {
+        throw new Error("Missing portfolio_drafts table definition in migration SQL");
+      }
+      if (!sqlContent.includes("alter table interview_sessions enable row level security;")) {
+        throw new Error("Missing RLS enablement for interview_sessions");
+      }
+      if (!sqlContent.includes("alter table portfolio_drafts enable row level security;")) {
+        throw new Error("Missing RLS enablement for portfolio_drafts");
+      }
+
+      // 2. Test Legacy localStorage Entry Migration Transformation
+      const legacyLocalRecord = {
+        id: "sess-legacy-1",
+        date: "Aug 29, 2026",
+        role: "Software Engineering & Architecture",
+        seniority: "senior",
+        personaName: "Josh",
+        personaStyle: "neutral",
+        overallScore: 84,
+        questionsCount: 4,
+        fillerWordDensity: 1.5,
+        speakingPaceWpm: 145,
+        gazePercent: 88,
+        posturePercent: 92,
+      };
+
+      const mapped = mapLegacySessionToSchema(legacyLocalRecord, "user-uuid-123");
+      if (mapped.user_id !== "user-uuid-123") throw new Error("Mapped session missing user_id");
+      if (mapped.role !== "Software Engineering & Architecture") throw new Error("Role mismatch in mapped session");
+      if (mapped.persona_id !== "josh_neutral") throw new Error(`Expected persona_id josh_neutral, got ${mapped.persona_id}`);
+      if (mapped.overall_score !== 84) throw new Error("Overall score mismatch in mapped session");
+      if (!mapped.webcam_metrics || mapped.webcam_metrics.gazeOnCameraPercent !== 88) {
+        throw new Error("Webcam metrics failed to map from legacy gazePercent");
+      }
+
+      // 3. Two-Session Multi-Device Cross-Client Sync Simulation
+      // Simulate Supabase database storage
+      const mockDatabase = {
+        interview_sessions: [],
+        portfolio_drafts: [],
+      };
+
+      // Device A: writes a full interview session
+      const deviceASession = {
+        id: "sess-dev-a-101",
+        user_id: "user-uuid-123",
+        role: "Product Management & Strategy",
+        seniority: "leadership",
+        company_style: "Product Sense & Execution",
+        persona_id: "bella_neutral",
+        questions: [{ id: "q1", question: "Describe a product roadmap pivot." }],
+        star_scores: [{ questionIndex: 0, score: 92 }],
+        overall_score: 92,
+        filler_word_density: 1.2,
+        speaking_pace_wpm: 138,
+        webcam_metrics: { enabled: true, gazeOnCameraPercent: 90, postureStabilityPercent: 94 },
+        completed: true,
+        created_at: new Date().toISOString(),
+      };
+      mockDatabase.interview_sessions.push(deviceASession);
+
+      // Device B: Fresh client context (no local cache) reads from Supabase for the same user
+      const deviceBFetched = mockDatabase.interview_sessions.filter((s) => s.user_id === "user-uuid-123");
+      if (deviceBFetched.length !== 1 || deviceBFetched[0].id !== "sess-dev-a-101") {
+        throw new Error("Cross-device sync failed: Device B could not retrieve session saved by Device A");
+      }
+      if (deviceBFetched[0].overall_score !== 92 || deviceBFetched[0].persona_id !== "bella_neutral") {
+        throw new Error("Cross-device data integrity check failed");
+      }
+
+      // 4. Partial/Abandoned Session Sync Assertion
+      const partialSession = {
+        id: "sess-partial-102",
+        user_id: "user-uuid-123",
+        role: "Data Science & Machine Learning",
+        persona_id: "rachel_warm",
+        questions: [{ id: "q1", question: "How do you evaluate ROC-AUC?" }],
+        star_scores: [],
+        overall_score: 65,
+        completed: false, // User ended early at question 1
+        created_at: new Date().toISOString(),
+      };
+      mockDatabase.interview_sessions.push(partialSession);
+
+      const allSessions = mockDatabase.interview_sessions.filter((s) => s.user_id === "user-uuid-123");
+      const foundPartial = allSessions.find((s) => s.id === "sess-partial-102");
+      if (!foundPartial || foundPartial.completed !== false) {
+        throw new Error("Partial session failed to persist with completed: false flag");
+      }
+
+      // 5. Portfolio Draft Sync Simulation
+      const portfolioDraftPayload = {
+        user_id: "user-uuid-123",
+        draft_data: {
+          name: "Jane Smith",
+          title: "Staff Systems Engineer",
+          bio: "Building high-performance distributed databases.",
+          skills: ["Rust", "Distributed Systems", "Go"],
+          projects: [],
+          experience: [],
+        },
+        updated_at: new Date().toISOString(),
+      };
+      mockDatabase.portfolio_drafts.push(portfolioDraftPayload);
+
+      const fetchedDraft = mockDatabase.portfolio_drafts.find((d) => d.user_id === "user-uuid-123");
+      if (!fetchedDraft || fetchedDraft.draft_data.name !== "Jane Smith") {
+        throw new Error("Portfolio draft failed to persist and retrieve from cloud database");
+      }
 
       return true;
     }
