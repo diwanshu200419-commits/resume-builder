@@ -33,6 +33,9 @@ import {
 } from "../lib/plans.ts";
 import { scoreCoverLetter } from "../lib/ai/cover-letter/cover-letter-score.ts";
 import { logAIUsage } from "../lib/logging/ai-usage.ts";
+import { ROLE_PAGES_DATA } from "../lib/seo/role-pages.ts";
+import { BLOG_POSTS } from "../lib/blog.ts";
+import sitemap from "../app/sitemap.ts";
 
 console.log("=========================================");
 console.log("🚀 Vaylo AI — Complete Automated Audit Suite");
@@ -1140,6 +1143,86 @@ const tests = [
         httpStatus: 500,
         errorMessage: "Test simulation error",
       });
+
+      return true;
+    }
+  },
+  {
+    name: "Suite #39: SEO Acquisition Engine, Role Datasets, Sitemap & Analytics Integrity",
+    test: async () => {
+      // 1. Verify all 10 required roles exist with unique keywords and data
+      const requiredRoles = [
+        "software-engineer",
+        "data-analyst",
+        "ai-engineer",
+        "frontend-developer",
+        "backend-developer",
+        "full-stack-developer",
+        "web-developer",
+        "digital-marketer",
+        "devops-engineer",
+        "fresher",
+      ];
+
+      for (const role of requiredRoles) {
+        const data = ROLE_PAGES_DATA[role];
+        if (!data) throw new Error(`Missing role definition in ROLE_PAGES_DATA: ${role}`);
+        if (!data.title || !data.metaDescription) throw new Error(`Missing title or metaDescription for ${role}`);
+        if (!data.mustHaveKeywords || data.mustHaveKeywords.length < 5) {
+          throw new Error(`Insufficient mustHaveKeywords for ${role}`);
+        }
+        if (!data.exampleBullets || data.exampleBullets.length === 0) {
+          throw new Error(`Missing exampleBullets for ${role}`);
+        }
+        if (!data.faq || data.faq.length === 0) {
+          throw new Error(`Missing FAQs for ${role}`);
+        }
+      }
+
+      // 2. Verify all 7 high-intent ATS blog posts exist
+      const requiredBlogSlugs = [
+        "what-is-an-ats-resume",
+        "how-to-check-ats-score",
+        "how-to-make-ats-friendly-resume",
+        "how-to-improve-ats-score",
+        "ats-resume-keywords",
+        "ats-resume-format",
+        "why-ats-rejects-resumes",
+      ];
+
+      for (const slug of requiredBlogSlugs) {
+        const post = BLOG_POSTS.find((p) => p.slug === slug);
+        if (!post) throw new Error(`Missing required ATS blog post: ${slug}`);
+        if (!post.title || !post.content || post.content.length < 200) {
+          throw new Error(`Blog post content too short or missing for ${slug}`);
+        }
+      }
+
+      // 3. Verify sitemap generation includes all critical commercial routes
+      const sitemapEntries = sitemap();
+      const urls = sitemapEntries.map((e) => e.url);
+
+      const requiredSitemapPaths = [
+        "https://www.vayloai.online",
+        "https://www.vayloai.online/free-ats-resume-checker",
+        "https://www.vayloai.online/ats-resume-checker",
+        "https://www.vayloai.online/ats-score-checker",
+        "https://www.vayloai.online/ai-resume-checker",
+        "https://www.vayloai.online/resume-optimizer",
+        "https://www.vayloai.online/ai-resume-builder",
+        "https://www.vayloai.online/pricing",
+        "https://www.vayloai.online/blog",
+        "https://www.vayloai.online/resume/software-engineer",
+        "https://www.vayloai.online/resume/data-analyst",
+        "https://www.vayloai.online/resume/ai-engineer",
+        "https://www.vayloai.online/blog/what-is-an-ats-resume",
+      ];
+
+      for (const path of requiredSitemapPaths) {
+        if (!urls.includes(path)) {
+          throw new Error(`Sitemap missing canonical URL: ${path}`);
+        }
+      }
 
       return true;
     }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles, ShieldCheck, Zap, Award, HelpCircle, ArrowRight } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 type Plan = "free" | "pro" | "premium" | "career-pack";
 
@@ -123,6 +124,10 @@ const faqs = [
 export function PricingClient({ userPlan = "free" }: PricingClientProps) {
   const normalizedUserPlan = userPlan.toLowerCase().replace("-", "_");
 
+  useEffect(() => {
+    trackEvent("pricing_view");
+  }, []);
+
   return (
     <div className="max-w-7xl mx-auto py-10 px-4 space-y-16 text-text-primary">
       {/* Header */}
@@ -199,6 +204,7 @@ export function PricingClient({ userPlan = "free" }: PricingClientProps) {
                 ) : (
                   <Button
                     asChild
+                    onClick={() => trackEvent("checkout_started", { plan: p.id, price: p.price })}
                     className={`w-full text-xs font-bold ${
                       p.popular ? "bg-accent hover:bg-accent-hover text-white shadow-lg" : "bg-surface-elevated hover:bg-border text-text-primary border border-border"
                     }`}

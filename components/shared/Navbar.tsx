@@ -114,14 +114,17 @@ export function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
+            <Link href="/free-ats-resume-checker" className="text-sm font-semibold text-accent hover:text-accent-hover transition-colors flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5" /> Free ATS Checker
+            </Link>
             <Link href="/#features" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
               Features
             </Link>
-            <Link href="/#how-it-works" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
-              How it works
-            </Link>
-            <Link href="/#pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
+            <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
               Pricing
+            </Link>
+            <Link href="/blog" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
+              Blog & Guides
             </Link>
             <ThemeToggle />
 
@@ -231,14 +234,17 @@ export function Navbar() {
 
         {open && (
           <div className="md:hidden pb-6 pt-2 space-y-3 border-t border-border/50 animate-fade-in">
+            <Link href="/free-ats-resume-checker" className="block text-sm font-bold text-accent py-1" onClick={() => setOpen(false)}>
+              ✨ Free ATS Resume Checker
+            </Link>
             <Link href="/#features" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
               Features
             </Link>
-            <Link href="/#how-it-works" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
-              How it works
-            </Link>
             <Link href="/pricing" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
               Pricing
+            </Link>
+            <Link href="/blog" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
+              Blog & Career Guides
             </Link>
 
             {user ? (

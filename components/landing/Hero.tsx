@@ -93,15 +93,15 @@ export function Hero() {
               transition={{ delay: 0.3 }}
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2"
             >
-              <Link href="/signup">
+              <Link href="/free-ats-resume-checker">
                 <Button size="lg" className="w-full sm:w-auto px-7 py-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-500/20 gap-2 transition-all hover:scale-[1.02]">
-                  Start Free
+                  <Sparkles className="w-4 h-4" /> Check Your Resume Free
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-              <Link href="/#features">
+              <Link href="/builder">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 py-6 rounded-xl border-border bg-surface text-text-primary hover:bg-surface-elevated font-semibold gap-2">
-                  Explore Features
+                  Launch Resume Builder
                 </Button>
               </Link>
             </motion.div>

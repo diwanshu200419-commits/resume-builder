@@ -11,6 +11,7 @@ import { Footer } from "@/components/shared/Footer";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ShareATSModal } from "@/components/ats/ShareATSModal";
+import { trackEvent } from "@/lib/analytics";
 
 type PublicATSResult = {
   atsScore: number;
@@ -106,6 +107,7 @@ export function FreeATSCalculatorClient() {
 
       setError(null);
       setLoading(true);
+      trackEvent("resume_upload", { file_type: file.type || "unknown" });
 
       try {
         const formData = new FormData();
@@ -119,6 +121,7 @@ export function FreeATSCalculatorClient() {
         setParsedText(data.text);
         setFilename(file.name);
         setStep("analyzing");
+        trackEvent("ats_analysis_started");
         await analyzeResume(data.text);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong, try again");
@@ -144,6 +147,10 @@ export function FreeATSCalculatorClient() {
 
       setAtsResult(data);
       setStep("results");
+      trackEvent("ats_analysis_completed", {
+        ats_score: data.atsScore,
+        keyword_match_score: data.keywordMatchScore,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong, try again");
       setStep("upload");
