@@ -1,0 +1,35 @@
+# VayloAI — AI Career Copilot
+
+> VayloAI is an AI-powered career platform that helps job seekers create ATS-compliant resumes, test resume scores, optimize bullet points for job descriptions, practice STAR technical interviews, and navigate their tech careers.
+
+## Core Products & Tools
+
+- [Free ATS Resume Checker](https://www.vayloai.online/free-ats-resume-checker): Instant 100-point deterministic ATS score calculator, missing keyword extractor, and formatting validator.
+- [AI Resume Builder](https://www.vayloai.online/ai-resume-builder): 100% ATS-compliant single-column resume builder with Google X-Y-Z bullet generation.
+- [Resume Optimizer](https://www.vayloai.online/resume-optimizer): Step-by-step resume tailoring engine against specific job descriptions.
+- [AI Voice Interview Preparation](https://www.vayloai.online/interview-prep): Real-time voice interview coach with STAR evaluation and FAANG question banks.
+- [Career & Technical Blog Hub](https://www.vayloai.online/blog): High-depth technical guides, system design blueprints, coding interview patterns, and salary negotiation guides.
+- [Pricing & Plans](https://www.vayloai.online/pricing): Transparent pricing: Free (₹0), Pro (₹99/mo), Premium (₹299/mo), Career Pack (₹499 lifetime).
+
+## Role-Specific Resume & ATS Guides
+
+- [Software Engineer Resume Guide](https://www.vayloai.online/resume/software-engineer): React, TypeScript, Node.js, Python, PostgreSQL, System Design keywords and X-Y-Z bullet formulas.
+- [Data Analyst Resume Guide](https://www.vayloai.online/resume/data-analyst): SQL Window functions, Tableau, Power BI, Python, ETL pipeline keywords.
+- [AI Engineer Resume Guide](https://www.vayloai.online/resume/ai-engineer): PyTorch, LLMs, RAG Pipelines, Qdrant/Pinecone, vLLM, LoRA fine-tuning keywords.
+- [Frontend Developer Resume Guide](https://www.vayloai.online/resume/frontend-developer): React, Next.js 14, Core Web Vitals (LCP, INP, CLS), Tailwind CSS, WCAG 2.2 AA.
+- [Backend Developer Resume Guide](https://www.vayloai.online/resume/backend-developer): Go, Node.js, PostgreSQL indexing, Redis caching, gRPC/REST keywords.
+- [Full-Stack Developer Resume Guide](https://www.vayloai.online/resume/full-stack-developer): End-to-end Next.js + PostgreSQL, Stripe API integration.
+- [DevOps Engineer Resume Guide](https://www.vayloai.online/resume/devops-engineer): Kubernetes (EKS), Docker, Terraform, CI/CD, Prometheus/Grafana.
+- [Fresher & Student Resume Guide](https://www.vayloai.online/resume/fresher): College capstone projects, LeetCode ratings, CS fundamentals.
+
+## Deep-Dive Interview & Technical Blueprints
+
+- [Top 15 Full-Stack Interview Questions (2026)](https://www.vayloai.online/blog/top-15-fullstack-interview-questions-2026): STAR model answers for Web Vitals, database migrations, and caching.
+- [System Design Interview Questions & FAANG Blueprints](https://www.vayloai.online/blog/system-design-interview-questions-faang): Distributed rate limiters (Redis), real-time WebSockets/Kafka, database sharding.
+- [Top 30 Behavioral Interview Questions (Amazon & Google)](https://www.vayloai.online/blog/top-behavioral-interview-questions-star): STAR answers for conflict, outages, and tight deadlines.
+- [Advanced React & JavaScript Interview Questions](https://www.vayloai.online/blog/advanced-react-javascript-interview-questions): React Fiber reconciliation, useEffect vs useLayoutEffect, Event Loop.
+- [Backend & High-Concurrency Interview Questions](https://www.vayloai.online/blog/backend-high-concurrency-interview-questions): Connection pool starvation, PgBouncer, optimistic vs pessimistic locking.
+- [15 Must-Know Coding Interview Patterns](https://www.vayloai.online/blog/top-dsa-interview-patterns-google-meta): Sliding Window, Two Pointers, Monotonic Stack, Dynamic Programming.
+- [Applied AI & LLM Engineer Interview Guide](https://www.vayloai.online/blog/machine-learning-llm-interview-questions): Precision RAG chunking, LoRA vs Full Fine-Tuning, vLLM throughput.
+- [Data Analytics & SQL Mastery Queries](https://www.vayloai.online/blog/advanced-sql-analytics-interview-questions): DENSE_RANK(), rolling 7-day averages, retention cohort analysis.
+- [What is an ATS Resume?](https://www.vayloai.online/blog/what-is-an-ats-resume): How Greenhouse, Workday, and Lever parse resumes in 2026.
