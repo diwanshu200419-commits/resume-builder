@@ -1207,7 +1207,7 @@ const tests = [
         "/ai-resume-checker",
         "/resume-optimizer",
         "/ai-resume-builder",
-        "/free-ats-checker",
+        "/interview-prep",
         "/pricing",
         "/blog",
       ];
