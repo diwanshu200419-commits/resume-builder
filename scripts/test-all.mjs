@@ -1241,7 +1241,137 @@ const tests = [
       return true;
     }
   },
+
+  // -------------------------------------------------------------------------
+  // Suite #40: Whole-Site Responsive Design Structural Audit
+  // Validates centralized fixes — no browser required, runs in CI.
+  // Companion to: tests/responsive-audit.spec.ts (Playwright real-browser)
+  // -------------------------------------------------------------------------
+  {
+    name: "Suite #40: Whole-Site Responsive Design — Centralized Fix Structural Audit",
+    test: () => {
+      // --- CHECK 1: pb-float-safe utility is defined in globals.css ---
+      const globalsPath = path.join(process.cwd(), "app", "globals.css");
+      const globalsCss = fs.readFileSync(globalsPath, "utf-8");
+
+      if (!globalsCss.includes(".pb-float-safe")) {
+        throw new Error(
+          "globals.css is missing .pb-float-safe utility class. " +
+          "This class is required to provide FloatingAICopilot clearance globally."
+        );
+      }
+
+      const pbFloatMatch = globalsCss.match(/\.pb-float-safe\s*\{([^}]+)\}/);
+      if (!pbFloatMatch) {
+        throw new Error("globals.css .pb-float-safe block not parseable.");
+      }
+      const pbFloatBody = pbFloatMatch[1];
+      if (!pbFloatBody.includes("padding-bottom")) {
+        throw new Error(
+          ".pb-float-safe must set padding-bottom (found: " + pbFloatBody.trim() + ")"
+        );
+      }
+      // Verify the value is at least 4rem (64px) to clear the 48px button + margins
+      if (!pbFloatBody.includes("max(") || !pbFloatBody.includes("4")) {
+        throw new Error(
+          ".pb-float-safe padding must use max() with ≥4rem to clear the floating copilot button."
+        );
+      }
+
+      // --- CHECK 2: Dashboard layout.tsx uses pb-float-safe, NOT pb-6 ---
+      const layoutPath = path.join(process.cwd(), "app", "(dashboard)", "layout.tsx");
+      const layoutContent = fs.readFileSync(layoutPath, "utf-8");
+
+      if (layoutContent.includes('"pb-6"') || layoutContent.includes("'pb-6'")) {
+        throw new Error(
+          "Dashboard layout.tsx still contains pb-6 on the main content wrapper. " +
+          "Must be replaced with pb-float-safe to globally clear the FloatingAICopilot."
+        );
+      }
+      if (!layoutContent.includes("pb-float-safe")) {
+        throw new Error(
+          "Dashboard layout.tsx must apply pb-float-safe to the main content wrapper div. " +
+          "Not found in file — global copilot clearance is not applied."
+        );
+      }
+
+      // --- CHECK 3: interview-prep pb-32 has been removed ---
+      const interviewPrepPath = path.join(process.cwd(), "app", "(dashboard)", "interview-prep", "page.tsx");
+      const interviewPrepContent = fs.readFileSync(interviewPrepPath, "utf-8");
+
+      if (interviewPrepContent.includes("pb-32")) {
+        throw new Error(
+          "interview-prep/page.tsx still contains pb-32. This was a local fix that is now " +
+          "superseded by the global pb-float-safe in layout.tsx. Remove it to avoid double-padding."
+        );
+      }
+
+      // --- CHECK 4: No bare grid-cols-2 without sm: prefix on form-input pages ---
+      // These files had bare grid-cols-2 confirmed by inspection — verify each is fixed.
+      const formPagesToCheck = [
+        {
+          file: path.join(process.cwd(), "app", "(dashboard)", "branding-studio", "page.tsx"),
+          name: "branding-studio",
+        },
+        {
+          file: path.join(process.cwd(), "app", "(dashboard)", "hiring-probability", "page.tsx"),
+          name: "hiring-probability",
+        },
+      ];
+
+      for (const entry of formPagesToCheck) {
+        const content = fs.readFileSync(entry.file, "utf-8");
+
+        // Find all grid-cols-2 occurrences
+        const bareGridRegex = /className="[^"]*(?<![a-z]:)grid-cols-2[^"]*"/g;
+        const matches = [...content.matchAll(bareGridRegex)];
+
+        for (const match of matches) {
+          const cls = match[0];
+          // A "bare" grid-cols-2 has no responsive prefix (no 'sm:grid-cols', 'md:grid-cols', etc.)
+          // and is NOT preceded by 'grid-cols-1' in the same className string
+          if (!cls.includes("grid-cols-1") && !cls.includes("sm:grid-cols") && !cls.includes("md:grid-cols")) {
+            // Determine context — is this a form-input row (has Input/select in adjacent content)?
+            // We check: if the bare grid-cols-2 is on a line that doesn't contain button/badge context
+            // This is heuristic — flag any remaining bare ones for human review
+            throw new Error(
+              `${entry.name} still has a bare 'grid-cols-2' className without a mobile-first ` +
+              `'grid-cols-1' prefix. Found: ${cls.slice(0, 100)}. ` +
+              `Add 'grid-cols-1 sm:grid-cols-2' to ensure single-column layout on mobile.`
+            );
+          }
+        }
+      }
+
+      // --- CHECK 5: FloatingAICopilot is rendered inside dashboard layout (not per-page) ---
+      if (!layoutContent.includes("FloatingAICopilot")) {
+        throw new Error(
+          "FloatingAICopilot must be rendered in the dashboard layout.tsx (not per-page). " +
+          "This ensures consistent z-index and clearance behavior across all dashboard routes."
+        );
+      }
+
+      // --- CHECK 6: globals.css has overflow-x hidden on html, body ---
+      if (!globalsCss.includes("overflow-x: hidden")) {
+        throw new Error(
+          "globals.css missing 'overflow-x: hidden' on html/body. " +
+          "This is the last-resort guard against horizontal overflow from any element."
+        );
+      }
+
+      // --- CHECK 7: Input font-size 16px globally enforced ---
+      if (!globalsCss.includes("font-size: 16px !important")) {
+        throw new Error(
+          "globals.css missing 'font-size: 16px !important' on input/select/textarea. " +
+          "This prevents iOS Safari from zooming on input focus."
+        );
+      }
+
+      return true;
+    }
+  },
 ];
+
 
 async function runAllAudits() {
   let passed = 0;

@@ -185,7 +185,7 @@ export default function InterviewPrepLobbyPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8 pb-32">
+    <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8">
       {/* Top Tab Bar (Lobby / History Switcher) */}
       {!isSessionActive && (
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 flex-wrap gap-2">

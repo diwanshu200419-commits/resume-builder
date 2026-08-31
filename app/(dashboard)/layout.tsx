@@ -34,7 +34,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Sidebar profile={profile} />
         <main className="flex-1 w-full max-w-full min-w-0 min-h-dvh pt-14 lg:pt-0 pb-safe">
           <TopBar profile={profile!} />
-          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 pb-6">
+          {/* pb-float-safe provides global clearance above FloatingAICopilot on every dashboard page */}
+          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 pb-float-safe">
             <Suspense fallback={<DashboardSkeleton />}>{children}</Suspense>
           </div>
         </main>

@@ -105,7 +105,7 @@ export default function HiringProbabilityPage() {
             <CardDescription className="text-xs">Enter your target role details to run the recruiter callback simulation.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs font-semibold">Target Company</Label>
                 <Input
@@ -200,7 +200,7 @@ export default function HiringProbabilityPage() {
               </Card>
 
               {/* 4 Factor Breakdown */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Card className="border-border bg-surface p-4 text-center">
                   <p className="text-[11px] text-text-muted font-medium">ATS Keyword Match</p>
                   <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{result.breakdown.atsKeywordMatch}%</p>

@@ -190,6 +190,18 @@
     margin-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
+  /*
+   * pb-float-safe — clears the FloatingAICopilot button on every dashboard page.
+   * The button is fixed at bottom: max(1rem, env(safe-area-inset-bottom)) and is
+   * 48px tall. We need: 48px button + 16px gap + safe-area-bottom + 8px extra = ~80px.
+   * Using max() ensures this also respects iPhone notch / Android nav bar insets.
+   * Applied once in the dashboard layout — NOT page-by-page.
+   */
+  .pb-float-safe {
+    padding-bottom: max(5rem, calc(env(safe-area-inset-bottom) + 4.5rem));
+  }
+
+
   /* Dynamic viewport height utilities */
   .min-h-dvh {
     min-height: 100dvh;

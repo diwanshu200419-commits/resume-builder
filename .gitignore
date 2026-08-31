@@ -34,3 +34,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 build-*.txt
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.auth/
+/tests/global-setup.js
+
