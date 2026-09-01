@@ -39,18 +39,22 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
     return;
   }
 
+  const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000';
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
-    baseURL: 'https://www.vayloai.online',
+    baseURL,
     viewport: { width: 390, height: 844 },
+    extraHTTPHeaders: {
+      'x-vaylo-test-runner': 'playwright',
+    },
   });
   const page = await context.newPage();
 
-  console.log('\n🔐 Playwright global-setup: logging in as QA account...');
+  console.log(`\n🔐 Playwright global-setup: logging in as QA account against ${baseURL}...`);
 
   try {
     // Navigate to login
-    await page.goto('https://www.vayloai.online/login', { waitUntil: 'domcontentloaded' });
+    await page.goto(`${baseURL}/login`, { waitUntil: 'domcontentloaded' });
 
     // Fill credentials
     await page.fill('input[type="email"], input[name="email"]', QA_EMAIL);

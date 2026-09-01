@@ -19,7 +19,12 @@ export default defineConfig({
   globalSetup: './tests/global-setup.ts',
 
   use: {
-    baseURL: 'https://www.vayloai.online',
+    // NEVER default to live production. Defaults to local dev server (http://localhost:3000)
+    // or staging preview via PLAYWRIGHT_TEST_BASE_URL
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
+    extraHTTPHeaders: {
+      'x-vaylo-test-runner': 'playwright',
+    },
     // Act like a real mobile browser for accurate CSS rendering
     // Individual tests override viewport per-breakpoint
     viewport: { width: 390, height: 844 },
@@ -30,6 +35,16 @@ export default defineConfig({
     // Do NOT use JavaScript-disabled mode — we want full client-side rendering
     javaScriptEnabled: true,
   },
+
+  // Auto-start webserver when testing locally if not already running
+  webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
+    ? undefined
+    : {
+        command: 'npm run start',
+        url: 'http://localhost:3000',
+        reuseExistingServer: true,
+        timeout: 120_000,
+      },
 
   projects: [
     // Public routes — no auth needed

@@ -33,6 +33,16 @@ declare global {
 export function trackEvent(eventName: AnalyticsEventName, params?: AnalyticsEventParams) {
   if (typeof window === "undefined") return;
 
+  // Suppress tracking in automated test environments (Playwright/Puppeteer), localhost, or disabled state
+  if (
+    window.navigator?.webdriver ||
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    (window as any)["ga-disable-G-ENLDX3KQQ7"] === true
+  ) {
+    return;
+  }
+
   // Sanitize: ensure no email, phone, or raw text is leaked
   const sanitizedParams: Record<string, any> = {};
 

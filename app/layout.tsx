@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { FloatingAICopilot } from "@/components/shared/FloatingAICopilot";
 
@@ -146,10 +145,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <Script id="google-analytics" strategy="afterInteractive">
           {`
+            // Prevent analytics pollution from automated tests (Playwright/Puppeteer/Selenium), localhost, and test runners
+            var isAutomatedTest = !!(navigator.webdriver || window.__playwright || window._phantom || window.callPhantom);
+            var isLocalOrPreview = window.location.hostname === 'localhost' || 
+                                   window.location.hostname === '127.0.0.1' || 
+                                   window.location.hostname.endsWith('.vercel.app');
+            
+            if (isAutomatedTest || isLocalOrPreview) {
+              // Opt-out / disable GA4 measurement for synthetic and local traffic
+              window['ga-disable-G-ENLDX3KQQ7'] = true;
+            }
+
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-ENLDX3KQQ7');
+
+            if (isAutomatedTest || isLocalOrPreview) {
+              gtag('config', 'G-ENLDX3KQQ7', {
+                traffic_type: 'internal',
+                debug_mode: true,
+                send_page_view: false
+              });
+            } else {
+              gtag('config', 'G-ENLDX3KQQ7');
+            }
           `}
         </Script>
         <script
@@ -160,7 +179,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} font-sans antialiased`}>
         {children}
         <FloatingAICopilot />
-        <GoogleAnalytics gaId="G-ENLDX3KQQ7" />
       </body>
     </html>
   );
