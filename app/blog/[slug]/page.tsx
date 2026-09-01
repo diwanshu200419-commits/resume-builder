@@ -64,29 +64,41 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.description,
-    image: [`${APP_URL}/og-image.png`],
-    datePublished: new Date(post.date).toISOString(),
-    author: {
-      "@type": "Organization",
-      name: post.author,
-      url: APP_URL,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Vaylo AI",
-      url: APP_URL,
-      logo: {
-        "@type": "ImageObject",
-        url: `${APP_URL}/logo.png`,
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": APP_URL },
+          { "@type": "ListItem", "position": 2, "name": "Blog & Guides", "item": `${APP_URL}/blog` },
+          { "@type": "ListItem", "position": 3, "name": post.title, "item": articleUrl }
+        ]
       },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": articleUrl,
-    },
+      {
+        "@type": "BlogPosting",
+        "headline": post.title,
+        "description": post.description,
+        "image": [`${APP_URL}/og-image.png`],
+        "datePublished": new Date(post.date).toISOString(),
+        "author": {
+          "@type": "Organization",
+          "name": post.author,
+          "url": APP_URL,
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Vaylo AI",
+          "url": APP_URL,
+          "logo": {
+            "@type": "ImageObject",
+            "url": `${APP_URL}/logo.png`,
+          },
+        },
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": articleUrl,
+        },
+      }
+    ]
   };
 
   return (

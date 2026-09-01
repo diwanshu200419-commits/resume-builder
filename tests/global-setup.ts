@@ -1,44 +1,95 @@
 /**
  * tests/global-setup.ts
  *
- * Runs ONCE before all Playwright tests. Logs in with the QA test account,
- * saves the authenticated browser storage state (cookies + localStorage) to
- * playwright/.auth/session.json so that every dashboard-route test can reuse
- * the live session without re-logging in on every test.
- *
- * QA account: qa-test@vayloai.online
- * This is a dedicated testing account — NEVER use a real user's credentials here.
- *
- * SETUP REQUIRED (one-time):
- *   1. Create the account qa-test@vayloai.online in Supabase (or via signup UI)
- *   2. Set env var VAYLO_QA_PASSWORD=<password> before running Playwright
- *      e.g.: $env:VAYLO_QA_PASSWORD="yourpassword"; npx playwright test
- *   3. The session.json is gitignored — it contains auth tokens.
+ * Runs ONCE before all Playwright tests. Ensures the QA test account
+ * exists and is confirmed, logs in via the UI to establish full browser
+ * session cookies & localStorage, and saves storage state to
+ * playwright/.auth/session.json.
  */
 
 import { chromium, FullConfig } from '@playwright/test';
+import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 
 const AUTH_STATE_PATH = path.join(process.cwd(), 'playwright/.auth/session.json');
 const QA_EMAIL = 'qa-test@vayloai.online';
-const QA_PASSWORD = process.env.VAYLO_QA_PASSWORD ?? '';
+const DEFAULT_TEST_PASSWORD = 'QaTestVaylo2026!';
+const QA_PASSWORD = process.env.VAYLO_QA_PASSWORD || DEFAULT_TEST_PASSWORD;
+
+function getEnvVar(name: string): string {
+  if (process.env[name]) return process.env[name]!;
+  try {
+    const envLocal = fs.readFileSync(path.join(process.cwd(), '.env.local'), 'utf-8');
+    const match = envLocal.match(new RegExp(`^${name}=(.*)$`, 'm'));
+    if (match) return match[1].trim().replace(/^["']|["']$/g, '');
+  } catch {}
+  return '';
+}
 
 export default async function globalSetup(_config: FullConfig): Promise<void> {
-  // Ensure the auth directory exists
   fs.mkdirSync(path.dirname(AUTH_STATE_PATH), { recursive: true });
 
-  // If no password is provided, skip auth setup — dashboard tests will be skipped
-  if (!QA_PASSWORD) {
-    console.warn(
-      '\n⚠️  VAYLO_QA_PASSWORD env var not set. Dashboard-route tests will be skipped.\n' +
-      '   To enable: set VAYLO_QA_PASSWORD=<qa account password> and re-run.\n'
-    );
-    // Write an empty/invalid state so dashboard tests fail gracefully (not with a missing file crash)
-    fs.writeFileSync(AUTH_STATE_PATH, JSON.stringify({ cookies: [], origins: [] }));
-    return;
+  const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
+  const serviceKey = getEnvVar('SUPABASE_SERVICE_ROLE_KEY');
+
+  // Step 1: Provision QA test user via Supabase Admin API if service key is available
+  if (supabaseUrl && serviceKey) {
+    try {
+      console.log('\n🔧 Provisioning / verifying QA test user in Supabase...');
+      const adminClient = createClient(supabaseUrl, serviceKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+
+      // Check if user exists
+      const { data: usersData, error: listError } = await adminClient.auth.admin.listUsers();
+      if (!listError) {
+        const existingUser = usersData.users.find(
+          (u) => u.email?.toLowerCase() === QA_EMAIL.toLowerCase()
+        );
+
+        let userId = existingUser?.id;
+
+        if (!existingUser) {
+          console.log(`Creating test user ${QA_EMAIL}...`);
+          const { data: created, error: createError } = await adminClient.auth.admin.createUser({
+            email: QA_EMAIL,
+            password: QA_PASSWORD,
+            email_confirm: true,
+            user_metadata: { full_name: 'QA Test User' },
+          });
+          if (createError) {
+            console.warn('Could not create QA user via admin API:', createError.message);
+          } else if (created.user) {
+            userId = created.user.id;
+          }
+        } else {
+          // Ensure password is up to date and email is confirmed
+          await adminClient.auth.admin.updateUserById(existingUser.id, {
+            password: QA_PASSWORD,
+            email_confirm: true,
+          });
+        }
+
+        // Ensure a profile row exists with premium plan so all dashboard tools are unlocked
+        if (userId) {
+          await adminClient.from('profiles').upsert({
+            id: userId,
+            email: QA_EMAIL,
+            full_name: 'QA Test User',
+            plan: 'premium',
+            role: 'user',
+            total_ats_checks: 10,
+            updated_at: new Date().toISOString(),
+          });
+        }
+      }
+    } catch (err: any) {
+      console.warn('Supabase QA user provisioning note:', err?.message || err);
+    }
   }
 
+  // Step 2: Log in via browser to capture full cookies & storage state
   const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000';
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -50,31 +101,29 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
   });
   const page = await context.newPage();
 
-  console.log(`\n🔐 Playwright global-setup: logging in as QA account against ${baseURL}...`);
+  console.log(`🔐 Playwright global-setup: logging in as ${QA_EMAIL} against ${baseURL}...`);
 
   try {
-    // Navigate to login
-    await page.goto(`${baseURL}/login`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${baseURL}/login`, { waitUntil: 'domcontentloaded', timeout: 30_000 });
 
-    // Fill credentials
     await page.fill('input[type="email"], input[name="email"]', QA_EMAIL);
     await page.fill('input[type="password"], input[name="password"]', QA_PASSWORD);
 
-    // Click sign-in button
     const signInBtn = page.locator('button[type="submit"]').first();
     await signInBtn.click();
 
-    // Wait for redirect to dashboard (successful login indicator)
+    // Wait for redirect to dashboard
     await page.waitForURL('**/dashboard**', { timeout: 20_000 });
 
-    // Save the authenticated session
+    // Save authenticated session state
     await context.storageState({ path: AUTH_STATE_PATH });
     console.log(`✅ Auth session saved to ${AUTH_STATE_PATH}\n`);
-  } catch (err) {
-    console.error('❌ Login failed in global-setup. Dashboard tests will use unauthenticated state.');
-    console.error(err);
-    // Save empty state so tests fail gracefully
-    fs.writeFileSync(AUTH_STATE_PATH, JSON.stringify({ cookies: [], origins: [] }));
+  } catch (err: any) {
+    console.error('❌ Login in global-setup encountered:', err?.message || err);
+    // Write state file so tests do not crash on missing file
+    if (!fs.existsSync(AUTH_STATE_PATH)) {
+      fs.writeFileSync(AUTH_STATE_PATH, JSON.stringify({ cookies: [], origins: [] }));
+    }
   } finally {
     await browser.close();
   }

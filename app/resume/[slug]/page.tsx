@@ -106,7 +106,7 @@ export default function RoleResumeGuidePage({ params }: RolePageProps) {
           <nav className="flex items-center gap-2 text-xs text-slate-400">
             <Link href="/" className="hover:text-indigo-400">Home</Link>
             <span>/</span>
-            <Link href="/free-ats-checker" className="hover:text-indigo-400">Resume Guides</Link>
+            <Link href="/free-ats-resume-checker" className="hover:text-indigo-400">Resume Guides</Link>
             <span>/</span>
             <span className="text-slate-200 font-semibold">{data.targetRole}</span>
           </nav>

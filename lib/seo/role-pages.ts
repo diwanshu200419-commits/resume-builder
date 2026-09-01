@@ -746,6 +746,289 @@ export const ROLE_PAGES_DATA: Record<string, RolePageData> = {
       },
     ],
   },
+  "product-manager": {
+    slug: "product-manager",
+    title: "Product Manager Resume & ATS Optimization Guide",
+    subtitle: "Master the metrics, discovery frameworks, and product execution keywords required for PM and APM roles at top tech companies.",
+    category: "role",
+    targetRole: "Product Manager",
+    metaDescription: "Build a high-scoring Product Manager resume. Get top ATS keywords (PRDs, OKRs, A/B Testing, User Retention), Google X-Y-Z formulas, and free ATS checking.",
+    keywords: ["product manager resume", "ATS keywords for product manager", "PM resume template", "APM resume guide", "product management metrics resume"],
+    recommendedStructure: [
+      "Header: Name, Email, Phone, LinkedIn, Personal Product Portfolio / Case Studies",
+      "Executive Summary: 2-3 lines summarizing product domain (B2B SaaS, FinTech, Consumer), revenue/user scale, and leadership",
+      "Work Experience: 3-4 bullet points per role focused on user problems, metrics moved, and cross-functional leadership",
+      "Core Competencies: Product Discovery, Roadmapping, Data Analytics, A/B Testing, Agile/Scrum",
+      "Education & Certifications: Degree, Pragmatic Institute, Scrum Alliance, or Reforge courses",
+    ],
+    mustHaveKeywords: ["Product Discovery", "PRDs & Specs", "User Research", "A/B Testing", "KPIs & OKRs", "Roadmapping", "SQL / Analytics", "Cross-Functional Leadership", "Agile / Scrum", "Go-To-Market (GTM)"],
+    preferredKeywords: ["Mixpanel / Amplitude", "Figma", "Jira", "Cohort Retention Analysis", "Customer Lifetime Value (LTV)", "Unit Economics", "Wireframing"],
+    exampleBullets: [
+      {
+        before: "Led product launch for new onboarding workflow.",
+        after: "Spearheaded user discovery and launched redesigned self-serve onboarding flow across 45,000 monthly signups, increasing Day-30 activation by 24% and ARR by $180k.",
+        explanation: "Quantifies business metric (activation + ARR), user volume, and product scope.",
+      },
+      {
+        before: "Wrote PRDs and worked with engineering to deliver features.",
+        after: "Authored 14 detailed PRDs and coordinated 12-engineer sprint cycles, delivering core search revamp 2 weeks ahead of schedule with zero Sev-1 post-release defects.",
+        explanation: "Shows execution rigor, team scale, and on-time delivery metric.",
+      },
+    ],
+    recruiterFocus: [
+      "Direct ownership of North Star metrics (CAC, LTV, Retention, GMV, Churn)",
+      "Customer empathy evidenced through qualitative research and quantitative experimentation",
+      "Technical literacy to partner effectively with engineering teams",
+    ],
+    commonMistakes: [
+      "Listing feature delivery dates without stating the actual business or user outcome achieved",
+      "Failing to mention analytical tools like SQL, Amplitude, or Mixpanel",
+    ],
+    faq: [
+      {
+        question: "Should a Product Manager include technical coding skills on their resume?",
+        answer: "You do not need to write production code, but mentioning SQL, API architecture basics, and data analytics tools proves you can communicate efficiently with software engineers.",
+      },
+      {
+        question: "How do I format product metrics on an APM/Fresher resume?",
+        answer: "Focus on student project adoption, hackathon user testing results, usability study sample sizes, and quantitative outcomes from internships.",
+      },
+    ],
+  },
+
+  "data-scientist": {
+    slug: "data-scientist",
+    title: "Data Scientist Resume & ATS Optimization Guide",
+    subtitle: "Showcase statistical modeling, machine learning pipelines, causal inference, and business value metrics for top Data Science teams.",
+    category: "role",
+    targetRole: "Data Scientist",
+    metaDescription: "Build a high-scoring Data Scientist resume. Discover must-have ATS keywords (Python, Pandas, Scikit-Learn, XGBoost, A/B Testing), X-Y-Z bullet formulas, and free ATS scanner.",
+    keywords: ["data scientist resume", "ATS keywords for data scientist", "machine learning data science CV", "data science bullet points", "statistical modeling resume"],
+    recommendedStructure: [
+      "Header: Name, Email, Phone, LinkedIn, GitHub, Kaggle Profile",
+      "Technical Skills Matrix: Programming (Python, R, SQL), ML/Stats (Regression, Random Forest, XGBoost), Data Tools (Spark, Snowflake, Tableau)",
+      "Work Experience: Reverse-chronological bullets highlighting model accuracy improvements and business dollars saved/generated",
+      "Selected Machine Learning Projects: End-to-end model deployments with Kaggle ranks or live GitHub code",
+      "Education: Degree in Computer Science, Statistics, Mathematics, or Quantitative discipline",
+    ],
+    mustHaveKeywords: ["Python", "SQL", "Pandas & NumPy", "Scikit-Learn", "Hypothesis Testing", "A/B Testing & Causal Inference", "Machine Learning", "Feature Engineering", "Data Visualization", "XGBoost / LightGBM"],
+    preferredKeywords: ["PyTorch / TensorFlow", "Apache Spark", "Snowflake / BigQuery", "MLflow", "Docker", "Statistical Experimentation", "Tableau / Looker"],
+    exampleBullets: [
+      {
+        before: "Built machine learning model to predict customer churn.",
+        after: "Developed and deployed an XGBoost customer churn prediction model on 1.2M user records, achieving 0.89 ROC-AUC and reducing annual enterprise churn by 14% ($320k saved).",
+        explanation: "Mentions algorithm, data scale, statistical evaluation metric (ROC-AUC), and direct revenue impact.",
+      },
+      {
+        before: "Conducted statistical tests for product team.",
+        after: "Designed and evaluated 18 multi-variate A/B tests using power analysis and Welch's t-tests, identifying checkout friction points and improving conversion by 3.4%.",
+        explanation: "Highlights rigorous statistical methodology and conversion lift.",
+      },
+    ],
+    recruiterFocus: [
+      "Rigorous experimental design and statistical foundations",
+      "Proven ability to translate business problems into mathematical/ML formulations",
+      "Clean Python/SQL code quality and deployment experience",
+    ],
+    commonMistakes: [
+      "Treating Data Science as just running `model.fit()` without mentioning data cleaning or feature validation",
+      "Omitting the business dollar value or efficiency gain resulting from the model",
+    ],
+    faq: [
+      {
+        question: "What is the difference between a Data Analyst and a Data Scientist resume?",
+        answer: "Data Analyst resumes emphasize SQL reporting, dashboarding (Power BI/Tableau), and descriptive insights. Data Scientist resumes emphasize statistical modeling, machine learning algorithms, hypothesis testing, and predictive pipelines.",
+      },
+      {
+        question: "Should I include Kaggle competitions on my Data Scientist resume?",
+        answer: "Yes, especially if you achieved Expert/Master tier, placed in the top 10%, or built custom feature engineering pipelines that demonstrate problem-solving depth.",
+      },
+    ],
+  },
+
+  "machine-learning-engineer": {
+    slug: "machine-learning-engineer",
+    title: "Machine Learning Engineer Resume & ATS Guide",
+    subtitle: "Target high-paying MLE roles with production deployment keywords, model optimization, PyTorch, CUDA, and distributed training highlights.",
+    category: "role",
+    targetRole: "Machine Learning Engineer",
+    metaDescription: "Master the Machine Learning Engineer resume. ATS keywords for PyTorch, MLOps, Triton, CUDA, vLLM, distributed training, and free resume score checker.",
+    keywords: ["machine learning engineer resume", "MLE ATS keywords", "production ML resume", "PyTorch resume bullets", "MLOps resume template"],
+    recommendedStructure: [
+      "Header: Name, Email, Phone, GitHub, Hugging Face, LinkedIn",
+      "Technical Skills Matrix: Core ML Frameworks, Model Serving & MLOps, Languages (Python, C++), Cloud & Distributed Compute",
+      "Work Experience: Production model latency, throughput, scale, and serving infrastructure achievements",
+      "Open Source / Research Contributions: ArXiv papers, Hugging Face models, GitHub implementations",
+      "Education: B.Tech / M.S. in Computer Science, AI/ML, or Computational Engineering",
+    ],
+    mustHaveKeywords: ["Python", "PyTorch", "MLOps & CI/CD for ML", "Model Serving (Triton / FastAPI)", "Docker & Kubernetes", "CUDA & GPU Optimization", "Feature Stores", "Transformer Architectures", "Distributed Training (DeepSpeed / FSDP)", "ONNX / TensorRT"],
+    preferredKeywords: ["vLLM / TGI", "LoRA / QLoRA", "Vector Databases (Qdrant / Milvus)", "Ray / Ray Train", "C++", "Weights & Biases", "Data Version Control (DVC)"],
+    exampleBullets: [
+      {
+        before: "Served deep learning models in production.",
+        after: "Optimized and served 7B parameter transformer models using TensorRT-LLM and vLLM on NVIDIA A100 GPUs, reducing p99 inference latency from 140ms to 28ms while cutting cloud compute costs by 45%.",
+        explanation: "Details model size, hardware (A100), serving engine (vLLM/TensorRT), latency drop, and cost savings.",
+      },
+      {
+        before: "Trained recommendation model on user data.",
+        after: "Engineered two-tower candidate generation model using PyTorch and Ray Train over 80M user-item interactions, improving top-10 precision by 18% and Day-7 click-through rates by 22%.",
+        explanation: "Specifies architecture (two-tower), distributed training framework (Ray), data volume, and precision metric.",
+      },
+    ],
+    recruiterFocus: [
+      "Demonstrated experience taking models from research notebooks to low-latency production APIs",
+      "Hardware efficiency: GPU memory management, quantization (FP8/INT4), and inference caching",
+      "Software engineering foundations (clean unit tests, microservices, containerization)",
+    ],
+    commonMistakes: [
+      "Listing academic theory without demonstrating production serving, API wrapping, or monitoring",
+      "Neglecting to mention model latency and throughput (QPS/RPS) numbers",
+    ],
+    faq: [
+      {
+        question: "How do I show MLOps experience if I worked primarily in research?",
+        answer: "Highlight model quantization (ONNX, TensorRT), containerization with Docker, API wrapping with FastAPI, and automated regression testing pipelines.",
+      },
+    ],
+  },
+
+  "cybersecurity-analyst": {
+    slug: "cybersecurity-analyst",
+    title: "Cybersecurity Analyst Resume & ATS Optimization Guide",
+    subtitle: "Showcase incident response, SIEM telemetry, threat hunting, vulnerability management, and SOC analysis keywords.",
+    category: "role",
+    targetRole: "Cybersecurity Analyst",
+    metaDescription: "Build a high-scoring Cybersecurity Analyst resume. Must-have ATS keywords (Splunk, Wireshark, MITRE ATT&CK, NIST, SOC 2), bullet formulas, and free ATS test.",
+    keywords: ["cybersecurity analyst resume", "SOC analyst resume ATS", "security engineer resume keywords", "SIEM incident response resume", "cyber security CV guide"],
+    recommendedStructure: [
+      "Header: Name, Email, Phone, LinkedIn, GitHub / TryHackMe / HackTheBox Profile",
+      "Certifications: CompTIA Security+, CEH, CISSP, CySA+, or GIAC",
+      "Security Skills Matrix: SIEM & Telemetry (Splunk, Sentinel), Network Tools (Wireshark, Nmap), Vulnerability Scanners (Nessus), Frameworks (MITRE ATT&CK, NIST CSF)",
+      "Professional Experience: SOC investigations, MTTD/MTTR reductions, compliance audits",
+      "Education: Bachelor's in Cybersecurity, Computer Science, or Information Technology",
+    ],
+    mustHaveKeywords: ["SIEM (Splunk / Microsoft Sentinel)", "Incident Response", "Threat Hunting", "MITRE ATT&CK Framework", "Vulnerability Assessment (Nessus / Qualys)", "Network Traffic Analysis (Wireshark)", "SOC Operations", "NIST Cybersecurity Framework", "Endpoint Detection & Response (EDR)", "Firewall & IAM Configuration"],
+    preferredKeywords: ["Python / Bash Scripting", "SOC 2 & ISO 27001 Compliance", "Burp Suite", "Cloud Security (AWS IAM / Azure Security Center)", "Malware Analysis", "Snort / Suricata"],
+    exampleBullets: [
+      {
+        before: "Monitored security alerts in Splunk and reported incidents.",
+        after: "Investigated 800+ Tier-2 security alerts in Splunk SIEM and Sentinel EDR, reducing Mean Time to Detect (MTTD) by 32% through 15 custom threat detection correlation rules.",
+        explanation: "Quantifies investigation scale, SIEM tools, and MTTD efficiency improvement.",
+      },
+      {
+        before: "Performed vulnerability scans across company servers.",
+        after: "Orchestrated weekly Nessus vulnerability scans across 450 network endpoints, coordinating patch management with DevOps to eliminate 98% of critical/high CVEs within SLA.",
+        explanation: "Highlights tool (Nessus), endpoint scope, and CVE remediation rate.",
+      },
+    ],
+    recruiterFocus: [
+      "Familiarity with industry frameworks like MITRE ATT&CK and NIST CSF",
+      "Demonstrated reduction in detection and resolution timelines (MTTD/MTTR)",
+      "Recognized industry security certifications (Security+, CySA+, CISSP)",
+    ],
+    commonMistakes: [
+      "Listing tools without specifying whether you configured them or simply viewed dashboards",
+      "Failing to mention patch compliance percentages and response SLAs",
+    ],
+    faq: [
+      {
+        question: "Are cybersecurity certifications necessary on a SOC Analyst resume?",
+        answer: "Yes, certifications like CompTIA Security+, CEH, or CySA+ validate foundational knowledge and are heavily filtered by automated corporate recruiting screens.",
+      },
+    ],
+  },
+
+  "cloud-architect": {
+    slug: "cloud-architect",
+    title: "Cloud Solutions Architect Resume & ATS Guide",
+    subtitle: "Highlight multi-region high availability, infrastructure as code, cost optimization (FinOps), and zero-trust security architectures.",
+    category: "role",
+    targetRole: "Cloud Solutions Architect",
+    metaDescription: "Master the Cloud Architect resume. Top ATS keywords for AWS, Azure, GCP, Terraform, Kubernetes, FinOps cost reduction, and free ATS scanner.",
+    keywords: ["cloud architect resume", "AWS solutions architect resume", "Azure cloud engineer ATS keywords", "Terraform cloud CV", "cloud infrastructure resume guide"],
+    recommendedStructure: [
+      "Header: Name, Email, Phone, LinkedIn, Cloud Certifications (AWS SAP-C02 / Azure Solutions Architect Expert)",
+      "Architecture Summary: Enterprise cloud migrations, high availability (99.99%), and multi-cloud governance scale",
+      "Technical Architecture Matrix: Cloud Platforms (AWS, Azure, GCP), IaC (Terraform, CloudFormation), Orchestration (Kubernetes, EKS), Networking & Security (VPC, Transit Gateway, IAM)",
+      "Enterprise Experience: Large-scale cloud modernization, cloud cost optimization, and disaster recovery blueprints",
+      "Education & Major Certifications",
+    ],
+    mustHaveKeywords: ["AWS / Microsoft Azure / GCP", "Terraform & Infrastructure as Code (IaC)", "Kubernetes & Microservices Architecture", "High Availability & Disaster Recovery (99.99%)", "Cloud Security & IAM", "FinOps & Cloud Cost Optimization", "VPC & Cloud Networking", "CI/CD & GitOps", "Database Scaling (Aurora / DynamoDB / CosmosDB)", "Enterprise Migration"],
+    preferredKeywords: ["AWS Well-Architected Framework", "ArgoCD", "Service Mesh (Istio)", "Multi-Cloud Governance", "Prometheus & Datadog Telemetry", "Zero Trust Architecture"],
+    exampleBullets: [
+      {
+        before: "Managed AWS infrastructure and moved servers to cloud.",
+        after: "Architected multi-region AWS cloud migration for 40+ microservices using Terraform and EKS, achieving 99.99% uptime SLA while reducing annual infrastructure spend by $210,000 via FinOps auto-scaling policies.",
+        explanation: "Highlights high availability metric, tools (Terraform, EKS), and massive FinOps dollar savings.",
+      },
+      {
+        before: "Set up CI/CD and deployment pipelines.",
+        after: "Implemented GitOps delivery workflow with Terraform and ArgoCD across 5 Kubernetes clusters, decreasing production deployment cycle time from 3 hours to 12 minutes with zero downtime.",
+        explanation: "Quantifies deployment speedup and names modern GitOps tools.",
+      },
+    ],
+    recruiterFocus: [
+      "Documented architecture decisions following the Well-Architected Framework",
+      "FinOps discipline and quantifiable cloud cost reductions",
+      "Experience with automated multi-environment provisioning using Terraform",
+    ],
+    commonMistakes: [
+      "Focusing exclusively on manual console management rather than Infrastructure as Code (Terraform)",
+      "Omitting high availability (99.99%) and disaster recovery RTO/RPO metrics",
+    ],
+    faq: [
+      {
+        question: "Which certifications carry the most weight on a Cloud Architect resume?",
+        answer: "AWS Certified Solutions Architect – Professional, Azure Solutions Architect Expert, and Google Professional Cloud Architect are the three highest-valued certifications in enterprise hiring.",
+      },
+    ],
+  },
+
+  "qa-automation-engineer": {
+    slug: "qa-automation-engineer",
+    title: "QA Automation Engineer Resume & ATS Guide",
+    subtitle: "Showcase automated testing frameworks, Playwright, Cypress, Selenium, API test suites, and CI/CD quality gate metrics.",
+    category: "role",
+    targetRole: "QA Automation Engineer",
+    metaDescription: "Build a high-scoring QA Automation Engineer resume. ATS keywords for Playwright, Cypress, Selenium, Postman, CI/CD test automation, and free ATS test.",
+    keywords: ["QA automation engineer resume", "SDET resume ATS keywords", "Playwright Cypress resume", "test automation framework CV", "software test engineer resume"],
+    recommendedStructure: [
+      "Header: Name, Email, Phone, GitHub, LinkedIn",
+      "Test Automation Matrix: End-to-End Tools (Playwright, Cypress, Selenium), API Testing (Postman, RestAssured), Languages (TypeScript, Python, Java), CI/CD & Reporting (GitHub Actions, Allure)",
+      "Professional Experience: Test suite buildouts, execution time reductions, and bug escape rate drops",
+      "Automated Testing Projects: Open-source test framework repositories on GitHub",
+      "Education: Bachelor's in Computer Science or Software Engineering",
+    ],
+    mustHaveKeywords: ["Playwright / Cypress / Selenium", "Test Automation Frameworks (Page Object Model)", "TypeScript / JavaScript / Python", "API Testing (Postman / RestAssured)", "CI/CD Pipeline Integration (GitHub Actions)", "End-to-End (E2E) Testing", "Regression & Performance Testing", "Jira & Defect Tracking", "SQL for Data Validation", "Git / GitHub"],
+    preferredKeywords: ["Docker for Test Environments", "JMeter / k6 Load Testing", "Allure Reporting", "Cross-Browser & Mobile Testing (Appium)", "BDD / Cucumber", "Mocking & WireMock"],
+    exampleBullets: [
+      {
+        before: "Wrote automated tests for website and logged bugs.",
+        after: "Built modular Playwright and TypeScript test automation framework covering 350+ end-to-end critical user journeys, reducing regression testing cycle from 2 days to 35 minutes in GitHub Actions CI.",
+        explanation: "Names framework (Playwright/TypeScript), test case count (350+), and 95% cycle time reduction.",
+      },
+      {
+        before: "Tested APIs using Postman and verified responses.",
+        after: "Designed automated REST API test suite in Postman with 220 assertions, catching 40+ schema mismatch defects in staging before production deployment.",
+        explanation: "Quantifies API test assertion volume and defect prevention metric.",
+      },
+    ],
+    recruiterFocus: [
+      "Ability to architect scalable test frameworks from scratch (not just writing single test scripts)",
+      "Deep integration with CI/CD pipelines to block failing builds automatically",
+      "Both UI (E2E) and backend API testing capabilities",
+    ],
+    commonMistakes: [
+      "Listing manual testing steps without demonstrating code-driven automation tools (Playwright/Cypress)",
+      "Failing to quantify the regression time saved or test coverage increase",
+    ],
+    faq: [
+      {
+        question: "Is Playwright preferred over Selenium on modern QA resumes?",
+        answer: "Yes, modern startups and tech companies heavily favor Playwright and Cypress for web automation due to faster execution, automatic waiting, and built-in tracing capabilities.",
+      },
+    ],
+  },
 };
 
 export function getRolePageBySlug(slug: string): RolePageData | undefined {
