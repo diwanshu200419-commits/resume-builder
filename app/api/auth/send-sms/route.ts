@@ -35,8 +35,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      // SECURITY: OTP is delivered via SMS only. Never return it in the HTTP response.
-      message: result.message,
+      message: "Verification code sent to your mobile phone.",
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to send SMS" }, { status: 500 });

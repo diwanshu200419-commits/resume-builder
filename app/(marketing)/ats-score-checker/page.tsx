@@ -8,7 +8,7 @@ import { CheckCircle2, Sparkles, BarChart3, ArrowRight, ShieldCheck } from "luci
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "ATS Score Checker — Test Your Resume Score Online | Vaylo AI",
+  title: "ATS Score Checker — Test Your Resume Score Online",
   description:
     "Check your resume ATS score online with Vaylo AI. See your 0-100% score breakdown, missing skills, impact verb scores, and formatting health.",
   keywords: [
@@ -22,23 +22,40 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}/ats-score-checker`,
   },
   openGraph: {
-    title: "ATS Score Checker — Test Your Resume Score Online | Vaylo AI",
+    title: "ATS Score Checker — Test Your Resume Score Online",
     description: "Check your resume ATS score online with Vaylo AI. See your 0-100% score breakdown.",
     url: `${APP_URL}/ats-score-checker`,
     siteName: "Vaylo AI",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Vaylo AI ATS Score Checker" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ATS Score Checker — Test Your Resume Score Online | Vaylo AI",
+    title: "ATS Score Checker — Test Your Resume Score Online",
     description: "Check your resume ATS score online with Vaylo AI. See your 0-100% score breakdown.",
-    images: ["/og-image.png"],
   },
 };
 
 export default function ATSScoreCheckerPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "VayloAI ATS Score Checker",
+    "operatingSystem": "Web",
+    "applicationCategory": "BusinessApplication",
+    "description":
+      "Check your resume ATS score online with Vaylo AI. See your 0-100% score breakdown, missing skills, impact verb scores, and formatting health.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    }
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <FreeATSCalculatorClient />
       <section className="bg-surface/40 border-t border-border py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto space-y-8 text-center">

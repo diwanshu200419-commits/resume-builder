@@ -1,44 +1,82 @@
 // app/p/[subdomain]/page.tsx
 //
 // Vaylo AI — Instant Public Portfolio Renderer
-// Serves live generated HTML portfolio pages for any candidate handle (e.g. /p/shiv)
+// Serves live generated HTML portfolio pages for candidate handles (e.g. /p/ashokkumarsolan567)
 
-import { generatePortfolioHTML, autoSuggestTemplate, PortfolioData } from "@/lib/portfolio-templates";
+import { notFound } from "next/navigation";
+import { createServiceClient } from "@/lib/supabase/server";
+import { generatePortfolioHTML, autoSuggestTemplate, PortfolioData, PortfolioTemplateId } from "@/lib/portfolio-templates";
 
 export const dynamic = "force-dynamic";
 
 export default async function PublicPortfolioPage({ params }: { params: { subdomain: string } }) {
-  const handle = params.subdomain || "candidate";
+  const rawHandle = decodeURIComponent(params.subdomain || "").toLowerCase().trim();
+  if (!rawHandle) {
+    notFound();
+  }
 
-  const defaultData: PortfolioData = {
-    name: handle.charAt(0).toUpperCase() + handle.slice(1) + " (Vaylo AI Portfolio)",
-    title: "Senior Technology Leader & Software Specialist",
-    bio: "Passionate engineer and leader with expertise in building high-performance web applications, scalable database systems, and AI copilot solutions.",
-    skills: ["System Architecture", "TypeScript", "React / Next.js", "PostgreSQL", "Cloud Infrastructure", "API Design", "AI Integration"],
-    projects: [
-      {
-        title: "High-Throughput SaaS Platform",
-        description: "Architected microservices infrastructure handling 500k+ monthly active requests with sub-50ms latency.",
-        tech: "Next.js • PostgreSQL • Redis",
-      },
-      {
-        title: "Enterprise AI Career OS",
-        description: "Engineered multi-dimensional ATS evaluation and STAR voice interview simulation engines.",
-        tech: "TypeScript • Gemini AI • Supabase",
-      },
-    ],
-    experience: [
-      {
-        role: "Senior Engineering Manager",
-        company: "Global Tech Solutions",
-        period: "2021 — Present",
-        summary: "Led engineering teams, optimized core product performance, and delivered high-reliability applications.",
-      },
-    ],
-  };
+  const supabase = await createServiceClient();
 
-  const template = autoSuggestTemplate(defaultData.bio);
-  const htmlContent = generatePortfolioHTML(defaultData, template);
+  // 1. Locate user profile by email prefix, full name, or user ID
+  let targetProfile: any = null;
+
+  // Try email prefix match
+  const { data: byEmail } = await supabase
+    .from("profiles")
+    .select("id, email, full_name, avatar_url, plan")
+    .ilike("email", `${rawHandle}@%`)
+    .limit(1)
+    .maybeSingle();
+
+  if (byEmail) {
+    targetProfile = byEmail;
+  } else {
+    // Try UUID match if valid uuid
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawHandle);
+    if (isUuid) {
+      const { data: byId } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, avatar_url, plan")
+        .eq("id", rawHandle)
+        .maybeSingle();
+      if (byId) targetProfile = byId;
+    }
+  }
+
+  // If no profile found, return 404
+  if (!targetProfile) {
+    notFound();
+  }
+
+  // 2. Fetch candidate's saved portfolio draft from Supabase
+  const { data: draftRecord } = await supabase
+    .from("portfolio_drafts")
+    .select("draft_data")
+    .eq("user_id", targetProfile.id)
+    .maybeSingle();
+
+  let portfolioData: PortfolioData;
+
+  if (draftRecord?.draft_data && draftRecord.draft_data.name) {
+    // Use actual candidate saved draft
+    portfolioData = draftRecord.draft_data;
+  } else {
+    // Truthful profile-based defaults from actual candidate profile
+    const displayName = targetProfile.full_name || rawHandle;
+    portfolioData = {
+      name: displayName,
+      title: "Professional Portfolio",
+      bio: `${displayName}'s verified candidate portfolio on Vaylo AI.`,
+      email: targetProfile.email || "",
+      avatarUrl: targetProfile.avatar_url || undefined,
+      skills: ["Problem Solving", "Professional Communication", "Project Delivery"],
+      projects: [],
+      experience: [],
+    };
+  }
+
+  const template: PortfolioTemplateId = autoSuggestTemplate(portfolioData.bio || portfolioData.title || "");
+  const htmlContent = generatePortfolioHTML(portfolioData, template);
 
   return (
     <div
@@ -47,3 +85,4 @@ export default async function PublicPortfolioPage({ params }: { params: { subdom
     />
   );
 }
+

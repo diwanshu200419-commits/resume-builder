@@ -11,8 +11,10 @@ export interface BlogPost {
   category?: "interviews" | "ats" | "system-design" | "coding" | "salary";
   author: string;
   date: string;
+  dateModified?: string;
   readTime: string;
   keywords: string[];
+  image?: string;
   content: string;
 }
 
@@ -25,6 +27,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: "interviews",
     author: "Vaylo AI Engineering Team",
     date: "August 29, 2026",
+    dateModified: "September 7, 2026",
     readTime: "10 min read",
     keywords: ["full stack interview questions", "STAR method answers", "tech interview prep", "system design questions", "React Node interview"],
     content: `
@@ -64,6 +67,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: "system-design",
     author: "Vaylo AI Principal Architect",
     date: "August 28, 2026",
+    dateModified: "September 7, 2026",
     readTime: "14 min read",
     keywords: ["system design interview questions", "FAANG system design", "distributed systems interview", "rate limiter architecture", "database sharding"],
     content: `
@@ -110,6 +114,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: "interviews",
     author: "Vaylo AI Leadership Advisory",
     date: "August 27, 2026",
+    dateModified: "September 7, 2026",
     readTime: "12 min read",
     keywords: ["behavioral interview questions", "Amazon leadership principles questions", "STAR method interview answers", "tell me about a time you failed", "engineering leadership interview"],
     content: `
@@ -147,6 +152,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: "coding",
     author: "Vaylo AI Frontend Lead",
     date: "August 26, 2026",
+    dateModified: "September 7, 2026",
     readTime: "11 min read",
     keywords: ["advanced React interview questions", "React Fiber reconciliation", "JavaScript closures event loop", "useEffect vs useLayoutEffect", "frontend senior interview"],
     content: `
@@ -186,6 +192,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: "system-design",
     author: "Vaylo AI Backend Engineering Team",
     date: "August 25, 2026",
+    dateModified: "September 7, 2026",
     readTime: "13 min read",
     keywords: ["backend interview questions", "high concurrency backend", "PostgreSQL database indexing", "Go concurrency goroutines", "Node.js cluster mode"],
     content: `
@@ -224,6 +231,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: "coding",
     author: "Vaylo AI Competitive Coding Hub",
     date: "August 24, 2026",
+    dateModified: "September 7, 2026",
     readTime: "12 min read",
     keywords: ["coding interview patterns", "LeetCode patterns FAANG", "sliding window two pointers", "monotonic stack dynamic programming", "Google coding interview"],
     content: `
@@ -261,6 +269,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: "interviews",
     author: "Vaylo AI Research Lab",
     date: "August 23, 2026",
+    dateModified: "September 7, 2026",
     readTime: "12 min read",
     keywords: ["AI engineer interview questions", "LLM interview questions", "RAG vector search interview", "LoRA fine tuning questions", "vLLM production AI"],
     content: `
@@ -292,6 +301,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: "coding",
     author: "Vaylo AI Analytics Team",
     date: "August 22, 2026",
+    dateModified: "September 7, 2026",
     readTime: "10 min read",
     keywords: ["SQL interview questions", "window functions SQL", "data analyst SQL test", "running total SQL", "cohort retention SQL query"],
     content: `
@@ -339,6 +349,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Career Research Team",
     date: "August 28, 2026",
+    dateModified: "September 7, 2026",
     readTime: "8 min read",
     keywords: ["what is an ATS resume", "ATS resume meaning", "applicant tracking system resume", "ATS compatible resume", "how ATS works"],
     content: `
@@ -367,6 +378,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Career Advisory",
     date: "August 26, 2026",
+    dateModified: "September 7, 2026",
     readTime: "6 min read",
     keywords: ["how to check ATS score", "check resume ATS score free", "ATS score calculation", "good ATS resume score", "free resume score check"],
     content: `
@@ -389,6 +401,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Technical Review",
     date: "August 24, 2026",
+    dateModified: "September 7, 2026",
     readTime: "9 min read",
     keywords: ["how to make ATS friendly resume", "ATS friendly resume template", "ATS resume formatting rules", "create ATS resume", "ATS proof resume"],
     content: `
@@ -409,6 +422,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Career Advisory",
     date: "August 22, 2026",
+    dateModified: "September 7, 2026",
     readTime: "7 min read",
     keywords: ["how to improve ATS score", "boost ATS score", "increase resume match rate", "tailor resume for ATS", "ATS keyword optimization"],
     content: `
@@ -428,6 +442,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Recruitment Research",
     date: "August 20, 2026",
+    dateModified: "September 7, 2026",
     readTime: "8 min read",
     keywords: ["ATS resume keywords", "resume keywords for ATS", "hard skills resume keywords", "keyword stuffing ATS", "find resume keywords"],
     content: `
@@ -448,6 +463,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Career Hub",
     date: "August 18, 2026",
+    dateModified: "September 7, 2026",
     readTime: "7 min read",
     keywords: ["ATS resume format", "best ATS format 2026", "chronological ATS resume", "ATS resume layout", "ATS format template"],
     content: `
@@ -467,6 +483,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Recruitment Research",
     date: "August 16, 2026",
+    dateModified: "September 7, 2026",
     readTime: "7 min read",
     keywords: ["why ATS rejects resumes", "resume rejected by ATS", "ATS rejection reasons", "fix ATS resume errors", "pass ATS resume test"],
     content: `
@@ -492,6 +509,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Recruitment Research",
     date: "August 10, 2026",
+    dateModified: "September 7, 2026",
     readTime: "6 min read",
     keywords: ["6 second resume scan", "recruiter eye tracking", "resume heatmap", "recruiter simulation AI", "resume rejection reasons"],
     content: `
@@ -511,6 +529,7 @@ FROM daily_sales_summary;</pre>
     category: "salary",
     author: "Vaylo AI Compensation Analytics",
     date: "August 08, 2026",
+    dateModified: "September 7, 2026",
     readTime: "8 min read",
     keywords: ["tech salary negotiation", "software engineer LPA India", "remote salary benchmarks", "salary counter offer script", "tech pay negotiation"],
     content: `
@@ -530,6 +549,7 @@ FROM daily_sales_summary;</pre>
     category: "ats",
     author: "Vaylo AI Student Career Hub",
     date: "August 05, 2026",
+    dateModified: "September 7, 2026",
     readTime: "7 min read",
     keywords: ["fresher resume template", "no experience resume ATS", "student CS resume", "ATS resume for freshers", "college project resume"],
     content: `

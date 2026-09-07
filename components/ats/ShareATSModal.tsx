@@ -86,12 +86,12 @@ export function ShareATSModal({
     const text = encodeURIComponent(
       `I just checked my resume with VayloAI and got an ATS score of ${score}/100! 🚀\n\nCheck your resume for free:`
     );
-    const url = encodeURIComponent("https://www.vayloai.online/free-ats-checker");
+    const url = encodeURIComponent("https://www.vayloai.online/free-ats-resume-checker");
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
   };
 
   const handleShareLinkedIn = () => {
-    const url = encodeURIComponent(shareUrl || "https://www.vayloai.online/free-ats-checker");
+    const url = encodeURIComponent(shareUrl || "https://www.vayloai.online/free-ats-resume-checker");
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, "_blank");
   };
 

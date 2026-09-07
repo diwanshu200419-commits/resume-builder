@@ -56,20 +56,11 @@ export const metadata: Metadata = {
     siteName: "VayloAI",
     title: "VayloAI — AI Career Copilot for Resume, Jobs & Interviews",
     description: "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "VayloAI Dashboard — AI Resume Builder and ATS Scanner",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "VayloAI — AI Career Copilot for Resume, Jobs & Interviews",
     description: "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
-    images: ["/og-image.png"],
     creator: "@vayloai",
   },
   icons: {

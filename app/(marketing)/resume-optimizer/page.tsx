@@ -8,7 +8,7 @@ import { Sparkles, Sliders, CheckCircle2, ArrowRight, Layers, FileText } from "l
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters | Vaylo AI",
+  title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters",
   description:
     "Optimize your resume for any job description in seconds. Boost your ATS match score, rewrite bullet points, and land more technical interviews with Vaylo AI.",
   keywords: [
@@ -22,23 +22,40 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}/resume-optimizer`,
   },
   openGraph: {
-    title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters | Vaylo AI",
+    title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters",
     description: "Optimize your resume for any job description in seconds with Vaylo AI.",
     url: `${APP_URL}/resume-optimizer`,
     siteName: "Vaylo AI",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Vaylo AI Resume Optimizer" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters | Vaylo AI",
+    title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters",
     description: "Optimize your resume for any job description in seconds with Vaylo AI.",
-    images: ["/og-image.png"],
   },
 };
 
 export default function ResumeOptimizerPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "VayloAI Resume Optimizer",
+    "operatingSystem": "Web",
+    "applicationCategory": "BusinessApplication",
+    "description":
+      "Optimize your resume for any job description in seconds. Boost your ATS match score, rewrite bullet points, and land more technical interviews with Vaylo AI.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    }
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <FreeATSCalculatorClient />
       <section className="bg-surface/40 border-t border-border py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto space-y-8 text-center">

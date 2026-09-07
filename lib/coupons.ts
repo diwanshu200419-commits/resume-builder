@@ -34,20 +34,6 @@ export const AUTHORIZED_COUPONS: Record<string, Coupon> = {
     discountValue: 10,
     description: "10% OFF Welcome Discount",
   },
-
-  // Secret Owner / Testing Full Access Pass (100% OFF)
-  ADMIN100: {
-    code: "ADMIN100",
-    discountType: "percent",
-    discountValue: 100,
-    description: "Owner Full Access Pass",
-  },
-  VAYLOVIP: {
-    code: "VAYLOVIP",
-    discountType: "percent",
-    discountValue: 100,
-    description: "VIP Candidate Access Pass",
-  },
 };
 
 export function calculateDiscount(originalPrice: number, coupon: Coupon): {

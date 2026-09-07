@@ -24,28 +24,19 @@ export async function generateMetadata({ params }: SharePageProps): Promise<Meta
     description,
     robots: {
       index: false, // noindex share cards so search engines don't index low-quality pages
-      follow: true, // follow link juice to /free-ats-checker
+      follow: true, // follow link juice to /free-ats-resume-checker
     },
     openGraph: {
       title,
       description,
       url: `${APP_URL}/share/ats/${publicId}`,
       siteName: "VayloAI",
-      images: [
-        {
-          url: `${APP_URL}/og-image.png`,
-          width: 1200,
-          height: 630,
-          alt: `VayloAI ATS Resume Match Score: ${score}/100`,
-        },
-      ],
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [`${APP_URL}/og-image.png`],
     },
   };
 }
@@ -65,7 +56,7 @@ export default async function SharedATSResultPage({ params }: SharePageProps) {
           <p className="text-xs text-slate-400 leading-relaxed">
             This share link does not exist or the owner has stopped public sharing.
           </p>
-          <Link href="/free-ats-checker">
+          <Link href="/free-ats-resume-checker">
             <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl">
               Check Your Own Resume Free →
             </Button>
@@ -147,7 +138,7 @@ export default async function SharedATSResultPage({ params }: SharePageProps) {
 
             {/* Call To Action */}
             <div className="pt-2">
-              <Link href="/free-ats-checker" className="block w-full">
+              <Link href="/free-ats-resume-checker" className="block w-full">
                 <Button className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-lg gap-2">
                   Check Your Resume For Free on VayloAI
                   <ArrowRight className="w-4 h-4" />

@@ -93,6 +93,29 @@ export async function POST(request: NextRequest) {
         reviewed_at: new Date().toISOString(),
       });
 
+      // Record in canonical payment_requests table for billing history & admin metrics
+      try {
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("id", userId)
+          .maybeSingle();
+
+        await supabase.from("payment_requests").upsert({
+          user_id: userId,
+          user_email: userProfile?.email || notes.email || "customer@vaylo.ai",
+          customer_name: userProfile?.full_name || notes.name || "Customer",
+          requested_plan: plan,
+          amount_claimed: amount,
+          utr_number: paymentId,
+          status: "approved",
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: "RAZORPAY_AUTO_WEBHOOK",
+        });
+      } catch (prErr) {
+        console.warn("[Razorpay Webhook] payment_requests sync warning:", prErr);
+      }
+
       // Grant Server-Side Database Entitlement
       await upgradeUserPlan(userId, plan, "manual_upi", paymentId);
 

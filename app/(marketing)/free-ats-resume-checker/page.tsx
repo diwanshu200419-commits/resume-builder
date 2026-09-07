@@ -9,7 +9,7 @@ import { CheckCircle2, AlertTriangle, Sparkles, FileText, Zap, ShieldCheck, Arro
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Free ATS Resume Checker – Check Your Resume Score | Vaylo AI",
+  title: "Free ATS Resume Checker – Check Your Resume Score",
   description:
     "Check your resume's ATS score for free. Identify missing keywords, formatting traps, and keyword match percentage against Greenhouse, Workday & Lever before applying.",
   keywords: [
@@ -27,27 +27,18 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}/free-ats-resume-checker`,
   },
   openGraph: {
-    title: "Free ATS Resume Checker – Check Your Resume Score | Vaylo AI",
+    title: "Free ATS Resume Checker – Check Your Resume Score",
     description:
       "Check your resume's ATS score, identify missing keywords and formatting issues, and improve your resume before applying.",
     url: `${APP_URL}/free-ats-resume-checker`,
     siteName: "Vaylo AI",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Vaylo AI Free ATS Resume Checker",
-      },
-    ],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free ATS Resume Checker – Check Your Resume Score | Vaylo AI",
+    title: "Free ATS Resume Checker – Check Your Resume Score",
     description: "Check your resume's ATS score, identify missing keywords and formatting issues, and improve your resume before applying.",
-    images: ["/og-image.png"],
   },
 };
 

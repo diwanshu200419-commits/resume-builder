@@ -94,6 +94,18 @@ export async function POST(request: NextRequest) {
           .eq("status", "pending");
       }
 
+      // Also mirror to payments table for complete consistency
+      try {
+        await supabase
+          .from("payments")
+          .update({
+            status: "completed",
+            reviewed_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId)
+          .eq("status", "pending");
+      } catch {}
+
       // Step 3: Dispatch In-App Notification & Audit Log Entry
       await createNotification({
         userId,
@@ -146,6 +158,18 @@ export async function POST(request: NextRequest) {
           .eq("user_id", userId)
           .eq("status", "pending");
       }
+
+      // Also mirror rejection to payments table
+      try {
+        await supabase
+          .from("payments")
+          .update({
+            status: "failed",
+            reviewed_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId)
+          .eq("status", "pending");
+      } catch {}
 
       // Dispatch In-App Notification for rejection
       await createNotification({

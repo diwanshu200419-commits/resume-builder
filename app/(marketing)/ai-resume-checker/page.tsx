@@ -8,7 +8,7 @@ import { Sparkles, Bot, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "AI Resume Checker — Instant AI Resume Scanner & Fixer | Vaylo AI",
+  title: "AI Resume Checker — Instant AI Resume Scanner & Fixer",
   description:
     "Audit and fix your resume with Vaylo AI's intelligent resume checker. Detect missing keywords, weak bullets, and ATS formatting risks powered by Gemini AI.",
   keywords: [
@@ -22,23 +22,40 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}/ai-resume-checker`,
   },
   openGraph: {
-    title: "AI Resume Checker — Instant AI Resume Scanner & Fixer | Vaylo AI",
+    title: "AI Resume Checker — Instant AI Resume Scanner & Fixer",
     description: "Audit and fix your resume with Vaylo AI's intelligent resume checker.",
     url: `${APP_URL}/ai-resume-checker`,
     siteName: "Vaylo AI",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Vaylo AI AI Resume Checker" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Resume Checker — Instant AI Resume Scanner & Fixer | Vaylo AI",
+    title: "AI Resume Checker — Instant AI Resume Scanner & Fixer",
     description: "Audit and fix your resume with Vaylo AI's intelligent resume checker.",
-    images: ["/og-image.png"],
   },
 };
 
 export default function AIResumeCheckerPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "VayloAI AI Resume Checker",
+    "operatingSystem": "Web",
+    "applicationCategory": "BusinessApplication",
+    "description":
+      "Audit and fix your resume with Vaylo AI's intelligent resume checker. Detect missing keywords, weak bullets, and ATS formatting risks powered by Gemini AI.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    }
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <FreeATSCalculatorClient />
       <section className="bg-surface/40 border-t border-border py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto space-y-8 text-center">

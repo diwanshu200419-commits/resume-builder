@@ -11,7 +11,7 @@ You are Vaylo AI's Master AI Career Copilot for Vaylo AI (https://www.vayloai.on
 You have expert knowledge across all Vaylo AI features and pricing plans:
 
 1. Official Website: https://www.vayloai.online
-2. Free ATS Optimizer & Scanner (/free-ats-checker & /analyze): Instant 0-100% score breakdown, missing keyword alerts, format validation, and 1-Click Auto-Fix bullet rewriters for Greenhouse, Workday & Lever filters.
+2. Free ATS Optimizer & Scanner (/free-ats-resume-checker & /analyze): Instant 0-100% score breakdown, missing keyword alerts, format validation, and 1-Click Auto-Fix bullet rewriters for Greenhouse, Workday & Lever filters.
 3. Interactive Resume Builder (/builder): Real-time live sheet preview with 4 recruiter-approved templates, section-by-section AI guidance, and PDF/DOCX downloads.
 4. STAR Voice Interview Coach (/interview-prep): Realtime speech-to-text practice sandbox with 1-10 STAR scoring, vocal filler word detection, and FAANG question bank.
 5. AI Recruiter 10-Second Eye Screen (/recruiter-simulation): Heatmap eye-tracking simulation showing visual focal points and why recruiters shortlist or reject.
@@ -116,8 +116,8 @@ export async function POST(request: NextRequest) {
       latencyMs: Date.now() - startTime,
     });
     return NextResponse.json({
-      reply: "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded' and optimize keywords at /free-ats-checker!",
-      advice: "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded' and optimize keywords at /free-ats-checker!"
+      reply: "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded' and optimize keywords at /free-ats-resume-checker!",
+      advice: "To boost your ATS score above 85%, use high-impact action verbs like 'Architected' or 'Spearheaded' and optimize keywords at /free-ats-resume-checker!"
     });
   }
   }); // end withRateLimit
@@ -127,7 +127,7 @@ function getTrainedFallbackAnswer(msg: string): string {
   const m = msg.toLowerCase();
 
   if (m.includes("domain") || m.includes("website") || m.includes("url") || m.includes("link") || m.includes("vayloai")) {
-    return "Vaylo AI's official custom domain is https://www.vayloai.online! You can access the free ATS resume scanner at /free-ats-checker or explore our plans at /pricing!";
+    return "Vaylo AI's official custom domain is https://www.vayloai.online! You can access the free ATS resume scanner at /free-ats-resume-checker or explore our plans at /pricing!";
   }
   if (m.includes("blog") || m.includes("guide") || m.includes("article") || m.includes("learn")) {
     return "Explore expert career intelligence guides, ATS formatting tips, STAR interview scripts, and salary negotiation secrets on our blog at /blog!";
@@ -154,7 +154,7 @@ function getTrainedFallbackAnswer(msg: string): string {
     return "Generate personalized LinkedIn referral requests and recruiter InMails on /networking that get 4x higher response rates!";
   }
   if (m.includes("ats") || m.includes("score") || m.includes("resume") || m.includes("fix") || m.includes("optimize")) {
-    return "To boost your ATS score above 85%, test your resume at /free-ats-checker and use our 1-Click 'Auto-Fix All ATS Errors' button to inject missing keywords and upgrade action verbs!";
+    return "To boost your ATS score above 85%, test your resume at /free-ats-resume-checker and use our 1-Click 'Auto-Fix All ATS Errors' button to inject missing keywords and upgrade action verbs!";
   }
   if (m.includes("price") || m.includes("plan") || m.includes("cost") || m.includes("free") || m.includes("pro") || m.includes("premium") || m.includes("upi")) {
     return "Vaylo AI offers 4 plans: Free (₹0 for 2 scans/mo), Pro (₹99/mo for 50 auto-fixes & unwatermarked downloads), Premium (₹299/mo for STAR Voice Interviews & AI Portfolio Builder), and Career Pack (₹499 lifetime access)! UPI ID: jattshiv32@okaxis.";
@@ -169,5 +169,5 @@ function getTrainedFallbackAnswer(msg: string): string {
     return "Translate your resume into German, French, Spanish, Japanese, Hindi, or English on /translate for international job applications!";
   }
 
-  return "I am Vaylo AI, your AI Career Copilot for https://www.vayloai.online! I can help you optimize your resume for ATS filters (/free-ats-checker), build resumes (/builder), create portfolios (/portfolio), calculate hiring odds (/hiring-probability), and practice STAR voice interviews (/interview-prep)! How can I help you today?";
+  return "I am Vaylo AI, your AI Career Copilot for https://www.vayloai.online! I can help you optimize your resume for ATS filters (/free-ats-resume-checker), build resumes (/builder), create portfolios (/portfolio), calculate hiring odds (/hiring-probability), and practice STAR voice interviews (/interview-prep)! How can I help you today?";
 }

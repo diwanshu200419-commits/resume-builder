@@ -26,32 +26,23 @@ export async function generateMetadata({ params }: RolePageProps): Promise<Metad
   const pageUrl = `${APP_URL}/resume/${data.slug}`;
 
   return {
-    title: `${data.title} | VayloAI`,
+    title: data.title,
     description: data.metaDescription,
     keywords: data.keywords,
     alternates: {
       canonical: pageUrl,
     },
     openGraph: {
-      title: `${data.title} | VayloAI`,
+      title: data.title,
       description: data.metaDescription,
       url: pageUrl,
       siteName: "VayloAI",
-      images: [
-        {
-          url: `${APP_URL}/og-image.png`,
-          width: 1200,
-          height: 630,
-          alt: `VayloAI ${data.targetRole} Resume ATS Guide`,
-        },
-      ],
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${data.title} | VayloAI`,
+      title: data.title,
       description: data.metaDescription,
-      images: [`${APP_URL}/og-image.png`],
     },
   };
 }
@@ -133,7 +124,7 @@ export default function RoleResumeGuidePage({ params }: RolePageProps) {
                   Scan your resume against Greenhouse, Workday &amp; Lever ATS filters in 10 seconds.
                 </p>
               </div>
-              <Link href="/free-ats-checker" className="shrink-0 w-full sm:w-auto">
+              <Link href="/free-ats-resume-checker" className="shrink-0 w-full sm:w-auto">
                 <Button className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs h-11 px-6 rounded-xl shadow-lg gap-2">
                   Check Your Resume Free <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -293,7 +284,7 @@ export default function RoleResumeGuidePage({ params }: RolePageProps) {
               Get your instant 100-Point ATS score breakdown, missing keyword alerts, and 1-click AI bullet fixes.
             </p>
             <div className="pt-2">
-              <Link href="/free-ats-checker">
+              <Link href="/free-ats-resume-checker">
                 <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs h-12 px-8 rounded-xl shadow-xl gap-2">
                   Check Your Resume For Free <ChevronRight className="w-4 h-4" />
                 </Button>

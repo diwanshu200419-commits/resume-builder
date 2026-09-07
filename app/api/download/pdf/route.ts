@@ -40,23 +40,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!analysis) {
-      analysis = {
-        job_title: jobTitle || "Software Engineer",
-        optimized_resume_text: `diwanshu sharma
-Software Engineer & AI Specialist
-diwanshu2004199@gmail.com | github.com/diwanshu200419-commits
-
-SUMMARY
-Results-driven AI/ML Engineer with experience architecting high-throughput LLM pipelines and modern web applications.
-
-EXPERIENCE
-Lead AI Engineer — Tech Corp (2022 - Present)
-• Architected RAG retrieval microservices reducing search latency by 45%.
-• Spearheaded full-stack Next.js and Supabase integration.
-
-EDUCATION & SKILLS
-B.Tech Computer Science | Skills: TypeScript, React, Next.js, Python, Supabase, PostgreSQL`,
-      };
+      return NextResponse.json(
+        { error: "Resume analysis not found. Please run an ATS scan first." },
+        { status: 404 }
+      );
     }
 
     const title = jobTitle || analysis.job_title || "Resume";

@@ -1,9 +1,25 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Mail, ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
 
-export const metadata = {
-  title: "Refund & Cancellation Policy — Vaylo AI",
+const APP_URL = "https://www.vayloai.online";
+
+export const metadata: Metadata = {
+  title: "Refund & Cancellation Policy",
   description: "Transparent refund and cancellation policy for Vaylo AI subscriptions and career tools.",
+  alternates: { canonical: `${APP_URL}/refund` },
+  openGraph: {
+    title: "Refund & Cancellation Policy",
+    description: "Transparent refund and cancellation policy for Vaylo AI subscriptions and career tools.",
+    url: `${APP_URL}/refund`,
+    siteName: "VayloAI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Refund & Cancellation Policy",
+    description: "Transparent refund and cancellation policy for Vaylo AI subscriptions and career tools.",
+  },
 };
 
 export default function RefundPage() {

@@ -61,10 +61,10 @@ export async function sendSmsOtp(phone: string, otpCode: string): Promise<{ succ
     }
   }
 
-  // 3. Fallback: Log SMS dispatch and return live verification code
+  // 3. Fallback: Log SMS dispatch internally
   console.log(`[SMS DISPATCH] To: ${formattedPhone} | Message: ${smsBody}`);
   return {
     success: true,
-    message: `🔑 Real OTP generated & sent to ${formattedPhone}. Your verification code is: ${otpCode}`,
+    message: `Verification code dispatched to ${formattedPhone}.`,
   };
 }

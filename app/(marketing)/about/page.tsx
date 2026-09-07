@@ -1,5 +1,26 @@
+import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Target, Compass, Heart } from "lucide-react";
+
+const APP_URL = "https://www.vayloai.online";
+
+export const metadata: Metadata = {
+  title: "About VayloAI — Our Mission & Story",
+  description: "Learn about VayloAI's mission to democratize career growth through AI. We help job seekers build ATS-optimized resumes, prepare for interviews, and accelerate their career.",
+  alternates: { canonical: `${APP_URL}/about` },
+  openGraph: {
+    title: "About VayloAI — Our Mission & Story",
+    description: "Learn about VayloAI's mission to democratize career growth through AI.",
+    url: `${APP_URL}/about`,
+    siteName: "VayloAI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About VayloAI — Our Mission & Story",
+    description: "Learn about VayloAI's mission to democratize career growth through AI.",
+  },
+};
 
 export default function AboutPage() {
   return (

@@ -8,7 +8,7 @@ import { CheckCircle2, Sparkles, ShieldCheck, ArrowRight, Zap, Target } from "lu
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "ATS Resume Checker — Free Online Resume Scanner | Vaylo AI",
+  title: "ATS Resume Checker — Free Online Resume Scanner",
   description:
     "Scan your resume with Vaylo AI's ATS resume checker. Instantly discover missing keywords, score breakdown, and format compatibility for Greenhouse, Workday & Lever.",
   keywords: [
@@ -22,23 +22,40 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}/ats-resume-checker`,
   },
   openGraph: {
-    title: "ATS Resume Checker — Free Online Resume Scanner | Vaylo AI",
+    title: "ATS Resume Checker — Free Online Resume Scanner",
     description: "Scan your resume against top ATS algorithms. Get instant score and feedback.",
     url: `${APP_URL}/ats-resume-checker`,
     siteName: "Vaylo AI",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Vaylo AI ATS Resume Checker" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ATS Resume Checker — Free Online Resume Scanner | Vaylo AI",
+    title: "ATS Resume Checker — Free Online Resume Scanner",
     description: "Scan your resume against top ATS algorithms. Get instant score and feedback.",
-    images: ["/og-image.png"],
   },
 };
 
 export default function ATSResumeCheckerPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "VayloAI ATS Resume Checker",
+    "operatingSystem": "Web",
+    "applicationCategory": "BusinessApplication",
+    "description":
+      "Scan your resume with Vaylo AI's ATS resume checker. Instantly discover missing keywords, score breakdown, and format compatibility for Greenhouse, Workday & Lever.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    }
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <FreeATSCalculatorClient />
       <section className="bg-surface/40 border-t border-border py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto space-y-8 text-center">

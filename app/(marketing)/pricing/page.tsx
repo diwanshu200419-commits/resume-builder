@@ -23,14 +23,6 @@ export const metadata: Metadata = {
       "Simple, transparent pricing. Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime). Start building your career today.",
     url: `${APP_URL}/pricing`,
     siteName: "Vaylo AI",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Vaylo AI Pricing Plans",
-      },
-    ],
     locale: "en_US",
     type: "website",
   },
@@ -38,7 +30,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Vaylo AI Pricing — Free, Pro ₹99, Premium ₹299",
     description: "Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime).",
-    images: ["/og-image.png"],
   },
 };
 

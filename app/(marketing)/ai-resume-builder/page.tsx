@@ -10,7 +10,7 @@ import { Sparkles, ArrowRight, CheckCircle2, ShieldCheck, Zap, FileText, Layers,
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "AI Resume Builder — Create ATS-Friendly Resumes Fast | Vaylo AI",
+  title: "AI Resume Builder — Create ATS-Friendly Resumes Fast",
   description:
     "Build a professional, ATS-friendly resume in minutes with Vaylo AI Resume Builder. Choose from recruiter-tested templates, generate high-impact bullets, and export clean PDFs.",
   keywords: [
@@ -24,17 +24,15 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}/ai-resume-builder`,
   },
   openGraph: {
-    title: "AI Resume Builder — Create ATS-Friendly Resumes Fast | Vaylo AI",
+    title: "AI Resume Builder — Create ATS-Friendly Resumes Fast",
     description: "Build a professional, ATS-friendly resume in minutes with Vaylo AI.",
     url: `${APP_URL}/ai-resume-builder`,
     siteName: "Vaylo AI",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Vaylo AI AI Resume Builder" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Resume Builder — Create ATS-Friendly Resumes Fast | Vaylo AI",
+    title: "AI Resume Builder — Create ATS-Friendly Resumes Fast",
     description: "Build a professional, ATS-friendly resume in minutes with Vaylo AI.",
-    images: ["/og-image.png"],
   },
 };
 

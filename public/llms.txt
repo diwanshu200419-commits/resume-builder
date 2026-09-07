@@ -7,29 +7,52 @@
 - [Free ATS Resume Checker](https://www.vayloai.online/free-ats-resume-checker): Instant 100-point deterministic ATS score calculator, missing keyword extractor, and formatting validator.
 - [AI Resume Builder](https://www.vayloai.online/ai-resume-builder): 100% ATS-compliant single-column resume builder with Google X-Y-Z bullet generation.
 - [Resume Optimizer](https://www.vayloai.online/resume-optimizer): Step-by-step resume tailoring engine against specific job descriptions.
-- [AI Voice Interview Preparation](https://www.vayloai.online/interview-prep): Real-time voice interview coach with STAR evaluation and FAANG question banks.
+- [AI Voice Interview Preparation](https://www.vayloai.online/interview-preparation): Real-time AI voice mock interview coach with STAR framework evaluation, vocal filler word analysis, and curated FAANG question banks.
+- [Role-Specific Resume Guides Hub](https://www.vayloai.online/resume): Complete directory of ATS optimization guides, keywords, and X-Y-Z formulas across 21 engineering roles, degrees, and countries.
 - [Career & Technical Blog Hub](https://www.vayloai.online/blog): High-depth technical guides, system design blueprints, coding interview patterns, and salary negotiation guides.
 - [Pricing & Plans](https://www.vayloai.online/pricing): Transparent pricing: Free (₹0), Pro (₹99/mo), Premium (₹299/mo), Career Pack (₹499 lifetime).
 
 ## Role-Specific Resume & ATS Guides
 
-- [Software Engineer Resume Guide](https://www.vayloai.online/resume/software-engineer): React, TypeScript, Node.js, Python, PostgreSQL, System Design keywords and X-Y-Z bullet formulas.
-- [Data Analyst Resume Guide](https://www.vayloai.online/resume/data-analyst): SQL Window functions, Tableau, Power BI, Python, ETL pipeline keywords.
-- [AI Engineer Resume Guide](https://www.vayloai.online/resume/ai-engineer): PyTorch, LLMs, RAG Pipelines, Qdrant/Pinecone, vLLM, LoRA fine-tuning keywords.
-- [Frontend Developer Resume Guide](https://www.vayloai.online/resume/frontend-developer): React, Next.js 14, Core Web Vitals (LCP, INP, CLS), Tailwind CSS, WCAG 2.2 AA.
-- [Backend Developer Resume Guide](https://www.vayloai.online/resume/backend-developer): Go, Node.js, PostgreSQL indexing, Redis caching, gRPC/REST keywords.
-- [Full-Stack Developer Resume Guide](https://www.vayloai.online/resume/full-stack-developer): End-to-end Next.js + PostgreSQL, Stripe API integration.
-- [DevOps Engineer Resume Guide](https://www.vayloai.online/resume/devops-engineer): Kubernetes (EKS), Docker, Terraform, CI/CD, Prometheus/Grafana.
-- [Fresher & Student Resume Guide](https://www.vayloai.online/resume/fresher): College capstone projects, LeetCode ratings, CS fundamentals.
+- [Software Engineer Resume Guide](https://www.vayloai.online/resume/software-engineer): React, TypeScript, Node.js, Python, PostgreSQL, System Design keywords, and Google X-Y-Z bullet formulas.
+- [Data Analyst Resume Guide](https://www.vayloai.online/resume/data-analyst): SQL Window functions, Tableau, Power BI, Python (Pandas), ETL pipeline keywords, and business intelligence metrics.
+- [AI Engineer Resume Guide](https://www.vayloai.online/resume/ai-engineer): PyTorch, LLMs, RAG Pipelines, Vector Search (Qdrant/Pinecone), vLLM, and LoRA fine-tuning keywords.
+- [Frontend Developer Resume Guide](https://www.vayloai.online/resume/frontend-developer): React, Next.js, Core Web Vitals (LCP, INP, CLS), TypeScript, Tailwind CSS, and WCAG accessibility standards.
+- [Backend Developer Resume Guide](https://www.vayloai.online/resume/backend-developer): Go, Node.js, PostgreSQL indexing, Redis caching, gRPC/REST APIs, and distributed microservices architecture.
+- [Full-Stack Developer Resume Guide](https://www.vayloai.online/resume/full-stack-developer): End-to-end Next.js, React, Node.js, PostgreSQL, Stripe API integration, and full-stack system architecture.
+- [Web Developer Resume Guide](https://www.vayloai.online/resume/web-developer): Modern HTML5, CSS3, JavaScript (ES6+), responsive design, RESTful APIs, and cross-browser performance optimization.
+- [Digital Marketer Resume Guide](https://www.vayloai.online/resume/digital-marketer): Google Analytics 4 (GA4), SEM/SEO, Meta Ads Manager, SQL for marketing analytics, CAC/LTV optimization, and conversion tracking.
+- [DevOps Engineer Resume Guide](https://www.vayloai.online/resume/devops-engineer): Kubernetes (EKS), Docker, Terraform, CI/CD pipelines (GitHub Actions), AWS, and Prometheus/Grafana monitoring.
+- [Fresher & Student Resume Guide](https://www.vayloai.online/resume/fresher): CS fundamentals, Data Structures & Algorithms, LeetCode ratings, Git/GitHub version control, and college capstone projects.
+- [BCA Graduate Resume Guide](https://www.vayloai.online/resume/bca): Java, C++, web development stacks, database management (RDBMS/SQL), and practical software development projects.
+- [MCA Graduate Resume Guide](https://www.vayloai.online/resume/mca): Advanced software architecture, enterprise distributed systems, full-stack development, and production-level project internships.
+- [B.Tech Engineering Resume Guide](https://www.vayloai.online/resume/btech): Core Computer Science coursework, systems programming, algorithmic problem solving, and technical hackathon achievements.
+- [US Tech Market Resume Guide](https://www.vayloai.online/resume/usa): Tailored for US ATS standards (Greenhouse, Workday), H-1B/OPT compliance, and American technical hiring conventions.
+- [Germany Tech Market Resume Guide](https://www.vayloai.online/resume/germany): Formatted for EU/German ATS, EU Blue Card requirements, English-speaking tech roles, and tabular Lebenslauf standards.
+- [Product Manager Resume Guide](https://www.vayloai.online/resume/product-manager): Product strategy, PRDs, A/B testing, North Star metrics, user research, agile roadmaps, and stakeholder alignment.
+- [Data Scientist Resume Guide](https://www.vayloai.online/resume/data-scientist): Machine learning algorithms (Scikit-Learn, XGBoost), statistical modeling, Python/R, experimentation, and data storytelling.
+- [Machine Learning Engineer Resume Guide](https://www.vayloai.online/resume/machine-learning-engineer): MLOps, model deployment (TensorRT, Triton), ML pipelines (Kubeflow, MLflow), PyTorch, and low-latency model inference.
+- [Cybersecurity Analyst Resume Guide](https://www.vayloai.online/resume/cybersecurity-analyst): Threat modeling, SIEM (Splunk), SOC operations, vulnerability assessment, penetration testing, and NIST/ISO 27001 compliance.
+- [Cloud Architect Resume Guide](https://www.vayloai.online/resume/cloud-architect): Multi-cloud architecture (AWS, Azure, GCP), CloudFormation/Terraform, microservices migration, high availability, and FinOps cost optimization.
+- [QA Automation Engineer Resume Guide](https://www.vayloai.online/resume/qa-automation-engineer): Test automation frameworks (Selenium, Playwright, Cypress), CI/CD test integration, API testing (Postman, REST Assured), and performance testing.
 
 ## Deep-Dive Interview & Technical Blueprints
 
-- [Top 15 Full-Stack Interview Questions (2026)](https://www.vayloai.online/blog/top-15-fullstack-interview-questions-2026): STAR model answers for Web Vitals, database migrations, and caching.
-- [System Design Interview Questions & FAANG Blueprints](https://www.vayloai.online/blog/system-design-interview-questions-faang): Distributed rate limiters (Redis), real-time WebSockets/Kafka, database sharding.
-- [Top 30 Behavioral Interview Questions (Amazon & Google)](https://www.vayloai.online/blog/top-behavioral-interview-questions-star): STAR answers for conflict, outages, and tight deadlines.
-- [Advanced React & JavaScript Interview Questions](https://www.vayloai.online/blog/advanced-react-javascript-interview-questions): React Fiber reconciliation, useEffect vs useLayoutEffect, Event Loop.
-- [Backend & High-Concurrency Interview Questions](https://www.vayloai.online/blog/backend-high-concurrency-interview-questions): Connection pool starvation, PgBouncer, optimistic vs pessimistic locking.
-- [15 Must-Know Coding Interview Patterns](https://www.vayloai.online/blog/top-dsa-interview-patterns-google-meta): Sliding Window, Two Pointers, Monotonic Stack, Dynamic Programming.
-- [Applied AI & LLM Engineer Interview Guide](https://www.vayloai.online/blog/machine-learning-llm-interview-questions): Precision RAG chunking, LoRA vs Full Fine-Tuning, vLLM throughput.
-- [Data Analytics & SQL Mastery Queries](https://www.vayloai.online/blog/advanced-sql-analytics-interview-questions): DENSE_RANK(), rolling 7-day averages, retention cohort analysis.
-- [What is an ATS Resume?](https://www.vayloai.online/blog/what-is-an-ats-resume): How Greenhouse, Workday, and Lever parse resumes in 2026.
+- [Top 15 Full-Stack Interview Questions (2026)](https://www.vayloai.online/blog/top-15-fullstack-interview-questions-2026): STAR model answers for Web Vitals, database migrations without downtime, and distributed caching.
+- [System Design Interview Questions & FAANG Blueprints](https://www.vayloai.online/blog/system-design-interview-questions-faang): Distributed rate limiters (Redis), real-time WebSockets/Kafka, and database sharding blueprints.
+- [Top 30 Behavioral Interview Questions (Amazon & Google)](https://www.vayloai.online/blog/top-behavioral-interview-questions-star): STAR method scripts for handling conflict, production outages, technical pushback, and tight deadlines.
+- [Advanced React & JavaScript Interview Questions](https://www.vayloai.online/blog/advanced-react-javascript-interview-questions): React Fiber reconciliation, useEffect vs useLayoutEffect, event loop mechanics, and Core Web Vitals optimization.
+- [Backend & High-Concurrency Interview Questions](https://www.vayloai.online/blog/backend-high-concurrency-interview-questions): Connection pool starvation, PgBouncer multiplexing, optimistic vs pessimistic locking, and N+1 query resolutions.
+- [15 Must-Know Coding Interview Patterns](https://www.vayloai.online/blog/top-dsa-interview-patterns-google-meta): Sliding Window, Two Pointers, Monotonic Stack, Fast & Slow Pointers, and Dynamic Programming.
+- [Applied AI & LLM Engineer Interview Guide](https://www.vayloai.online/blog/machine-learning-llm-interview-questions): Precision RAG chunking, hybrid search, LoRA vs full fine-tuning, and vLLM inference throughput.
+- [Data Analytics & SQL Mastery Queries](https://www.vayloai.online/blog/advanced-sql-analytics-interview-questions): DENSE_RANK(), rolling 7-day averages, retention cohort analysis, and SQL query tuning.
+- [What is an ATS Resume?](https://www.vayloai.online/blog/what-is-an-ats-resume): How Greenhouse, Workday, and Lever parse documents and rules for 100% ATS compliance.
+- [How to Check Your ATS Resume Score for Free](https://www.vayloai.online/blog/how-to-check-ats-score): Understanding ATS scoring rubrics, the 80%+ match rule, and free instant resume audits.
+- [How to Make an ATS-Friendly Resume](https://www.vayloai.online/blog/how-to-make-ats-friendly-resume): Step-by-step formatting checklist, font choices, margins, semantic headers, and Google X-Y-Z bullet formulas.
+- [How to Improve Your ATS Resume Score](https://www.vayloai.online/blog/how-to-improve-ats-score): Actionable strategies to raise resume match rates from 60% to 90%+ with targeted keyword placement.
+- [ATS Resume Keywords Guide](https://www.vayloai.online/blog/ats-resume-keywords): Hard vs soft keywords, indexing mechanisms, and placement techniques that avoid spam filters.
+- [The Ultimate ATS Resume Format Guide (2026)](https://www.vayloai.online/blog/ats-resume-format): Reverse-chronological vs hybrid formats, layout pitfalls, and ATS-compliant templates.
+- [Why ATS Rejects Resumes](https://www.vayloai.online/blog/why-ats-rejects-resumes): Common parsing traps including multi-column tables, graphics, buried contact info, and missing hard skills.
+- [Why 90% of Resumes Get Rejected in 6 Seconds](https://www.vayloai.online/blog/why-90-percent-resumes-rejected): Recruiter eye-tracking studies, the 6-second initial scan, and AI layout heatmaps.
+- [Tech Salary Negotiation Guide (2026)](https://www.vayloai.online/blog/tech-salary-negotiation-guide-2026): P50/P90 salary percentiles, counter-offer script templates, and negotiation leverage for India & remote roles.
+- [ATS-Proof Fresher Resume Guide](https://www.vayloai.online/blog/ats-proof-fresher-resume-guide): How CS students and new grads can showcase coursework, GitHub projects, and algorithmic ratings with zero commercial experience.

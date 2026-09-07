@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const articleUrl = `${APP_URL}/blog/${post.slug}`;
 
   return {
-    title: `${post.title} | Vaylo AI Blog`,
+    title: post.title,
     description: post.description,
     keywords: post.keywords,
     alternates: {
@@ -37,21 +37,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       siteName: "Vaylo AI",
       type: "article",
       publishedTime: new Date(post.date).toISOString(),
+      modifiedTime: new Date(post.dateModified || post.date).toISOString(),
       authors: [post.author],
-      images: [
-        {
-          url: "/og-image.png",
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: ["/og-image.png"],
     },
   };
 }
@@ -79,6 +71,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         "description": post.description,
         "image": [`${APP_URL}/og-image.png`],
         "datePublished": new Date(post.date).toISOString(),
+        "dateModified": new Date(post.dateModified || post.date).toISOString(),
         "author": {
           "@type": "Organization",
           "name": post.author,
@@ -200,7 +193,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                   <CheckCircle2 className="w-4 h-4" /> Start Free 10-Sec ATS Scan
                 </Button>
               </Link>
-              <Link href="/interview-prep">
+              <Link href="/interview-preparation">
                 <Button variant="outline" className="border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs rounded-xl">
                   Practice Voice Interviews
                 </Button>

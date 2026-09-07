@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/resume-optimizer", priority: 0.9, changeFreq: "daily" },
     { path: "/ai-resume-builder", priority: 0.95, changeFreq: "daily" },
     // /free-ats-checker removed — 308 permanent redirect to /free-ats-resume-checker
+    { path: "/resume", priority: 0.85, changeFreq: "weekly" },
     { path: "/cover-letter-generator", priority: 0.85, changeFreq: "weekly" },
     { path: "/pricing", priority: 0.9, changeFreq: "weekly" },
     { path: "/blog", priority: 0.85, changeFreq: "daily" },
@@ -21,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/privacy", priority: 0.5, changeFreq: "monthly" },
     { path: "/terms", priority: 0.5, changeFreq: "monthly" },
     { path: "/refund", priority: 0.5, changeFreq: "monthly" },
-    { path: "/interview-prep", priority: 0.9, changeFreq: "weekly" },
+    { path: "/interview-preparation", priority: 0.9, changeFreq: "weekly" },
   ];
 
   const blogRoutes = BLOG_POSTS.map((post) => ({

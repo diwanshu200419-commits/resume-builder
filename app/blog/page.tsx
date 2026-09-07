@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Career & Technical Interview Blog — Real Questions, STAR Guides & ATS Secrets | Vaylo AI",
+  title: "Career & Technical Interview Blog — Real Questions, STAR Guides & ATS Secrets",
   description:
     "Master real-world FAANG system design interview questions, Google STAR behavioral answers, advanced React/Node coding rounds, and ATS resume scoring formulas.",
   keywords: [
@@ -27,7 +27,6 @@ export const metadata: Metadata = {
     description: "Master real-world FAANG system design, Google STAR behavioral rounds, and ATS optimization.",
     url: `${APP_URL}/blog`,
     siteName: "Vaylo AI",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Vaylo AI Technical Interview Blog" }],
     locale: "en_US",
     type: "website",
   },
@@ -35,7 +34,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Vaylo AI Technical Interview & Career Blog",
     description: "Master real-world FAANG system design, Google STAR behavioral rounds, and ATS optimization.",
-    images: ["/og-image.png"],
   },
 };
 

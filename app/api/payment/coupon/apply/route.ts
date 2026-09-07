@@ -32,8 +32,15 @@ export async function POST(request: NextRequest) {
     const originalPrice = getPlanAmount(plan as Exclude<Plan, "free">);
     const { discountAmount, finalPrice } = calculateDiscount(originalPrice, coupon);
 
-    // If 100% OFF Full Access Pass (e.g. ADMIN100 or VAYLOVIP)
-    if (finalPrice === 0 || coupon.discountValue === 100) {
+    // Prevent unauthorized 100% plan upgrades via coupon
+    if (finalPrice === 0 || coupon.discountValue >= 100) {
+      if (profile.role !== "admin") {
+        return NextResponse.json(
+          { error: "This promotion code is not eligible for automatic activation." },
+          { status: 403 }
+        );
+      }
+
       await upgradeUserPlan(profile.id, plan, "manual_upi", `COUPON_${cleanCode}`);
 
       await createNotification({
@@ -52,7 +59,7 @@ export async function POST(request: NextRequest) {
         coupon: cleanCode,
         discountAmount,
         finalPrice: 0,
-        message: `Success! Full access pass '${cleanCode}' applied. Your account is upgraded! 🎉`,
+        message: `Admin pass '${cleanCode}' verified. Account upgraded!`,
       });
     }
 

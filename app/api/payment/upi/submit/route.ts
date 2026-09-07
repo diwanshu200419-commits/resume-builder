@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const supabase = await createServiceClient();
+
     const screenshot = formData.get("screenshot");
     let screenshotPath = null;
 
@@ -43,45 +45,76 @@ export async function POST(request: NextRequest) {
       }
       const ext = (screenshot.name.split(".").pop() || "jpg").toLowerCase();
       screenshotPath = `${profile.id}/${Date.now()}_utr.${ext}`;
+
+      try {
+        const arrayBuffer = await screenshot.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const { error: uploadError } = await supabase.storage
+          .from("payment-proofs")
+          .upload(screenshotPath, buffer, {
+            contentType: screenshot.type,
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error("[payment/upi/submit] Storage upload failed:", uploadError.message);
+        }
+      } catch (uploadErr) {
+        console.error("[payment/upi/submit] Storage upload exception:", uploadErr);
+      }
     }
 
     const amountClaimed = plan === "career_pack" ? 499 : plan === "premium" ? 299 : 99;
 
-    const supabase = await createServiceClient();
-
-    // 1. Check for Duplicate UTR
-    const { data: existingPayment } = await supabase
-      .from("payments")
+    // 1. Check for Duplicate UTR in canonical payment_requests table
+    const { data: existingRequest } = await supabase
+      .from("payment_requests")
       .select("id, status")
-      .eq("utr", utr)
-      .single();
+      .eq("utr_number", utr)
+      .maybeSingle();
 
-    if (existingPayment) {
+    if (existingRequest) {
       return NextResponse.json(
         { error: "This UPI UTR reference number has already been submitted or processed." },
         { status: 400 }
       );
     }
 
-    // 2. Store Payment Submission with 'pending' status for Manual Review
-    const { error: dbError } = await supabase.from("payments").insert({
+    // 2. Store Payment Submission in canonical payment_requests table
+    const { error: dbError } = await supabase.from("payment_requests").insert({
       user_id: profile.id,
-      utr,
-      upi_ref: utr,
-      plan,
-      amount: amountClaimed,
-      currency: "INR",
-      status: "pending",
+      user_email: customerEmail,
       customer_name: customerName,
-      customer_email: customerEmail,
       customer_phone: customerPhone,
+      requested_plan: plan,
+      amount_claimed: amountClaimed,
+      utr_number: utr,
       screenshot_url: screenshotPath,
+      status: "pending",
       created_at: new Date().toISOString(),
     });
 
     if (dbError) {
-      console.error("[payment/upi/submit] DB insert error:", dbError.message);
+      console.error("[payment/upi/submit] payment_requests DB insert error:", dbError.message);
     }
+
+    // Backward-compatibility mirror to payments table
+    try {
+      await supabase.from("payments").upsert({
+        user_id: profile.id,
+        utr,
+        upi_ref: utr,
+        plan,
+        amount: amountClaimed,
+        currency: "INR",
+        status: "pending",
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        screenshot_url: screenshotPath,
+        created_at: new Date().toISOString(),
+      });
+    } catch {}
 
     // 3. Dispatch In-App Notification
     await createNotification({

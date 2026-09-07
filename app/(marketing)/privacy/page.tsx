@@ -1,9 +1,25 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Mail, ArrowLeft, Lock, Database, Cpu } from "lucide-react";
 
-export const metadata = {
-  title: "Privacy Policy — Vaylo AI",
+const APP_URL = "https://www.vayloai.online";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
   description: "Privacy policy detailing data collection, AI processing, storage, and protection on Vaylo AI.",
+  alternates: { canonical: `${APP_URL}/privacy` },
+  openGraph: {
+    title: "Privacy Policy",
+    description: "Privacy policy detailing data collection, AI processing, storage, and protection on Vaylo AI.",
+    url: `${APP_URL}/privacy`,
+    siteName: "VayloAI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy",
+    description: "Privacy policy detailing data collection, AI processing, storage, and protection on Vaylo AI.",
+  },
 };
 
 export default function PrivacyPage() {

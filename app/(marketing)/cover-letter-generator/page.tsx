@@ -9,18 +9,22 @@ import { Sparkles, ArrowRight, CheckCircle2, FileText, ShieldCheck } from "lucid
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Free AI Cover Letter Generator | VayloAI",
+  title: "Free AI Cover Letter Generator",
   description: "Generate tailored, professional cover letters in seconds with AI. Match job descriptions, highlight key achievements, and land more interview calls.",
   keywords: ["free AI cover letter generator", "cover letter builder", "tailored cover letter", "AI cover letter maker", "cover letter template"],
   alternates: {
     canonical: `${APP_URL}/cover-letter-generator`,
   },
   openGraph: {
-    title: "Free AI Cover Letter Generator | VayloAI",
+    title: "Free AI Cover Letter Generator",
     description: "Generate tailored, professional cover letters in seconds with AI. Match job descriptions and impress hiring managers.",
     url: `${APP_URL}/cover-letter-generator`,
     siteName: "VayloAI",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "VayloAI Cover Letter Generator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Free AI Cover Letter Generator",
+    description: "Generate tailored, professional cover letters in seconds with AI. Match job descriptions and impress hiring managers.",
   },
 };
 
@@ -85,7 +89,7 @@ export default function PublicCoverLetterPage() {
             <div className="pt-4 border-t border-slate-800 text-center space-y-4">
               <p className="text-xs text-slate-400">Ready to create your tailored cover letter and check your ATS resume score?</p>
               <div className="flex flex-col sm:flex-row justify-center gap-3">
-                <Link href="/free-ats-checker">
+                <Link href="/free-ats-resume-checker">
                   <Button className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs h-11 px-8 rounded-xl gap-2">
                     Check Resume &amp; Cover Letter Free <ArrowRight className="w-4 h-4" />
                   </Button>

@@ -1,9 +1,25 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Mail, ArrowLeft } from "lucide-react";
 
-export const metadata = {
-  title: "Terms & Conditions — Vaylo AI",
+const APP_URL = "https://www.vayloai.online";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
   description: "Terms and conditions governing the use of Vaylo AI career copilot services.",
+  alternates: { canonical: `${APP_URL}/terms` },
+  openGraph: {
+    title: "Terms & Conditions",
+    description: "Terms and conditions governing the use of Vaylo AI career copilot services.",
+    url: `${APP_URL}/terms`,
+    siteName: "VayloAI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms & Conditions",
+    description: "Terms and conditions governing the use of Vaylo AI career copilot services.",
+  },
 };
 
 export default function TermsPage() {
