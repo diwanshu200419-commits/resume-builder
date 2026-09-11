@@ -22,25 +22,24 @@ const APP_URL = "https://www.vayloai.online";
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "VayloAI — AI Career Copilot for Resume, Jobs & Interviews",
+    default: "AI Resume Builder for India | VayloAI — Beat ATS Filters",
     template: "%s | VayloAI",
   },
   description:
-    "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
+    "Get your free ATS score in 30 seconds. AI-powered resume builder built for Indian job seekers — no credit card required. Try VayloAI free.",
   keywords: [
-    "AI resume builder",
-    "ATS resume checker",
-    "AI career coach",
-    "resume optimizer",
-    "interview preparation",
-    "AI resume India",
-    "resume builder for freshers",
-    "ATS scanner free",
+    "AI resume builder India",
+    "free ATS resume checker",
+    "resume builder for freshers India",
+    "ATS score checker",
+    "AI career copilot",
+    "resume builder for Indian job seekers",
+    "ATS resume checker for Naukri & LinkedIn",
     "VayloAI"
   ],
-  authors: [{ name: "Vaylo AI" }],
-  creator: "Vaylo AI",
-  publisher: "Vaylo AI",
+  authors: [{ name: "VayloAI" }],
+  creator: "VayloAI",
+  publisher: "VayloAI",
   formatDetection: {
     email: false,
     address: false,
@@ -54,19 +53,27 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: APP_URL,
     siteName: "VayloAI",
-    title: "VayloAI — AI Career Copilot for Resume, Jobs & Interviews",
-    description: "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
+    title: "AI Resume Builder for India | VayloAI — Beat ATS Filters",
+    description: "Get your free ATS score in 30 seconds. AI-powered resume builder built for Indian job seekers — no credit card required. Try VayloAI free.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "VayloAI — AI Career Copilot for Resume, Jobs & Interviews",
-    description: "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
+    title: "AI Resume Builder for India | VayloAI — Beat ATS Filters",
+    description: "Get your free ATS score in 30 seconds. AI-powered resume builder built for Indian job seekers — no credit card required. Try VayloAI free.",
     creator: "@vayloai",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+    ],
     shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   manifest: "/site.webmanifest",
   robots: {
@@ -92,13 +99,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {
         "@type": "Organization",
         "@id": `${APP_URL}/#organization`,
-        name: "Vaylo AI",
+        name: "VayloAI",
+        alternateName: "Vaylo AI",
         url: APP_URL,
-        logo: `${APP_URL}/logo.png`,
+        logo: `${APP_URL}/icon.png`,
+        description: "AI-powered resume builder, ATS checker, and career copilot for Indian job seekers.",
         sameAs: [
-          "https://twitter.com/vayloai",
-          "https://github.com/diwanshu200419-commits/resume-builder",
-          "https://linkedin.com/company/vayloai"
+          "https://github.com/diwanshu200419-commits/resume-builder"
         ]
       },
       {
@@ -106,15 +113,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         "@id": `${APP_URL}/#website`,
         url: APP_URL,
         name: "VayloAI",
-        description: "AI Career Copilot for Resume, Jobs & Interviews",
+        description: "AI Resume Builder, ATS Checker & Career Copilot for Indian job seekers",
         publisher: { "@id": `${APP_URL}/#organization` }
       },
       {
         "@type": "SoftwareApplication",
-        name: "VayloAI Career Copilot",
-        operatingSystem: "Web",
+        name: "VayloAI",
         applicationCategory: "BusinessApplication",
-        description: "Build better resumes, optimize applications, prepare for interviews, and accelerate your job search with VayloAI.",
+        operatingSystem: "Web",
         offers: [
           { "@type": "Offer", name: "Free", price: "0", priceCurrency: "INR" },
           { "@type": "Offer", name: "Pro", price: "99", priceCurrency: "INR" },

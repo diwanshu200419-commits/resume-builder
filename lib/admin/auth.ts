@@ -40,7 +40,7 @@ export async function requireAdmin(): Promise<
       .map((e) => e.trim().toLowerCase())
       .filter(Boolean);
 
-    const HARDCODED_FOUNDERS = ["jattshiv32@gmail.com", "diwanshu200419@gmail.com", "admin@vaylo.ai"];
+    const HARDCODED_FOUNDERS = ["jattshiv32@gmail.com", "diwanshu200419@gmail.com", "admin@vayloai.online"];
 
     const isFounderEmail = HARDCODED_FOUNDERS.includes(userEmail) || envAdminEmails.includes(userEmail);
     const isAdminRole = userRole === "admin";
@@ -59,7 +59,7 @@ export async function requireAdmin(): Promise<
       error: null,
       admin: {
         userId: profile.id,
-        email: profile.email || "admin@vaylo.ai",
+        email: profile.email || "admin@vayloai.online",
         fullName: profile.full_name,
         role: "admin",
       },

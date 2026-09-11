@@ -117,7 +117,7 @@ const faqs = [
   },
   {
     q: "How does the 1-Click Portfolio Deployment work?",
-    a: "When you upgrade to Premium or Career Pack, Vaylo AI generates a full single-page dark mode HTML portfolio and deploys it live to username.vaylo.ai with SSL instantly.",
+    a: "When you upgrade to Premium or Career Pack, VayloAI generates a full single-page dark mode HTML portfolio and deploys it live to username.vayloai.online with SSL instantly.",
   },
 ];
 

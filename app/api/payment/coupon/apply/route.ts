@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
-import { AUTHORIZED_COUPONS, calculateDiscount } from "@/lib/coupons";
-import { getPlanAmount, buildUpiLink, buildUpiQrUrl } from "@/lib/upi";
+import { validateCouponForUser, calculateCouponDiscount, redeemCouponAtomic } from "@/lib/coupons";
+import { getPlanAmount } from "@/lib/upi";
 import { upgradeUserPlan } from "@/lib/upgrade-user-plan";
 import { createNotification } from "@/lib/notifications";
 import type { Plan } from "@/types";
@@ -17,37 +17,40 @@ export async function POST(request: NextRequest) {
     const cleanCode = String(code || "").trim().toUpperCase();
 
     if (!cleanCode) {
-      return NextResponse.json({ error: "Please enter a coupon code" }, { status: 400 });
+      return NextResponse.json({ error: "Please enter a coupon code." }, { status: 400 });
     }
 
-    const coupon = AUTHORIZED_COUPONS[cleanCode];
-
-    if (!coupon) {
-      return NextResponse.json(
-        { error: "Invalid coupon code. Please check and try again." },
-        { status: 400 }
-      );
+    // Server-side validation against database
+    const validation = await validateCouponForUser(cleanCode, profile.id, plan);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
+    const coupon = validation.coupon;
     const originalPrice = getPlanAmount(plan as Exclude<Plan, "free">);
-    const { discountAmount, finalPrice } = calculateDiscount(originalPrice, coupon);
+    const { discountAmount, finalPrice, isFreeUpgrade } = calculateCouponDiscount(originalPrice, coupon);
 
-    // Prevent unauthorized 100% plan upgrades via coupon
-    if (finalPrice === 0 || coupon.discountValue >= 100) {
-      if (profile.role !== "admin") {
-        return NextResponse.json(
-          { error: "This promotion code is not eligible for automatic activation." },
-          { status: 403 }
-        );
+    // 100% Free Upgrade or Free Trial Months (No Razorpay call needed)
+    if (isFreeUpgrade) {
+      const redeemResult = await redeemCouponAtomic(
+        cleanCode,
+        profile.id,
+        profile.email || "",
+        plan,
+        discountAmount
+      );
+
+      if (!redeemResult.success) {
+        return NextResponse.json({ error: redeemResult.error || "Could not redeem coupon." }, { status: 400 });
       }
 
-      await upgradeUserPlan(profile.id, plan, "manual_upi", `COUPON_${cleanCode}`);
+      await upgradeUserPlan(profile.id, plan, "coupon", `COUPON_${cleanCode}`);
 
       await createNotification({
         userId: profile.id,
         type: "payment_approved",
-        title: `Full Access Coupon Applied — ${plan.toUpperCase()} Unlocked! 🎉`,
-        body: `Coupon '${cleanCode}' was applied. All features of the ${plan.toUpperCase()} plan are active!`,
+        title: `Coupon Applied — ${plan.toUpperCase()} Unlocked! 🎉`,
+        body: `Coupon '${cleanCode}' was successfully redeemed. All features of the ${plan.toUpperCase()} plan are active!`,
         link: "/dashboard",
       });
 
@@ -59,30 +62,25 @@ export async function POST(request: NextRequest) {
         coupon: cleanCode,
         discountAmount,
         finalPrice: 0,
-        message: `Admin pass '${cleanCode}' verified. Account upgraded!`,
+        message: `Coupon '${cleanCode}' verified! Your ${plan.toUpperCase()} plan has been activated.`,
       });
     }
 
-    // Otherwise return discount details & updated UPI payment links for reduced payable amount
-    const upiLink = buildUpiLink({ amount: finalPrice });
-    const qrUrl = buildUpiQrUrl(upiLink, finalPrice);
-
+    // Partial Discount — Validated for checkout
     return NextResponse.json({
       success: true,
       isFullAccess: false,
       coupon: cleanCode,
-      discountType: coupon.discountType,
-      discountValue: coupon.discountValue,
+      discountType: coupon.discount_type,
+      discountValue: coupon.discount_value,
       originalPrice,
       discountAmount,
       finalPrice,
-      description: coupon.description,
-      upiLink,
-      qrUrl,
-      message: `Coupon '${cleanCode}' applied! You saved ₹${discountAmount}. New payable price: ₹${finalPrice}.`,
+      description: coupon.description || `Special discount on ${plan.toUpperCase()}`,
+      message: `Coupon '${cleanCode}' applied! You saved ₹${discountAmount}. Final payable: ₹${finalPrice}.`,
     });
   } catch (error: any) {
-    console.error("[Coupon API Error]:", error);
+    console.error("[Coupon Apply Error]:", error);
     return NextResponse.json({ error: "Failed to apply coupon code" }, { status: 500 });
   }
 }

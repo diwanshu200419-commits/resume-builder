@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       title: post.title,
       description: post.description,
       url: articleUrl,
-      siteName: "Vaylo AI",
+      siteName: "VayloAI",
       type: "article",
       publishedTime: new Date(post.date).toISOString(),
       modifiedTime: new Date(post.dateModified || post.date).toISOString(),
@@ -44,6 +44,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       card: "summary_large_image",
       title: post.title,
       description: post.description,
+      creator: "@vayloai",
     },
   };
 }
@@ -79,18 +80,33 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         },
         "publisher": {
           "@type": "Organization",
-          "name": "Vaylo AI",
+          "name": "VayloAI",
           "url": APP_URL,
           "logo": {
             "@type": "ImageObject",
-            "url": `${APP_URL}/logo.png`,
+            "url": `${APP_URL}/icon.png`,
           },
         },
         "mainEntityOfPage": {
           "@type": "WebPage",
           "@id": articleUrl,
         },
-      }
+      },
+      ...(post.faqs && post.faqs.length > 0
+        ? [
+            {
+              "@type": "FAQPage",
+              "mainEntity": post.faqs.map((faq) => ({
+                "@type": "Question",
+                "name": faq.question,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": faq.answer,
+                },
+              })),
+            },
+          ]
+        : [])
     ]
   };
 
@@ -171,6 +187,23 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             />
           </article>
 
+          {/* Frequently Asked Questions Section */}
+          {post.faqs && post.faqs.length > 0 && (
+            <div className="pt-8 border-t border-border space-y-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-indigo-400" /> Frequently Asked Questions
+              </h2>
+              <div className="space-y-4">
+                {post.faqs.map((faq, idx) => (
+                  <div key={idx} className="p-5 rounded-2xl bg-surface border border-border space-y-2">
+                    <h3 className="font-semibold text-text-primary text-sm sm:text-base">{faq.question}</h3>
+                    <p className="text-text-secondary text-xs sm:text-sm leading-relaxed">{faq.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* High-Converting CTA Box */}
           <div className="p-8 rounded-3xl bg-gradient-to-br from-indigo-950/60 via-slate-900 to-slate-950 border border-indigo-500/30 text-left space-y-4 shadow-2xl relative overflow-hidden my-12">
             <div className="flex items-center gap-3">
@@ -184,7 +217,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             </div>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Don&apos;t leave your job applications to chance. Vaylo AI scans your resume against Greenhouse, Workday, and Lever filters, extracts missing high-intent keywords, and provides live AI voice interview practice.
+              Don&apos;t leave your job applications to chance. VayloAI scans your resume against Greenhouse, Workday, and Lever filters, extracts missing high-intent keywords, and provides live AI voice interview practice.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-2">

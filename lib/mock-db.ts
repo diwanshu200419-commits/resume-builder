@@ -384,7 +384,7 @@ export function mockAuthAction(method: string, payload: any): any {
       return { data: null, error: { message: "Invalid OTP code. Enter code sent or test code 12345" } };
     }
 
-    const email = `user_${cleanPhone.slice(-6)}@phone.vaylo.ai`;
+    const email = `user_${cleanPhone.slice(-6)}@phone.vayloai.online`;
 
     let user = db.profiles.find((p: any) => p.email === email || p.phone === cleanPhone);
     if (!user) {
@@ -465,7 +465,7 @@ export function mockAuthAction(method: string, payload: any): any {
     if (!user) {
       user = {
         id: Math.random().toString(36).substring(2, 15),
-        email: cleanTarget.includes("@") ? cleanTarget : `user_${cleanTarget.slice(-6)}@phone.vaylo.ai`,
+        email: cleanTarget.includes("@") ? cleanTarget : `user_${cleanTarget.slice(-6)}@phone.vayloai.online`,
         phone: cleanTarget.includes("@") ? "" : cleanTarget,
         full_name: cleanTarget.split("@")[0],
         plan: "free",

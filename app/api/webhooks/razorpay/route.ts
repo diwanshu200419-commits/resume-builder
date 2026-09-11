@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
 
         await supabase.from("payment_requests").upsert({
           user_id: userId,
-          user_email: userProfile?.email || notes.email || "customer@vaylo.ai",
+          user_email: userProfile?.email || notes.email || "customer@vayloai.online",
           customer_name: userProfile?.full_name || notes.name || "Customer",
           requested_plan: plan,
           amount_claimed: amount,

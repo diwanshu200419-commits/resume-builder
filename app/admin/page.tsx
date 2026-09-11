@@ -34,8 +34,10 @@ import {
   Bell,
   Radio,
   Send,
+  Tag,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { CouponsManager } from "@/components/admin/CouponsManager";
 
 interface UserProfile {
   id: string;
@@ -140,7 +142,7 @@ export default function AdminPage() {
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
   const [activeTab, setActiveTab] = useState<
-    "overview" | "users" | "notifications" | "payments" | "feedback" | "analytics" | "health" | "audit" | "errors"
+    "overview" | "users" | "notifications" | "payments" | "coupons" | "feedback" | "analytics" | "health" | "audit" | "errors"
   >("overview");
 
   // User directory filters & pagination
@@ -568,6 +570,15 @@ export default function AdminPage() {
           }`}
         >
           <CreditCard className="w-4 h-4" /> Payments ({pendingPayments.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab("coupons")}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all shrink-0 ${
+            activeTab === "coupons" ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          <Tag className="w-4 h-4" /> Coupons
         </button>
 
         <button
@@ -1194,6 +1205,11 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* TAB: COUPONS & PROMO CODE MANAGEMENT */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === "coupons" && <CouponsManager />}
 
       {/* ------------------------------------------------------------- */}
       {/* TAB: USER FEEDBACK & SUPPORT COMPLAINTS INBOX */}

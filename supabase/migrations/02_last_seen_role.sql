@@ -16,7 +16,7 @@ SET role = 'admin', plan = 'career_pack', subscription_status = 'active'
 WHERE email IN (
   'jattshiv32@gmail.com',
   'diwanshu200419@gmail.com',
-  'admin@vaylo.ai'
+  'admin@vayloai.online'
 );
 
 -- 3. Index last_seen_at for efficient activity-window queries

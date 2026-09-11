@@ -17,23 +17,24 @@ export const metadata: Metadata = {
     "FAANG coding questions",
     "React interview questions",
     "ATS resume guide",
-    "Vaylo AI blog"
+    "VayloAI blog"
   ],
   alternates: {
     canonical: `${APP_URL}/blog`,
   },
   openGraph: {
-    title: "Vaylo AI Technical Interview & Career Blog",
+    title: "VayloAI Technical Interview & Career Blog",
     description: "Master real-world FAANG system design, Google STAR behavioral rounds, and ATS optimization.",
     url: `${APP_URL}/blog`,
-    siteName: "Vaylo AI",
+    siteName: "VayloAI",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vaylo AI Technical Interview & Career Blog",
+    title: "VayloAI Technical Interview & Career Blog",
     description: "Master real-world FAANG system design, Google STAR behavioral rounds, and ATS optimization.",
+    creator: "@vayloai",
   },
 };
 
@@ -43,14 +44,14 @@ export default function BlogIndexPage() {
     "@graph": [
       {
         "@type": "Blog",
-        "name": "Vaylo AI Technical Interview & Career Intelligence Hub",
+        "name": "VayloAI Technical Interview & Career Intelligence Hub",
         "url": `${APP_URL}/blog`,
         "description": "Master real-world FAANG system design questions, Google STAR behavioral answers, and ATS scoring secrets.",
         "publisher": {
           "@type": "Organization",
-          "name": "Vaylo AI",
+          "name": "VayloAI",
           "url": APP_URL,
-          "logo": `${APP_URL}/logo.png`
+          "logo": `${APP_URL}/icon.png`
         }
       },
       {

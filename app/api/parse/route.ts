@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseResumeFile } from "@/lib/parse-resume";
 import { getUser } from "@/lib/auth";
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
-];
+import { validateResumeBuffer } from "@/lib/validate-resume";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,19 +17,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // 1. Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: "File too large. Max 5MB allowed." }, { status: 400 });
-    }
-
-    // 2. Validate MIME type & file extension
-    const ext = "." + file.name.split(".").pop()?.toLowerCase();
-    const ALLOWED_EXTENSIONS = [".pdf", ".docx", ".txt"];
-    if (!ALLOWED_TYPES.includes(file.type) && !ALLOWED_EXTENSIONS.includes(ext)) {
-      return NextResponse.json({ error: "Invalid file type. Only PDF, DOCX, and TXT are allowed." }, { status: 400 });
-    }
-
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Deep Magic Byte & File Header Validation
+    const validation = validateResumeBuffer(buffer, file.name);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error || "Invalid file format." }, { status: 400 });
+    }
+
     const text = await parseResumeFile(buffer, file.name);
 
     const safeText = (text && text.trim()) 

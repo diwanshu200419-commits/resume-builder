@@ -4,32 +4,33 @@ import { PricingClient } from "@/components/marketing/PricingClient";
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Vaylo AI Pricing — Free, Pro ₹99, Premium ₹299 | AI Resume Builder",
+  title: "VayloAI Pricing — Free ₹0, Pro ₹99, Premium ₹299",
   description:
-    "Transparent pricing for Vaylo AI. Free Tier (₹0), Pro Plan (₹99/mo), Premium Plan (₹299/mo), and Career Pack (₹499 one-time lifetime). Start building your career today.",
+    "Simple, transparent pricing for Indian job seekers. Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime). Try VayloAI free.",
   keywords: [
-    "Vaylo AI pricing",
-    "AI resume builder pricing",
-    "ATS checker plans",
-    "cheap AI career copilot",
+    "VayloAI pricing",
+    "resume builder price India",
+    "AI resume builder cost",
+    "pro resume subscription",
     "career pack lifetime deal"
   ],
   alternates: {
     canonical: `${APP_URL}/pricing`,
   },
   openGraph: {
-    title: "Vaylo AI Pricing — Free, Pro ₹99, Premium ₹299 | AI Resume Builder",
+    title: "VayloAI Pricing — Free ₹0, Pro ₹99, Premium ₹299",
     description:
-      "Simple, transparent pricing. Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime). Start building your career today.",
+      "Simple, transparent pricing for Indian job seekers. Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime). Try VayloAI free.",
     url: `${APP_URL}/pricing`,
-    siteName: "Vaylo AI",
+    siteName: "VayloAI",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vaylo AI Pricing — Free, Pro ₹99, Premium ₹299",
-    description: "Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime).",
+    title: "VayloAI Pricing — Free ₹0, Pro ₹99, Premium ₹299",
+    description: "Simple, transparent pricing for Indian job seekers. Free (₹0), Pro (₹99/mo), Premium (₹299/mo), or Career Pack (₹499 lifetime). Try VayloAI free.",
+    creator: "@vayloai",
   },
 };
 
@@ -42,7 +43,7 @@ export default function PricingPage() {
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "What is included in the Vaylo AI Free plan?",
+            "name": "What is included in the VayloAI Free plan?",
             "acceptedAnswer": {
               "@type": "Answer",
               "text": "The Free plan includes 2 ATS resume scans (total), access to the interactive resume builder, and PDF exports with a watermark. No credit card required."
@@ -50,10 +51,10 @@ export default function PricingPage() {
           },
           {
             "@type": "Question",
-            "name": "How much does Vaylo AI Pro cost?",
+            "name": "How much does VayloAI Pro cost?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Vaylo AI Pro costs ₹99/month and includes 30 ATS scans per month, 1-Click Auto-Fix bullet rewriter, AI cover letters, LinkedIn optimizer, and unwatermarked PDF/DOCX exports."
+              "text": "VayloAI Pro costs ₹99/month and includes 30 ATS scans per month, 1-Click Auto-Fix bullet rewriter, AI cover letters, LinkedIn optimizer, and unwatermarked PDF/DOCX exports."
             }
           },
           {

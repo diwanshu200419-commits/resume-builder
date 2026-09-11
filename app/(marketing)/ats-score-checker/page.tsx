@@ -8,29 +8,31 @@ import { CheckCircle2, Sparkles, BarChart3, ArrowRight, ShieldCheck } from "luci
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "ATS Score Checker — Test Your Resume Score Online",
+  title: "ATS Score Checker Online | Instant Score — VayloAI",
   description:
-    "Check your resume ATS score online with Vaylo AI. See your 0-100% score breakdown, missing skills, impact verb scores, and formatting health.",
+    "Test your resume ATS score online in 30 seconds. Get your 0-100 score breakdown, missing skills, impact verb analysis, and formatting health with VayloAI.",
   keywords: [
-    "ats score checker",
-    "check ats score",
-    "resume ats score online",
-    "ats score test",
-    "resume score breakdown"
+    "ATS score checker",
+    "check ATS score",
+    "resume ATS score online",
+    "ATS score test",
+    "resume score breakdown",
+    "VayloAI"
   ],
   alternates: {
     canonical: `${APP_URL}/ats-score-checker`,
   },
   openGraph: {
-    title: "ATS Score Checker — Test Your Resume Score Online",
-    description: "Check your resume ATS score online with Vaylo AI. See your 0-100% score breakdown.",
+    title: "ATS Score Checker Online | Instant Score — VayloAI",
+    description: "Test your resume ATS score online in 30 seconds. Get your 0-100 score breakdown, missing skills, impact verb analysis, and formatting health with VayloAI.",
     url: `${APP_URL}/ats-score-checker`,
-    siteName: "Vaylo AI",
+    siteName: "VayloAI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ATS Score Checker — Test Your Resume Score Online",
-    description: "Check your resume ATS score online with Vaylo AI. See your 0-100% score breakdown.",
+    title: "ATS Score Checker Online | Instant Score — VayloAI",
+    description: "Test your resume ATS score online in 30 seconds. Get your 0-100 score breakdown, missing skills, impact verb analysis, and formatting health with VayloAI.",
+    creator: "@vayloai",
   },
 };
 
@@ -42,7 +44,7 @@ export default function ATSScoreCheckerPage() {
     "operatingSystem": "Web",
     "applicationCategory": "BusinessApplication",
     "description":
-      "Check your resume ATS score online with Vaylo AI. See your 0-100% score breakdown, missing skills, impact verb scores, and formatting health.",
+      "Test your resume ATS score online in 30 seconds. Get your 0-100 score breakdown, missing skills, impact verb analysis, and formatting health with VayloAI.",
     "offers": {
       "@type": "Offer",
       "price": "0",

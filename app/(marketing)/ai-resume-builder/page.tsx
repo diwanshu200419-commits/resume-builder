@@ -10,29 +10,31 @@ import { Sparkles, ArrowRight, CheckCircle2, ShieldCheck, Zap, FileText, Layers,
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "AI Resume Builder — Create ATS-Friendly Resumes Fast",
+  title: "AI Resume Builder for Freshers & Tech | Free — VayloAI",
   description:
-    "Build a professional, ATS-friendly resume in minutes with Vaylo AI Resume Builder. Choose from recruiter-tested templates, generate high-impact bullets, and export clean PDFs.",
+    "Build an ATS-proof resume in minutes. Tailored templates for Indian freshers, developers, and data analysts. Get started free with VayloAI.",
   keywords: [
-    "ai resume builder",
-    "free ai resume builder",
-    "ats resume builder",
-    "best resume builder 2026",
-    "online resume maker"
+    "AI resume builder India",
+    "resume builder for freshers India",
+    "software engineer resume builder",
+    "resume builder for data analyst",
+    "ATS resume builder",
+    "VayloAI"
   ],
   alternates: {
     canonical: `${APP_URL}/ai-resume-builder`,
   },
   openGraph: {
-    title: "AI Resume Builder — Create ATS-Friendly Resumes Fast",
-    description: "Build a professional, ATS-friendly resume in minutes with Vaylo AI.",
+    title: "AI Resume Builder for Freshers & Tech | Free — VayloAI",
+    description: "Build an ATS-proof resume in minutes. Tailored templates for Indian freshers, developers, and data analysts. Get started free with VayloAI.",
     url: `${APP_URL}/ai-resume-builder`,
-    siteName: "Vaylo AI",
+    siteName: "VayloAI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Resume Builder — Create ATS-Friendly Resumes Fast",
-    description: "Build a professional, ATS-friendly resume in minutes with Vaylo AI.",
+    title: "AI Resume Builder for Freshers & Tech | Free — VayloAI",
+    description: "Build an ATS-proof resume in minutes. Tailored templates for Indian freshers, developers, and data analysts. Get started free with VayloAI.",
+    creator: "@vayloai",
   },
 };
 
@@ -42,13 +44,15 @@ export default function AIResumeBuilderLandingPage() {
     "@graph": [
       {
         "@type": "SoftwareApplication",
-        "name": "Vaylo AI Resume Builder",
+        "name": "VayloAI Resume Builder",
         "operatingSystem": "Web",
         "applicationCategory": "BusinessApplication",
         "url": `${APP_URL}/ai-resume-builder`,
         "offers": [
           { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "INR" },
-          { "@type": "Offer", "name": "Pro", "price": "99", "priceCurrency": "INR" }
+          { "@type": "Offer", "name": "Pro", "price": "99", "priceCurrency": "INR" },
+          { "@type": "Offer", "name": "Premium", "price": "299", "priceCurrency": "INR" },
+          { "@type": "Offer", "name": "Career Pack", "price": "499", "priceCurrency": "INR" }
         ]
       }
     ]

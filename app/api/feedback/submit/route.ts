@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       .from("user_feedback")
       .insert({
         user_id: user.id,
-        user_email: user.email || "candidate@vaylo.ai",
+        user_email: user.email || "candidate@vayloai.online",
         category: cleanCategory,
         message: message.trim(),
         status: "open",

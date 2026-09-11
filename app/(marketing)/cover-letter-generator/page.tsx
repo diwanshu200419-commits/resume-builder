@@ -9,22 +9,30 @@ import { Sparkles, ArrowRight, CheckCircle2, FileText, ShieldCheck } from "lucid
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Free AI Cover Letter Generator",
-  description: "Generate tailored, professional cover letters in seconds with AI. Match job descriptions, highlight key achievements, and land more interview calls.",
-  keywords: ["free AI cover letter generator", "cover letter builder", "tailored cover letter", "AI cover letter maker", "cover letter template"],
+  title: "AI Cover Letter Generator India | Free & Fast — VayloAI",
+  description: "Generate role-tailored cover letters matched to job descriptions in 30 seconds. Free AI cover letter generator for freshers and pros. Try VayloAI.",
+  keywords: [
+    "AI cover letter generator",
+    "free cover letter generator India",
+    "cover letter generator for freshers",
+    "cover letter builder online",
+    "tailored cover letter AI",
+    "VayloAI"
+  ],
   alternates: {
     canonical: `${APP_URL}/cover-letter-generator`,
   },
   openGraph: {
-    title: "Free AI Cover Letter Generator",
-    description: "Generate tailored, professional cover letters in seconds with AI. Match job descriptions and impress hiring managers.",
+    title: "AI Cover Letter Generator India | Free & Fast — VayloAI",
+    description: "Generate role-tailored cover letters matched to job descriptions in 30 seconds. Free AI cover letter generator for freshers and pros. Try VayloAI.",
     url: `${APP_URL}/cover-letter-generator`,
     siteName: "VayloAI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free AI Cover Letter Generator",
-    description: "Generate tailored, professional cover letters in seconds with AI. Match job descriptions and impress hiring managers.",
+    title: "AI Cover Letter Generator India | Free & Fast — VayloAI",
+    description: "Generate role-tailored cover letters matched to job descriptions in 30 seconds. Free AI cover letter generator for freshers and pros. Try VayloAI.",
+    creator: "@vayloai",
   },
 };
 

@@ -8,29 +8,31 @@ import { Sparkles, Bot, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "AI Resume Checker — Instant AI Resume Scanner & Fixer",
+  title: "AI Resume Checker for Naukri & LinkedIn | Score — VayloAI",
   description:
-    "Audit and fix your resume with Vaylo AI's intelligent resume checker. Detect missing keywords, weak bullets, and ATS formatting risks powered by Gemini AI.",
+    "Scan your resume with AI before applying on Naukri, LinkedIn, and corporate portals. Instant feedback on keywords and ATS score. Try VayloAI free.",
   keywords: [
-    "ai resume checker",
-    "ai resume scanner",
-    "ai resume review",
-    "smart resume analyzer",
-    "ai powered resume test"
+    "AI resume checker",
+    "AI resume checker for Naukri",
+    "AI resume checker India",
+    "resume keyword optimizer",
+    "AI resume scanner",
+    "VayloAI"
   ],
   alternates: {
     canonical: `${APP_URL}/ai-resume-checker`,
   },
   openGraph: {
-    title: "AI Resume Checker — Instant AI Resume Scanner & Fixer",
-    description: "Audit and fix your resume with Vaylo AI's intelligent resume checker.",
+    title: "AI Resume Checker for Naukri & LinkedIn | Score — VayloAI",
+    description: "Scan your resume with AI before applying on Naukri, LinkedIn, and corporate portals. Instant feedback on keywords and ATS score. Try VayloAI free.",
     url: `${APP_URL}/ai-resume-checker`,
-    siteName: "Vaylo AI",
+    siteName: "VayloAI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Resume Checker — Instant AI Resume Scanner & Fixer",
-    description: "Audit and fix your resume with Vaylo AI's intelligent resume checker.",
+    title: "AI Resume Checker for Naukri & LinkedIn | Score — VayloAI",
+    description: "Scan your resume with AI before applying on Naukri, LinkedIn, and corporate portals. Instant feedback on keywords and ATS score. Try VayloAI free.",
+    creator: "@vayloai",
   },
 };
 
@@ -42,7 +44,7 @@ export default function AIResumeCheckerPage() {
     "operatingSystem": "Web",
     "applicationCategory": "BusinessApplication",
     "description":
-      "Audit and fix your resume with Vaylo AI's intelligent resume checker. Detect missing keywords, weak bullets, and ATS formatting risks powered by Gemini AI.",
+      "Scan your resume with AI before applying on Naukri, LinkedIn, and corporate portals. Instant feedback on keywords and ATS score. Try VayloAI free.",
     "offers": {
       "@type": "Offer",
       "price": "0",

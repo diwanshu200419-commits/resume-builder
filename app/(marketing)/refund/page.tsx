@@ -85,7 +85,7 @@ export default function RefundPage() {
           <h2 className="text-base font-bold text-text-primary">4. How to Request a Refund</h2>
           <p>To request a refund, please follow these steps:</p>
           <ol className="list-decimal pl-5 space-y-1 text-text-secondary">
-            <li>Send an email to <strong>support@vaylo.ai</strong> from your registered account email address.</li>
+            <li>Send an email to <strong>support@vayloai.online</strong> from your registered account email address.</li>
             <li>Include your Payment UTR or Transaction Reference number.</li>
             <li>State the reason for your refund request.</li>
           </ol>
@@ -99,13 +99,13 @@ export default function RefundPage() {
           <h2 className="text-base font-bold text-text-primary">5. Support Contact</h2>
           <p>If you have any questions regarding refunds or billing, contact our support team:</p>
           <div className="flex items-center gap-1.5 font-medium text-indigo-400">
-            <Mail className="w-4 h-4" /> support@vaylo.ai
+            <Mail className="w-4 h-4" /> support@vayloai.online
           </div>
         </section>
       </div>
 
       <div className="pt-8 border-t border-border text-center text-xs text-text-muted">
-        <p>© {new Date().getFullYear()} Vaylo AI. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} VayloAI. All rights reserved.</p>
       </div>
     </div>
   );

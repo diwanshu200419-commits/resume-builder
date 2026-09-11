@@ -6,24 +6,25 @@ import { Footer } from '@/components/shared/Footer';
 import { ArrowRight, Briefcase, GraduationCap, Globe } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Resume Guides — Role-Specific ATS Optimization',
-  description: 'Master ATS optimization with our role-specific resume guides. Get exact keywords, X-Y-Z bullet formulas, and structural recommendations for Software Engineers, Analysts, and more.',
+  title: 'ATS Resume Guides for 2026 Roles | VayloAI — Free Samples',
+  description: 'Master ATS optimization with role-specific resume guides. Get exact keywords, X-Y-Z bullet formulas, and India job market insights. Try VayloAI free.',
   alternates: {
     canonical: 'https://www.vayloai.online/resume',
   },
   openGraph: {
-    title: 'Resume Guides — Role-Specific ATS Optimization',
-    description: 'Master ATS optimization with our role-specific resume guides. Get exact keywords, X-Y-Z bullet formulas, and structural recommendations.',
+    title: 'ATS Resume Guides for 2026 Roles | VayloAI — Free Samples',
+    description: 'Master ATS optimization with role-specific resume guides. Get exact keywords, X-Y-Z bullet formulas, and India job market insights. Try VayloAI free.',
     url: 'https://www.vayloai.online/resume',
     siteName: 'VayloAI',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Resume Guides — Role-Specific ATS Optimization',
-    description: 'Master ATS optimization with our role-specific resume guides.',
+    title: 'ATS Resume Guides for 2026 Roles | VayloAI — Free Samples',
+    description: 'Master ATS optimization with role-specific resume guides. Get exact keywords, X-Y-Z bullet formulas, and India job market insights. Try VayloAI free.',
+    creator: '@vayloai',
   },
-  keywords: ['resume guides', 'role-specific resume', 'ATS optimization', 'resume examples', 'resume keywords'],
+  keywords: ['resume guides', 'role-specific resume', 'ATS optimization', 'resume examples', 'resume keywords', 'VayloAI'],
 };
 
 export default function ResumeHubPage() {

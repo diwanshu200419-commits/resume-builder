@@ -8,29 +8,31 @@ import { Sparkles, Sliders, CheckCircle2, ArrowRight, Layers, FileText } from "l
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters",
+  title: "Resume Optimizer for Job Description | ATS Match — VayloAI",
   description:
-    "Optimize your resume for any job description in seconds. Boost your ATS match score, rewrite bullet points, and land more technical interviews with Vaylo AI.",
+    "Optimize your resume against target job descriptions. Match keywords, fix formatting flaws, and increase interview callbacks with VayloAI.",
   keywords: [
     "resume optimizer",
-    "ai resume optimizer",
-    "optimize resume for job",
-    "tailor resume to job description",
-    "ats resume optimization"
+    "resume optimizer for job description",
+    "resume keyword optimizer",
+    "semantic keyword matching resume",
+    "ATS friendly resume maker",
+    "VayloAI"
   ],
   alternates: {
     canonical: `${APP_URL}/resume-optimizer`,
   },
   openGraph: {
-    title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters",
-    description: "Optimize your resume for any job description in seconds with Vaylo AI.",
+    title: "Resume Optimizer for Job Description | ATS Match — VayloAI",
+    description: "Optimize your resume against target job descriptions. Match keywords, fix formatting flaws, and increase interview callbacks with VayloAI.",
     url: `${APP_URL}/resume-optimizer`,
-    siteName: "Vaylo AI",
+    siteName: "VayloAI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Resume Optimizer — Optimize Your Resume for ATS & Recruiters",
-    description: "Optimize your resume for any job description in seconds with Vaylo AI.",
+    title: "Resume Optimizer for Job Description | ATS Match — VayloAI",
+    description: "Optimize your resume against target job descriptions. Match keywords, fix formatting flaws, and increase interview callbacks with VayloAI.",
+    creator: "@vayloai",
   },
 };
 
@@ -42,7 +44,7 @@ export default function ResumeOptimizerPage() {
     "operatingSystem": "Web",
     "applicationCategory": "BusinessApplication",
     "description":
-      "Optimize your resume for any job description in seconds. Boost your ATS match score, rewrite bullet points, and land more technical interviews with Vaylo AI.",
+      "Optimize your resume against target job descriptions. Match keywords, fix formatting flaws, and increase interview callbacks with VayloAI.",
     "offers": {
       "@type": "Offer",
       "price": "0",

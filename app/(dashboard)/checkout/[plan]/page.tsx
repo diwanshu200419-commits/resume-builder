@@ -105,6 +105,8 @@ export default function CheckoutPage() {
                 razorpay_signature: response.razorpay_signature,
                 plan,
                 amount: data.amount,
+                couponCode: discountDetails?.code || undefined,
+                discountAmount: discountDetails?.discountAmount || 0,
               }),
             });
             const verifyData = await verifyRes.json();

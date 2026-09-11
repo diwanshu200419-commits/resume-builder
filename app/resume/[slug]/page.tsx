@@ -24,16 +24,17 @@ export async function generateMetadata({ params }: RolePageProps): Promise<Metad
   if (!data) return {};
 
   const pageUrl = `${APP_URL}/resume/${data.slug}`;
+  const seoTitle = `${data.targetRole} Resume Format & ATS Keywords 2026 | VayloAI`;
 
   return {
-    title: data.title,
+    title: seoTitle,
     description: data.metaDescription,
     keywords: data.keywords,
     alternates: {
       canonical: pageUrl,
     },
     openGraph: {
-      title: data.title,
+      title: seoTitle,
       description: data.metaDescription,
       url: pageUrl,
       siteName: "VayloAI",
@@ -41,8 +42,9 @@ export async function generateMetadata({ params }: RolePageProps): Promise<Metad
     },
     twitter: {
       card: "summary_large_image",
-      title: data.title,
+      title: seoTitle,
       description: data.metaDescription,
+      creator: "@vayloai",
     },
   };
 }
@@ -67,8 +69,8 @@ export default function RoleResumeGuidePage({ params }: RolePageProps) {
         "headline": data.title,
         "description": data.metaDescription,
         "url": `${APP_URL}/resume/${data.slug}`,
-        "author": { "@type": "Organization", "name": "Vaylo AI Career Research Team" },
-        "publisher": { "@type": "Organization", "name": "Vaylo AI", "logo": { "@type": "ImageObject", "url": `${APP_URL}/logo.png` } }
+        "author": { "@type": "Organization", "name": "VayloAI Career Research Team" },
+        "publisher": { "@type": "Organization", "name": "VayloAI", "logo": { "@type": "ImageObject", "url": `${APP_URL}/icon.png` } }
       },
       {
         "@type": "FAQPage",

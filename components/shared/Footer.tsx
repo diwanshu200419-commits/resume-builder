@@ -16,7 +16,7 @@ export function Footer() {
               Your AI Career Copilot — Beat ATS filters, practice STAR interviews, negotiate higher pay, and build candidate portfolio sites.
             </p>
             <div className="text-xs text-text-muted flex items-center gap-1">
-              <Mail className="w-3.5 h-3.5 text-accent" /> support@vaylo.ai
+              <Mail className="w-3.5 h-3.5 text-accent" /> support@vayloai.online
             </div>
           </div>
 
@@ -73,7 +73,7 @@ export function Footer() {
             </ul>
             <div className="mt-4 p-2.5 rounded-lg bg-surface-elevated border border-border text-[11px] text-text-muted flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>256-bit SSL Encrypted Payments & Data Protection</span>
+              <span>TLS Encrypted Checkout · Secure Gateway by Razorpay</span>
             </div>
           </div>
         </div>

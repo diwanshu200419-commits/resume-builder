@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const rawPlan = String(formData.get("plan") || "pro").toLowerCase();
     const plan = rawPlan === "career-pack" || rawPlan === "career_pack" ? "career_pack" : rawPlan;
     const customerName = String(formData.get("customerName") || profile.full_name || "Candidate").trim();
-    const customerEmail = String(formData.get("customerEmail") || profile.email || "candidate@vaylo.ai").trim();
+    const customerEmail = String(formData.get("customerEmail") || profile.email || "candidate@vayloai.online").trim();
     const customerPhone = String(formData.get("customerPhone") || "").trim();
 
     if (!utr || utr.length < 4) {

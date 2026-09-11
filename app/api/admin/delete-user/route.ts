@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { logAdminAudit } from "@/lib/admin/logger";
+import { checkAdminRateLimit } from "@/lib/admin/rate-limit";
+import { verifyAdminStepUp } from "@/lib/admin/step-up";
 
 export const dynamic = "force-dynamic";
 
@@ -13,10 +15,28 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const { error: authError, admin } = await requireAdmin();
-    if (authError) return authError;
+    if (authError || !admin) return authError;
+
+    // Enforce dedicated Admin Rate Limiter
+    const clientIp = request.headers.get("x-forwarded-for") || admin.userId;
+    const rateCheck = checkAdminRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many admin actions. Please slow down and try again." },
+        { status: 429 }
+      );
+    }
 
     const body = await request.json().catch(() => ({}));
-    const { userId, confirmEmail, reason = "Admin full user deletion" } = body;
+    const { userId, confirmEmail, adminPassword, reason = "Admin full user deletion" } = body;
+
+    // Verify step-up authentication if password passed
+    if (adminPassword) {
+      const stepUp = await verifyAdminStepUp(admin.email, adminPassword);
+      if (!stepUp.verified) {
+        return NextResponse.json({ error: stepUp.error }, { status: 403 });
+      }
+    }
 
     if (!userId || !confirmEmail) {
       return NextResponse.json(

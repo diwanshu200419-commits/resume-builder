@@ -10,6 +10,7 @@ import {
   ShieldAlert,
   HelpCircle,
   ChevronDown,
+  Globe,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import type { Profile } from "@/types";
@@ -52,6 +53,15 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <Link
+          href="/"
+          className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-text-primary px-2.5 py-1.5 rounded-lg border border-border/70 hover:bg-surface-elevated transition-colors"
+          title="Back to Main Website"
+        >
+          <Globe className="w-3.5 h-3.5 text-accent" />
+          <span>Main Site</span>
+        </Link>
+
         <NotificationCenter />
 
         <DropdownMenu.Root>
@@ -116,6 +126,16 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
                 >
                   <Settings className="w-4 h-4 text-text-secondary" />
                   Settings
+                </Link>
+              </DropdownMenu.Item>
+
+              <DropdownMenu.Item asChild>
+                <Link
+                  href="/"
+                  className="rounded-lg px-3 py-2 hover:bg-surface-elevated cursor-pointer flex items-center gap-2 text-sm text-text-primary outline-none data-[highlighted]:bg-surface-elevated"
+                >
+                  <Globe className="w-4 h-4 text-accent" />
+                  Main Website
                 </Link>
               </DropdownMenu.Item>
 

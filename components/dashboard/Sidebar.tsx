@@ -33,6 +33,8 @@ import {
   Menu,
   X,
   BarChart3,
+  ArrowLeft,
+  Home,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
@@ -282,6 +284,17 @@ export function Sidebar({ profile }: { profile: Profile }) {
         >
           <X size={20} />
         </button>
+      </div>
+
+      <div className="px-3 pt-3 pb-1 shrink-0">
+        <Link
+          href="/"
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-text-muted hover:text-text-primary rounded-lg bg-surface-elevated/70 hover:bg-surface-elevated border border-border/70 transition-all group"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 text-accent group-hover:-translate-x-0.5 transition-transform shrink-0" />
+          <span>Back to Main Website</span>
+        </Link>
       </div>
 
       <nav className="flex-1 p-3 pb-5 overflow-y-auto scrollbar-thin-sidebar">

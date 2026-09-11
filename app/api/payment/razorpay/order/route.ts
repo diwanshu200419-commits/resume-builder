@@ -28,13 +28,15 @@ export async function POST(request: NextRequest) {
     }
 
     let amount = getPlanAmount(plan as Exclude<Plan, "free">);
+    let validatedCouponCode: string | null = null;
 
     if (couponCode) {
-      const { AUTHORIZED_COUPONS, calculateDiscount } = await import("@/lib/coupons");
-      const coupon = AUTHORIZED_COUPONS[String(couponCode).trim().toUpperCase()];
-      if (coupon) {
-        const { finalPrice } = calculateDiscount(amount, coupon);
+      const { validateCouponForUser, calculateCouponDiscount } = await import("@/lib/coupons");
+      const validation = await validateCouponForUser(String(couponCode), profile.id, plan);
+      if (validation.valid) {
+        const { finalPrice } = calculateCouponDiscount(amount, validation.coupon);
         amount = finalPrice;
+        validatedCouponCode = validation.coupon.code;
       }
     }
 
@@ -57,6 +59,7 @@ export async function POST(request: NextRequest) {
         userId: profile.id,
         userEmail: profile.email || "",
         plan,
+        couponCode: validatedCouponCode || "",
       },
     });
 

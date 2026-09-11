@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 export async function upgradeUserPlan(
   userId: string,
   plan: string,
-  source: "manual_upi" | "admin_override" | "razorpay" | "razorpay_webhook",
+  source: "manual_upi" | "admin_override" | "razorpay" | "razorpay_webhook" | "coupon",
   transactionId?: string
 ) {
   const normalizedPlan = (plan || "free").toLowerCase().replace("-", "_");

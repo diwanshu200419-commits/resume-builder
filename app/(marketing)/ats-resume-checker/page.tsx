@@ -8,29 +8,31 @@ import { CheckCircle2, Sparkles, ShieldCheck, ArrowRight, Zap, Target } from "lu
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "ATS Resume Checker — Free Online Resume Scanner",
+  title: "ATS Resume Checker Online | Scan & Fix — VayloAI",
   description:
-    "Scan your resume with Vaylo AI's ATS resume checker. Instantly discover missing keywords, score breakdown, and format compatibility for Greenhouse, Workday & Lever.",
+    "Scan your resume with VayloAI ATS checker in 30 seconds. Identify missing keywords and formatting errors for Greenhouse, Workday & Lever.",
   keywords: [
-    "ats resume checker",
-    "resume ats scanner",
+    "ATS resume checker",
+    "resume ATS scanner",
+    "free ATS score checker",
+    "ATS resume checker India",
     "online resume checker",
-    "ats compatibility test",
-    "free resume scanner"
+    "VayloAI"
   ],
   alternates: {
     canonical: `${APP_URL}/ats-resume-checker`,
   },
   openGraph: {
-    title: "ATS Resume Checker — Free Online Resume Scanner",
-    description: "Scan your resume against top ATS algorithms. Get instant score and feedback.",
+    title: "ATS Resume Checker Online | Scan & Fix — VayloAI",
+    description: "Scan your resume with VayloAI ATS checker in 30 seconds. Identify missing keywords and formatting errors for Greenhouse, Workday & Lever.",
     url: `${APP_URL}/ats-resume-checker`,
-    siteName: "Vaylo AI",
+    siteName: "VayloAI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ATS Resume Checker — Free Online Resume Scanner",
-    description: "Scan your resume against top ATS algorithms. Get instant score and feedback.",
+    title: "ATS Resume Checker Online | Scan & Fix — VayloAI",
+    description: "Scan your resume with VayloAI ATS checker in 30 seconds. Identify missing keywords and formatting errors for Greenhouse, Workday & Lever.",
+    creator: "@vayloai",
   },
 };
 
@@ -42,7 +44,7 @@ export default function ATSResumeCheckerPage() {
     "operatingSystem": "Web",
     "applicationCategory": "BusinessApplication",
     "description":
-      "Scan your resume with Vaylo AI's ATS resume checker. Instantly discover missing keywords, score breakdown, and format compatibility for Greenhouse, Workday & Lever.",
+      "Scan your resume with VayloAI ATS resume checker in 30 seconds. Instantly discover missing keywords, score breakdown, and format compatibility for Greenhouse, Workday & Lever.",
     "offers": {
       "@type": "Offer",
       "price": "0",

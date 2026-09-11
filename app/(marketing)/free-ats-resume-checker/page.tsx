@@ -9,36 +9,37 @@ import { CheckCircle2, AlertTriangle, Sparkles, FileText, Zap, ShieldCheck, Arro
 const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
-  title: "Free ATS Resume Checker – Check Your Resume Score",
+  title: "Free ATS Resume Checker India | Instant Score — VayloAI",
   description:
-    "Check your resume's ATS score for free. Identify missing keywords, formatting traps, and keyword match percentage against Greenhouse, Workday & Lever before applying.",
+    "Get your free ATS score in 30 seconds. Scan your resume against Indian and global ATS filters, find missing keywords, and get hired faster.",
   keywords: [
-    "ats resume checker",
-    "free ats resume checker",
-    "ats score checker",
-    "resume ats checker",
-    "ats resume checker free",
-    "ai resume checker",
-    "resume checker",
-    "ats score",
-    "resume optimization"
+    "free ATS resume checker India",
+    "ATS score checker online",
+    "check resume ATS compatibility free",
+    "is my resume ATS friendly",
+    "ATS resume checker for freshers",
+    "AI resume checker India",
+    "ATS score",
+    "VayloAI"
   ],
   alternates: {
     canonical: `${APP_URL}/free-ats-resume-checker`,
   },
   openGraph: {
-    title: "Free ATS Resume Checker – Check Your Resume Score",
+    title: "Free ATS Resume Checker India | Instant Score — VayloAI",
     description:
-      "Check your resume's ATS score, identify missing keywords and formatting issues, and improve your resume before applying.",
+      "Get your free ATS score in 30 seconds. Scan your resume against Indian and global ATS filters, find missing keywords, and get hired faster.",
     url: `${APP_URL}/free-ats-resume-checker`,
-    siteName: "Vaylo AI",
+    siteName: "VayloAI",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free ATS Resume Checker – Check Your Resume Score",
-    description: "Check your resume's ATS score, identify missing keywords and formatting issues, and improve your resume before applying.",
+    title: "Free ATS Resume Checker India | Instant Score — VayloAI",
+    description:
+      "Get your free ATS score in 30 seconds. Scan your resume against Indian and global ATS filters, find missing keywords, and get hired faster.",
+    creator: "@vayloai",
   },
 };
 
@@ -48,7 +49,7 @@ export default function PrimaryFreeATSResumeCheckerPage() {
     "@graph": [
       {
         "@type": "SoftwareApplication",
-        "name": "Vaylo AI Free ATS Resume Checker",
+        "name": "VayloAI Free ATS Resume Checker",
         "operatingSystem": "Web",
         "applicationCategory": "BusinessApplication",
         "url": `${APP_URL}/free-ats-resume-checker`,

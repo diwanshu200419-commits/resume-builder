@@ -106,7 +106,73 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  const needsProtection = isProtectedRoute(pathname) || isAdminRoute(pathname);
+  const isAdm = isAdminRoute(pathname);
+  const isAdmApi = pathname === "/api/admin" || pathname.startsWith("/api/admin/");
+
+  // 1. Edge Layer: Protect Admin API Routes
+  if (isAdmApi) {
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized: Authentication required" }, { status: 401 });
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile || profile.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden: Admin privileges required" }, { status: 403 });
+    }
+
+    return response;
+  }
+
+  // 2. Edge Layer: Protect Admin UI Console
+  if (isAdm) {
+    if (!user) {
+      // Cloaked redirect: Never reveal ?next=/admin in URL query parameters
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, role")
+      .eq("id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (profileError || !profile) {
+      // Non-admin user attempting to access /admin -> silently redirect to user dashboard
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // 3. Admin MFA Enforcement (AAL2 Check)
+    const isMfaPath = pathname.startsWith("/admin/mfa");
+    if (!isMfaPath && process.env.ENABLE_ADMIN_MFA !== "false") {
+      try {
+        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aalData && aalData.currentLevel === "aal1" && aalData.nextLevel === "aal2") {
+          const redirectUrl = request.nextUrl.clone();
+          redirectUrl.pathname = "/admin/mfa-verify";
+          redirectUrl.search = "";
+          return NextResponse.redirect(redirectUrl);
+        }
+      } catch {
+        // Continue if MFA endpoint is unavailable
+      }
+    }
+
+    return response;
+  }
+
+  const needsProtection = isProtectedRoute(pathname);
 
   if (needsProtection) {
     if (!user) {
@@ -116,22 +182,6 @@ export async function middleware(request: NextRequest) {
       redirectUrl.search = "";
       redirectUrl.searchParams.set("next", encodeURIComponent(fullPath));
       return NextResponse.redirect(redirectUrl);
-    }
-
-    if (isAdminRoute(pathname)) {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, role")
-        .eq("id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (profileError || !profile) {
-        const redirectUrl = request.nextUrl.clone();
-        redirectUrl.pathname = "/dashboard";
-        redirectUrl.search = "";
-        return NextResponse.redirect(redirectUrl);
-      }
     }
 
     try {
@@ -165,6 +215,7 @@ export const config = {
     "/login",
     "/signup",
     "/admin/:path*",
+    "/api/admin/:path*",
     "/dashboard/:path*",
     "/profile/:path*",
     "/analyze/:path*",

@@ -127,13 +127,13 @@ export default function PrivacyPage() {
             If you have questions regarding this Privacy Policy or wish to exercise your data protection rights, please contact us:
           </p>
           <div className="flex items-center gap-1.5 font-medium text-indigo-400">
-            <Mail className="w-4 h-4" /> support@vaylo.ai
+            <Mail className="w-4 h-4" /> support@vayloai.online
           </div>
         </section>
       </div>
 
       <div className="pt-8 border-t border-border text-center text-xs text-text-muted">
-        <p>© {new Date().getFullYear()} Vaylo AI. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} VayloAI. All rights reserved.</p>
       </div>
     </div>
   );

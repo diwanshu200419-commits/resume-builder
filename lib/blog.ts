@@ -15,6 +15,7 @@ export interface BlogPost {
   readTime: string;
   keywords: string[];
   image?: string;
+  faqs?: Array<{ question: string; answer: string }>;
   content: string;
 }
 
@@ -352,6 +353,20 @@ FROM daily_sales_summary;</pre>
     dateModified: "September 7, 2026",
     readTime: "8 min read",
     keywords: ["what is an ATS resume", "ATS resume meaning", "applicant tracking system resume", "ATS compatible resume", "how ATS works"],
+    faqs: [
+      {
+        question: "What is an ATS friendly resume format?",
+        answer: "An ATS-friendly resume format uses a clean, single-column layout with standard semantic section headings (Work Experience, Skills, Education), standard fonts like Inter, Arial, or Calibri, and contains zero multi-column tables, text boxes, or embedded graphics."
+      },
+      {
+        question: "Can applicant tracking systems read PDF resumes?",
+        answer: "Yes, modern applicant tracking systems like Greenhouse, Workday, and Lever reliably parse text-based PDF files. However, scanned PDFs or image-based files cannot be parsed and will fail ATS screening."
+      },
+      {
+        question: "Why do ATS systems reject qualified candidates?",
+        answer: "ATS systems reject candidates primarily due to missing exact-match technical keywords, non-standard headings that confuse parsers, multi-column tables that scramble text order, and graphics or icons in headers."
+      }
+    ],
     content: `
       <h2>1. What is an ATS Resume?</h2>
       <p>An <strong>ATS resume</strong> is a resume specifically formatted, structured, and keyword-optimized so that an <strong>Applicant Tracking System (ATS)</strong> can accurately parse, extract, and index your work experience, skills, and education without formatting errors or dropped data.</p>
@@ -381,15 +396,29 @@ FROM daily_sales_summary;</pre>
     dateModified: "September 7, 2026",
     readTime: "6 min read",
     keywords: ["how to check ATS score", "check resume ATS score free", "ATS score calculation", "good ATS resume score", "free resume score check"],
+    faqs: [
+      {
+        question: "How can I check my resume ATS score for free?",
+        answer: "You can upload your PDF or DOCX file to VayloAI Free ATS Resume Checker. The tool parses your resume, matches it against top recruiter benchmarks, and provides an instant 0-100 score in under 30 seconds."
+      },
+      {
+        question: "What is considered a passing ATS score?",
+        answer: "An ATS score of 80% or higher is widely considered passing, putting your resume in the top 10-15% of applicants reviewed by human hiring managers."
+      },
+      {
+        question: "Does checking my resume score cost anything?",
+        answer: "No, VayloAI provides a completely free ATS resume score check without requiring a credit card or mandatory subscription."
+      }
+    ],
     content: `
       <h2>1. Why Checking Your ATS Score Before Applying is Critical</h2>
       <p>The average corporate job posting receives over 250 applications. Corporate ATS filters automatically rank and sort these candidates based on keyword relevance and formatting compliance. If your score falls below 75%, your application is pushed to the bottom of the recruiter's candidate queue.</p>
 
-      <h2>2. How Vaylo AI Calculates Your ATS Score</h2>
-      <p>Vaylo AI uses a transparent <strong>100-Point Deterministic Rubric</strong> divided into five objective categories: Hard Keyword Match (30 pts), Impact Action Verbs (25 pts), Quantified Metrics (20 pts), Structural Parseability (15 pts), and Anti-Keyword-Stuffing Context (10 pts).</p>
+      <h2>2. How VayloAI Calculates Your ATS Score</h2>
+      <p>VayloAI uses a transparent <strong>100-Point Deterministic Rubric</strong> divided into five objective categories: Hard Keyword Match (30 pts), Impact Action Verbs (25 pts), Quantified Metrics (20 pts), Structural Parseability (15 pts), and Anti-Keyword-Stuffing Context (10 pts).</p>
 
       <h2>3. Run Your Instant Score Check Now</h2>
-      <p>Upload your resume to <strong>Vaylo AI Free ATS Score Checker</strong> — get instant feedback on missing keywords and actionable bullet improvements with zero signup required.</p>
+      <p>Upload your resume to <strong>VayloAI Free ATS Score Checker</strong> — get instant feedback on missing keywords and actionable bullet improvements with zero signup required.</p>
     `,
   },
 

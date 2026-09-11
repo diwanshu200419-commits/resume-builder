@@ -72,6 +72,22 @@ export async function POST(request: NextRequest) {
     // Grant plan access
     await upgradeUserPlan(profile.id, plan, "razorpay", razorpay_payment_id);
 
+    // Atomically redeem coupon if used
+    if (body.couponCode) {
+      try {
+        const { redeemCouponAtomic } = await import("@/lib/coupons");
+        await redeemCouponAtomic(
+          String(body.couponCode),
+          profile.id,
+          profile.email || "",
+          plan,
+          Number(body.discountAmount || 0)
+        );
+      } catch (couponErr) {
+        console.warn("[Razorpay Verify] Coupon redemption record error:", couponErr);
+      }
+    }
+
     // In-app notification
     await createNotification({
       userId: profile.id,
