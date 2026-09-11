@@ -213,13 +213,32 @@ export async function GET(request: NextRequest) {
     const totalTokensUsed = aiLogs.reduce((sum: number, log: any) => sum + Number(log.total_tokens || 0), 0);
 
     // Fetch real candidate support/feedback entries
-    const { data: userFeedbackData } = await supabase
-      .from("user_feedback")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
+    let userFeedback: any[] = [];
+    try {
+      const { data: userFeedbackData, error: fbError } = await supabase
+        .from("user_feedback")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
 
-    const userFeedback = userFeedbackData || [];
+      if (!fbError && userFeedbackData) {
+        userFeedback = userFeedbackData;
+      }
+    } catch (fbErr) {
+      console.warn("[Admin Users API] Error querying user_feedback, using fallback:", fbErr);
+    }
+
+    const { getAllFallbackFeedback } = await import("@/lib/feedback");
+    const fallbackItems = getAllFallbackFeedback();
+    if (fallbackItems.length > 0) {
+      const existingIds = new Set(userFeedback.map((f: any) => f.id));
+      for (const item of fallbackItems) {
+        if (!existingIds.has(item.id)) {
+          userFeedback.push(item);
+        }
+      }
+      userFeedback.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
 
     return NextResponse.json({
       timestamp: new Date().toISOString(),

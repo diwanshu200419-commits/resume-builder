@@ -35,15 +35,18 @@ import {
   BarChart3,
   ArrowLeft,
   Home,
+  MessageSquare,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
+import { FeedbackModal } from "@/components/shared/FeedbackModal";
 
 interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<any>;
   activePrefixes?: string[];
+  onClick?: () => void;
 }
 
 interface NavSection {
@@ -55,6 +58,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -245,6 +249,12 @@ export function Sidebar({ profile }: { profile: Profile }) {
           icon: Settings,
           activePrefixes: ["/settings"],
         },
+        {
+          href: "#feedback",
+          label: "Feedback & Support",
+          icon: MessageSquare,
+          onClick: () => setFeedbackOpen(true),
+        },
       ],
     },
   ];
@@ -309,6 +319,27 @@ export function Sidebar({ profile }: { profile: Profile }) {
             <div className="space-y-1">
               {section.items.map((item) => {
                 const isActive = isItemActive(item);
+
+                if (item.onClick) {
+                  return (
+                    <button
+                      key={section.heading + "-" + item.label}
+                      type="button"
+                      onClick={() => {
+                        setMobileOpen(false);
+                        item.onClick?.();
+                      }}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-left",
+                        "text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+                      )}
+                    >
+                      <item.icon className="w-5 h-5 shrink-0 text-accent" />
+                      <span className="truncate">{item.label}</span>
+                    </button>
+                  );
+                }
+
                 return (
                   <Link
                     key={section.heading + "-" + item.label}
@@ -383,6 +414,15 @@ export function Sidebar({ profile }: { profile: Profile }) {
           </div>
         </aside>
       )}
+
+      {/* Persistent Feedback Modal */}
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        userEmail={profile.email}
+        userName={profile.full_name}
+        isAuthenticated={true}
+      />
     </>
   );
 }

@@ -16,15 +16,18 @@ import {
   ChevronDown,
   Sparkles,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { createClient } from "@/lib/supabase/client";
+import { FeedbackModal } from "@/components/shared/FeedbackModal";
 
 export function Navbar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -126,6 +129,13 @@ export function Navbar() {
             <Link href="/blog" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
               Blog & Guides
             </Link>
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium flex items-center gap-1.5"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-accent" />
+              Contact / Feedback
+            </button>
             <ThemeToggle />
 
             {loading ? (
@@ -193,6 +203,16 @@ export function Navbar() {
                       <Settings className="w-4 h-4 text-sky-400" /> Account Settings
                     </Link>
 
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        setFeedbackOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-text-primary hover:bg-surface-elevated rounded-lg transition-colors text-left"
+                    >
+                      <MessageSquare className="w-4 h-4 text-emerald-400" /> Feedback & Support
+                    </button>
+
                     <div className="pt-1 border-t border-border/50">
                       <button
                         onClick={handleLogout}
@@ -246,6 +266,15 @@ export function Navbar() {
             <Link href="/blog" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
               Blog & Career Guides
             </Link>
+            <button
+              onClick={() => {
+                setOpen(false);
+                setFeedbackOpen(true);
+              }}
+              className="w-full text-left block text-sm text-accent hover:text-accent-hover py-1 font-medium flex items-center gap-1.5"
+            >
+              <MessageSquare className="w-3.5 h-3.5" /> Contact / Feedback
+            </button>
 
             {user ? (
               <div className="space-y-2 pt-2 border-t border-border/50">
@@ -259,6 +288,15 @@ export function Navbar() {
                 <Link href="/builder" className="block text-xs font-semibold py-1.5 text-text-primary" onClick={() => setOpen(false)}>
                   Resume Builder
                 </Link>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    setFeedbackOpen(true);
+                  }}
+                  className="w-full text-left text-xs font-semibold py-1.5 text-emerald-400"
+                >
+                  Feedback & Support
+                </button>
                 <button onClick={handleLogout} className="w-full text-left text-xs font-bold py-1.5 text-rose-500">
                   Sign Out
                 </button>
@@ -280,6 +318,14 @@ export function Navbar() {
           </div>
         )}
       </div>
+
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        isAuthenticated={Boolean(user)}
+        userEmail={user?.email}
+        userName={displayName}
+      />
     </nav>
   );
 }

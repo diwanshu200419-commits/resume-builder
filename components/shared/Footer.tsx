@@ -1,7 +1,13 @@
+'use client';
+
+import { useState } from 'react';
 import Link from "next/link";
-import { ShieldCheck, Mail, Sparkles } from "lucide-react";
+import { ShieldCheck, Mail, Sparkles, MessageSquare } from "lucide-react";
+import { FeedbackModal } from "@/components/shared/FeedbackModal";
 
 export function Footer() {
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+
   return (
     <footer className="border-t border-border bg-surface text-text-primary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-12">
@@ -60,6 +66,14 @@ export function Footer() {
               <li><Link href="/blog/how-to-improve-ats-score" className="hover:text-accent transition-colors">How to Improve ATS Score</Link></li>
               <li><Link href="/pricing" className="hover:text-accent transition-colors">Pricing Plans (₹0 - ₹499)</Link></li>
               <li><Link href="/about" className="hover:text-accent transition-colors">About Vaylo AI</Link></li>
+              <li>
+                <button
+                  onClick={() => setFeedbackOpen(true)}
+                  className="hover:text-accent transition-colors text-left flex items-center gap-1 text-accent font-medium"
+                >
+                  <MessageSquare className="w-3 h-3" /> Report an Issue / Feedback
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -70,6 +84,14 @@ export function Footer() {
               <li><Link href="/privacy" className="hover:text-accent transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-accent transition-colors">Terms of Service</Link></li>
               <li><Link href="/refund" className="hover:text-accent transition-colors">Refund & Cancellation</Link></li>
+              <li>
+                <button
+                  onClick={() => setFeedbackOpen(true)}
+                  className="hover:text-accent transition-colors text-left text-text-muted"
+                >
+                  Contact Support
+                </button>
+              </li>
             </ul>
             <div className="mt-4 p-2.5 rounded-lg bg-surface-elevated border border-border text-[11px] text-text-muted flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -80,7 +102,10 @@ export function Footer() {
 
         <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-text-muted gap-4">
           <p>© {new Date().getFullYear()} Vaylo AI. All rights reserved.</p>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
+            <button onClick={() => setFeedbackOpen(true)} className="hover:underline text-accent">
+              Feedback & Support
+            </button>
             <Link href="/privacy" className="hover:underline">Privacy</Link>
             <Link href="/terms" className="hover:underline">Terms</Link>
             <Link href="/refund" className="hover:underline">Refunds</Link>
@@ -88,6 +113,12 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        isAuthenticated={false}
+      />
     </footer>
   );
 }

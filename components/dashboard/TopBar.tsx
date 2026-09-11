@@ -11,6 +11,7 @@ import {
   HelpCircle,
   ChevronDown,
   Globe,
+  MessageSquare,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import type { Profile } from "@/types";
@@ -18,6 +19,8 @@ import { PlanBadge } from "@/components/shared/PlanBadge";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
+import { FeedbackModal } from "@/components/shared/FeedbackModal";
 
 interface TopBarProps {
   profile: Profile;
@@ -26,6 +29,7 @@ interface TopBarProps {
 
 export function TopBar({ profile, pageTitle }: TopBarProps) {
   const router = useRouter();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const displayName = profile.full_name || profile.email || "User";
 
   const handleSignOut = async () => {
@@ -130,6 +134,17 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
               </DropdownMenu.Item>
 
               <DropdownMenu.Item asChild>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackOpen(true)}
+                  className="w-full rounded-lg px-3 py-2 hover:bg-surface-elevated cursor-pointer flex items-center gap-2 text-sm text-text-primary outline-none data-[highlighted]:bg-surface-elevated text-left"
+                >
+                  <MessageSquare className="w-4 h-4 text-accent" />
+                  Feedback &amp; Support
+                </button>
+              </DropdownMenu.Item>
+
+              <DropdownMenu.Item asChild>
                 <Link
                   href="/"
                   className="rounded-lg px-3 py-2 hover:bg-surface-elevated cursor-pointer flex items-center gap-2 text-sm text-text-primary outline-none data-[highlighted]:bg-surface-elevated"
@@ -163,17 +178,27 @@ export function TopBar({ profile, pageTitle }: TopBarProps) {
                 </DropdownMenu.Item>
               ) : null}
 
-              <DropdownMenu.Item
-                onSelect={handleSignOut}
-                className="rounded-lg px-3 py-2 hover:bg-rose-500/10 cursor-pointer flex items-center gap-2 text-sm text-rose-500 outline-none data-[highlighted]:bg-rose-500/10"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
+              <DropdownMenu.Item asChild>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full rounded-lg px-3 py-2 hover:bg-danger/10 text-danger cursor-pointer flex items-center gap-2 text-sm outline-none data-[highlighted]:bg-danger/10 font-medium text-left"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
       </div>
+
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        userEmail={profile.email}
+        userName={profile.full_name}
+        isAuthenticated={true}
+      />
     </header>
   );
 }
