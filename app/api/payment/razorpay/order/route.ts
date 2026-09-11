@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { plan } = await request.json();
+    const { plan, couponCode } = await request.json();
     const validPlans = ["pro", "premium", "career", "career-pack", "career_pack"];
     if (!plan || !validPlans.includes(plan)) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
@@ -27,7 +27,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const amount = getPlanAmount(plan as Exclude<Plan, "free">);
+    let amount = getPlanAmount(plan as Exclude<Plan, "free">);
+
+    if (couponCode) {
+      const { AUTHORIZED_COUPONS, calculateDiscount } = await import("@/lib/coupons");
+      const coupon = AUTHORIZED_COUPONS[String(couponCode).trim().toUpperCase()];
+      if (coupon) {
+        const { finalPrice } = calculateDiscount(amount, coupon);
+        amount = finalPrice;
+      }
+    }
+
     const amountInPaise = Math.round(amount * 100);
 
     if (amountInPaise < 100) {

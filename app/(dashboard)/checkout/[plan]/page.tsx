@@ -5,16 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Loader2,
-  QrCode,
   CheckCircle2,
-  Upload,
   ShieldCheck,
-  Smartphone,
   ArrowLeft,
-  Copy,
   Check,
   Zap,
   Tag,
@@ -23,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { initializeRazorpayPayment } from "@/lib/razorpay";
+import { createClient } from "@/lib/supabase/client";
 
 const PLAN_DETAILS: Record<string, { name: string; price: number; tagline: string }> = {
   pro: { name: "Vaylo Pro", price: 99, tagline: "Unlimited resume AI, downloads & cover letters" },
@@ -32,25 +28,25 @@ const PLAN_DETAILS: Record<string, { name: string; price: number; tagline: strin
   career_pack: { name: "Vaylo Career Pack", price: 499, tagline: "Complete placement pack with 1-on-1 AI review" },
 };
 
-type OrderData = {
-  paymentId: string;
-  ref: string;
-  amount: number;
-  upiId?: string;
-  upiLink: string;
-  qrUrl: string;
-};
-
 export default function CheckoutPage() {
   const params = useParams();
   const router = useRouter();
   const plan = String(params.plan || "").toLowerCase();
   const planInfo = PLAN_DETAILS[plan];
 
-  const [order, setOrder] = useState<OrderData | null>(null);
-  const [creating, setCreating] = useState(true);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  // User Profile
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then((res: any) => {
+      if (res?.data?.user) {
+        setEmail(res.data.user.email || "");
+        setName(res.data.user.user_metadata?.full_name || res.data.user.user_metadata?.name || "");
+      }
+    });
+  }, []);
 
   // Discount Coupon State
   const [couponInput, setCouponInput] = useState("");
@@ -65,17 +61,8 @@ export default function CheckoutPage() {
   } | null>(null);
 
   // Form State
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [utr, setUtr] = useState("");
-  const [screenshot, setScreenshot] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-
-  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [serverError, setServerError] = useState<string | null>(null);
 
   // Razorpay Standard Checkout state
   const [rzpLoading, setRzpLoading] = useState(false);
@@ -89,7 +76,10 @@ export default function CheckoutPage() {
       const res = await fetch("/api/payment/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({
+          plan,
+          couponCode: discountDetails?.code || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not initiate Razorpay payment");
@@ -103,7 +93,6 @@ export default function CheckoutPage() {
         orderId: data.orderId,
         customerName: name || "Customer",
         customerEmail: email || "",
-        customerPhone: phone || "",
         onSuccess: async (response) => {
           // Step 3: Verify payment signature on backend
           try {
@@ -120,7 +109,7 @@ export default function CheckoutPage() {
             });
             const verifyData = await verifyRes.json();
             if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
-            // Show the same success screen as UPI
+            // Show instant success screen
             setUtr(`RZP_${response.razorpay_payment_id}`);
             setSubmitted(true);
           } catch (err: any) {
@@ -133,55 +122,14 @@ export default function CheckoutPage() {
           setRzpError(error?.description || error?.reason || "Payment failed. Please try again.");
           setRzpLoading(false);
         },
+        onDismiss: () => {
+          setRzpLoading(false);
+        },
       });
     } catch (err: any) {
       setRzpError(err.message || "Something went wrong. Please try again.");
       setRzpLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (!planInfo) return;
-
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/payment/upi/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Could not start payment");
-        if (!cancelled) setOrder(data);
-      } catch (e: any) {
-        if (!cancelled) setCreateError(e.message || "Something went wrong. Please try again.");
-      } finally {
-        if (!cancelled) setCreating(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [plan, planInfo]);
-
-  if (!planInfo) {
-    return (
-      <div className="max-w-xl mx-auto py-20 text-center">
-        <h1 className="text-2xl font-bold text-text-primary mb-2">Plan not found</h1>
-        <p className="text-text-secondary mb-6">Please choose a valid plan to continue.</p>
-        <Link href="/pricing">
-          <Button>Back to pricing</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  const handleCopyUpi = () => {
-    navigator.clipboard.writeText("jattshiv32@okaxis");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
   };
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
@@ -215,72 +163,12 @@ export default function CheckoutPage() {
           finalPrice: data.finalPrice,
           description: data.description,
         });
-        if (order) {
-          setOrder({
-            ...order,
-            amount: data.finalPrice,
-            upiLink: data.upiLink,
-            qrUrl: data.qrUrl,
-          });
-        }
         setCouponSuccess(`Coupon '${data.coupon}' applied! You saved ₹${data.discountAmount}.`);
       }
     } catch (err: any) {
       setCouponError(err.message || "Could not apply coupon code.");
     } finally {
       setApplyingCoupon(false);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setScreenshot(file);
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    } else {
-      setPreview(null);
-    }
-  };
-
-  const validate = () => {
-    const errors: Record<string, string> = {};
-    const cleanUtr = utr.trim().replace(/\s+/g, "");
-
-    if (!name.trim() || name.trim().length < 2) errors.name = "Enter your full name";
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = "Enter a valid email address";
-
-    if (!cleanUtr || cleanUtr.length < 4) {
-      errors.utr = "Enter a valid 12-digit UPI UTR number from GPay / PhonePe";
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setServerError(null);
-    if (!validate()) return;
-
-    setSubmitting(true);
-    try {
-      const fd = new FormData();
-      fd.append("paymentId", order?.paymentId || `pay_${Date.now()}`);
-      fd.append("utr", utr.trim().replace(/\s+/g, ""));
-      fd.append("customerName", name.trim());
-      fd.append("customerEmail", email.trim());
-      fd.append("customerPhone", phone.trim());
-      fd.append("plan", plan);
-      if (screenshot) fd.append("screenshot", screenshot);
-
-      const res = await fetch("/api/payment/upi/submit", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not complete plan activation");
-      setSubmitted(true);
-    } catch (e: any) {
-      setServerError(e.message || "Something went wrong. Please try again.");
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -362,7 +250,7 @@ export default function CheckoutPage() {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.4fr] gap-6">
-        {/* Order summary + QR Code */}
+        {/* Left Column: Order Summary Card */}
         <div className="space-y-6">
           <Card className="bg-gradient-to-br from-indigo-500/10 via-surface to-surface border-indigo-500/20 shadow-lg">
             <CardHeader>
@@ -398,44 +286,94 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* ── Razorpay Standard Checkout ── */}
+          {/* Feature Highlights */}
+          <Card className="border-border bg-surface shadow-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-white flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-400" />
+                What&apos;s Included in {planInfo.name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2.5 text-xs text-slate-300">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Unlimited AI Resume ATS Enhancements &amp; Bullet Fixes</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Unwatermarked PDF &amp; DOCX Export Downloads</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Cover Letter Generator &amp; LinkedIn Optimizer</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Instant activation right after successful payment</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column: Razorpay Checkout Button + Coupon Card */}
+        <div className="space-y-6">
+          {/* ── Razorpay Instant Checkout Card ── */}
           <Card className="border-indigo-500/40 bg-gradient-to-br from-indigo-600/10 via-surface to-surface shadow-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base text-white">
-                <CreditCard className="w-5 h-5 text-indigo-400" />
-                Pay Instantly with Razorpay
+              <CardTitle className="flex items-center justify-between text-base text-white">
+                <span className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-indigo-400" />
+                  Instant Online Checkout
+                </span>
+                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Instant Activation
+                </span>
               </CardTitle>
               <CardDescription className="text-xs text-text-secondary">
-                Card, UPI, Net Banking, Wallet — all in one secure checkout. Instant activation.
+                Pay securely via UPI (GPay, PhonePe, Paytm), Credit/Debit Card, Net Banking, or Wallets.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
+              <div className="p-3.5 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-slate-400">Total payable amount</p>
+                  <p className="text-xl font-bold text-emerald-400">₹{effectivePrice}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium">
+                    Verified Razorpay Gateway
+                  </span>
+                </div>
+              </div>
+
               <Button
-                className="w-full h-12 text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-2 shadow-lg rounded-xl"
+                className="w-full h-12 text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-2 shadow-lg rounded-xl transition-all"
                 disabled={rzpLoading}
                 onClick={handleRazorpayPay}
               >
                 {rzpLoading ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Launching Razorpay…</>
                 ) : (
                   <><CreditCard className="w-4 h-4" /> Pay ₹{effectivePrice} with Razorpay</>
                 )}
               </Button>
 
               {rzpError && (
-                <p className="text-[11px] text-rose-400 font-medium text-center">{rzpError}</p>
+                <p className="text-xs text-rose-400 font-medium text-center bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-lg">
+                  {rzpError}
+                </p>
               )}
 
-              <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400">
+              <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Secured by Razorpay · 256-bit TLS encryption</span>
+                <span>256-bit TLS encrypted · Powered by Razorpay Standard</span>
               </div>
 
               <div className="flex flex-wrap justify-center gap-2 pt-1">
-                {["VISA", "Mastercard", "UPI", "Net Banking", "Wallet"].map((method) => (
+                {["Google Pay", "PhonePe", "Paytm", "UPI", "Cards", "Net Banking"].map((method) => (
                   <span
                     key={method}
-                    className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[10px] text-slate-300 font-medium"
+                    className="px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-[11px] text-slate-300 font-medium"
                   >
                     {method}
                   </span>
@@ -444,104 +382,22 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 text-xs text-text-muted">
-            <div className="flex-1 h-px bg-border" />
-            <span>or pay manually via UPI</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          {/* QR Code & Direct UPI */}
-          <Card className="border-border bg-surface shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <QrCode className="w-5 h-5 text-amber-400" />
-                Pay ₹{effectivePrice} via Any UPI App
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-              {creating && (
-                <div className="flex flex-col items-center gap-2 py-10 text-text-muted">
-                  <Loader2 className="w-6 h-6 animate-spin text-accent" />
-                  <span className="text-sm">Generating payment details...</span>
-                </div>
-              )}
-
-              {createError && (
-                <div className="text-center py-6">
-                  <p className="text-sm text-red-500 mb-3">{createError}</p>
-                  <Button variant="outline" onClick={() => location.reload()}>
-                    Try again
-                  </Button>
-                </div>
-              )}
-
-              {order && (
-                <>
-                  {/* Clean QR Code */}
-                  <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={order.qrUrl} alt="UPI QR code" width={200} height={200} />
-                  </div>
-
-                  {/* Copy UPI VPA Section */}
-                  <div className="w-full bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-                    <p className="text-[11px] text-slate-400 text-center font-semibold">Official Vaylo AI UPI ID:</p>
-                    <div className="flex items-center justify-between bg-slate-900 px-3.5 py-2.5 rounded-lg border border-slate-800">
-                      <span className="font-mono text-sm font-bold text-amber-300">jattshiv32@okaxis</span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleCopyUpi}
-                        className="h-8 text-xs gap-1.5 text-indigo-400 hover:text-indigo-300 hover:bg-slate-800 font-bold"
-                      >
-                        {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                        <span>{copied ? "Copied!" : "Copy VPA"}</span>
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Deep Link Open Button */}
-                  <div className="w-full space-y-2">
-                    <a href={order.upiLink} className="w-full block">
-                      <Button className="w-full h-11 gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg">
-                        <Smartphone className="w-4 h-4" />
-                        Open GPay / PhonePe / Paytm App
-                      </Button>
-                    </a>
-
-                    <div className="p-3.5 bg-slate-900/80 rounded-xl border border-slate-800 text-[11px] text-slate-300 space-y-1.5">
-                      <p className="font-bold text-amber-300">📲 Easy 2-Step Payment Guide:</p>
-                      <p className="leading-relaxed">
-                        1. Tap <strong className="text-white">Copy VPA</strong> or scan QR code on GPay / PhonePe.<br />
-                        2. Pay <strong className="text-emerald-300">₹{effectivePrice}</strong>, copy the 12-digit UTR reference number from GPay history, and paste it on the right!
-                      </p>
-                    </div>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column: Coupon Code Input + UTR Proof Form */}
-        <div className="space-y-6">
           {/* DISCOUNT / PROMO CODE CARD */}
-          <Card className="border-indigo-500/30 bg-surface shadow-xl">
+          <Card className="border-border bg-surface shadow-xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2 text-white">
                 <Tag className="w-5 h-5 text-indigo-400" />
-                Have a Promo or Discount Coupon?
+                Have a Promo or Coupon Code?
               </CardTitle>
               <CardDescription className="text-xs text-text-secondary">
-                Enter your promotional code to apply a price discount to your order.
+                Enter your coupon code to apply an instant discount before paying.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleApplyCoupon} className="space-y-3">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Enter Coupon Code"
+                    placeholder="ENTER COUPON CODE"
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                     className="bg-surface-elevated border-indigo-500/30 text-xs font-mono font-bold tracking-wider text-amber-300 placeholder:text-slate-500 uppercase"
@@ -560,139 +416,12 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* UTR Payment Proof Form */}
-          <Card className="border-border bg-surface shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center justify-between">
-                <span>Payment Proof &amp; Verification</span>
-                <span className="text-xs text-amber-400 font-bold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Verification Required
-                </span>
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Enter candidate details and your 12-digit UPI UTR reference number from GPay/PhonePe to submit for verification.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1">
-                  <Label htmlFor="name" className="text-xs font-semibold">Candidate Full Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="Your Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="bg-surface-elevated border-border text-xs"
-                  />
-                  {formErrors.name && <p className="text-[11px] text-rose-400 font-medium">{formErrors.name}</p>}
-                </div>
-
-                <div className="space-y-1">
-                  <Label htmlFor="email" className="text-xs font-semibold">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-surface-elevated border-border text-xs"
-                  />
-                  {formErrors.email && <p className="text-[11px] text-rose-400 font-medium">{formErrors.email}</p>}
-                </div>
-
-                <div className="space-y-1">
-                  <Label htmlFor="phone" className="text-xs font-semibold">Phone Number (Optional)</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="bg-surface-elevated border-border text-xs"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <Label htmlFor="utr" className="text-xs font-semibold">12-Digit UPI UTR Reference Number *</Label>
-                  <Input
-                    id="utr"
-                    placeholder="e.g. 421098765432"
-                    value={utr}
-                    onChange={(e) => setUtr(e.target.value)}
-                    className="bg-surface-elevated border-border text-xs font-mono tracking-wider font-bold text-amber-300"
-                  />
-                  {formErrors.utr ? (
-                    <p className="text-[11px] text-rose-400 font-medium">{formErrors.utr}</p>
-                  ) : (
-                    <p className="text-[10px] text-text-muted">
-                      Enter the 12-digit UTR from GPay / PhonePe history. Your payment will be manually verified before access is activated.
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  <Label htmlFor="screenshot" className="text-xs font-semibold">Payment Screenshot (Optional)</Label>
-                  <label
-                    htmlFor="screenshot"
-                    className="flex flex-col items-center justify-center gap-1.5 border border-dashed border-border rounded-xl p-4 cursor-pointer hover:border-accent/50 transition-colors text-center bg-surface-elevated"
-                  >
-                    {preview ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={preview} alt="Screenshot preview" className="max-h-36 rounded object-contain" />
-                    ) : (
-                      <>
-                        <Upload className="w-5 h-5 text-text-muted" />
-                        <span className="text-xs text-text-secondary">Click to upload image (max 5MB)</span>
-                      </>
-                    )}
-                    <input
-                      id="screenshot"
-                      type="file"
-                      accept="image/png,image/jpeg,image/jpg,image/webp"
-                      className="hidden"
-                      onChange={handleFileChange}
-                    />
-                  </label>
-                </div>
-
-                {/* Legal & Refund Notice */}
-                <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] text-slate-300 space-y-2">
-                  <div className="flex items-start gap-2">
-                    <input
-                      id="checkout-terms"
-                      type="checkbox"
-                      required
-                      className="mt-0.5 rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <label htmlFor="checkout-terms" className="cursor-pointer text-[11px] leading-tight select-none">
-                      I agree to the <Link href="/terms" target="_blank" className="text-indigo-400 underline font-semibold">Terms of Service</Link> and understand the <Link href="/refund" target="_blank" className="text-indigo-400 underline font-semibold">Refund Policy</Link>.
-                    </label>
-                  </div>
-                  <p className="text-[10px] text-slate-400 leading-normal border-t border-slate-800/80 pt-2">
-                    Refund eligibility depends on usage of paid AI features. Please review our <Link href="/refund" target="_blank" className="text-amber-300 underline font-medium">Refund Policy</Link> before purchasing.
-                  </p>
-                </div>
-
-                {serverError && <p className="text-xs text-rose-400 font-medium">{serverError}</p>}
-
-                <Button
-                  type="submit"
-                  className="w-full h-11 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 shadow-md"
-                  disabled={submitting}
-                >
-                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit Payment for Verification"}
-                </Button>
-
-                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
-                  <Link href="/privacy" target="_blank" className="hover:underline">Privacy Policy</Link>
-                  <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                    <ShieldCheck className="w-3.5 h-3.5" /> 256-Bit SSL Encrypted
-                  </span>
-                  <Link href="/terms" target="_blank" className="hover:underline">Terms of Service</Link>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+          {/* Legal & Guarantee Links */}
+          <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+            <Link href="/privacy" target="_blank" className="hover:underline">Privacy Policy</Link>
+            <Link href="/refund" target="_blank" className="hover:underline">Refund Policy</Link>
+            <Link href="/terms" target="_blank" className="hover:underline">Terms of Service</Link>
+          </div>
         </div>
       </div>
     </div>

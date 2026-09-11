@@ -29,6 +29,7 @@ export interface RazorpayCheckoutOptions {
   customerPhone?: string;
   onSuccess: (response: { razorpay_payment_id: string; razorpay_order_id?: string; razorpay_signature?: string }) => void;
   onFailure: (error: any) => void;
+  onDismiss?: () => void;
 }
 
 export async function initializeRazorpayPayment(options: RazorpayCheckoutOptions) {
@@ -66,6 +67,9 @@ export async function initializeRazorpayPayment(options: RazorpayCheckoutOptions
     modal: {
       ondismiss: function () {
         console.log("Razorpay checkout modal closed by candidate.");
+        if (options.onDismiss) {
+          options.onDismiss();
+        }
       },
     },
   };
