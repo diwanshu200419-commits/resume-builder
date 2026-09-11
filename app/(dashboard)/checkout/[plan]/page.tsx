@@ -19,8 +19,10 @@ import {
   Zap,
   Tag,
   Sparkles,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
+import { initializeRazorpayPayment } from "@/lib/razorpay";
 
 const PLAN_DETAILS: Record<string, { name: string; price: number; tagline: string }> = {
   pro: { name: "Vaylo Pro", price: 99, tagline: "Unlimited resume AI, downloads & cover letters" },
@@ -74,6 +76,69 @@ export default function CheckoutPage() {
   const [submitted, setSubmitted] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
+
+  // Razorpay Standard Checkout state
+  const [rzpLoading, setRzpLoading] = useState(false);
+  const [rzpError, setRzpError] = useState<string | null>(null);
+
+  const handleRazorpayPay = async () => {
+    setRzpError(null);
+    setRzpLoading(true);
+    try {
+      // Step 1: Create Razorpay order on backend
+      const res = await fetch("/api/payment/razorpay/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not initiate Razorpay payment");
+
+      // Step 2: Open Razorpay Standard Checkout modal
+      await initializeRazorpayPayment({
+        key: data.key,
+        amount: data.amount,
+        plan,
+        planName: planInfo.name,
+        orderId: data.orderId,
+        customerName: name || "Customer",
+        customerEmail: email || "",
+        customerPhone: phone || "",
+        onSuccess: async (response) => {
+          // Step 3: Verify payment signature on backend
+          try {
+            const verifyRes = await fetch("/api/payment/razorpay/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                plan,
+                amount: data.amount,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
+            // Show the same success screen as UPI
+            setUtr(`RZP_${response.razorpay_payment_id}`);
+            setSubmitted(true);
+          } catch (err: any) {
+            setRzpError(err.message || "Payment verification failed. Contact support with your payment ID.");
+          } finally {
+            setRzpLoading(false);
+          }
+        },
+        onFailure: (error) => {
+          setRzpError(error?.description || error?.reason || "Payment failed. Please try again.");
+          setRzpLoading(false);
+        },
+      });
+    } catch (err: any) {
+      setRzpError(err.message || "Something went wrong. Please try again.");
+      setRzpLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!planInfo) return;
@@ -223,33 +288,41 @@ export default function CheckoutPage() {
 
   if (submitted) {
     const isCoupon = utr.startsWith("COUPON_");
+    const isRazorpay = utr.startsWith("RZP_");
+    const isInstantSuccess = isCoupon || isRazorpay;
 
     return (
       <div className="max-w-xl mx-auto py-16">
-        <Card className={`border-surface shadow-2xl ${isCoupon ? "border-emerald-500/30" : "border-amber-500/30"}`}>
+        <Card className={`border-surface shadow-2xl ${isInstantSuccess ? "border-emerald-500/30" : "border-amber-500/30"}`}>
           <CardContent className="flex flex-col items-center text-center gap-4 py-12 px-6">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border ${isCoupon ? "bg-emerald-500/15 border-emerald-500/30" : "bg-amber-500/15 border-amber-500/30"}`}>
-              {isCoupon ? (
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border ${isInstantSuccess ? "bg-emerald-500/15 border-emerald-500/30" : "bg-amber-500/15 border-amber-500/30"}`}>
+              {isInstantSuccess ? (
                 <CheckCircle2 className="w-8 h-8 text-emerald-400" />
               ) : (
                 <Zap className="w-8 h-8 text-amber-400" />
               )}
             </div>
             <h1 className="text-2xl font-bold text-text-primary">
-              {isCoupon ? "Coupon Verified — Plan Unlocked! 🎉" : "Payment Submitted — Verification Pending ⏳"}
+              {isCoupon
+                ? "Coupon Verified — Plan Unlocked! 🎉"
+                : isRazorpay
+                ? "Payment Successful — Plan Unlocked! 🎉"
+                : "Payment Submitted — Verification Pending ⏳"}
             </h1>
             <p className="text-sm text-text-secondary max-w-md leading-relaxed">
               {isCoupon ? (
                 <>Your <span className="font-bold text-emerald-400">{planInfo.name}</span> plan pass has been verified. All paid features are now active!</>
+              ) : isRazorpay ? (
+                <>Your Razorpay payment was verified and your <span className="font-bold text-emerald-400">{planInfo.name}</span> plan is now active! All features are unlocked immediately.</>
               ) : (
                 <>Payment submitted. Your payment is being verified. Please wait while our team confirms your transaction reference (Ref: <span className="font-mono text-amber-300 font-bold">{utr}</span>). You don&apos;t need to pay again.</>
               )}
             </p>
-            <div className={`p-4 rounded-xl text-xs text-left w-full space-y-1 ${isCoupon ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300" : "bg-slate-900 border border-slate-800 text-slate-300"}`}>
-              <p className={`font-bold ${isCoupon ? "text-emerald-200" : "text-amber-300"}`}>
-                {isCoupon ? "🚀 All Plan Features Unlocked:" : "ℹ️ Verification Details:"}
+            <div className={`p-4 rounded-xl text-xs text-left w-full space-y-1 ${isInstantSuccess ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300" : "bg-slate-900 border border-slate-800 text-slate-300"}`}>
+              <p className={`font-bold ${isInstantSuccess ? "text-emerald-200" : "text-amber-300"}`}>
+                {isInstantSuccess ? "🚀 All Plan Features Unlocked:" : "ℹ️ Verification Details:"}
               </p>
-              {isCoupon ? (
+              {isInstantSuccess ? (
                 <>
                   <p>• 1-Click Auto-Fix Bullets &amp; Keyword Optimizer</p>
                   <p>• Unwatermarked PDF &amp; DOCX Resume Exports</p>
@@ -277,6 +350,7 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
 
   return (
     <div className="max-w-4xl mx-auto py-6 sm:py-10">
@@ -323,6 +397,59 @@ export default function CheckoutPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* ── Razorpay Standard Checkout ── */}
+          <Card className="border-indigo-500/40 bg-gradient-to-br from-indigo-600/10 via-surface to-surface shadow-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-white">
+                <CreditCard className="w-5 h-5 text-indigo-400" />
+                Pay Instantly with Razorpay
+              </CardTitle>
+              <CardDescription className="text-xs text-text-secondary">
+                Card, UPI, Net Banking, Wallet — all in one secure checkout. Instant activation.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                className="w-full h-12 text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white gap-2 shadow-lg rounded-xl"
+                disabled={rzpLoading}
+                onClick={handleRazorpayPay}
+              >
+                {rzpLoading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
+                ) : (
+                  <><CreditCard className="w-4 h-4" /> Pay ₹{effectivePrice} with Razorpay</>
+                )}
+              </Button>
+
+              {rzpError && (
+                <p className="text-[11px] text-rose-400 font-medium text-center">{rzpError}</p>
+              )}
+
+              <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Secured by Razorpay · 256-bit TLS encryption</span>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-2 pt-1">
+                {["VISA", "Mastercard", "UPI", "Net Banking", "Wallet"].map((method) => (
+                  <span
+                    key={method}
+                    className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[10px] text-slate-300 font-medium"
+                  >
+                    {method}
+                  </span>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 text-xs text-text-muted">
+            <div className="flex-1 h-px bg-border" />
+            <span>or pay manually via UPI</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
 
           {/* QR Code & Direct UPI */}
           <Card className="border-border bg-surface shadow-xl">

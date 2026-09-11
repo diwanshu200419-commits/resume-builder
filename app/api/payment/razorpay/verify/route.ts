@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
+import { createServiceClient } from "@/lib/supabase/server";
 import { upgradeUserPlan } from "@/lib/upgrade-user-plan";
 import { createNotification } from "@/lib/notifications";
 import crypto from "crypto";
@@ -14,48 +15,69 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, plan = "pro" } = body;
 
-    if (!razorpay_payment_id) {
-      return NextResponse.json({ error: "Missing razorpay_payment_id" }, { status: 400 });
-    }
-
-    const razorpaySecret = process.env.RAZORPAY_KEY_SECRET;
-
-    // SECURITY: If Razorpay is not configured, this endpoint must be disabled.
-    // Do NOT allow plan upgrades without verified payment signature.
-    if (!razorpaySecret) {
-      console.warn("[Razorpay Verify] RAZORPAY_KEY_SECRET not configured — endpoint disabled.");
+    // Validate required fields
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
       return NextResponse.json(
-        { error: "Razorpay payment verification is not currently active. Please use UPI payment." },
-        { status: 503 }
-      );
-    }
-
-    if (razorpaySecret && razorpay_order_id && razorpay_signature) {
-      const generatedSignature = crypto
-        .createHmac("sha256", razorpaySecret)
-        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-        .digest("hex");
-
-      if (generatedSignature !== razorpay_signature) {
-        return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
-      }
-    } else if (!razorpay_order_id || !razorpay_signature) {
-      // Missing required Razorpay fields — reject
-      return NextResponse.json(
-        { error: "Missing required Razorpay payment fields" },
+        { error: "Missing required fields: razorpay_payment_id, razorpay_order_id, razorpay_signature" },
         { status: 400 }
       );
     }
 
-    // Upgrade profile & allot all plan features instantly
-    await upgradeUserPlan(profile.id, plan, "manual_upi", razorpay_payment_id);
+    const razorpaySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!razorpaySecret) {
+      console.warn("[Razorpay Verify] RAZORPAY_KEY_SECRET not configured — endpoint disabled.");
+      return NextResponse.json(
+        { error: "Razorpay payment verification is not currently active." },
+        { status: 503 }
+      );
+    }
 
-    // Dispatch In-App Notification to candidate
+    // HMAC-SHA256 signature verification
+    const generatedSignature = crypto
+      .createHmac("sha256", razorpaySecret)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (generatedSignature !== razorpay_signature) {
+      console.error("[Razorpay Verify] Signature mismatch — payment rejected.");
+      return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
+    }
+
+    // Persist payment records
+    const supabase = await createServiceClient();
+
+    await supabase.from("payments").upsert({
+      user_id: profile.id,
+      utr: razorpay_payment_id,
+      upi_ref: razorpay_order_id,
+      plan,
+      amount: body.amount || 0,
+      currency: "INR",
+      status: "completed",
+      reviewed_at: new Date().toISOString(),
+    });
+
+    await supabase.from("payment_requests").upsert({
+      user_id: profile.id,
+      user_email: profile.email || "",
+      customer_name: profile.full_name || "Customer",
+      requested_plan: plan,
+      amount_claimed: body.amount || 0,
+      utr_number: razorpay_payment_id,
+      status: "approved",
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: "RAZORPAY_AUTO_CHECKOUT",
+    });
+
+    // Grant plan access
+    await upgradeUserPlan(profile.id, plan, "razorpay", razorpay_payment_id);
+
+    // In-app notification
     await createNotification({
       userId: profile.id,
       type: "payment_approved",
-      title: `Payment Success — ${plan.toUpperCase()} Unlocked! 🎉`,
-      body: `Your payment (ID: ${razorpay_payment_id}) has been processed successfully. All features of the ${plan.toUpperCase()} plan are now active on your account!`,
+      title: `Payment Confirmed — ${plan.toUpperCase()} Unlocked! 🎉`,
+      body: `Your Razorpay payment (ID: ${razorpay_payment_id}) was verified. All ${plan.toUpperCase()} features are now active!`,
       link: "/dashboard",
     });
 
