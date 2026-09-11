@@ -76,7 +76,7 @@ const plans = [
     ],
     cta: "Unlock Premium OS",
     popular: true,
-    cardBg: "border-indigo-500/50 bg-gradient-to-b from-indigo-950/40 via-slate-950 to-slate-950 shadow-2xl shadow-indigo-500/10",
+    cardBg: "border-indigo-500/50 bg-gradient-to-b from-indigo-500/5 via-surface to-surface shadow-2xl shadow-indigo-500/10",
   },
   {
     id: "career-pack" as Plan,
@@ -85,7 +85,7 @@ const plans = [
     period: "one-time",
     description: "Lifetime AI Career Toolkit with no monthly subscription",
     icon: Award,
-    badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    badgeColor: "bg-amber-500/20 text-amber-500 dark:text-amber-400 border-amber-500/30",
     features: [
       { text: "Everything in Premium AI OS", included: true },
       { text: "Lifetime Access to Career Pack Features", included: true },
@@ -98,7 +98,7 @@ const plans = [
     ],
     cta: "Get Lifetime Access",
     popular: false,
-    cardBg: "border-amber-500/30 bg-slate-950/80",
+    cardBg: "border-amber-500/40 bg-gradient-to-b from-amber-500/5 via-surface to-surface shadow-xl",
   },
 ];
 
@@ -109,7 +109,7 @@ const faqs = [
   },
   {
     q: "What payment methods are supported?",
-    a: "Payment is currently available via UPI (Google Pay, PhonePe, Paytm, CRED, and any UPI app). After completing your UPI payment, submit your 12-digit UTR reference number. Your plan will be activated after our team manually verifies the transaction — typically within a few hours.",
+    a: "We support all major payment methods via secure Razorpay checkout: UPI (Google Pay, PhonePe, Paytm, CRED), Credit/Debit Cards (Visa, Mastercard, RuPay), Net Banking, and Wallets. Your plan is activated instantly upon payment.",
   },
   {
     q: "How does Lifetime Access work on Career Pack?",

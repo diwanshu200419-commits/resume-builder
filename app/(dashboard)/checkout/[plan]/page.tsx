@@ -185,9 +185,9 @@ export default function CheckoutPage() {
           <CardContent className="flex flex-col items-center text-center gap-4 py-12 px-6">
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border ${isInstantSuccess ? "bg-emerald-500/15 border-emerald-500/30" : "bg-amber-500/15 border-amber-500/30"}`}>
               {isInstantSuccess ? (
-                <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400" />
               ) : (
-                <Zap className="w-8 h-8 text-amber-400" />
+                <Zap className="w-8 h-8 text-amber-500 dark:text-amber-400" />
               )}
             </div>
             <h1 className="text-2xl font-bold text-text-primary">
@@ -199,30 +199,30 @@ export default function CheckoutPage() {
             </h1>
             <p className="text-sm text-text-secondary max-w-md leading-relaxed">
               {isCoupon ? (
-                <>Your <span className="font-bold text-emerald-400">{planInfo.name}</span> plan pass has been verified. All paid features are now active!</>
+                <>Your <span className="font-bold text-emerald-600 dark:text-emerald-400">{planInfo.name}</span> plan pass has been verified. All paid features are now active!</>
               ) : isRazorpay ? (
-                <>Your Razorpay payment was verified and your <span className="font-bold text-emerald-400">{planInfo.name}</span> plan is now active! All features are unlocked immediately.</>
+                <>Your Razorpay payment was verified and your <span className="font-bold text-emerald-600 dark:text-emerald-400">{planInfo.name}</span> plan is now active! All features are unlocked immediately.</>
               ) : (
-                <>Payment submitted. Your payment is being verified. Please wait while our team confirms your transaction reference (Ref: <span className="font-mono text-amber-300 font-bold">{utr}</span>). You don&apos;t need to pay again.</>
+                <>Payment submitted. Your payment is being verified. Please wait while our team confirms your transaction reference (Ref: <span className="font-mono text-amber-500 dark:text-amber-300 font-bold">{utr}</span>). You don&apos;t need to pay again.</>
               )}
             </p>
-            <div className={`p-4 rounded-xl text-xs text-left w-full space-y-1 ${isInstantSuccess ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300" : "bg-slate-900 border border-slate-800 text-slate-300"}`}>
-              <p className={`font-bold ${isInstantSuccess ? "text-emerald-200" : "text-amber-300"}`}>
+            <div className={`p-4 rounded-xl text-xs text-left w-full space-y-1.5 ${isInstantSuccess ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300" : "bg-surface-elevated border border-border text-text-secondary"}`}>
+              <p className={`font-bold ${isInstantSuccess ? "text-emerald-700 dark:text-emerald-200" : "text-amber-600 dark:text-amber-300"}`}>
                 {isInstantSuccess ? "🚀 All Plan Features Unlocked:" : "ℹ️ Verification Details:"}
               </p>
               {isInstantSuccess ? (
-                <>
+                <div className="space-y-1 text-xs text-text-secondary">
                   <p>• 1-Click Auto-Fix Bullets &amp; Keyword Optimizer</p>
                   <p>• Unwatermarked PDF &amp; DOCX Resume Exports</p>
                   <p>• LinkedIn Branding Studio &amp; AI Cover Letters</p>
                   <p>• STAR Voice Practice &amp; Recruiter Eye-Screen Simulation</p>
-                </>
+                </div>
               ) : (
                 <>
-                  <p>• Transaction Reference: <span className="font-mono text-amber-300 font-bold">{utr}</span></p>
-                  <p>• Plan Requested: <span className="font-bold text-white">{planInfo.name}</span></p>
-                  <p>• Status: <span className="text-amber-400 font-bold">Pending Admin / Webhook Verification</span></p>
-                  <p className="text-[11px] text-slate-400 pt-1">Your features will unlock automatically upon verification. You may return to the dashboard anytime.</p>
+                  <p>• Transaction Reference: <span className="font-mono text-amber-500 dark:text-amber-300 font-bold">{utr}</span></p>
+                  <p>• Plan Requested: <span className="font-bold text-text-primary">{planInfo.name}</span></p>
+                  <p>• Status: <span className="text-amber-500 dark:text-amber-400 font-bold">Pending Admin / Webhook Verification</span></p>
+                  <p className="text-[11px] text-text-muted pt-1">Your features will unlock automatically upon verification. You may return to the dashboard anytime.</p>
                 </>
               )}
             </div>
@@ -254,16 +254,16 @@ export default function CheckoutPage() {
         <div className="space-y-6">
           <Card className="bg-gradient-to-br from-indigo-500/10 via-surface to-surface border-indigo-500/20 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-xl font-bold text-white">
+              <CardTitle className="flex items-center justify-between text-xl font-bold text-text-primary">
                 <span>{planInfo.name}</span>
                 <div className="text-right">
                   {discountDetails ? (
                     <div className="flex flex-col items-end">
-                      <span className="text-xs line-through text-slate-400">₹{planInfo.price}</span>
-                      <span className="text-3xl font-extrabold text-emerald-400">₹{discountDetails.finalPrice}</span>
+                      <span className="text-xs line-through text-text-muted">₹{planInfo.price}</span>
+                      <span className="text-3xl font-extrabold text-emerald-500 dark:text-emerald-400">₹{discountDetails.finalPrice}</span>
                     </div>
                   ) : (
-                    <span className="text-3xl font-extrabold text-amber-300">₹{planInfo.price}</span>
+                    <span className="text-3xl font-extrabold text-indigo-600 dark:text-amber-300">₹{planInfo.price}</span>
                   )}
                 </div>
               </CardTitle>
@@ -271,11 +271,11 @@ export default function CheckoutPage() {
             <CardContent>
               <p className="text-sm text-text-secondary">{planInfo.tagline}</p>
               {discountDetails && (
-                <div className="mt-3 p-2 bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-xs text-emerald-300 flex items-center justify-between">
+                <div className="mt-3 p-2.5 bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-xs text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
                   <span className="font-bold flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Coupon '{discountDetails.code}' Applied
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Coupon '{discountDetails.code}' Applied
                   </span>
-                  <span className="font-mono font-bold text-emerald-400">-₹{discountDetails.discountAmount} OFF</span>
+                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">-₹{discountDetails.discountAmount} OFF</span>
                 </div>
               )}
               <p className="text-xs text-text-muted mt-2 font-medium">
@@ -289,26 +289,26 @@ export default function CheckoutPage() {
           {/* Feature Highlights */}
           <Card className="border-border bg-surface shadow-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base text-white flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-400" />
+              <CardTitle className="text-base text-text-primary flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                 What&apos;s Included in {planInfo.name}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2.5 text-xs text-slate-300">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CardContent className="space-y-3 text-xs text-text-secondary">
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <span>Unlimited AI Resume ATS Enhancements &amp; Bullet Fixes</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <span>Unwatermarked PDF &amp; DOCX Export Downloads</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <span>Cover Letter Generator &amp; LinkedIn Optimizer</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <span>Instant activation right after successful payment</span>
               </div>
             </CardContent>
@@ -318,14 +318,14 @@ export default function CheckoutPage() {
         {/* Right Column: Razorpay Checkout Button + Coupon Card */}
         <div className="space-y-6">
           {/* ── Razorpay Instant Checkout Card ── */}
-          <Card className="border-indigo-500/40 bg-gradient-to-br from-indigo-600/10 via-surface to-surface shadow-xl">
+          <Card className="border-indigo-500/30 bg-gradient-to-br from-indigo-600/5 via-surface to-surface shadow-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center justify-between text-base text-white">
-                <span className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-indigo-400" />
+              <CardTitle className="flex items-center justify-between text-base text-text-primary">
+                <span className="flex items-center gap-2 font-bold">
+                  <CreditCard className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                   Instant Online Checkout
                 </span>
-                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" /> Instant Activation
                 </span>
               </CardTitle>
@@ -334,13 +334,13 @@ export default function CheckoutPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-3.5 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div className="p-4 bg-surface-elevated rounded-xl border border-border flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-400">Total payable amount</p>
-                  <p className="text-xl font-bold text-emerald-400">₹{effectivePrice}</p>
+                  <p className="text-xs text-text-muted">Total payable amount</p>
+                  <p className="text-2xl font-bold text-indigo-600 dark:text-emerald-400">₹{effectivePrice}</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium">
+                  <span className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">
                     Verified Razorpay Gateway
                   </span>
                 </div>
@@ -359,13 +359,13 @@ export default function CheckoutPage() {
               </Button>
 
               {rzpError && (
-                <p className="text-xs text-rose-400 font-medium text-center bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-lg">
+                <p className="text-xs text-rose-500 dark:text-rose-400 font-medium text-center bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-lg">
                   {rzpError}
                 </p>
               )}
 
-              <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="flex items-center justify-center gap-2 text-[11px] text-text-muted">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                 <span>256-bit TLS encrypted · Powered by Razorpay Standard</span>
               </div>
 
@@ -373,7 +373,7 @@ export default function CheckoutPage() {
                 {["Google Pay", "PhonePe", "Paytm", "UPI", "Cards", "Net Banking"].map((method) => (
                   <span
                     key={method}
-                    className="px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-[11px] text-slate-300 font-medium"
+                    className="px-2.5 py-1 rounded-md bg-surface-elevated border border-border text-[11px] text-text-secondary font-medium"
                   >
                     {method}
                   </span>
@@ -385,8 +385,8 @@ export default function CheckoutPage() {
           {/* DISCOUNT / PROMO CODE CARD */}
           <Card className="border-border bg-surface shadow-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2 text-white">
-                <Tag className="w-5 h-5 text-indigo-400" />
+              <CardTitle className="text-base flex items-center gap-2 text-text-primary font-bold">
+                <Tag className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                 Have a Promo or Coupon Code?
               </CardTitle>
               <CardDescription className="text-xs text-text-secondary">
@@ -400,7 +400,7 @@ export default function CheckoutPage() {
                     placeholder="ENTER COUPON CODE"
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                    className="bg-surface-elevated border-indigo-500/30 text-xs font-mono font-bold tracking-wider text-amber-300 placeholder:text-slate-500 uppercase"
+                    className="bg-surface-elevated border-border text-xs font-mono font-bold tracking-wider text-text-primary placeholder:text-text-muted uppercase"
                   />
                   <Button
                     type="submit"
@@ -410,17 +410,17 @@ export default function CheckoutPage() {
                     {applyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
                   </Button>
                 </div>
-                {couponError && <p className="text-[11px] text-rose-400 font-medium">{couponError}</p>}
-                {couponSuccess && <p className="text-[11px] text-emerald-400 font-medium">{couponSuccess}</p>}
+                {couponError && <p className="text-[11px] text-rose-500 dark:text-rose-400 font-medium">{couponError}</p>}
+                {couponSuccess && <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">{couponSuccess}</p>}
               </form>
             </CardContent>
           </Card>
 
           {/* Legal & Guarantee Links */}
-          <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-            <Link href="/privacy" target="_blank" className="hover:underline">Privacy Policy</Link>
-            <Link href="/refund" target="_blank" className="hover:underline">Refund Policy</Link>
-            <Link href="/terms" target="_blank" className="hover:underline">Terms of Service</Link>
+          <div className="flex items-center justify-between text-xs text-text-muted px-1">
+            <Link href="/privacy" target="_blank" className="hover:text-text-primary transition-colors">Privacy Policy</Link>
+            <Link href="/refund" target="_blank" className="hover:text-text-primary transition-colors">Refund Policy</Link>
+            <Link href="/terms" target="_blank" className="hover:text-text-primary transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>
