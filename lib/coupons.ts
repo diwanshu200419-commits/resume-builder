@@ -30,7 +30,7 @@ export interface CouponRedemptionRecord {
 }
 
 // In-memory fallback registry for development, testing, and migration bootstrapping
-const FALLBACK_COUPONS: Map<string, DBCoupon> = new Map([
+export const FALLBACK_COUPONS: Map<string, DBCoupon> = new Map([
   [
     "SAVE20",
     {
@@ -101,7 +101,15 @@ const FALLBACK_COUPONS: Map<string, DBCoupon> = new Map([
   ],
 ]);
 
-const FALLBACK_REDEMPTIONS: CouponRedemptionRecord[] = [];
+export const FALLBACK_REDEMPTIONS: CouponRedemptionRecord[] = [];
+
+export function addFallbackCoupon(coupon: DBCoupon): void {
+  FALLBACK_COUPONS.set(coupon.code.toUpperCase(), coupon);
+}
+
+export function getAllFallbackCoupons(): DBCoupon[] {
+  return Array.from(FALLBACK_COUPONS.values());
+}
 
 /**
  * Fetch a coupon by its unique code from Supabase DB, with graceful fallback.
