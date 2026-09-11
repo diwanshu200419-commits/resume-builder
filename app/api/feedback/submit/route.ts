@@ -84,8 +84,12 @@ export async function POST(request: NextRequest) {
 
       userName = name ? String(name).trim().slice(0, 100) : "Anonymous Visitor";
 
-      if (noReplyNeeded) {
-        userEmail = email ? String(email).trim().toLowerCase() : "anonymous@vayloai.online";
+      const isExplicitlyAnonymous = Boolean(noReplyNeeded);
+
+      if (isExplicitlyAnonymous) {
+        // Explicitly anonymous user: Do NOT store fake email like anonymous@vayloai.online.
+        // Store empty string / null so admin UI explicitly knows this user requested anonymity.
+        userEmail = email ? String(email).trim().toLowerCase() : "";
       } else {
         const candidateEmail = String(email || "").trim().toLowerCase();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -101,6 +105,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const isAnonymousSubmission = !userId && !userEmail;
+
     // 4. Persistence via Service-Role Client (supports both Auth & Anonymous inserts)
     let savedRecord: UserFeedbackRecord | null = null;
 
@@ -110,7 +116,7 @@ export async function POST(request: NextRequest) {
         .from("user_feedback")
         .insert({
           user_id: userId,
-          user_email: userEmail,
+          user_email: userEmail || "anonymous",
           category: cleanCategory,
           message: userName && !userId ? `[From: ${userName}] ${cleanMessage}` : cleanMessage,
           status: "open",
@@ -119,7 +125,11 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (!insertError && inserted) {
-        savedRecord = inserted as UserFeedbackRecord;
+        savedRecord = {
+          ...inserted,
+          is_anonymous: isAnonymousSubmission,
+          name: userName,
+        } as UserFeedbackRecord;
       } else if (insertError) {
         console.warn("[Feedback Submit] DB insert error, using fallback:", insertError.message);
       }
@@ -134,12 +144,36 @@ export async function POST(request: NextRequest) {
         user_id: userId,
         user_email: userEmail,
         name: userName,
+        is_anonymous: isAnonymousSubmission,
         category: cleanCategory,
         message: cleanMessage,
         status: "open",
         created_at: new Date().toISOString(),
       };
       addFallbackFeedback(savedRecord);
+    }
+
+    // 5. Trigger Realtime Notification for Admin Console
+    try {
+      const { createNotification } = await import("@/lib/notifications");
+      // Admin user IDs
+      const ADMIN_IDS = [
+        "cca59e48-cfba-44ca-9033-3d57bce2220c", // jattshiv32@gmail.com
+        "811b0310-f9bc-4cf2-83af-a61c901f3e25", // diwanshu200419@gmail.com
+      ];
+      for (const adminId of ADMIN_IDS) {
+        await createNotification({
+          userId: adminId,
+          type: "general",
+          title: `New Feedback: ${cleanCategory.toUpperCase()}`,
+          body: isAnonymousSubmission
+            ? `Anonymous visitor submitted: "${cleanMessage.slice(0, 80)}..."`
+            : `${userEmail || userName} submitted: "${cleanMessage.slice(0, 80)}..."`,
+          link: "/admin",
+        });
+      }
+    } catch (notifErr) {
+      console.warn("[Feedback Submit] Admin notification warning:", notifErr);
     }
 
     return NextResponse.json({

@@ -5,6 +5,7 @@ export interface UserFeedbackRecord {
   user_id: string | null;
   user_email: string;
   name?: string | null;
+  is_anonymous?: boolean;
   category: string; // 'bug' | 'billing' | 'feature' | 'complaint' | 'general'
   message: string;
   status: "open" | "in_progress" | "resolved" | "closed";

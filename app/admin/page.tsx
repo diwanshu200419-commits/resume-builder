@@ -234,6 +234,16 @@ export default function AdminPage() {
       )
       .on(
         "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" },
+        (payload: any) => {
+          if (payload?.new?.title?.includes("Feedback") || payload?.new?.title?.includes("Support")) {
+            setRealtimeNotification(`🔔 ${payload.new.title}: ${payload.new.body || ""}`);
+          }
+          fetchData();
+        }
+      )
+      .on(
+        "postgres_changes",
         { event: "INSERT", schema: "public", table: "profiles" },
         () => {
           fetchData();
@@ -1322,7 +1332,16 @@ export default function AdminPage() {
                             <span className="font-mono text-xs font-bold text-indigo-400">
                               #{item.ticket_ref || `VAY-${(feedbackId || "00000").slice(0, 5).toUpperCase()}`}
                             </span>
-                            <span className="font-bold text-text-primary text-xs">{item.user_email || "No email"}</span>
+                            {item.is_anonymous || !item.user_email || item.user_email === "anonymous" || item.user_email === "anonymous@vayloai.online" ? (
+                              <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 text-[10px] font-bold">
+                                🕵️ Anonymous (No Email)
+                              </Badge>
+                            ) : (
+                              <span className="font-bold text-text-primary text-xs">{item.user_email}</span>
+                            )}
+                            {item.name && item.name !== "Anonymous Visitor" && (
+                              <span className="text-xs text-text-muted">({item.name})</span>
+                            )}
                             {linkedUser && (
                               <Badge className={`text-[10px] ${PLAN_COLORS[linkedUserPlan] || PLAN_COLORS.free}`}>
                                 {planLabel(linkedUserPlan)}
