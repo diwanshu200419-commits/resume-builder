@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -16,6 +16,8 @@ import {
   Copy,
   Check,
   Trash2,
+  Edit2,
+  X,
   Sparkles,
   ToggleLeft,
   ToggleRight,
@@ -42,6 +44,64 @@ export function CouponsManager() {
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
+
+  // Edit Modal State
+  const [editingCoupon, setEditingCoupon] = useState<DBCoupon | null>(null);
+  const [editPlan, setEditPlan] = useState<string>("all");
+  const [editType, setEditType] = useState<"percent" | "fixed" | "free_months">("percent");
+  const [editValue, setEditValue] = useState<number>(20);
+  const [editDuration, setEditDuration] = useState<number>(1);
+  const [editMax, setEditMax] = useState<number>(100);
+  const [editExpiry, setEditExpiry] = useState<string>("");
+  const [editActive, setEditActive] = useState<boolean>(true);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const startEditCoupon = (coupon: DBCoupon) => {
+    setEditingCoupon(coupon);
+    setEditPlan(coupon.plan || "all");
+    setEditType(coupon.discount_type || "percent");
+    setEditValue(Number(coupon.discount_value) || 20);
+    setEditDuration(Number(coupon.duration_months) || 1);
+    setEditMax(Number(coupon.max_redemptions) || 100);
+    setEditExpiry(coupon.expires_at ? coupon.expires_at.split("T")[0] : "");
+    setEditActive(coupon.is_active ?? true);
+    setEditError(null);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCoupon) return;
+    setEditError(null);
+    setSavingEdit(true);
+
+    try {
+      const res = await fetch(`/api/admin/coupons/${editingCoupon.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: editPlan,
+          discount_type: editType,
+          discount_value: Number(editValue),
+          duration_months: Number(editDuration),
+          max_redemptions: Number(editMax),
+          expires_at: editExpiry ? new Date(editExpiry).toISOString() : null,
+          is_active: editActive,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update coupon.");
+
+      setFormSuccess(`Coupon '${editingCoupon.code}' updated successfully!`);
+      setEditingCoupon(null);
+      fetchCoupons();
+    } catch (err: any) {
+      setEditError(err.message || "Failed to update coupon.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const fetchCoupons = async () => {
     try {
@@ -530,15 +590,26 @@ export function CouponsManager() {
                         </td>
 
                         <td className="py-3 px-4 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteCoupon(c.id, c.code)}
-                            className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 p-1.5 h-auto rounded-lg"
-                            title="Delete coupon"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => startEditCoupon(c)}
+                              className="text-text-muted hover:text-accent hover:bg-accent/10 p-1.5 h-auto rounded-lg"
+                              title="Edit coupon"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteCoupon(c.id, c.code)}
+                              className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 p-1.5 h-auto rounded-lg"
+                              title="Delete coupon"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -603,6 +674,175 @@ export function CouponsManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Coupon Modal */}
+      {editingCoupon && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <Card className="w-full max-w-xl border-accent/50 bg-surface shadow-2xl animate-in zoom-in-95">
+            <CardHeader className="pb-3 border-b border-border/50 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-bold flex items-center gap-2 text-text-primary">
+                  <Edit2 className="w-4 h-4 text-accent" />
+                  <span>Edit Coupon: <span className="font-mono text-accent">{editingCoupon.code}</span></span>
+                </CardTitle>
+                <CardDescription className="text-xs text-text-muted">
+                  Update discount value, applicable plan, redemption limits, or expiration.
+                </CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditingCoupon(null)}
+                className="p-1.5 h-auto text-text-muted hover:text-text-primary rounded-lg"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </CardHeader>
+
+            <CardContent className="pt-4">
+              <form onSubmit={handleSaveEdit} className="space-y-4">
+                {editError && (
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{editError}</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Plan Scope */}
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
+                      Plan Scope
+                    </label>
+                    <select
+                      value={editPlan}
+                      onChange={(e) => setEditPlan(e.target.value)}
+                      className="w-full h-10 px-3 py-2 rounded-lg bg-background border border-border text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent"
+                    >
+                      <option value="all">All Plans (Universal)</option>
+                      <option value="pro">Pro Plan Only</option>
+                      <option value="premium">Premium Plan Only</option>
+                      <option value="career_pack">Career Pack Only</option>
+                    </select>
+                  </div>
+
+                  {/* Discount Type */}
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
+                      Discount Type
+                    </label>
+                    <select
+                      value={editType}
+                      onChange={(e) => setEditType(e.target.value as any)}
+                      className="w-full h-10 px-3 py-2 rounded-lg bg-background border border-border text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent"
+                    >
+                      <option value="percent">Percentage Off (%)</option>
+                      <option value="fixed">Flat Rupee Off (₹)</option>
+                      <option value="free_months">Free Access Pass (100% Off)</option>
+                    </select>
+                  </div>
+
+                  {/* Discount Value */}
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
+                      {editType === "percent" ? "Discount Percentage (%)" : editType === "fixed" ? "Discount Amount (₹)" : "Free Validity (Months)"}
+                    </label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={editType === "percent" ? 100 : 10000}
+                      value={editValue}
+                      onChange={(e) => setEditValue(Number(e.target.value))}
+                      className="bg-background border-border"
+                      required
+                    />
+                  </div>
+
+                  {/* Duration Months */}
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
+                      Discount Duration (Months)
+                    </label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={36}
+                      value={editDuration}
+                      onChange={(e) => setEditDuration(Number(e.target.value))}
+                      className="bg-background border-border"
+                      required
+                    />
+                  </div>
+
+                  {/* Max Redemptions */}
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
+                      Max Redemptions
+                    </label>
+                    <Input
+                      type="number"
+                      min={editingCoupon.times_redeemed || 1}
+                      max={100000}
+                      value={editMax}
+                      onChange={(e) => setEditMax(Number(e.target.value))}
+                      className="bg-background border-border"
+                      required
+                    />
+                    <p className="text-[10px] text-text-muted mt-1">Already redeemed: {editingCoupon.times_redeemed || 0}</p>
+                  </div>
+
+                  {/* Expiration Date */}
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
+                      Expires On (Optional)
+                    </label>
+                    <Input
+                      type="date"
+                      value={editExpiry}
+                      onChange={(e) => setEditExpiry(e.target.value)}
+                      className="bg-background border-border"
+                    />
+                  </div>
+                </div>
+
+                {/* Active Status Checkbox */}
+                <div className="flex items-center gap-2 pt-2">
+                  <input
+                    type="checkbox"
+                    id="editActiveStatus"
+                    checked={editActive}
+                    onChange={(e) => setEditActive(e.target.checked)}
+                    className="w-4 h-4 rounded border-border text-accent focus:ring-accent"
+                  />
+                  <label htmlFor="editActiveStatus" className="text-xs font-semibold text-text-primary cursor-pointer">
+                    Coupon is Active and can be redeemed
+                  </label>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingCoupon(null)}
+                    className="border-border text-xs"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={savingEdit}
+                    className="bg-accent hover:bg-accent-hover text-white text-xs font-bold"
+                  >
+                    {savingEdit ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Changes"}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

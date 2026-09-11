@@ -111,6 +111,27 @@ export function getAllFallbackCoupons(): DBCoupon[] {
   return Array.from(FALLBACK_COUPONS.values());
 }
 
+export function deleteFallbackCoupon(idOrCode: string): boolean {
+  for (const [code, coupon] of Array.from(FALLBACK_COUPONS.entries())) {
+    if (coupon.id === idOrCode || coupon.code.toUpperCase() === idOrCode.toUpperCase()) {
+      FALLBACK_COUPONS.delete(code);
+      return true;
+    }
+  }
+  return false;
+}
+
+export function updateFallbackCoupon(idOrCode: string, updates: Partial<DBCoupon>): DBCoupon | null {
+  for (const [code, coupon] of Array.from(FALLBACK_COUPONS.entries())) {
+    if (coupon.id === idOrCode || coupon.code.toUpperCase() === idOrCode.toUpperCase()) {
+      const updated = { ...coupon, ...updates };
+      FALLBACK_COUPONS.set(code, updated);
+      return updated;
+    }
+  }
+  return null;
+}
+
 /**
  * Fetch a coupon by its unique code from Supabase DB, with graceful fallback.
  */

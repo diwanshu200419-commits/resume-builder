@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { updateFallbackCoupon, deleteFallbackCoupon } from "@/lib/coupons";
 
 export async function PATCH(
   request: NextRequest,
@@ -27,22 +28,48 @@ export async function PATCH(
     if (body.expires_at !== undefined) {
       updatePayload.expires_at = body.expires_at ? new Date(body.expires_at).toISOString() : null;
     }
+    if (body.discount_value !== undefined && typeof body.discount_value === "number") {
+      updatePayload.discount_value = body.discount_value;
+    }
+    if (body.discount_type !== undefined) {
+      updatePayload.discount_type = body.discount_type;
+    }
+    if (body.plan !== undefined) {
+      updatePayload.plan = body.plan;
+    }
+    if (body.duration_months !== undefined) {
+      updatePayload.duration_months = body.duration_months;
+    }
 
-    const supabase = await createServiceClient();
-    const { data, error } = await supabase
-      .from("coupons")
-      .update(updatePayload)
-      .eq("id", couponId)
-      .select()
-      .single();
+    let updatedRecord: any = null;
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    try {
+      const supabase = await createServiceClient();
+      const { data, error } = await supabase
+        .from("coupons")
+        .update(updatePayload)
+        .eq("id", couponId)
+        .select()
+        .single();
+
+      if (!error && data) {
+        updatedRecord = data;
+      }
+    } catch (dbErr) {
+      console.warn("[Admin Coupon PATCH] DB update error, using fallback:", dbErr);
+    }
+
+    if (!updatedRecord) {
+      updatedRecord = updateFallbackCoupon(couponId, updatePayload);
+    }
+
+    if (!updatedRecord) {
+      return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      coupon: data,
+      coupon: updatedRecord,
       message: `Coupon updated successfully.`,
     });
   } catch (error: any) {
@@ -64,16 +91,23 @@ export async function DELETE(
       return NextResponse.json({ error: "Missing coupon ID" }, { status: 400 });
     }
 
-    const supabase = await createServiceClient();
+    let deletedFromDb = false;
 
-    const { error } = await supabase
-      .from("coupons")
-      .delete()
-      .eq("id", couponId);
+    try {
+      const supabase = await createServiceClient();
+      const { error } = await supabase
+        .from("coupons")
+        .delete()
+        .eq("id", couponId);
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      if (!error) {
+        deletedFromDb = true;
+      }
+    } catch (dbErr) {
+      console.warn("[Admin Coupon DELETE] DB delete error, trying fallback:", dbErr);
     }
+
+    const deletedFromFallback = deleteFallbackCoupon(couponId);
 
     return NextResponse.json({
       success: true,
