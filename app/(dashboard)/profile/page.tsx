@@ -30,6 +30,7 @@ import {
   Check,
   Calendar,
   Clock,
+  ImageIcon,
 } from "lucide-react";
 
 function calculateProfileStrength(p: Profile): number {
@@ -88,6 +89,7 @@ export default function ProfilePage() {
   const [industry, setIndustry] = useState("");
   const [skills, setSkills] = useState("");
   const [preferredLocation, setPreferredLocation] = useState("");
+  const [avatarUrlInput, setAvatarUrlInput] = useState("");
 
   useEffect(() => {
     async function loadProfile() {
@@ -131,6 +133,7 @@ export default function ProfilePage() {
       setIndustry(p.industry || "");
       setSkills(Array.isArray(p.skills) ? p.skills.join(", ") : p.skills ? String(p.skills) : "");
       setPreferredLocation(p.preferred_location || "");
+      setAvatarUrlInput(p.avatar_url || "");
       setLoading(false);
     }
 
@@ -160,6 +163,7 @@ export default function ProfilePage() {
       industry: industry || null,
       skills: skillsArray.length > 0 ? skillsArray : null,
       preferred_location: preferredLocation.trim() || null,
+      avatar_url: avatarUrlInput.trim() || null,
       updated_at: new Date().toISOString(),
     };
 
@@ -389,6 +393,21 @@ export default function ProfilePage() {
                     onChange={(e) => setHeadline(e.target.value)}
                     placeholder="Full-Stack Engineer | Building scalable products"
                   />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="avatar_url" className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-text-muted" />
+                    Profile Picture URL
+                  </Label>
+                  <Input
+                    id="avatar_url"
+                    value={avatarUrlInput}
+                    onChange={(e) => setAvatarUrlInput(e.target.value)}
+                    placeholder="https://images.unsplash.com/... or https://example.com/photo.jpg"
+                  />
+                  <p className="text-[11px] text-text-muted">
+                    Provide a direct image URL (HTTPS) for your profile avatar, or leave blank to use your name initials.
+                  </p>
                 </div>
               </div>
             </div>

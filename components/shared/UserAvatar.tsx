@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export interface UserAvatarProps {
   avatarUrl: string | null;
@@ -20,6 +20,11 @@ export function UserAvatar({
   size,
 }: UserAvatarProps) {
   const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [avatarUrl]);
+
   const safeName = fullName?.trim() || "User";
   const initials =
     safeName
@@ -31,7 +36,19 @@ export function UserAvatar({
       .toUpperCase() || "U";
 
   const sizeClass = SIZE_CLASSES[size];
-  const hasAvatar = Boolean(avatarUrl?.trim()) && !failed;
+
+  const trimmed = avatarUrl?.trim();
+  const isValidUrl = Boolean(
+    trimmed &&
+    trimmed !== "null" &&
+    trimmed !== "undefined" &&
+    (trimmed.startsWith("http://") ||
+      trimmed.startsWith("https://") ||
+      trimmed.startsWith("data:image/") ||
+      trimmed.startsWith("/"))
+  );
+
+  const hasAvatar = isValidUrl && !failed;
 
   if (hasAvatar) {
     return (
@@ -48,10 +65,11 @@ export function UserAvatar({
 
   return (
     <div
-      className={`${sizeClass} rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center shrink-0 border border-border`}
+      className={`${sizeClass} rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center shrink-0 border border-border select-none`}
       aria-label={safeName}
     >
       {initials}
     </div>
   );
 }
+
