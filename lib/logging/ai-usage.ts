@@ -1,6 +1,6 @@
-// lib/logging/ai-usage.ts
+﻿// lib/logging/ai-usage.ts
 //
-// Vaylo AI — Centralized AI Usage & Observability Logger
+// VayloAI — Centralized AI Usage & Observability Logger
 // Logs every AI-powered request (both successful generations and blocked/rejected attempts).
 
 import { createClient } from "@supabase/supabase-js";

@@ -1,6 +1,6 @@
-// lib/interview/history-sync.ts
+﻿// lib/interview/history-sync.ts
 //
-// Vaylo AI — Persistent Interview History & Cloud Sync Engine
+// VayloAI — Persistent Interview History & Cloud Sync Engine
 // Handles Supabase persistence, one-time localStorage migration, write-through caching, and cross-device sync.
 
 // Types only

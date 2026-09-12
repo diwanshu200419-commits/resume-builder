@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   Dialog,
@@ -61,7 +61,7 @@ export function UpgradeModal({
               </div>
             </div>
             <DialogTitle className="text-2xl font-bold text-center text-text-primary">
-              Unlock Vaylo AI {plan === "pro" ? "Pro" : "Premium"}
+              Unlock VayloAI {plan === "pro" ? "Pro" : "Premium"}
             </DialogTitle>
             <DialogDescription className="text-center text-text-secondary mt-2">
               Unlock {feature} and take your career to the next level with unlimited AI power.

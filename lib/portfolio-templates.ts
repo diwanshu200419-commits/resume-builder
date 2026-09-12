@@ -1,6 +1,6 @@
-// lib/portfolio-templates.ts
+﻿// lib/portfolio-templates.ts
 //
-// Vaylo AI — Multi-Design Portfolio Template Engine
+// VayloAI — Multi-Design Portfolio Template Engine
 // 6 Fully Responsive, Modern, Production-Ready, 100% Self-Contained Themes
 // Engineered for 320px Mobile, 768px Tablet, and 1440px+ Desktop Screens
 // Features: Project Screenshots, Testimonials, Resume Download Link, SEO Meta & Schema.org JSON-LD
@@ -605,7 +605,7 @@ function renderTechnicalTemplate(data: PortfolioData): string {
     </section>
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">VayloAI Studio</a>.
     </footer>
   </div>
 </body>
@@ -827,7 +827,7 @@ function renderMinimalTemplate(data: PortfolioData): string {
     <div class="projects-grid">${testimonialsHtml}</div>` : ''}
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">VayloAI Studio</a>.
     </footer>
   </div>
 </body>
@@ -1049,7 +1049,7 @@ function renderExecutiveTemplate(data: PortfolioData): string {
     </div>
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">VayloAI Studio</a>.
     </footer>
   </div>
 </body>
@@ -1268,7 +1268,7 @@ function renderVibrantTemplate(data: PortfolioData): string {
     </div>
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">VayloAI Studio</a>.
     </footer>
   </div>
 </body>
@@ -1431,7 +1431,7 @@ function renderEditorialTemplate(data: PortfolioData): string {
     </section>` : ''}
 
     <footer>
-      <span>© ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.</span>
+      <span>© ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">VayloAI Studio</a>.</span>
       <div>
         <a href="mailto:${safeEmail}">Correspond via Email →</a>
         ${safeResumeUrl ? ` · <a href="${safeResumeUrl}" target="_blank">Download Resume PDF</a>` : ""}
@@ -1655,7 +1655,7 @@ function renderAuroraTemplate(data: PortfolioData): string {
     </div>
 
     <footer>
-      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">Vaylo AI Studio</a>.
+      © ${new Date().getFullYear()} ${safeName}. Built with <a href="https://www.vayloai.online" target="_blank">VayloAI Studio</a>.
     </footer>
   </div>
 </body>

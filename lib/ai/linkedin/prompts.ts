@@ -1,4 +1,4 @@
-import { getKeywordsForRole } from "./role-taxonomy";
+﻿import { getKeywordsForRole } from "./role-taxonomy";
 
 export interface LinkedinPromptParams {
   targetRole: string;
@@ -21,7 +21,7 @@ export interface LinkedinPromptParams {
 }
 
 export function buildLinkedinSystemInstruction(): string {
-  return `You are Vaylo AI's Lead LinkedIn Branding Specialist and Senior Executive Recruiter.
+  return `You are VayloAI's Lead LinkedIn Branding Specialist and Senior Executive Recruiter.
 Your job is to generate a role-aware, recruiter-optimized LinkedIn Profile Strategy tailored specifically to the candidate's career level and verified skills.
 
 STRICT EXPERIENCE LEVEL STRATEGY RULES:

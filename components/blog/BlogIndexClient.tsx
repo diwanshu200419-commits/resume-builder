@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -67,7 +67,7 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
       {/* Header Hero Section */}
       <div className="text-center max-w-3xl mx-auto space-y-4">
         <Badge variant="default" className="gap-1.5 px-3.5 py-1.5 text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full font-semibold">
-          <BookOpen className="w-3.5 h-3.5 text-indigo-400" /> Vaylo AI Career & Technical Interview Hub
+          <BookOpen className="w-3.5 h-3.5 text-indigo-400" /> VayloAI Career & Technical Interview Hub
         </Badge>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-text-primary tracking-tight leading-tight">
           Real Technical Interview Questions & <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-400 bg-clip-text text-transparent">Career Blueprints</span>

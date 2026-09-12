@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import Link from "next/link";
 import { getPublicShareResult } from "@/lib/share-ats";
 import { Button } from "@/components/ui/button";
@@ -151,7 +151,7 @@ export default async function SharedATSResultPage({ params }: SharePageProps) {
 
       {/* Footer Branding */}
       <div className="max-w-xl mx-auto w-full text-center mt-8 text-xs text-slate-500 relative z-10">
-        <p>© {new Date().getFullYear()} Vaylo AI. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} VayloAI. All rights reserved.</p>
       </div>
     </div>
   );

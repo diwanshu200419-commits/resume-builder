@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -225,7 +225,7 @@ export default function SignupForm() {
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur-xl p-8">
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-white tracking-tight">
-                Create your Vaylo AI Account
+                Create your VayloAI Account
               </h1>
               <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
                 Get your ATS score in under 2 minutes

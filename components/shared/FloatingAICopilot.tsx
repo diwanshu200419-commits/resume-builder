@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ export function FloatingAICopilot() {
     {
       id: "welcome",
       sender: "bot",
-      text: "👋 Welcome to Vaylo AI! I am your 24/7 AI Career Copilot. I can help you fix ATS resume errors, build portfolios, practice voice interviews, or calculate hiring odds. What would you like to achieve today?",
+      text: "👋 Welcome to VayloAI! I am your 24/7 AI Career Copilot. I can help you fix ATS resume errors, build portfolios, practice voice interviews, or calculate hiring odds. What would you like to achieve today?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -109,7 +109,7 @@ export function FloatingAICopilot() {
         <Button
           onClick={() => setIsOpen(true)}
           className="h-12 w-12 sm:w-auto sm:px-4 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-2xl gap-2 font-bold transition-all transform hover:scale-105 active:scale-95"
-          aria-label="Open Vaylo AI Copilot"
+          aria-label="Open VayloAI Copilot"
         >
           <Bot className="w-5 h-5 animate-pulse" />
           <span className="hidden sm:inline">Ask AI Assistant</span>
@@ -124,7 +124,7 @@ export function FloatingAICopilot() {
               </div>
               <div>
                 <CardTitle className="text-xs font-extrabold text-white flex items-center gap-1.5">
-                  Vaylo AI Copilot
+                  VayloAI Copilot
                   <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-semibold border border-emerald-500/30">
                     Live
                   </span>
@@ -195,7 +195,7 @@ export function FloatingAICopilot() {
 
               {loading && (
                 <div className="flex gap-2 justify-start items-center text-xs text-indigo-400 font-medium">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" /> Vaylo AI is thinking...
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" /> VayloAI is thinking...
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -210,7 +210,7 @@ export function FloatingAICopilot() {
               className="flex gap-2 pt-2 border-t border-slate-800 shrink-0"
             >
               <Input
-                placeholder="Ask Vaylo AI..."
+                placeholder="Ask VayloAI..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 className="text-xs bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 rounded-xl"

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Mail, ArrowLeft } from "lucide-react";
 
@@ -6,11 +6,11 @@ const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
-  description: "Terms and conditions governing the use of Vaylo AI career copilot services.",
+  description: "Terms and conditions governing the use of VayloAI career copilot services.",
   alternates: { canonical: `${APP_URL}/terms` },
   openGraph: {
     title: "Terms & Conditions",
-    description: "Terms and conditions governing the use of Vaylo AI career copilot services.",
+    description: "Terms and conditions governing the use of VayloAI career copilot services.",
     url: `${APP_URL}/terms`,
     siteName: "VayloAI",
     type: "website",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Terms & Conditions",
-    description: "Terms and conditions governing the use of Vaylo AI career copilot services.",
+    description: "Terms and conditions governing the use of VayloAI career copilot services.",
   },
 };
 
@@ -39,7 +39,7 @@ export default function TermsPage() {
           <ShieldCheck className="w-4 h-4 text-amber-400" /> Important Career Assistance Disclaimer:
         </p>
         <p>
-          Vaylo AI provides AI-powered career optimization tools. Vaylo AI does <strong>NOT</strong> guarantee job placement, employment offers, interview calls, specific ATS scores, or target salary increases. All AI recommendations are advisory tools designed to assist your application preparation.
+          VayloAI provides AI-powered career optimization tools. VayloAI does <strong>NOT</strong> guarantee job placement, employment offers, interview calls, specific ATS scores, or target salary increases. All AI recommendations are advisory tools designed to assist your application preparation.
         </p>
       </div>
 
@@ -48,7 +48,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">1. Introduction</h2>
           <p>
-            Welcome to Vaylo AI. These Terms and Conditions (&quot;Terms&quot;) govern your access to and use of the Vaylo AI website (https://www.vayloai.online), mobile applications, APIs, and associated career copilot services. By creating an account or using Vaylo AI, you agree to be bound by these Terms.
+            Welcome to VayloAI. These Terms and Conditions (&quot;Terms&quot;) govern your access to and use of the VayloAI website (https://www.vayloai.online), mobile applications, APIs, and associated career copilot services. By creating an account or using VayloAI, you agree to be bound by these Terms.
           </p>
         </section>
 
@@ -56,7 +56,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">2. Eligibility</h2>
           <p>
-            You must be at least 18 years of age or the age of legal majority in your jurisdiction to create an account and purchase subscription plans on Vaylo AI.
+            You must be at least 18 years of age or the age of legal majority in your jurisdiction to create an account and purchase subscription plans on VayloAI.
           </p>
         </section>
 
@@ -80,7 +80,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">5. AI-Generated Content</h2>
           <p>
-            Vaylo AI utilizes automated machine learning models (including Google Gemini AI) to assist with resume rewriting, ATS evaluation, cover letter generation, and interview preparation. You are responsible for reviewing and verifying all AI-generated text before submitting it to prospective employers.
+            VayloAI utilizes automated machine learning models (including Google Gemini AI) to assist with resume rewriting, ATS evaluation, cover letter generation, and interview preparation. You are responsible for reviewing and verifying all AI-generated text before submitting it to prospective employers.
           </p>
         </section>
 
@@ -88,7 +88,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">6. Resume Ownership</h2>
           <p>
-            You retain 100% full ownership and intellectual property rights over your uploaded resumes, work history, and personal application records. Vaylo AI does not claim ownership over your personal data.
+            You retain 100% full ownership and intellectual property rights over your uploaded resumes, work history, and personal application records. VayloAI does not claim ownership over your personal data.
           </p>
         </section>
 
@@ -96,7 +96,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">7. User-Generated Content</h2>
           <p>
-            By uploading documents or text to Vaylo AI, you grant Vaylo AI a limited, non-exclusive license to store and process the content solely for providing AI career services to your account.
+            By uploading documents or text to VayloAI, you grant VayloAI a limited, non-exclusive license to store and process the content solely for providing AI career services to your account.
           </p>
         </section>
 
@@ -104,7 +104,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">8. Acceptable Use</h2>
           <p>
-            Vaylo AI is provided solely for personal career development and job application preparation. You agree to use the service in compliance with all applicable laws and regulations.
+            VayloAI is provided solely for personal career development and job application preparation. You agree to use the service in compliance with all applicable laws and regulations.
           </p>
         </section>
 
@@ -112,7 +112,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">9. Prohibited Activities</h2>
           <p>
-            You shall not: (a) reverse engineer or scrape Vaylo AI APIs; (b) attempt to bypass feature entitlement controls or devtools guards; (c) upload malicious scripts; or (d) resell account access to third parties.
+            You shall not: (a) reverse engineer or scrape VayloAI APIs; (b) attempt to bypass feature entitlement controls or devtools guards; (c) upload malicious scripts; or (d) resell account access to third parties.
           </p>
         </section>
 
@@ -120,7 +120,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">10. Subscription Plans</h2>
           <p>
-            Vaylo AI offers Free (₹0), Pro (₹99/month), Premium (₹299/month), and Career Pack (₹499 one-time) plans. Plan features and limits are specified on the Pricing page.
+            VayloAI offers Free (₹0), Pro (₹99/month), Premium (₹299/month), and Career Pack (₹499 one-time) plans. Plan features and limits are specified on the Pricing page.
           </p>
         </section>
 
@@ -160,7 +160,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">15. AI Limitations &amp; Output Disclaimer</h2>
           <p>
-            AI recommendations are probabilistic suggestions based on automated language processing. Vaylo AI makes no representation that AI outputs are free from errors or omissions.
+            AI recommendations are probabilistic suggestions based on automated language processing. VayloAI makes no representation that AI outputs are free from errors or omissions.
           </p>
         </section>
 
@@ -168,7 +168,7 @@ export default function TermsPage() {
         <section className="space-y-2 font-semibold text-text-primary">
           <h2 className="text-base font-bold">16. No Employment Guarantee</h2>
           <p className="text-text-secondary font-normal">
-            Vaylo AI is a self-service career assistance software. Vaylo AI does NOT guarantee employment, hiring decisions, or job offers from any employer or recruiting agency.
+            VayloAI is a self-service career assistance software. VayloAI does NOT guarantee employment, hiring decisions, or job offers from any employer or recruiting agency.
           </p>
         </section>
 
@@ -176,7 +176,7 @@ export default function TermsPage() {
         <section className="space-y-2 font-semibold text-text-primary">
           <h2 className="text-base font-bold">17. No Guarantee of ATS Score Performance</h2>
           <p className="text-text-secondary font-normal">
-            ATS match scores represent algorithmic similarity metrics. Vaylo AI does NOT guarantee that specific ATS scores will pass third-party proprietary employer Applicant Tracking Systems.
+            ATS match scores represent algorithmic similarity metrics. VayloAI does NOT guarantee that specific ATS scores will pass third-party proprietary employer Applicant Tracking Systems.
           </p>
         </section>
 
@@ -184,7 +184,7 @@ export default function TermsPage() {
         <section className="space-y-2 font-semibold text-text-primary">
           <h2 className="text-base font-bold">18. No Guarantee of Job Interviews</h2>
           <p className="text-text-secondary font-normal">
-            Interview selection depends entirely on external employer evaluation. Using Vaylo AI does NOT guarantee interview invitations.
+            Interview selection depends entirely on external employer evaluation. Using VayloAI does NOT guarantee interview invitations.
           </p>
         </section>
 
@@ -192,7 +192,7 @@ export default function TermsPage() {
         <section className="space-y-2 font-semibold text-text-primary">
           <h2 className="text-base font-bold">19. No Guarantee of Job Placement or Salary</h2>
           <p className="text-text-secondary font-normal">
-            Vaylo AI does NOT guarantee job placement, salary negotiation outcomes, or specific compensation offers.
+            VayloAI does NOT guarantee job placement, salary negotiation outcomes, or specific compensation offers.
           </p>
         </section>
 
@@ -200,7 +200,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">20. Third-Party Services</h2>
           <p>
-            Vaylo AI integrates with third-party infrastructure providers (Supabase for authentication/storage, Google AI for language models). Use of third-party features is subject to their respective terms.
+            VayloAI integrates with third-party infrastructure providers (Supabase for authentication/storage, Google AI for language models). Use of third-party features is subject to their respective terms.
           </p>
         </section>
 
@@ -208,7 +208,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">21. Service Availability &amp; Maintenance</h2>
           <p>
-            While we strive for maximum uptime, Vaylo AI services are provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis without guarantee of uninterrupted availability.
+            While we strive for maximum uptime, VayloAI services are provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis without guarantee of uninterrupted availability.
           </p>
         </section>
 
@@ -216,7 +216,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">22. Intellectual Property</h2>
           <p>
-            The Vaylo AI software, branding, UI components, codebases, and logos are the property of Vaylo AI and protected by intellectual property laws.
+            The VayloAI software, branding, UI components, codebases, and logos are the property of VayloAI and protected by intellectual property laws.
           </p>
         </section>
 
@@ -224,7 +224,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">23. Account Termination</h2>
           <p>
-            Vaylo AI reserves the right to suspend or terminate accounts that violate prohibited usage rules or engage in fraudulent activity.
+            VayloAI reserves the right to suspend or terminate accounts that violate prohibited usage rules or engage in fraudulent activity.
           </p>
         </section>
 
@@ -232,7 +232,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">24. Limitation of Liability</h2>
           <p>
-            To the maximum extent permitted by applicable law, Vaylo AI shall not be liable for indirect, incidental, or consequential damages resulting from your use of the platform.
+            To the maximum extent permitted by applicable law, VayloAI shall not be liable for indirect, incidental, or consequential damages resulting from your use of the platform.
           </p>
         </section>
 
@@ -240,7 +240,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-text-primary">25. Changes to Terms</h2>
           <p>
-            We reserve the right to update these Terms at any time. Continued use of Vaylo AI following changes constitutes acceptance of the revised Terms.
+            We reserve the right to update these Terms at any time. Continued use of VayloAI following changes constitutes acceptance of the revised Terms.
           </p>
         </section>
 

@@ -1,6 +1,6 @@
-// components/interview/InterviewHistoryTracker.tsx
+﻿// components/interview/InterviewHistoryTracker.tsx
 //
-// Vaylo AI — Cross-Session Progress & Historical Interview Trends Component
+// VayloAI — Cross-Session Progress & Historical Interview Trends Component
 // Visualizes multi-session STAR performance improvements, filler word reductions, and pace metrics over time
 // Backed by Supabase persistence with automatic legacy localStorage migration.
 

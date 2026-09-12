@@ -1,4 +1,4 @@
-// lib/razorpay.ts — Client-side Razorpay SDK Loader & Trigger
+﻿// lib/razorpay.ts — Client-side Razorpay SDK Loader & Trigger
 
 export function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -45,7 +45,7 @@ export async function initializeRazorpayPayment(options: RazorpayCheckoutOptions
     key: razorpayKey,
     amount: Math.round(options.amount * 100), // convert rupees to paise
     currency: "INR",
-    name: "Vaylo AI",
+    name: "VayloAI",
     description: `${options.planName} Upgrade`,
     image: "https://www.vayloai.online/logo.png",
     order_id: options.orderId,
@@ -56,7 +56,7 @@ export async function initializeRazorpayPayment(options: RazorpayCheckoutOptions
     },
     notes: {
       plan: options.plan,
-      app: "Vaylo AI",
+      app: "VayloAI",
     },
     theme: {
       color: "#6366f1", // Indigo primary

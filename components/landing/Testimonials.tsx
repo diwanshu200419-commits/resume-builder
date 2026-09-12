@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { CheckCircle2, Sparkles, Target, Zap } from "lucide-react";
@@ -61,7 +61,7 @@ export function Testimonials() {
               </p>
 
               <div className="pt-3 border-t border-slate-100 dark:border-border flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Integrated in Vaylo AI
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Integrated in VayloAI
               </div>
             </motion.div>
           ))}

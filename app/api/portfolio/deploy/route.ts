@@ -1,6 +1,6 @@
-// app/api/portfolio/deploy/route.ts
+﻿// app/api/portfolio/deploy/route.ts
 //
-// Vaylo AI — Portfolio Subdomain & Custom Domain Deploy Route
+// VayloAI — Portfolio Subdomain & Custom Domain Deploy Route
 // Tier-Gated: Premium+ required for live subdomain deployment (Free/Pro get 403 Preview Only)
 // Custom Domains: Career Pack users can connect custom CNAME domains
 

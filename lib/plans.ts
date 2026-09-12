@@ -1,4 +1,4 @@
-import type { Profile } from "@/types";
+﻿import type { Profile } from "@/types";
 
 export type PlanType = "free" | "pro" | "premium" | "career_pack";
 
@@ -20,7 +20,7 @@ export const PLAN_CONFIG: Record<PlanType, PlanConfig> = {
     priceInr: 0,
     billingType: "free",
     periodLabel: "forever",
-    tagline: "Perfect to try Vaylo AI",
+    tagline: "Perfect to try VayloAI",
     features: [
       "2 ATS Resume Scans",
       "Basic Resume Builder",

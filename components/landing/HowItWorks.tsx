@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { Upload, Sparkles, Trophy } from "lucide-react";
@@ -35,7 +35,7 @@ export function HowItWorks() {
     <section id="how-it-works" className="py-20 px-4 bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 space-y-2">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">How Vaylo AI works</h2>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">How VayloAI works</h2>
           <p className="text-text-secondary text-sm">Your career transformation in 3 simple steps.</p>
         </div>
 

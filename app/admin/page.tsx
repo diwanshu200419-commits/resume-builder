@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Fragment, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -454,7 +454,7 @@ export default function AdminPage() {
             <ShieldAlert className="w-12 h-12 text-danger mx-auto mb-2" />
             <CardTitle className="text-xl font-bold text-text-primary">Access Denied</CardTitle>
             <CardDescription className="text-xs text-text-secondary mt-1">
-              Admin privileges required. Your account does not have permission to access the Vaylo AI Admin Panel.
+              Admin privileges required. Your account does not have permission to access the VayloAI Admin Panel.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
@@ -504,7 +504,7 @@ export default function AdminPage() {
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold flex items-center gap-2 tracking-tight">
             <ShieldAlert className="w-7 h-7 sm:w-8 sm:h-8 text-accent shrink-0" />
-            Vaylo AI SaaS Founder Console
+            VayloAI SaaS Founder Console
           </h1>
           <p className="text-text-secondary mt-1 text-xs sm:text-sm">
             Live Production Data · Zero Mock Analytics · Verified Billing &amp; AI Costs

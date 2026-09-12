@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -43,7 +43,7 @@ export default function AdminMfaVerifyPage() {
           setNeedsEnrollment(true);
           const { data: enrollData, error: enrollError } = await supabase.auth.mfa.enroll({
             factorType: "totp",
-            issuer: "Vaylo AI Admin",
+            issuer: "VayloAI Admin",
           });
 
           if (enrollError) throw enrollError;

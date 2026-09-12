@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Send, Sparkles, Bot, User } from "lucide-react";
 export default function CareerCoachPage() {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState<{ role: string; text: string }[]>([
-    { role: "assistant", text: "Hey, I'm Vaylo AI, your AI Career Copilot! Ask me anything about your career, resumes, or interviews!" },
+    { role: "assistant", text: "Hey, I'm VayloAI, your AI Career Copilot! Ask me anything about your career, resumes, or interviews!" },
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -43,7 +43,7 @@ export default function CareerCoachPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-accent" />
-              <CardTitle>Vaylo AI — Career Coach</CardTitle>
+              <CardTitle>VayloAI — Career Coach</CardTitle>
             </div>
             <CardDescription>Your personal AI mentor for career growth!</CardDescription>
           </CardHeader>

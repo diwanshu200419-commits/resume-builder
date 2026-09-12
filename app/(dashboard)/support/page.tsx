@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -201,7 +201,7 @@ export default function CustomerSupportPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold flex items-center gap-2 tracking-tight">
             <Headphones className="w-7 h-7 text-indigo-400" />
-            Vaylo AI Help &amp; Customer Support
+            VayloAI Help &amp; Customer Support
           </h1>
           <p className="text-xs sm:text-sm text-text-secondary mt-1">
             Have a question about payment verification, ATS scans, or refunds? Submit a ticket and our team will review your request.

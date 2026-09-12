@@ -1,4 +1,4 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import { FreeATSCalculatorClient } from "@/components/marketing/FreeATSCalculatorClient";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -89,10 +89,10 @@ export default function PrimaryFreeATSResumeCheckerPage() {
           },
           {
             "@type": "Question",
-            "name": "How is the Vaylo AI ATS score calculated?",
+            "name": "How is the VayloAI ATS score calculated?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Vaylo AI uses a deterministic 100-point rubric assessing 5 dimensions: Keyword Match (30 pts), Impact Action Verbs (25 pts), Quantified Metrics (20 pts), Structural Parseability (15 pts), and Anti-Keyword-Stuffing Context (10 pts)."
+              "text": "VayloAI uses a deterministic 100-point rubric assessing 5 dimensions: Keyword Match (30 pts), Impact Action Verbs (25 pts), Quantified Metrics (20 pts), Structural Parseability (15 pts), and Anti-Keyword-Stuffing Context (10 pts)."
             }
           },
           {
@@ -136,10 +136,10 @@ export default function PrimaryFreeATSResumeCheckerPage() {
             </p>
           </div>
 
-          {/* Section 2: What Vaylo AI Checks */}
+          {/* Section 2: What VayloAI Checks */}
           <div className="space-y-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-text-primary flex items-center gap-2">
-              <Layers className="w-6 h-6 text-accent" /> What Vaylo AI Checks in Your Resume
+              <Layers className="w-6 h-6 text-accent" /> What VayloAI Checks in Your Resume
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-border bg-surface p-6 space-y-3">

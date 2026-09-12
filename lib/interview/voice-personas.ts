@@ -1,6 +1,6 @@
-// lib/interview/voice-personas.ts
+﻿// lib/interview/voice-personas.ts
 //
-// Vaylo AI — Voice Interviewer Personas
+// VayloAI — Voice Interviewer Personas
 // Uses licensed stock synthetic voices from official provider libraries (ElevenLabs / Azure / Web Speech)
 // No impersonation or cloning of private identifiable individuals.
 

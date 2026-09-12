@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -138,7 +138,7 @@ export function Hero() {
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                 </div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Vaylo AI Dashboard</span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">VayloAI Dashboard</span>
               </div>
 
               {/* ATS Score Gauge Box */}

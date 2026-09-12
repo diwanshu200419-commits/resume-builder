@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +22,7 @@ export default function ResumeBuilderPage() {
   });
 
   const [experience, setExperience] = useState({
-    company: "Vaylo AI",
+    company: "VayloAI",
     role: "Full Stack Engineer",
     duration: "2024 - Present",
     bullets: "- Built dynamic checkout and AI career tools resulting in a 40% engagement boost.\n- Optimized backend queries reducing response latency by 200ms.",

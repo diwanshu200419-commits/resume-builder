@@ -1,6 +1,6 @@
-// lib/ai/linkedin/linkedin-score.ts
+﻿// lib/ai/linkedin/linkedin-score.ts
 //
-// Vaylo AI — Deterministic LinkedIn Profile Scoring Engine
+// VayloAI — Deterministic LinkedIn Profile Scoring Engine
 // 100-Point Rule-Based Explainable Algorithm (Zero LLM Guesswork)
 // Reuses evidence-matching taxonomy and deterministic rubric math.
 

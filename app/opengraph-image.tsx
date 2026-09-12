@@ -1,8 +1,8 @@
-import { ImageResponse } from "next/og";
+﻿import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-export const alt = "Vaylo AI Dashboard — AI Resume Builder and ATS Scanner";
+export const alt = "VayloAI Dashboard — AI Resume Builder and ATS Scanner";
 export const size = {
   width: 1200,
   height: 630,

@@ -1,6 +1,6 @@
-// lib/portfolio/draft-sync.ts
+﻿// lib/portfolio/draft-sync.ts
 //
-// Vaylo AI — Persistent Portfolio Draft & Cloud Autosave Engine
+// VayloAI — Persistent Portfolio Draft & Cloud Autosave Engine
 // Handles Supabase debounced autosave, one-time localStorage migration, and multi-device draft continuity.
 
 import { PortfolioData } from "../portfolio-templates";

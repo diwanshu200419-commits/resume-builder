@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
@@ -528,7 +528,7 @@ export default function PortfolioGeneratorPage() {
       { name: "index.html", content: htmlCode },
       {
         name: "README.md",
-        content: `# ${candidateName}'s Portfolio Website\n\nGenerated with Vaylo AI Multi-Design Portfolio Engine.\n\n## Quick 1-Click Hosting\n1. Netlify Drop: Drag and drop this folder or index.html to https://app.netlify.com/drop\n2. Vercel: Run 'npx vercel' in this folder\n3. GitHub Pages: Upload index.html to your <username>.github.io repository`,
+        content: `# ${candidateName}'s Portfolio Website\n\nGenerated with VayloAI Multi-Design Portfolio Engine.\n\n## Quick 1-Click Hosting\n1. Netlify Drop: Drag and drop this folder or index.html to https://app.netlify.com/drop\n2. Vercel: Run 'npx vercel' in this folder\n3. GitHub Pages: Upload index.html to your <username>.github.io repository`,
       },
     ]);
     const url = URL.createObjectURL(zipBlob);

@@ -1,6 +1,6 @@
-// app/api/ai/interview-tts/route.ts
+﻿// app/api/ai/interview-tts/route.ts
 //
-// Vaylo AI — Multi-Tier Text-to-Speech Engine
+// VayloAI — Multi-Tier Text-to-Speech Engine
 // Tier 1: Self-Hosted Neural Piper TTS (Zero API Cost, Low-Latency CPU ONNX)
 // Tier 2: ElevenLabs Commercial Stock Voice API
 // Tier 3: Client Browser SpeechSynthesis Fallback

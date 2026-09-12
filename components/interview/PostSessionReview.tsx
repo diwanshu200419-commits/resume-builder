@@ -1,6 +1,6 @@
-// components/interview/PostSessionReview.tsx
+﻿// components/interview/PostSessionReview.tsx
 //
-// Vaylo AI — Executive Post-Session Review & STAR Coaching Guidance Component
+// VayloAI — Executive Post-Session Review & STAR Coaching Guidance Component
 // Delivers deep pedagogical feedback, turn-by-turn STAR breakdowns, suggested rewrites, and trend analytics.
 
 "use client";

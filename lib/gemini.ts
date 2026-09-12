@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+﻿import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import type { ATSAnalysisResult, OptimizationResult, InterviewQuestions, LinkedInSuggestions } from "@/types";
 import { z } from "zod";
 import crypto from "crypto";
@@ -77,7 +77,7 @@ const safetySettings = [
 // ----------------------------
 // Master System Prompt (FAANG-grade)
 // ----------------------------
-const MASTER_SYSTEM_PROMPT = `You are Vaylo AI's FAANG-level resume evaluation engine.
+const MASTER_SYSTEM_PROMPT = `You are VayloAI's FAANG-level resume evaluation engine.
 You have 15+ years of experience in Fortune 500 & FAANG tech recruiting and ATS architecture.
 
 Your evaluation standards:
@@ -613,7 +613,7 @@ export async function generateVayloInterviewQuestions(
 
   try {
     const aiResult = await withRetryAndTimeout(async () => {
-      const prompt = `SYSTEM PROMPT — Vaylo AI Interview Question Generator
+      const prompt = `SYSTEM PROMPT — VayloAI Interview Question Generator
 
 You are an expert technical recruiter and hiring manager with 15+ years of experience running interview loops across Fortune 500 companies, top startups, and specialized industries (tech, finance, healthcare, legal, sales, design, trades, government, and academia).
 

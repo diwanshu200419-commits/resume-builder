@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 
@@ -35,7 +35,7 @@ export async function GET() {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    const prompt = `You are a test assistant. Return valid JSON with a single field "message" that says "Vaylo AI is working perfectly!"`;
+    const prompt = `You are a test assistant. Return valid JSON with a single field "message" that says "VayloAI is working perfectly!"`;
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 

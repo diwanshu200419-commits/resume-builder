@@ -1,6 +1,6 @@
-// lib/analytics.ts
+﻿// lib/analytics.ts
 //
-// Vaylo AI — Privacy-Safe GA4 Funnel & Conversion Tracking Engine
+// VayloAI — Privacy-Safe GA4 Funnel & Conversion Tracking Engine
 // Strictly prohibits personally identifiable information (PII) like names, emails, phone numbers, or raw resume text.
 
 export type AnalyticsEventName =

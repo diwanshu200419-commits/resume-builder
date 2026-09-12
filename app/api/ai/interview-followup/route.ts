@@ -1,6 +1,6 @@
-// app/api/ai/interview-followup/route.ts
+﻿// app/api/ai/interview-followup/route.ts
 //
-// Vaylo AI — Conversational Follow-Up Decision API
+// VayloAI — Conversational Follow-Up Decision API
 // Evaluates candidate turns and triggers targeted probing questions when answers lack depth
 
 import { NextRequest, NextResponse } from "next/server";

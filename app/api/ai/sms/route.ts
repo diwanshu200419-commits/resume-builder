@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { sendSmsOtp } from "@/lib/sms";
 import { checkSmsRateLimit } from "@/lib/sms-rate-limit";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   return NextResponse.json({
     status: "online",
-    service: "Vaylo AI Mobile SMS Gateway API",
+    service: "VayloAI Mobile SMS Gateway API",
     method: "POST",
     endpoint: "/api/ai/sms",
     description: "Send HTTP POST with JSON body { phone: '9876543210' } to dispatch 6-digit OTP SMS.",

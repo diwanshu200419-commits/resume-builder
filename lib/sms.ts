@@ -1,11 +1,11 @@
-export async function sendSmsOtp(phone: string, otpCode: string): Promise<{ success: boolean; message: string }> {
+﻿export async function sendSmsOtp(phone: string, otpCode: string): Promise<{ success: boolean; message: string }> {
   const twilioSid = process.env.TWILIO_ACCOUNT_SID;
   const twilioToken = process.env.TWILIO_AUTH_TOKEN;
   const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
   const fast2smsKey = process.env.FAST2SMS_API_KEY;
 
   const formattedPhone = phone.startsWith("+") ? phone : `+91${phone.replace(/\D/g, "")}`;
-  const smsBody = `Your Vaylo AI verification code is: ${otpCode}. Valid for 10 minutes. Do not share this OTP with anyone.`;
+  const smsBody = `Your VayloAI verification code is: ${otpCode}. Valid for 10 minutes. Do not share this OTP with anyone.`;
 
   // 1. Try Twilio SMS Gateway if configured
   if (twilioSid && twilioToken && twilioPhone) {

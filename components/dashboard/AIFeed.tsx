@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Sparkles, ArrowRight, Target, FileText, Linkedin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +30,7 @@ export function AIFeed({ activities, analysesCount }: AIFeedProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-accent" />
-          Vaylo AI Career Feed
+          VayloAI Career Feed
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -68,7 +68,7 @@ export function AIFeed({ activities, analysesCount }: AIFeedProps) {
                 <Sparkles className="w-5 h-5 text-text-muted" />
               </div>
               <p className="text-sm text-text-primary font-medium">
-                Activity will appear here as you use Vaylo AI tools.
+                Activity will appear here as you use VayloAI tools.
               </p>
               <p className="text-xs text-text-muted mt-1">
                 Start with an ATS analysis or resume optimization.

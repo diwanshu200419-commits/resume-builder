@@ -1,6 +1,6 @@
 // lib/seo/role-pages.ts
 //
-// Authoritative, deep, role-specific content hubs for Vaylo AI SEO acquisition.
+// Authoritative, deep, role-specific content hubs for VayloAI SEO acquisition.
 // Every single role contains 100% unique technical stacks, ATS keywords, Google X-Y-Z bullet formulas, and FAQs.
 
 export interface RolePageData {
@@ -651,7 +651,7 @@ export const ROLE_PAGES_DATA: Record<string, RolePageData> = {
     faq: [
       {
         question: "What ATS score should I target for off-campus FAANG applications?",
-        answer: "Aim for an ATS score of 85%+ on Vaylo AI, ensuring exact matching of hard technical skills and Google X-Y-Z formatted project bullet points.",
+        answer: "Aim for an ATS score of 85%+ on VayloAI, ensuring exact matching of hard technical skills and Google X-Y-Z formatted project bullet points.",
       },
     ],
   },

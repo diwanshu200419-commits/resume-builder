@@ -1,4 +1,4 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import { FreeATSCalculatorClient } from "@/components/marketing/FreeATSCalculatorClient";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -62,10 +62,10 @@ export default function ATSResumeCheckerPage() {
       <section className="bg-surface/40 border-t border-border py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto space-y-8 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-text-primary">
-            Why Job Seekers Rely on Vaylo AI's ATS Resume Checker
+            Why Job Seekers Rely on VayloAI's ATS Resume Checker
           </h2>
           <p className="text-sm text-text-secondary max-w-2xl mx-auto">
-            Traditional resume reviewers charge hundreds of dollars for subjective opinions. Vaylo AI analyzes your resume deterministically using real Applicant Tracking System scoring criteria in seconds.
+            Traditional resume reviewers charge hundreds of dollars for subjective opinions. VayloAI analyzes your resume deterministically using real Applicant Tracking System scoring criteria in seconds.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left pt-4">
             <Card className="p-5 border-border bg-surface space-y-2">

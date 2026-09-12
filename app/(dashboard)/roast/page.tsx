@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +40,7 @@ export default function ResumeRoastPage() {
 
   const handleCopyRoast = () => {
     if (!roast) return;
-    const textToCopy = `🔥 VAYLO AI RESUME ROAST 🔥\n\nGeneral Roast:\n${roast.general_roast}\n\nFormat Roast:\n${roast.format_roast}\n\nSkills Roast:\n${roast.skills_roast}\n\nGet roasted at: Vaylo AI Career Platform!`;
+    const textToCopy = `🔥 VayloAI RESUME ROAST 🔥\n\nGeneral Roast:\n${roast.general_roast}\n\nFormat Roast:\n${roast.format_roast}\n\nSkills Roast:\n${roast.skills_roast}\n\nGet roasted at: VayloAI Career Platform!`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

@@ -1,5 +1,5 @@
-export const SYSTEM_PROMPT = `
-You are Vaylo AI.
+﻿export const SYSTEM_PROMPT = `
+You are VayloAI.
 
 The world's most advanced AI Career Operating System.
 

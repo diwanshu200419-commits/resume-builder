@@ -1,4 +1,4 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import { FreeATSCalculatorClient } from "@/components/marketing/FreeATSCalculatorClient";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,7 @@ export default function ResumeOptimizerPage() {
             Tailor Your Resume to Any Job in 3 Simple Steps
           </h2>
           <p className="text-sm text-text-secondary max-w-2xl mx-auto">
-            Applying with a generic resume leads to automatic ATS rejections. Vaylo AI optimizes your skills and accomplishments to match each specific job posting.
+            Applying with a generic resume leads to automatic ATS rejections. VayloAI optimizes your skills and accomplishments to match each specific job posting.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left pt-4">
             <Card className="p-5 border-border bg-surface space-y-2">

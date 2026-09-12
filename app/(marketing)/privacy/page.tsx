@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Mail, ArrowLeft, Lock, Database, Cpu } from "lucide-react";
 
@@ -6,11 +6,11 @@ const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy policy detailing data collection, AI processing, storage, and protection on Vaylo AI.",
+  description: "Privacy policy detailing data collection, AI processing, storage, and protection on VayloAI.",
   alternates: { canonical: `${APP_URL}/privacy` },
   openGraph: {
     title: "Privacy Policy",
-    description: "Privacy policy detailing data collection, AI processing, storage, and protection on Vaylo AI.",
+    description: "Privacy policy detailing data collection, AI processing, storage, and protection on VayloAI.",
     url: `${APP_URL}/privacy`,
     siteName: "VayloAI",
     type: "website",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Privacy Policy",
-    description: "Privacy policy detailing data collection, AI processing, storage, and protection on Vaylo AI.",
+    description: "Privacy policy detailing data collection, AI processing, storage, and protection on VayloAI.",
   },
 };
 
@@ -39,7 +39,7 @@ export default function PrivacyPage() {
           <ShieldCheck className="w-4 h-4 text-indigo-400" /> Data Privacy &amp; Protection Commitment:
         </p>
         <p>
-          Your privacy is paramount. Vaylo AI stores your career records securely and uses AI models strictly to analyze and improve your job application materials. We do <strong>NOT</strong> sell your personal resume data to third-party advertisers.
+          Your privacy is paramount. VayloAI stores your career records securely and uses AI models strictly to analyze and improve your job application materials. We do <strong>NOT</strong> sell your personal resume data to third-party advertisers.
         </p>
       </div>
 
@@ -50,13 +50,13 @@ export default function PrivacyPage() {
             <Database className="w-4 h-4 text-indigo-400" /> 1. Information We Collect
           </h2>
           <p>
-            To provide AI-driven resume optimization and interview evaluation services, Vaylo AI collects and processes the following information:
+            To provide AI-driven resume optimization and interview evaluation services, VayloAI collects and processes the following information:
           </p>
           <ul className="list-disc pl-5 space-y-1 text-text-secondary">
             <li><strong>Account Information:</strong> Your full name, email address, profile avatar, and login credentials managed via Supabase Authentication.</li>
             <li><strong>Career Materials:</strong> Uploaded resume content, text extracts, target job descriptions, work experience, and bullet points.</li>
             <li><strong>AI Inputs &amp; Outputs:</strong> Queries submitted to AI features, ATS match analysis results, cover letters, and STAR interview transcripts.</li>
-            <li><strong>Payment Information:</strong> Payment reference numbers (UTR), plan type, transaction timestamp, and optional payment proof screenshots. Raw credit card numbers are never stored on Vaylo AI servers.</li>
+            <li><strong>Payment Information:</strong> Payment reference numbers (UTR), plan type, transaction timestamp, and optional payment proof screenshots. Raw credit card numbers are never stored on VayloAI servers.</li>
             <li><strong>Usage Data:</strong> Log data including feature access timestamps, browser type, and diagnostic error reports.</li>
           </ul>
         </section>
@@ -81,7 +81,7 @@ export default function PrivacyPage() {
             <Cpu className="w-4 h-4 text-purple-400" /> 3. AI Processing via Google AI Services
           </h2>
           <p>
-            AI processing on Vaylo AI occurs through our securely configured Google AI (Gemini) service integration. Resume text and job description content sent to the AI service are used solely for generating application recommendations during your active session.
+            AI processing on VayloAI occurs through our securely configured Google AI (Gemini) service integration. Resume text and job description content sent to the AI service are used solely for generating application recommendations during your active session.
           </p>
         </section>
 
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-text-primary">5. Data Security Measures</h2>
           <p>
-            Vaylo AI implements strict technical and organizational security measures, including 256-bit SSL encryption in transit, Supabase Row Level Security (RLS) policies, and server-side authorization guards to prevent unauthorized access to your resume records.
+            VayloAI implements strict technical and organizational security measures, including 256-bit SSL encryption in transit, Supabase Row Level Security (RLS) policies, and server-side authorization guards to prevent unauthorized access to your resume records.
           </p>
         </section>
 
@@ -116,7 +116,7 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-text-primary">7. Your Privacy Rights</h2>
           <p>
-            Depending on your jurisdiction, you have the right to access, correct, download, or delete your personal data stored on Vaylo AI.
+            Depending on your jurisdiction, you have the right to access, correct, download, or delete your personal data stored on VayloAI.
           </p>
         </section>
 

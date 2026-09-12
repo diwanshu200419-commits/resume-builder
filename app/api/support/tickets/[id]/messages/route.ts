@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sanitizeInput } from "@/lib/support/tickets";
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
 
     const isAdmin = profile.role === "admin";
     const senderType = isAdmin ? "admin" : "user";
-    const senderName = isAdmin ? "Vaylo AI Support Team" : (profile.full_name || profile.email);
+    const senderName = isAdmin ? "VayloAI Support Team" : (profile.full_name || profile.email);
 
     if (!ticket) {
       // Check user_feedback fallback table
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
         await createNotification({
           userId: feedback.user_id,
           type: "ticket_reply",
-          title: "New Support Reply from Vaylo AI Team",
+          title: "New Support Reply from VayloAI Team",
           body: `Our support team has responded to your request: "${cleanMessage.slice(0, 100)}..."`,
           link: "/support",
         });

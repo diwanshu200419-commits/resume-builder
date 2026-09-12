@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,7 +45,7 @@ export default function BrandingStudioPage() {
   const [achievements, setAchievements] = useState("Optimized query performance by 40%, built automated CI/CD pipeline");
   const [education, setEducation] = useState("B.Tech in Computer Science");
   const [certifications, setCertifications] = useState("AWS Certified Solutions Architect");
-  const [projects, setProjects] = useState("Vaylo AI SaaS Application, E-commerce Payment Gateway");
+  const [projects, setProjects] = useState("VayloAI SaaS Application, E-commerce Payment Gateway");
   const [currentHeadline, setCurrentHeadline] = useState("Software Engineer at Tech Corp");
   const [currentAbout, setCurrentAbout] = useState("I am a passionate software engineer working on web applications.");
   const [targetJobDescription, setTargetJobDescription] = useState("");
@@ -373,7 +373,7 @@ export default function BrandingStudioPage() {
               <Linkedin className="w-12 h-12 text-[#0A66C2] mx-auto opacity-80" />
               <h3 className="text-lg font-bold text-text-primary">Universal LinkedIn Optimization Ready</h3>
               <p className="text-xs text-text-secondary max-w-md mx-auto leading-relaxed">
-                Configure your target role and verified skills on the left. Vaylo AI will compute your
+                Configure your target role and verified skills on the left. VayloAI will compute your
                 deterministic 0–100 LinkedIn score and generate 5 role-aware headline strategies.
               </p>
             </Card>

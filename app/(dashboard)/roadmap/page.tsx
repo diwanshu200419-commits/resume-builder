@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,7 +64,7 @@ export default function CareerRoadmapPage() {
         <Card className="border-border">
           <CardHeader>
             <CardTitle className="text-lg">Configure your goals</CardTitle>
-            <CardDescription>Tell Vaylo AI about where you want to go.</CardDescription>
+            <CardDescription>Tell VayloAI about where you want to go.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
@@ -140,7 +140,7 @@ export default function CareerRoadmapPage() {
             <div className="h-full flex flex-col items-center justify-center text-center p-12 min-h-[400px]">
               <Compass className="w-16 h-16 text-text-muted mb-4 opacity-30" />
               <h3 className="font-semibold text-text-secondary text-lg mb-2">No Roadmap Generated</h3>
-              <p className="text-text-muted text-sm max-w-sm">Provide your target role and dream company, and Vaylo AI will plot a personalized timeline.</p>
+              <p className="text-text-muted text-sm max-w-sm">Provide your target role and dream company, and VayloAI will plot a personalized timeline.</p>
             </div>
           ) : (
             roadmap && (

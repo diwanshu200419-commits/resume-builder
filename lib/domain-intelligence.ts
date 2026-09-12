@@ -1,6 +1,6 @@
-// lib/domain-intelligence.ts
+﻿// lib/domain-intelligence.ts
 //
-// Vaylo AI — Domain-Agnostic Resume Intelligence Engine
+// VayloAI — Domain-Agnostic Resume Intelligence Engine
 // Classifies Job Descriptions into 12 domains (Finance, HR, Sales, Marketing, IT, PM, Ops, etc.)
 // and provides domain-specific action verb banks, metric types, and prompt blocks.
 

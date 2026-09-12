@@ -1,4 +1,4 @@
-import type { Plan } from "@/types";
+﻿import type { Plan } from "@/types";
 
 // Amounts are in paise-equivalent rupees (whole rupees here)
 const PLAN_AMOUNTS: Record<string, number> = {
@@ -73,7 +73,7 @@ export function buildUpiQrUrl(upiLink: string, amount: number): string {
     pn: name || "DIWANSHU",
     am: amount.toString(),
     cu: "INR",
-    tn: `Vaylo AI ${amount}`,
+    tn: `VayloAI ${amount}`,
   });
 
   const fullQrLink = `upi://pay?${qrParams.toString().replace(/\+/g, "%20")}`;

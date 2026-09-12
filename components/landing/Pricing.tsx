@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ const plans = [
     name: "Free",
     price: "₹0",
     period: "forever",
-    description: "Perfect to try Vaylo AI",
+    description: "Perfect to try VayloAI",
     features: [
       { text: "2 resume downloads", included: true },
       { text: "Basic ATS check", included: true },

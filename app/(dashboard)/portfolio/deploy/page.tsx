@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +25,7 @@ export default function PortfolioDeployRedirectPage() {
           Portfolio Deployment &amp; Export Studio
         </h1>
         <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-          Vaylo AI gives you complete ownership of your portfolio source code. Deploy for free in 10 seconds via Netlify Drop, Vercel, or GitHub Pages.
+          VayloAI gives you complete ownership of your portfolio source code. Deploy for free in 10 seconds via Netlify Drop, Vercel, or GitHub Pages.
         </p>
       </div>
 

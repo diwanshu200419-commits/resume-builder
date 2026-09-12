@@ -1,4 +1,4 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import { FreeATSCalculatorClient } from "@/components/marketing/FreeATSCalculatorClient";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,7 @@ export default function AIResumeCheckerPage() {
             Next-Generation AI Resume Evaluation
           </h2>
           <p className="text-sm text-text-secondary max-w-2xl mx-auto">
-            Vaylo AI combines deterministic ATS scoring with advanced generative AI to rewrite weak bullets into high-impact accomplishments following Google's X-Y-Z formula.
+            VayloAI combines deterministic ATS scoring with advanced generative AI to rewrite weak bullets into high-impact accomplishments following Google's X-Y-Z formula.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left pt-4">
             <Card className="p-5 border-border bg-surface space-y-2">
@@ -87,7 +87,7 @@ export default function AIResumeCheckerPage() {
           <div className="pt-6">
             <Button asChild className="bg-accent hover:bg-accent-hover text-white font-bold text-xs">
               <Link href="/builder">
-                <Sparkles className="w-4 h-4 mr-2" /> Start Building with Vaylo AI
+                <Sparkles className="w-4 h-4 mr-2" /> Start Building with VayloAI
               </Link>
             </Button>
           </div>

@@ -33,7 +33,10 @@ export default function AboutPage() {
           Democratizing Career Growth through AI
         </h1>
         <p className="text-text-secondary text-sm">
-          Vaylo AI was founded with a simple vision: to empower candidates everywhere with automated, high-quality recruiter intelligence.
+          VayloAI was founded by <strong>Diwanshu</strong> with a simple vision: to empower candidates everywhere with automated, high-quality recruiter intelligence.
+        </p>
+        <p className="text-text-secondary text-xs mt-2">
+          <em>Note: VayloAI (vayloai.online) is an AI-powered resume builder and ATS checker — not related to vaylo.ai (valet parking) or vayloaisolutions.com.</em>
         </p>
       </div>
 

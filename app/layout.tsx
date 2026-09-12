@@ -97,13 +97,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Person",
+        "@id": `${APP_URL}/#founder`,
+        name: "Diwanshu",
+        url: `${APP_URL}/about`,
+        sameAs: [
+          "https://linkedin.com/in/diwanshu",
+          "https://github.com/diwanshu200419-commits"
+        ],
+        jobTitle: "Founder",
+        worksFor: { "@id": `${APP_URL}/#organization` }
+      },
+      {
         "@type": "Organization",
         "@id": `${APP_URL}/#organization`,
         name: "VayloAI",
-        alternateName: "Vaylo AI",
         url: APP_URL,
         logo: `${APP_URL}/icon.png`,
         description: "AI-powered resume builder, ATS checker, and career copilot for Indian job seekers.",
+        founder: { "@id": `${APP_URL}/#founder` },
         sameAs: [
           "https://github.com/diwanshu200419-commits/resume-builder"
         ]
@@ -136,6 +148,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="google-site-verification" content="googlea1966f76a89819c1" />
         <meta name="google-site-verification" content="0w0LWASRueXYjlydirI9OkfyFuaSVfHtymdPVEY5ad0" />
+        {/* TODO: Replace empty string below with your real msvalidate.01 code from https://www.bing.com/webmasters */}
+        {/* Steps: Sign in → Add Site → Verify via HTML Meta Tag → copy the content value */}
+        {/* Leave empty until you have the real code — an invalid code is worse than none */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-ENLDX3KQQ7"
           strategy="afterInteractive"

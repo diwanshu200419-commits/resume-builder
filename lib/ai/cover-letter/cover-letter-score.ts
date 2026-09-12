@@ -1,6 +1,6 @@
-// lib/ai/cover-letter/cover-letter-score.ts
+﻿// lib/ai/cover-letter/cover-letter-score.ts
 //
-// Vaylo AI — Deterministic Cover Letter Quality Scorer
+// VayloAI — Deterministic Cover Letter Quality Scorer
 // Rule-based, 100% reproducible. Zero LLM scoring.
 // Follows the same pattern as lib/ai/linkedin/linkedin-score.ts
 // and the ATS engine in lib/ats-v2.ts.

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Mail, ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
 
@@ -6,11 +6,11 @@ const APP_URL = "https://www.vayloai.online";
 
 export const metadata: Metadata = {
   title: "Refund & Cancellation Policy",
-  description: "Transparent refund and cancellation policy for Vaylo AI subscriptions and career tools.",
+  description: "Transparent refund and cancellation policy for VayloAI subscriptions and career tools.",
   alternates: { canonical: `${APP_URL}/refund` },
   openGraph: {
     title: "Refund & Cancellation Policy",
-    description: "Transparent refund and cancellation policy for Vaylo AI subscriptions and career tools.",
+    description: "Transparent refund and cancellation policy for VayloAI subscriptions and career tools.",
     url: `${APP_URL}/refund`,
     siteName: "VayloAI",
     type: "website",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Refund & Cancellation Policy",
-    description: "Transparent refund and cancellation policy for Vaylo AI subscriptions and career tools.",
+    description: "Transparent refund and cancellation policy for VayloAI subscriptions and career tools.",
   },
 };
 
@@ -39,7 +39,7 @@ export default function RefundPage() {
           <ShieldCheck className="w-4 h-4 text-emerald-400" /> Transparent Refund Policy:
         </p>
         <p>
-          We want you to be completely satisfied with Vaylo AI. Because AI feature execution consumes real-time cloud computation tokens, refund eligibility depends on whether paid AI analyses or exports have been used.
+          We want you to be completely satisfied with VayloAI. Because AI feature execution consumes real-time cloud computation tokens, refund eligibility depends on whether paid AI analyses or exports have been used.
         </p>
       </div>
 

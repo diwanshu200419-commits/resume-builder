@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from "next/link";
@@ -65,7 +65,7 @@ export function Footer() {
               <li><Link href="/blog/how-to-make-ats-friendly-resume" className="hover:text-accent transition-colors">ATS-Friendly Checklist</Link></li>
               <li><Link href="/blog/how-to-improve-ats-score" className="hover:text-accent transition-colors">How to Improve ATS Score</Link></li>
               <li><Link href="/pricing" className="hover:text-accent transition-colors">Pricing Plans (₹0 - ₹499)</Link></li>
-              <li><Link href="/about" className="hover:text-accent transition-colors">About Vaylo AI</Link></li>
+              <li><Link href="/about" className="hover:text-accent transition-colors">About VayloAI</Link></li>
               <li>
                 <button
                   onClick={() => setFeedbackOpen(true)}
@@ -101,7 +101,7 @@ export function Footer() {
         </div>
 
         <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-text-muted gap-4">
-          <p>© {new Date().getFullYear()} Vaylo AI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} VayloAI. All rights reserved.</p>
           <div className="flex gap-4 items-center">
             <button onClick={() => setFeedbackOpen(true)} className="hover:underline text-accent">
               Feedback & Support

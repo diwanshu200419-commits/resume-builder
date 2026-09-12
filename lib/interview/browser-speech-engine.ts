@@ -1,6 +1,6 @@
-// lib/interview/browser-speech-engine.ts
+﻿// lib/interview/browser-speech-engine.ts
 //
-// Vaylo AI — Optimized Browser Speech Synthesis Engine
+// VayloAI — Optimized Browser Speech Synthesis Engine
 // Zero-cost, zero-API, zero-hosting client-side speech engine with asynchronous voice loading
 // and prioritized high-fidelity neural voice selection (Edge/Chrome Natural voices -> OS voices).
 

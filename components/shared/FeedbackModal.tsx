@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -131,7 +131,7 @@ export function FeedbackModal({
               </div>
               <h3 className="text-base font-bold text-text-primary">Feedback Received!</h3>
               <p className="text-xs text-text-secondary max-w-xs mx-auto">
-                Thank you for helping us improve Vaylo AI. Our team will review this promptly.
+                Thank you for helping us improve VayloAI. Our team will review this promptly.
               </p>
             </div>
           ) : (

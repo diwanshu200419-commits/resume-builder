@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -230,7 +230,7 @@ export function PricingClient({ userPlan = "free" }: PricingClientProps) {
       <div className="max-w-4xl mx-auto space-y-8 pt-8 border-t border-border">
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-bold text-text-primary">Frequently Asked Questions</h2>
-          <p className="text-xs text-text-secondary">Everything you need to know about Vaylo AI subscriptions.</p>
+          <p className="text-xs text-text-secondary">Everything you need to know about VayloAI subscriptions.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

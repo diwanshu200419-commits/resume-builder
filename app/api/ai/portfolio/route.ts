@@ -1,6 +1,6 @@
-// app/api/ai/portfolio/route.ts
+﻿// app/api/ai/portfolio/route.ts
 //
-// Vaylo AI — Multi-Design Portfolio Generator API
+// VayloAI — Multi-Design Portfolio Generator API
 // Generates responsive single-page portfolio HTML across 6 modern design themes:
 // 1. Technical / Neo-Terminal
 // 2. Minimal / Bento Studio

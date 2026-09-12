@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest, { params }: RouteProps) {
               ticket_id: feedback.id,
               sender_user_id: null,
               sender_type: "admin",
-              sender_name: "Vaylo AI Support Admin",
+              sender_name: "VayloAI Support Admin",
               message: feedback.admin_response,
               created_at: feedback.responded_at || feedback.created_at,
             }] : [])

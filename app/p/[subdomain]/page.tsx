@@ -1,6 +1,6 @@
-// app/p/[subdomain]/page.tsx
+﻿// app/p/[subdomain]/page.tsx
 //
-// Vaylo AI — Instant Public Portfolio Renderer
+// VayloAI — Instant Public Portfolio Renderer
 // Serves live generated HTML portfolio pages for candidate handles (e.g. /p/ashokkumarsolan567)
 
 import { notFound } from "next/navigation";
@@ -66,7 +66,7 @@ export default async function PublicPortfolioPage({ params }: { params: { subdom
     portfolioData = {
       name: displayName,
       title: "Professional Portfolio",
-      bio: `${displayName}'s verified candidate portfolio on Vaylo AI.`,
+      bio: `${displayName}'s verified candidate portfolio on VayloAI.`,
       email: targetProfile.email || "",
       avatarUrl: targetProfile.avatar_url || undefined,
       skills: ["Problem Solving", "Professional Communication", "Project Delivery"],

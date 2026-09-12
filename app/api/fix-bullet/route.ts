@@ -1,6 +1,6 @@
-// app/api/fix-bullet/route.ts
+﻿// app/api/fix-bullet/route.ts
 //
-// Vaylo AI — Domain-Agnostic FAANG-Level ATS Bullet-Point Rewriter
+// VayloAI — Domain-Agnostic FAANG-Level ATS Bullet-Point Rewriter
 // Dynamically classifies JD into 1 of 12 domains (Finance, HR, Sales, IT, PM, Ops, etc.)
 // and selects domain-specific action verb banks and metric definitions,
 // without fabricating experience, skills, or metrics.
@@ -44,7 +44,7 @@ type GeminiResult = z.infer<typeof GeminiResultSchema>;
 function buildSystemPrompt(domain: ReturnType<typeof detectDomainFromJD>): string {
   const domainContext = getDomainPromptContext(domain);
 
-  return `You are Vaylo AI's domain-agnostic resume optimization engine. Your job is to rewrite weak, passive resume bullet points into high-impact, ATS-optimized bullets — WITHOUT inventing experience, skills, metrics, or outcomes the candidate did not provide.
+  return `You are VayloAI's domain-agnostic resume optimization engine. Your job is to rewrite weak, passive resume bullet points into high-impact, ATS-optimized bullets — WITHOUT inventing experience, skills, metrics, or outcomes the candidate did not provide.
 
 ${domainContext}
 
