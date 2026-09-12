@@ -62,11 +62,11 @@ export function RoleGuideLinks() {
               href="/blog/case-study-fresher-to-sde-ats-transformation"
               className="p-4 rounded-xl bg-background border border-border hover:border-accent group transition-all"
             >
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wide">Case Study</span>
+              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wide">Composite Benchmark</span>
               <h4 className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors mt-1">
                 Tier-3 Fresher: 48 to 89 ATS Score Delta &rarr;
               </h4>
-              <p className="text-xs text-text-muted mt-1">Real before/after diagnostics, Google X-Y-Z bullet rewrites, and 4 tech interview callbacks.</p>
+              <p className="text-xs text-text-muted mt-1">Simulated before/after diagnostics, Google X-Y-Z bullet rewrites, and algorithm analysis.</p>
             </Link>
 
             <Link

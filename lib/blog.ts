@@ -1,4 +1,4 @@
-﻿// lib/blog.ts
+// lib/blog.ts
 //
 // High-intent, authoritative informational guides and technical interview question collections.
 // Contains zero AI fluff, real-world technical architecture questions, STAR answers, and internal CTAs.
@@ -591,8 +591,8 @@ FROM daily_sales_summary;</pre>
   },
   {
     slug: "case-study-fresher-to-sde-ats-transformation",
-    title: "Case Study: How a Tier-3 Fresher Jumped from 48 to 89 ATS Score and Landed 4 Tech Interviews",
-    description: "An in-depth, data-backed analysis of a Tier-3 engineering graduate's resume transformation. See the exact ATS diagnostic delta (48 to 89), keyword gaps filled, and Google X-Y-Z bullet rewrites.",
+    title: "Composite Case Study: How a Tier-3 Fresher Profile Jumped from 48 to 89 ATS Score (Illustrative Benchmark)",
+    description: "An illustrative benchmark analysis modeling a Tier-3 engineering graduate's resume transformation. Explore the simulated 48 to 89 ATS score delta, keyword gap remediation, and Google X-Y-Z bullet rewrites.",
     tag: "Case Study",
     category: "ats",
     author: "VayloAI Research Lab",
@@ -615,8 +615,17 @@ FROM daily_sales_summary;</pre>
       }
     ],
     content: `
-      <h2>1. The Candidate Profile & The Initial Dilemma</h2>
-      <p>Rahul S. graduated in 2025 with a B.Tech in Computer Science from an affiliated Tier-3 engineering college in Pune. Over a four-month period, Rahul submitted over 60 applications for entry-level Software Development Engineer (SDE-1) and Full-Stack Developer roles on Naukri, LinkedIn, and corporate job boards.</p>
+      <div style="padding: 1rem 1.25rem; border-radius: 0.75rem; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); margin-bottom: 2rem;">
+        <p style="font-weight: bold; font-size: 0.875rem; color: #818cf8; margin-bottom: 0.25rem;">
+          ⚠️ COMPOSITE SAMPLE CASE STUDY — FOR DEMONSTRATION &amp; BENCHMARK PURPOSES
+        </p>
+        <p style="font-size: 0.8125rem; color: #94a3b8; line-height: 1.5; margin: 0;">
+          <strong>Disclosure:</strong> This case study is an illustrative composite scenario constructed for technical benchmarking and educational demonstration. It models real-world ATS failure modes, algorithmic score deltas, and Google X-Y-Z bullet rewrites using synthetic candidate profiles, rather than representing an individual customer's verified personal results.
+        </p>
+      </div>
+
+      <h2>1. The Candidate Profile &amp; The Initial Dilemma (Sample Scenario)</h2>
+      <p>In this benchmark case study, we examine a synthetic candidate persona — Rahul S., modeling a 2025 B.Tech Computer Science graduate from an affiliated Tier-3 college in Pune. Like thousands of Indian engineering graduates entering the off-campus job market, this profile typifies common applicant struggles across Naukri and LinkedIn. Over a four-month period, this baseline profile was applied to over 60 entry-level Software Development Engineer (SDE-1) and Full-Stack Developer job postings.</p>
       <p>The outcome was frustratingly common: <strong>zero recruiter callbacks, zero interview invites, and automated rejection emails within 48 hours</strong>.</p>
       <p>When Rahul ran his original resume through the <strong>VayloAI 100-Point ATS Analyzer</strong>, the diagnostic report exposed the root cause immediately: an overall <strong>ATS score of 48/100</strong>, placing his application in the bottom 15th percentile of the applicant pool.</p>
 
@@ -718,12 +727,12 @@ FROM daily_sales_summary;</pre>
       <p><strong>After (Scored 92% match):</strong></p>
       <blockquote>Developed NLP semantic similarity engine in Python using spaCy, Sentence-Transformers, and scikit-learn, achieving 87% accuracy matching resumes against 1,200+ public job descriptions. Containerized service with Docker and deployed on AWS EC2, maintaining 99.8% uptime during academic demonstration.</blockquote>
 
-      <h2>5. The Outcome: 4 Interview Callbacks in 18 Days</h2>
-      <p>With an ATS score of <strong>89/100</strong>, Rahul re-applied to 25 roles across high-growth startups and tech consultancies in Bengaluru and Pune. The results were immediate:</p>
+      <h2>5. Expected Candidate Outcomes &amp; Benchmark Benchmarking</h2>
+      <p>When applicant profiles achieve an ATS rating above <strong>85/100</strong> on VayloAI, recruitment data indicates a significant uplift in screening pass rates compared to sub-50 baseline submissions:</p>
       <ul>
-        <li><strong>4 Recruiter Screening Invitations:</strong> Within 18 days, Rahul received callbacks from a Series-B fintech company, a global healthcare SaaS firm, and two tech services MNCs.</li>
-        <li><strong>Technical Round Success:</strong> Armed with concrete architectural talking points directly from his resume bullets, Rahul cleared 3 consecutive technical interviews.</li>
-        <li><strong>Final Offer:</strong> Rahul accepted an SDE-1 position with an <strong>₹8.5 LPA starting package</strong> — proving that Tier-3 graduates can break into top tech roles when their resume passes ATS filters with authoritative evidence.</li>
+        <li><strong>Increased Recruiter Shortlisting:</strong> Single-column resumes featuring verified hard technical keywords and quantified metrics regularly advance past automated applicant filters to reach human hiring managers.</li>
+        <li><strong>Technical Interview Preparation:</strong> Structuring resume bullets around specific technical achievements (latency reduction, caching, database indexing) provides candidates with concrete architectural talking points during system design and coding discussions.</li>
+        <li><strong>Target Salary Calibration:</strong> High-scoring candidate profiles applying to mid-tier startups and tech consultancies in tech hubs like Bengaluru and Pune typically target entry-level engineering ranges between ₹6 LPA and ₹10 LPA.</li>
       </ul>
 
       <h2>6. Test Your Own Resume for Free</h2>
@@ -909,7 +918,7 @@ FROM daily_sales_summary;</pre>
       },
       {
         question: "Is my resume data safe and compliant with India's Digital Personal Data Protection (DPDP) Act 2023 on VayloAI?",
-        answer: "Yes, 100%. VayloAI complies strictly with the Digital Personal Data Protection (DPDP) Act 2023. We do not sell or monetize candidate resumes to third-party data brokers or recruitment spam agencies. Resumes are processed in secure memory under TLS 1.3 encryption, and users retain full rights to delete their data at any time."
+        answer: "Yes. VayloAI adheres to core DPDP Act principles: we never sell candidate information to third-party data brokers or marketing agencies, all data travels over TLS 1.3 encryption, and registered users can request complete data erasure and account deletion at any time by contacting support@vayloai.online or using our in-app support module."
       },
       {
         question: "Which file format is better for Indian job portals: PDF or DOCX?",
@@ -960,12 +969,14 @@ FROM daily_sales_summary;</pre>
       </ul>
 
       <h2>3. Privacy &amp; Data Security: Compliance with India's DPDP Act 2023</h2>
-      <p>When using online career tools, data privacy is paramount. Under India's <strong>Digital Personal Data Protection (DPDP) Act 2023</strong>, candidates have strict rights regarding how their personal identity, employment history, and contact details are handled.</p>
-      <p>At <strong>VayloAI</strong>, privacy is embedded by design:</p>
+      <p>When using online career tools, data privacy and transparency are essential. Under India's <strong>Digital Personal Data Protection (DPDP) Act 2023</strong>, candidates have recognized rights regarding the processing and erasure of their personal identity and career records.</p>
+      <p>Here is exactly how <strong>VayloAI</strong> handles candidate data today:</p>
       <ul>
-        <li>Your resume text is never shared with third-party telemarketers, credit card issuers, or spam databases.</li>
-        <li>Processing occurs over secure SSL/TLS 1.3 encrypted sessions.</li>
-        <li>You retain unconditional rights to delete your uploaded documents and profile data at any time from your account settings.</li>
+        <li><strong>Zero Data Broker Sharing:</strong> Your resume data and contact information are strictly confidential and are never sold, rented, or syndicated to third-party telemarketers, lead brokers, or recruitment spam lists.</li>
+        <li><strong>Transport Encryption:</strong> All client-to-server traffic is encrypted in transit using standard SSL/TLS 1.3 protocols.</li>
+        <li><strong>Public Scans vs. Account Storage:</strong> Free scans on our public homepage checker operate ephemerally in memory without saving to a candidate profile. When you sign in to your dashboard, your analysis history is saved to your private database account so you can review previous evaluations.</li>
+        <li><strong>AI Model Inference:</strong> Resume text is evaluated via Google Gemini API endpoints under data confidentiality commitments and is not used to train public models.</li>
+        <li><strong>Right to Erasure &amp; Account Deletion:</strong> In compliance with the DPDP Act, any registered user can request permanent deletion of their account profile, resume evaluations, and associated data by emailing <a href="mailto:support@vayloai.online">support@vayloai.online</a> or submitting an erasure request via the in-app Feedback &amp; Support tool. Requests are verified and permanently purged.</li>
       </ul>
 
       <h2>4. Recommended Role-Specific Guides</h2>
