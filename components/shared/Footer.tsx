@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import Link from "next/link";
@@ -11,7 +11,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-surface text-text-primary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-12">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
           {/* Brand Info */}
           <div className="md:col-span-1 space-y-3">
             <Link href="/" className="text-xl font-extrabold text-text-primary flex items-center gap-1.5">
@@ -41,18 +41,41 @@ export function Footer() {
           </div>
 
           {/* Role-Specific Resume Guides */}
-          <div>
-            <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider mb-3">Resume Guides</h4>
-            <ul className="space-y-2 text-xs text-text-secondary">
-              <li><Link href="/resume/software-engineer" className="hover:text-accent transition-colors">Software Engineer</Link></li>
-              <li><Link href="/resume/data-analyst" className="hover:text-accent transition-colors">Data Analyst</Link></li>
-              <li><Link href="/resume/ai-engineer" className="hover:text-accent transition-colors">AI Engineer</Link></li>
-              <li><Link href="/resume/frontend-developer" className="hover:text-accent transition-colors">Frontend Developer</Link></li>
-              <li><Link href="/resume/backend-developer" className="hover:text-accent transition-colors">Backend Developer</Link></li>
-              <li><Link href="/resume/full-stack-developer" className="hover:text-accent transition-colors">Full-Stack Developer</Link></li>
-              <li><Link href="/resume/devops-engineer" className="hover:text-accent transition-colors">DevOps Engineer</Link></li>
-              <li><Link href="/resume/fresher" className="hover:text-accent transition-colors">Fresher / Student</Link></li>
-            </ul>
+          <div className="md:col-span-2 grid grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider mb-3">Resume by Role</h4>
+              <ul className="space-y-2 text-xs text-text-secondary">
+                <li><Link href="/resume/software-engineer" className="hover:text-accent transition-colors">Software Engineer</Link></li>
+                <li><Link href="/resume/frontend-developer" className="hover:text-accent transition-colors">Frontend Developer</Link></li>
+                <li><Link href="/resume/backend-developer" className="hover:text-accent transition-colors">Backend Developer</Link></li>
+                <li><Link href="/resume/full-stack-developer" className="hover:text-accent transition-colors">Full-Stack Developer</Link></li>
+                <li><Link href="/resume/ai-engineer" className="hover:text-accent transition-colors">AI Engineer</Link></li>
+                <li><Link href="/resume/data-analyst" className="hover:text-accent transition-colors">Data Analyst</Link></li>
+                <li><Link href="/resume/data-scientist" className="hover:text-accent transition-colors">Data Scientist</Link></li>
+                <li><Link href="/resume/machine-learning-engineer" className="hover:text-accent transition-colors">ML Engineer</Link></li>
+                <li><Link href="/resume/devops-engineer" className="hover:text-accent transition-colors">DevOps Engineer</Link></li>
+                <li><Link href="/resume/cloud-architect" className="hover:text-accent transition-colors">Cloud Architect</Link></li>
+                <li><Link href="/resume/qa-automation-engineer" className="hover:text-accent transition-colors">QA / Automation</Link></li>
+                <li><Link href="/resume/cybersecurity-analyst" className="hover:text-accent transition-colors">Cybersecurity Analyst</Link></li>
+                <li><Link href="/resume/product-manager" className="hover:text-accent transition-colors">Product Manager</Link></li>
+                <li><Link href="/resume/web-developer" className="hover:text-accent transition-colors">Web Developer</Link></li>
+                <li><Link href="/resume/digital-marketer" className="hover:text-accent transition-colors">Digital Marketer</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider mb-3">Resume by Degree</h4>
+              <ul className="space-y-2 text-xs text-text-secondary">
+                <li><Link href="/resume/fresher" className="hover:text-accent transition-colors">Fresher / Student</Link></li>
+                <li><Link href="/resume/btech" className="hover:text-accent transition-colors">B.Tech CSE Resume</Link></li>
+                <li><Link href="/resume/bca" className="hover:text-accent transition-colors">BCA Resume</Link></li>
+                <li><Link href="/resume/mca" className="hover:text-accent transition-colors">MCA Resume</Link></li>
+              </ul>
+              <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider mb-3 mt-5">Resume by Country</h4>
+              <ul className="space-y-2 text-xs text-text-secondary">
+                <li><Link href="/resume/usa" className="hover:text-accent transition-colors">USA Tech Resume</Link></li>
+                <li><Link href="/resume/germany" className="hover:text-accent transition-colors">Germany Resume</Link></li>
+              </ul>
+            </div>
           </div>
 
           {/* Resources & Guides */}

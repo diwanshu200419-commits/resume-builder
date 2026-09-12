@@ -5,6 +5,7 @@ import { SocialProof } from "@/components/landing/SocialProof";
 import { Metrics } from "@/components/landing/Metrics";
 import { Features } from "@/components/landing/Features";
 import { HowItWorks } from "@/components/landing/HowItWorks";
+import { RoleGuideLinks } from "@/components/landing/RoleGuideLinks";
 import { BeforeAfterDemo } from "@/components/landing/BeforeAfterDemo";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { Pricing } from "@/components/landing/Pricing";
@@ -20,6 +21,7 @@ export default function LandingPage() {
         <Metrics />
         <Features />
         <HowItWorks />
+        <RoleGuideLinks />
         <BeforeAfterDemo />
         <Testimonials />
         <Pricing />
