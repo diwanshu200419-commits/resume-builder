@@ -19,7 +19,7 @@ export function runInterviewPrepTests() {
     if (matches) count += matches.length;
   }
   
-  assert.strictEqual(count, 5, "Must count exactly 5 filler words in sample transcript");
+  assert.strictEqual(count, 6, "Must count exactly 6 filler words in sample transcript");
 
   // Test 3: Repetition Exclusion Logic
   const excludeSet = new Set(["fq-1"]);
