@@ -20,9 +20,11 @@ export function UserAvatar({
   size,
 }: UserAvatarProps) {
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setFailed(false);
+    setLoaded(false);
   }, [avatarUrl]);
 
   const safeName = fullName?.trim() || "User";
@@ -50,25 +52,27 @@ export function UserAvatar({
 
   const hasAvatar = isValidUrl && !failed;
 
-  if (hasAvatar) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={avatarUrl!}
-        alt={safeName}
-        referrerPolicy="no-referrer"
-        onError={() => setFailed(true)}
-        className={`${sizeClass} rounded-full object-cover shrink-0 border border-border bg-surface-elevated`}
-      />
-    );
-  }
-
   return (
     <div
-      className={`${sizeClass} rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center shrink-0 border border-border select-none`}
+      className={`${sizeClass} rounded-full relative inline-flex items-center justify-center shrink-0 border border-border bg-indigo-600 text-white font-bold select-none overflow-hidden`}
       aria-label={safeName}
     >
-      {initials}
+      <span className="text-current">{initials}</span>
+
+      {hasAvatar && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={avatarUrl!}
+          alt={safeName}
+          referrerPolicy="no-referrer"
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${
+            loaded ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          style={{ color: "transparent" }}
+        />
+      )}
     </div>
   );
 }
