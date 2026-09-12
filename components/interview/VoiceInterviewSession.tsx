@@ -42,6 +42,8 @@ import {
   selectBestAvailableVoice,
 } from "@/lib/interview/browser-speech-engine";
 import { WebcamProxyTracker, WebcamProxyMetrics } from "./WebcamProxyTracker";
+import { WebcamMediaPipeTracker, MediaPipeTrackingMetrics } from "./WebcamMediaPipeTracker";
+import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import {
   PostSessionReview,
   SessionSummaryData,
@@ -115,6 +117,17 @@ export function VoiceInterviewSession({
 
   // Webcam Metrics
   const [webcamMetrics, setWebcamMetrics] = useState<WebcamProxyMetrics | null>(null);
+
+  const handleMediaPipeMetrics = useCallback((m: MediaPipeTrackingMetrics) => {
+    setWebcamMetrics({
+      enabled: m.enabled,
+      totalFramesAnalyzed: m.totalFramesAnalyzed,
+      gazeOnCameraPercent: m.gazeOnCameraPercent,
+      postureStabilityPercent: m.postureStabilityPercent,
+      fidgetCount: m.fidgetCount,
+      descriptiveFeedback: m.descriptiveFeedback,
+    });
+  }, []);
 
   // Speech Recognition Ref
   const recognitionRef = useRef<any>(null);
@@ -538,7 +551,11 @@ export function VoiceInterviewSession({
           </div>
 
           {/* Optional Webcam Opt-in */}
-          <WebcamProxyTracker isInterviewActive={false} onMetricsUpdate={setWebcamMetrics} />
+          {FEATURE_FLAGS.ENABLE_MEDIAPIPE_VISION ? (
+            <WebcamMediaPipeTracker isInterviewActive={false} onMetricsUpdate={handleMediaPipeMetrics} />
+          ) : (
+            <WebcamProxyTracker isInterviewActive={false} onMetricsUpdate={setWebcamMetrics} />
+          )}
         </Card>
       )}
 
@@ -688,7 +705,11 @@ export function VoiceInterviewSession({
 
           {/* Right: Real-time Camera Proxy & Turn Scoreboard */}
           <div className="lg:col-span-4 space-y-4">
-            <WebcamProxyTracker isInterviewActive={true} onMetricsUpdate={setWebcamMetrics} />
+            {FEATURE_FLAGS.ENABLE_MEDIAPIPE_VISION ? (
+              <WebcamMediaPipeTracker isInterviewActive={true} onMetricsUpdate={handleMediaPipeMetrics} />
+            ) : (
+              <WebcamProxyTracker isInterviewActive={true} onMetricsUpdate={setWebcamMetrics} />
+            )}
 
             {/* Session Progress Card */}
             <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 p-4 space-y-3 shadow-sm rounded-2xl">

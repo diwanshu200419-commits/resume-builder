@@ -25,7 +25,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { VoiceInterviewSession } from "@/components/interview/VoiceInterviewSession";
 import { InterviewHistoryTracker } from "@/components/interview/InterviewHistoryTracker";
+import { MCQInterviewSession } from "@/components/interview/MCQInterviewSession";
+import { PreSessionChecklistModal } from "@/components/interview/PreSessionChecklistModal";
 import { INTERVIEWER_PERSONAS, VoicePersona } from "@/lib/interview/voice-personas";
+import { FEATURE_FLAGS } from "@/lib/feature-flags";
+import { Sliders, BookOpen } from "lucide-react";
 
 const DOMAIN_PRESETS = [
   {
@@ -80,6 +84,8 @@ const DOMAIN_PRESETS = [
 
 export default function InterviewPrepLobbyPage() {
   const [activeTab, setActiveTab] = useState<"studio" | "history">("studio");
+  const [practiceMode, setPracticeMode] = useState<"voice" | "mcq">("voice");
+  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState("software_engineering");
   const [customRoleText, setCustomRoleText] = useState("");
   const [seniority, setSeniority] = useState<"entry-level" | "mid-level" | "senior" | "leadership">("mid-level");
@@ -214,6 +220,34 @@ export default function InterviewPrepLobbyPage() {
             </button>
           </div>
 
+          {/* Mode Switcher (Voice vs MCQ) */}
+          {FEATURE_FLAGS.ENABLE_MCQ_MODE && activeTab === "studio" && (
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setPracticeMode("voice")}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  practiceMode === "voice"
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                🎙️ Voice Mode
+              </button>
+              <button
+                type="button"
+                onClick={() => setPracticeMode("mcq")}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  practiceMode === "mcq"
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                📝 MCQ Mode
+              </button>
+            </div>
+          )}
+
           <Badge variant="outline" className="text-xs text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700">
             4 Stock Personas • 100% Client-Side Web Speech &amp; Camera
           </Badge>
@@ -271,6 +305,42 @@ export default function InterviewPrepLobbyPage() {
             setActiveTab("studio");
           }}
         />
+      ) : practiceMode === "mcq" && FEATURE_FLAGS.ENABLE_MCQ_MODE ? (
+        /* MCQ Practice Studio View */
+        <div className="space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+            <div>
+              <Badge variant="outline" className="text-purple-600 dark:text-purple-400 border-purple-500/30 text-xs">
+                MCQ Conceptual &amp; Situational Practice
+              </Badge>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+                {targetRoleTitle} Quiz Drills
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Curated technical, system design, and situational judgment questions with deep explanations
+              </p>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPracticeMode("voice")}
+              className="text-xs border-slate-300 dark:border-slate-700 gap-1.5"
+            >
+              🎙️ Switch to Voice Mode
+            </Button>
+          </div>
+
+          <MCQInterviewSession
+            roleCategory={selectedDomain}
+            difficulty={seniority === "senior" || seniority === "leadership" ? "hard" : "medium"}
+            onExit={() => setPracticeMode("voice")}
+            onSwitchToVoice={() => {
+              setPracticeMode("voice");
+              handleLaunchVoiceSession();
+            }}
+          />
+        </div>
       ) : (
         /* Lobby View */
         <div className="space-y-8">
@@ -292,13 +362,31 @@ export default function InterviewPrepLobbyPage() {
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <Button
                   type="button"
-                  onClick={() => handleLaunchVoiceSession()}
+                  onClick={() => {
+                    if (practiceMode === "mcq") {
+                      // Already in MCQ view
+                    } else {
+                      handleLaunchVoiceSession();
+                    }
+                  }}
                   disabled={loadingQuestions}
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-5 text-sm gap-2 shadow-lg shadow-emerald-600/25 rounded-xl"
                 >
                   <Play className="w-4 h-4 fill-white" />
-                  {loadingQuestions ? "Generating Domain Questions..." : "Start Practice Session"}
+                  {loadingQuestions ? "Generating Domain Questions..." : practiceMode === "mcq" ? "Scroll Down to MCQ Drills" : "Start Voice Practice"}
                 </Button>
+
+                {FEATURE_FLAGS.ENABLE_VIRTUAL_COACHING && practiceMode === "voice" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsChecklistOpen(true)}
+                    className="border-slate-700 bg-slate-900/80 text-slate-200 hover:bg-slate-800 text-xs px-4 py-5 gap-2 rounded-xl"
+                  >
+                    <Sliders className="w-3.5 h-3.5 text-sky-400" />
+                    Pre-Session Calibration
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -431,15 +519,29 @@ export default function InterviewPrepLobbyPage() {
                 </div>
               </div>
 
-              <Button
-                type="button"
-                onClick={() => handleLaunchVoiceSession()}
-                disabled={loadingQuestions}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-5 text-sm gap-2 shadow-lg shadow-emerald-600/30 rounded-xl shrink-0 transition-transform active:scale-95"
-              >
-                <Play className="w-4 h-4 fill-white" />
-                {loadingQuestions ? "Generating Domain Questions..." : `Start Voice Interview with ${INTERVIEWER_PERSONAS[selectedPersonaId]?.name || "Josh"} →`}
-              </Button>
+              <div className="flex items-center gap-2">
+                {FEATURE_FLAGS.ENABLE_VIRTUAL_COACHING && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsChecklistOpen(true)}
+                    className="border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 text-xs rounded-xl"
+                  >
+                    <Sliders className="w-3.5 h-3.5 text-sky-400 mr-1.5" />
+                    Checklist
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  onClick={() => handleLaunchVoiceSession()}
+                  disabled={loadingQuestions}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-5 text-sm gap-2 shadow-lg shadow-emerald-600/30 rounded-xl shrink-0 transition-transform active:scale-95"
+                >
+                  <Play className="w-4 h-4 fill-white" />
+                  {loadingQuestions ? "Generating Domain Questions..." : `Start Voice Interview with ${INTERVIEWER_PERSONAS[selectedPersonaId]?.name || "Josh"} →`}
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -474,6 +576,15 @@ export default function InterviewPrepLobbyPage() {
           </div>
         </div>
       )}
+      {/* Pre-Session Virtual Setup Checklist Modal */}
+      <PreSessionChecklistModal
+        open={isChecklistOpen}
+        onOpenChange={setIsChecklistOpen}
+        onConfirmReady={() => {
+          setIsChecklistOpen(false);
+          handleLaunchVoiceSession();
+        }}
+      />
     </div>
   );
 }

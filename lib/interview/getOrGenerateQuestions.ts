@@ -130,16 +130,40 @@ export const GENERIC_FALLBACK_QUESTION_SET = {
   ]
 };
 
-export { CIVIL_SERVICE_FALLBACK_QUESTION_SET, isCivilServiceOrGovtRole } from "./civil-service-questions";
 import { CIVIL_SERVICE_FALLBACK_QUESTION_SET, isCivilServiceOrGovtRole } from "./civil-service-questions";
+import { getCuratedQuestions, CuratedQuestion } from "./question-bank";
+export { CIVIL_SERVICE_FALLBACK_QUESTION_SET, isCivilServiceOrGovtRole };
+
+
+function mapRoleToCategory(targetRole: string): string {
+  const lower = targetRole.toLowerCase();
+  if (lower.includes('civil') || lower.includes('upsc') || lower.includes('ias') || lower.includes('psc') || lower.includes('govt')) return 'civil_services';
+  if (lower.includes('data') || lower.includes('ai') || lower.includes('machine learning') || lower.includes('ml')) return 'data_ai';
+  if (lower.includes('product') || lower.includes('pm')) return 'product_management';
+  if (lower.includes('consult') || lower.includes('business analyst') || lower.includes('strategy')) return 'business_consulting';
+  if (lower.includes('sale') || lower.includes('account exec') || lower.includes('bizdev')) return 'sales_bizdev';
+  return 'software_engineering';
+}
 
 async function callGeminiForQuestionsWithRetry(req: QuestionRequest) {
   const seniority = req.seniority || "mid-level";
   const companyStyle = req.companyStyle || "general industry standard";
   const previouslyAsked = req.previouslyAsked || [];
 
-  // Call 1
-  let raw = await generateVayloInterviewQuestions(req.targetRole, companyStyle, seniority, previouslyAsked);
+  // Retrieve RAG Anchor Questions from Curated Question Bank
+  const category = mapRoleToCategory(req.targetRole);
+  const ragAnchors = getCuratedQuestions({
+    roleCategory: category,
+    limit: 2,
+    excludeIds: previouslyAsked,
+  });
+
+  // Call 1 (enriched with few-shot anchor context if available)
+  const roleWithAnchors = ragAnchors.length > 0
+    ? `${req.targetRole} (Exemplar anchors for tone & rigor: ${ragAnchors.map((a: CuratedQuestion) => a.question).join(' | ')})`
+    : req.targetRole;
+
+  let raw = await generateVayloInterviewQuestions(roleWithAnchors, companyStyle, seniority, previouslyAsked);
   
   if (typeof raw === "string") {
     try {
@@ -171,10 +195,34 @@ async function callGeminiForQuestionsWithRetry(req: QuestionRequest) {
     console.warn("[getOrGenerateQuestions] Gemini retry failed:", err);
   }
 
-  // Fallback to role-appropriate static question set if all Gemini calls fail validation
+  // Fallback to curated question bank or role-appropriate static question set if all Gemini calls fail validation
   if (isCivilServiceOrGovtRole(req.targetRole, req.companyStyle)) {
     return CIVIL_SERVICE_FALLBACK_QUESTION_SET;
   }
+
+  const fallbackCategory = mapRoleToCategory(req.targetRole);
+  const curatedFallback = getCuratedQuestions({ roleCategory: fallbackCategory, limit: 8 });
+  if (curatedFallback.length >= 4) {
+    return {
+      role: req.targetRole,
+      seniority,
+      company_style: companyStyle,
+      questions: curatedFallback.map((cq: CuratedQuestion, idx: number) => ({
+        id: cq.id || `curated_${idx + 1}`,
+        type: cq.questionType || "technical",
+        question: cq.question,
+        why_this_matters: cq.whyThisMatters,
+        rubric: {
+          structure_weight: 0.35,
+          specificity_weight: 0.35,
+          relevance_weight: 0.15,
+          communication_weight: 0.15,
+          model_answer_keywords: cq.rubric?.modelKeywords || ["structure", "impact", "metrics"]
+        }
+      }))
+    };
+  }
+
   return GENERIC_FALLBACK_QUESTION_SET;
 }
 
