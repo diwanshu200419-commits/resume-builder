@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ const plans = [
       { text: "LinkedIn optimizer", included: false },
       { text: "Portfolio generator", included: false },
     ],
-    cta: "Start free",
+    cta: "Start Free – 2 Free Downloads",
     href: "/signup",
     popular: false,
   },
@@ -62,7 +62,7 @@ const plans = [
     name: "Career Pack",
     price: "₹499",
     period: "/one-time",
-    description: "Lifetime AI Career Toolkit",
+    description: "One-time payment for ongoing lifetime access",
     features: [
       { text: "Everything in Premium", included: true },
       { text: "Lifetime access to Career Pack features", included: true },
@@ -73,7 +73,7 @@ const plans = [
       { text: "Higher AI Fair-Use Limits", included: true },
       { text: "24/7 Priority Support", included: true },
     ],
-    cta: "Get Lifetime Access",
+    cta: "Get Lifetime Access – All Tools + Roadmap",
     href: "/checkout/career-pack",
     popular: false,
   },

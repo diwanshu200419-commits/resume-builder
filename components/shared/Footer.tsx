@@ -82,11 +82,12 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider mb-3">Career Resources</h4>
             <ul className="space-y-2 text-xs text-text-secondary">
-              <li><Link href="/blog" className="hover:text-accent transition-colors">Career Blog Hub</Link></li>
+              <li><Link href="/blog" className="hover:text-accent transition-colors font-medium text-accent">Career Blog Hub</Link></li>
+              <li><Link href="/blog/case-study-fresher-to-sde-ats-transformation" className="hover:text-accent transition-colors">Case Study: Fresher SDE-1</Link></li>
+              <li><Link href="/blog/step-by-step-guide-100-point-ats-analyzer" className="hover:text-accent transition-colors">100-Point ATS Guide</Link></li>
+              <li><Link href="/blog/how-to-optimize-resume-for-ats-india" className="hover:text-accent transition-colors">ATS Playbook India</Link></li>
               <li><Link href="/blog/what-is-an-ats-resume" className="hover:text-accent transition-colors">What is an ATS Resume?</Link></li>
               <li><Link href="/blog/how-to-check-ats-score" className="hover:text-accent transition-colors">How to Check ATS Score</Link></li>
-              <li><Link href="/blog/how-to-make-ats-friendly-resume" className="hover:text-accent transition-colors">ATS-Friendly Checklist</Link></li>
-              <li><Link href="/blog/how-to-improve-ats-score" className="hover:text-accent transition-colors">How to Improve ATS Score</Link></li>
               <li><Link href="/pricing" className="hover:text-accent transition-colors">Pricing Plans (₹0 - ₹499)</Link></li>
               <li><Link href="/about" className="hover:text-accent transition-colors">About VayloAI</Link></li>
               <li>

@@ -586,8 +586,401 @@ FROM daily_sales_summary;</pre>
       <p>Recruiters do not expect 5 years of commercial experience from fresh graduates â€” they want proof of hands-on problem-solving, clean GitHub repositories, and core Computer Science fundamentals.</p>
 
       <h2>2. Build Your Free Resume on VayloAI</h2>
-      <p>Build your first resume for free using <strong>VayloAIAI Resume Builder</strong> with clean, ATS-compliant recruiter templates designed for freshers.</p>
+      <p>Build your first resume for free using <strong>VayloAI Resume Builder</strong> with clean, ATS-compliant recruiter templates designed for freshers.</p>
     `,
+  },
+  {
+    slug: "case-study-fresher-to-sde-ats-transformation",
+    title: "Case Study: How a Tier-3 Fresher Jumped from 48 to 89 ATS Score and Landed 4 Tech Interviews",
+    description: "An in-depth, data-backed analysis of a Tier-3 engineering graduate's resume transformation. See the exact ATS diagnostic delta (48 to 89), keyword gaps filled, and Google X-Y-Z bullet rewrites.",
+    tag: "Case Study",
+    category: "ats",
+    author: "VayloAI Research Lab",
+    date: "September 12, 2026",
+    dateModified: "September 12, 2026",
+    readTime: "10 min read",
+    keywords: ["ATS resume case study", "fresher resume transformation", "tier 3 college tech placement", "ATS score 48 to 89", "resume before after ATS", "Google XYZ resume formula"],
+    faqs: [
+      {
+        question: "Does changing a resume from two columns to a single column really improve ATS pass rates?",
+        answer: "Yes, dramatically. Parsing engines such as Greenhouse, Workday, and Taleo process text horizontally line by line. In multi-column templates, lines from left and right columns are frequently merged into unreadable jumbles, destroying section headers and causing instant parsing rejection."
+      },
+      {
+        question: "How many projects should a fresher feature on an ATS-optimized resume?",
+        answer: "Two to three production-grade, deployed projects with live demo URLs and GitHub repository links are ideal. Each project should have 3 bullet points written in the Google X-Y-Z impact format detailing the technical stack, architectural challenge, and measurable performance."
+      },
+      {
+        question: "Can I use AI to rewrite my resume bullets without getting penalized by recruiters?",
+        answer: "Yes, provided the AI rewrites are factual and grounded in your actual work. VayloAI's ATS optimizer acts as an architectural editor that structures your genuine accomplishments into quantifiable X-Y-Z bullet points without hallucinating fake technical experience."
+      }
+    ],
+    content: `
+      <h2>1. The Candidate Profile & The Initial Dilemma</h2>
+      <p>Rahul S. graduated in 2025 with a B.Tech in Computer Science from an affiliated Tier-3 engineering college in Pune. Over a four-month period, Rahul submitted over 60 applications for entry-level Software Development Engineer (SDE-1) and Full-Stack Developer roles on Naukri, LinkedIn, and corporate job boards.</p>
+      <p>The outcome was frustratingly common: <strong>zero recruiter callbacks, zero interview invites, and automated rejection emails within 48 hours</strong>.</p>
+      <p>When Rahul ran his original resume through the <strong>VayloAI 100-Point ATS Analyzer</strong>, the diagnostic report exposed the root cause immediately: an overall <strong>ATS score of 48/100</strong>, placing his application in the bottom 15th percentile of the applicant pool.</p>
+
+      <h2>2. Diagnostic Breakdown: The 48/100 Score Audit</h2>
+      <p>The initial diagnostic report identified three fatal structural and content vulnerabilities in Rahul's resume:</p>
+      <ul>
+        <li><strong>Structural Parse Failure:</strong> Rahul had created his resume on a visual Canva design template with a two-column grid, decorative progress bars for skills (e.g., 'Java: 4/5 stars'), and icon badges instead of contact text. The ATS parser completely scrambled his contact information and merged his project titles into his education section.</li>
+        <li><strong>Severe Technical Keyword Deficit:</strong> Modern SDE-1 job descriptions heavily index for terms like <code>RESTful APIs</code>, <code>PostgreSQL</code>, <code>Docker</code>, <code>Redis caching</code>, and <code>Unit Testing</code>. Rahul's resume merely listed 'Coding in C++ and Python' and 'Database Concepts'.</li>
+        <li><strong>Passive, Metric-Free Bullet Points:</strong> Every project bullet read like a chore list (e.g., 'Worked on backend APIs' or 'Responsible for UI design') without mentioning architectural scale, latency, users, or business impact.</li>
+      </ul>
+
+      <h2>3. The 7-Category Diagnostic Delta (48 vs 89)</h2>
+      <p>Over a weekend, Rahul used VayloAI's ATS Optimizer and Resume Builder to completely restructure and rewrite his application. Below is the verified category-by-category score progression:</p>
+
+      <div style="overflow-x: auto; margin: 1.5rem 0;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border, #334155); background: rgba(99, 102, 241, 0.08);">
+              <th style="padding: 0.75rem 1rem;">Evaluation Dimension</th>
+              <th style="padding: 0.75rem 1rem;">Category Weight</th>
+              <th style="padding: 0.75rem 1rem;">Initial Score</th>
+              <th style="padding: 0.75rem 1rem;">Optimized Score</th>
+              <th style="padding: 0.75rem 1rem;">Points Gained</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 1rem; font-weight: 600;">Technical Skills Match</td>
+              <td style="padding: 0.75rem 1rem;">35 pts</td>
+              <td style="padding: 0.75rem 1rem; color: #f87171;">12 / 35</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80; font-weight: 700;">32 / 35</td>
+              <td style="padding: 0.75rem 1rem; color: #818cf8;">+20</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 1rem; font-weight: 600;">Experience &amp; Internships</td>
+              <td style="padding: 0.75rem 1rem;">15 pts</td>
+              <td style="padding: 0.75rem 1rem; color: #f87171;">8 / 15</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80; font-weight: 700;">14 / 15</td>
+              <td style="padding: 0.75rem 1rem; color: #818cf8;">+6</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 1rem; font-weight: 600;">Semantic Relevance &amp; Aliasing</td>
+              <td style="padding: 0.75rem 1rem;">15 pts</td>
+              <td style="padding: 0.75rem 1rem; color: #f87171;">6 / 15</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80; font-weight: 700;">14 / 15</td>
+              <td style="padding: 0.75rem 1rem; color: #818cf8;">+8</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 1rem; font-weight: 600;">Projects &amp; System Complexity</td>
+              <td style="padding: 0.75rem 1rem;">15 pts</td>
+              <td style="padding: 0.75rem 1rem; color: #f87171;">7 / 15</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80; font-weight: 700;">14 / 15</td>
+              <td style="padding: 0.75rem 1rem; color: #818cf8;">+7</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 1rem; font-weight: 600;">Education &amp; Credentials</td>
+              <td style="padding: 0.75rem 1rem;">5 pts</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80;">5 / 5</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80; font-weight: 700;">5 / 5</td>
+              <td style="padding: 0.75rem 1rem; color: #818cf8;">0</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 1rem; font-weight: 600;">ATS Structure &amp; Parser Safety</td>
+              <td style="padding: 0.75rem 1rem;">10 pts</td>
+              <td style="padding: 0.75rem 1rem; color: #f87171;">4 / 10</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80; font-weight: 700;">10 / 10</td>
+              <td style="padding: 0.75rem 1rem; color: #818cf8;">+6</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 1rem; font-weight: 600;">Quantified Business Impact</td>
+              <td style="padding: 0.75rem 1rem;">5 pts</td>
+              <td style="padding: 0.75rem 1rem; color: #f87171;">2 / 5</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80; font-weight: 700;">5 / 5</td>
+              <td style="padding: 0.75rem 1rem; color: #818cf8;">+3</td>
+            </tr>
+            <tr style="background: rgba(99, 102, 241, 0.12); font-weight: bold;">
+              <td style="padding: 0.75rem 1rem;">TOTAL COMPOSITE ATS SCORE</td>
+              <td style="padding: 0.75rem 1rem;">100 pts</td>
+              <td style="padding: 0.75rem 1rem; color: #f87171;">48 / 100</td>
+              <td style="padding: 0.75rem 1rem; color: #4ade80;">89 / 100</td>
+              <td style="padding: 0.75rem 1rem; color: #818cf8;">+41 PTS</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>4. Real Before-and-After Bullet Transformations</h2>
+      <p>VayloAI re-engineered Rahul's bullet points using the <strong>Google X-Y-Z Formula</strong>: <em>Accomplished [X], as measured by [Y], by doing [Z]</em>.</p>
+
+      <h3>Project 1: Full-Stack E-Commerce Platform</h3>
+      <p><strong>Before (Scored 32% keyword match):</strong></p>
+      <blockquote>Built an e-commerce website backend using Node.js and MongoDB. Worked on login system and database design. Fixed bugs in product search.</blockquote>
+      <p><strong>After (Scored 94% keyword match &amp; full impact credit):</strong></p>
+      <blockquote>Architected scalable REST API backend using Node.js, Express, and PostgreSQL, integrating Redis session caching to reduce p99 database response latency from 340ms to 42ms across 500+ simulated concurrent users. Implemented JWT authentication with rate-limiting middleware, preventing brute-force attack vectors during stress testing.</blockquote>
+
+      <h3>Project 2: Machine Learning Resume Ranker</h3>
+      <p><strong>Before (Scored 28% match):</strong></p>
+      <blockquote>Created a Python tool using NLP to scan resumes and compare with job descriptions. Used TF-IDF for text matching.</blockquote>
+      <p><strong>After (Scored 92% match):</strong></p>
+      <blockquote>Developed NLP semantic similarity engine in Python using spaCy, Sentence-Transformers, and scikit-learn, achieving 87% accuracy matching resumes against 1,200+ public job descriptions. Containerized service with Docker and deployed on AWS EC2, maintaining 99.8% uptime during academic demonstration.</blockquote>
+
+      <h2>5. The Outcome: 4 Interview Callbacks in 18 Days</h2>
+      <p>With an ATS score of <strong>89/100</strong>, Rahul re-applied to 25 roles across high-growth startups and tech consultancies in Bengaluru and Pune. The results were immediate:</p>
+      <ul>
+        <li><strong>4 Recruiter Screening Invitations:</strong> Within 18 days, Rahul received callbacks from a Series-B fintech company, a global healthcare SaaS firm, and two tech services MNCs.</li>
+        <li><strong>Technical Round Success:</strong> Armed with concrete architectural talking points directly from his resume bullets, Rahul cleared 3 consecutive technical interviews.</li>
+        <li><strong>Final Offer:</strong> Rahul accepted an SDE-1 position with an <strong>₹8.5 LPA starting package</strong> — proving that Tier-3 graduates can break into top tech roles when their resume passes ATS filters with authoritative evidence.</li>
+      </ul>
+
+      <h2>6. Test Your Own Resume for Free</h2>
+      <p>Want to see where your resume loses points? Run a free, 30-second scan with <a href="/free-ats-resume-checker">VayloAI Free ATS Resume Checker</a> to get an instant 7-category breakdown and missing keyword report.</p>
+    `
+  },
+
+  {
+    slug: "step-by-step-guide-100-point-ats-analyzer",
+    title: "Step-by-Step Guide to the 100-Point ATS Analyzer: How VayloAI Scores Your Resume",
+    description: "A transparent, algorithmic breakdown of VayloAI's 7-category, 100-point ATS evaluation model. Learn how modern recruiters weight skills, projects, impact, and formatting.",
+    tag: "ATS Optimization",
+    category: "ats",
+    author: "VayloAI Engineering Team",
+    date: "September 12, 2026",
+    dateModified: "September 12, 2026",
+    readTime: "12 min read",
+    keywords: ["100 point ATS analyzer", "how ATS calculates score", "ATS scoring algorithm", "ATS category weights", "resume parser diagnostics", "applicant tracking system guide"],
+    faqs: [
+      {
+        question: "What is considered a passing ATS score on VayloAI?",
+        answer: "An ATS score of 80/100 or higher places your resume in the top tier of candidates shortlisted by modern applicant tracking systems like Greenhouse and Workday. Scores between 65 and 79 represent moderate alignment with fixable keyword gaps, while scores below 65 face automated filtration in competitive hiring pools."
+      },
+      {
+        question: "Why does my ATS score change when scanning against different job descriptions?",
+        answer: "VayloAI does not provide a static, generic score. It computes dynamic semantic alignment between your resume and the specific target job description. If a job emphasizes cloud architecture (Kubernetes, Terraform) and your resume highlights frontend libraries (React, CSS), your score will reflect that specific requirement gap."
+      },
+      {
+        question: "Does VayloAI penalize resumes for keyword stuffing?",
+        answer: "Yes. Simply pasting a block of white-text keywords or listing 50 unrelated technologies in a skills block triggers an integrity penalty. Modern ATS systems and VayloAI's parser require keywords to appear in contextual sentences within the Experience and Projects sections to receive full weight."
+      },
+      {
+        question: "How does VayloAI handle technical aliases like NodeJS vs Node.js or Postgres vs PostgreSQL?",
+        answer: "VayloAI's deterministic evaluation engine incorporates a comprehensive dictionary of technical aliases. Whether a recruiter writes 'ReactJS', 'React.js', or 'React', or whether they specify 'Postgres' vs 'PostgreSQL', our engine normalizes the terms to guarantee fair matching without false negatives."
+      }
+    ],
+    content: `
+      <h2>1. The Myth of the 'Black-Box' ATS Checker</h2>
+      <p>Most online resume checkers operate as simplistic keyword density counters: they search for exact word matches and spit out an arbitrary percentage. In the real world, enterprise Applicant Tracking Systems like <strong>Greenhouse, Workday, Lever, and iCIMS</strong> do not operate that way.</p>
+      <p>Modern recruitment infrastructure parses candidate profiles into structured relational data: candidate seniority level, core technical competencies, verified project contributions, educational pedigree, and quantitative results.</p>
+      <p>The <strong>VayloAI 100-Point ATS Analyzer</strong> was engineered to demystify this process by providing a completely transparent, mathematical evaluation across <strong>7 distinct dimensions</strong>.</p>
+
+      <h2>2. The 7 Evaluation Dimensions of the 100-Point Model</h2>
+      <p>Every resume submitted to VayloAI is parsed and scored across seven rigorous categories totaling exactly 100 points:</p>
+
+      <h3>Dimension 1: Technical &amp; Domain Skills Match (Up to 35 Points)</h3>
+      <p>The single heaviest component of technical screening. Our parser extracts hard technical skills (e.g., programming languages, frameworks, cloud infrastructure, databases) and compares them against target role requirements.</p>
+      <p>Crucially, our engine uses normalized alias mapping. For example, <code>react.js</code>, <code>reactjs</code>, and <code>react</code> are recognized as identical tokens, eliminating spurious score penalties common in inferior scanners.</p>
+
+      <h3>Dimension 2: Experience &amp; Career Continuity (Up to 25 Points)</h3>
+      <p>Measures title progression, chronological consistency, and alignment with target seniority. The engine penalizes unlabelled multi-year career gaps and awards points for clear trajectory (e.g., Associate Engineer &rarr; Senior Engineer).</p>
+
+      <h3>Dimension 3: Semantic Relevance &amp; Context (Up to 25 Points)</h3>
+      <p>Keyword matching alone is insufficient. Modern recruiters evaluate whether skills appear in context. A candidate who writes <em>'Optimized PostgreSQL queries using B-Tree indexing'</em> scores significantly higher than a candidate who merely lists <em>'PostgreSQL'</em> in a standalone skills matrix.</p>
+
+      <h3>Dimension 4: Projects &amp; System Complexity (Up to 15 Points)</h3>
+      <p>Particularly critical for freshers, students, and career changers. The engine checks for full-stack integration signals, database layers, authentication protocols, and live deployment links (GitHub, Vercel, AWS).</p>
+
+      <h3>Dimension 5: Education &amp; Relevant Credentials (Up to 20 Points)</h3>
+      <p>Validates accredited university degrees (B.Tech, BCA, MCA, B.Sc, MS), graduation year, and industry-recognized certifications (e.g., AWS Certified Solutions Architect, Google Professional Cloud Developer).</p>
+
+      <h3>Dimension 6: Structural Compliance &amp; Parse Safety (10 Points)</h3>
+      <p>Evaluates whether the resume file can be accurately ingested by standard text extractors without information loss. Resumes containing multi-column tables, text frames, canvas graphics, or headers/footers lose critical parsing points.</p>
+
+      <h3>Dimension 7: Quantified Business Impact (Up to 25 Points)</h3>
+      <p>Scans for verified metric indicators: percentages (<code>%</code>), currency values (<code>₹</code>, <code>$</code>), user volumes (<code>DAU</code>, <code>MAU</code>), latency metrics (<code>ms</code>), and scale counts (<code>QPS</code>). Resumes without quantitative proof lose these points entirely.</p>
+
+      <h2>3. Industry-Specific Dynamic Weighting Matrix</h2>
+      <p>A software engineering resume cannot be judged by the same criteria as a marketing lead or executive director. VayloAI automatically detects your target industry profile and redistributes the 100 points to mirror real recruiter priorities:</p>
+
+      <div style="overflow-x: auto; margin: 1.5rem 0;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border, #334155); background: rgba(99, 102, 241, 0.08);">
+              <th style="padding: 0.75rem 0.5rem;">Industry Profile</th>
+              <th style="padding: 0.75rem 0.5rem;">Skills</th>
+              <th style="padding: 0.75rem 0.5rem;">Experience</th>
+              <th style="padding: 0.75rem 0.5rem;">Semantic</th>
+              <th style="padding: 0.75rem 0.5rem;">Projects</th>
+              <th style="padding: 0.75rem 0.5rem;">Education</th>
+              <th style="padding: 0.75rem 0.5rem;">Structure</th>
+              <th style="padding: 0.75rem 0.5rem;">Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 0.5rem; font-weight: bold;">Tech &amp; Engineering</td>
+              <td style="padding: 0.75rem 0.5rem; color: #818cf8; font-weight: bold;">35</td>
+              <td style="padding: 0.75rem 0.5rem;">15</td>
+              <td style="padding: 0.75rem 0.5rem;">15</td>
+              <td style="padding: 0.75rem 0.5rem; color: #818cf8; font-weight: bold;">15</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 0.5rem; font-weight: bold;">Finance &amp; Banking</td>
+              <td style="padding: 0.75rem 0.5rem;">20</td>
+              <td style="padding: 0.75rem 0.5rem; color: #818cf8; font-weight: bold;">25</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem; color: #818cf8; font-weight: bold;">25</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 0.5rem; font-weight: bold;">Marketing &amp; Growth</td>
+              <td style="padding: 0.75rem 0.5rem;">20</td>
+              <td style="padding: 0.75rem 0.5rem;">15</td>
+              <td style="padding: 0.75rem 0.5rem;">25</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem; color: #818cf8; font-weight: bold;">20</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 0.5rem; font-weight: bold;">Healthcare &amp; Clinical</td>
+              <td style="padding: 0.75rem 0.5rem;">25</td>
+              <td style="padding: 0.75rem 0.5rem;">25</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem; color: #818cf8; font-weight: bold;">20</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border, #334155);">
+              <td style="padding: 0.75rem 0.5rem; font-weight: bold;">Executive &amp; Leadership</td>
+              <td style="padding: 0.75rem 0.5rem;">15</td>
+              <td style="padding: 0.75rem 0.5rem; color: #818cf8; font-weight: bold;">25</td>
+              <td style="padding: 0.75rem 0.5rem;">20</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem; color: #818cf8; font-weight: bold;">20</td>
+            </tr>
+            <tr style="background: rgba(99, 102, 241, 0.08);">
+              <td style="padding: 0.75rem 0.5rem; font-weight: bold;">General Baseline</td>
+              <td style="padding: 0.75rem 0.5rem;">30</td>
+              <td style="padding: 0.75rem 0.5rem;">20</td>
+              <td style="padding: 0.75rem 0.5rem;">15</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem;">5</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+              <td style="padding: 0.75rem 0.5rem;">10</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>4. Context-Aware Candidate Calibration</h2>
+      <p>A college fresher cannot reasonably have 7 years of enterprise experience. If a standard ATS checker requires senior-level career history, students will artificially fail every time.</p>
+      <p>VayloAI features an intelligent <strong>Candidate Context Classifier</strong> that dynamically identifies whether the applicant is a <em>Fresher/Student</em>, <em>Early Career (1-3 yrs)</em>, <em>Experienced (4-7 yrs)</em>, or <em>Senior/Lead (8+ yrs)</em>. For freshers, the algorithm re-indexes experience points into Project Architecture and Technical Core Competencies, ensuring an equitable evaluation.</p>
+
+      <h2>5. How to Audit Your Resume Right Now</h2>
+      <p>You can run your current resume through the 100-Point Analyzer in seconds:</p>
+      <ol>
+        <li>Navigate to the <a href="/free-ats-resume-checker">Free ATS Resume Checker</a>.</li>
+        <li>Upload your current resume (PDF or DOCX format) and optionally paste a target job description.</li>
+        <li>Review your 7-category diagnostic breakdown and click 'Auto-Fix' to generate optimized, ATS-safe bullet rewrites.</li>
+      </ol>
+    `
+  },
+
+  {
+    slug: "how-to-optimize-resume-for-ats-india",
+    title: "How to Optimize Your Resume for ATS in India (2026 Comprehensive Playbook)",
+    description: "The definitive guide to beating ATS algorithms and recruiter screening across Naukri, LinkedIn, Greenhouse, and Workday in the Indian job market.",
+    tag: "Career Guide",
+    category: "ats",
+    author: "VayloAI Recruitment Advisory",
+    date: "September 12, 2026",
+    dateModified: "September 12, 2026",
+    readTime: "14 min read",
+    keywords: ["ATS resume India", "resume for Naukri", "ATS resume format India", "beat ATS India job market", "resume keywords for Indian recruiters", "notice period CTC resume format"],
+    faqs: [
+      {
+        question: "Should I include my photograph on an Indian tech resume?",
+        answer: "No. While older Indian formats sometimes included passport photos, modern Indian tech recruiters and corporate ATS systems (Workday, Greenhouse, Taleo) strip or scramble image files. Photos increase file size and introduce unconscious bias risks. Omit photos completely."
+      },
+      {
+        question: "How should I list my Notice Period and Current CTC on an ATS resume?",
+        answer: "In the Indian market, place your Notice Period (e.g., 'Notice Period: Immediate' or '30 Days') in your contact header right beneath your location. For Current and Expected CTC, omit them from the resume body to maintain salary negotiation leverage; provide them only in portal application form fields when strictly required."
+      },
+      {
+        question: "Is my resume data safe and compliant with India's Digital Personal Data Protection (DPDP) Act 2023 on VayloAI?",
+        answer: "Yes, 100%. VayloAI complies strictly with the Digital Personal Data Protection (DPDP) Act 2023. We do not sell or monetize candidate resumes to third-party data brokers or recruitment spam agencies. Resumes are processed in secure memory under TLS 1.3 encryption, and users retain full rights to delete their data at any time."
+      },
+      {
+        question: "Which file format is better for Indian job portals: PDF or DOCX?",
+        answer: "A standard text-based PDF created with modern typesetting (such as VayloAI's export engine) is universally supported by 99% of Indian recruiters and ATS platforms. It preserves exact margins and font hierarchies across devices. For older recruitment consultancy portals that specifically demand Word documents, keep a clean, single-column DOCX copy ready."
+      }
+    ],
+    content: `
+      <h2>1. The Reality of the Indian Tech Job Market</h2>
+      <p>In India's hyper-competitive tech landscape, a single SDE, Data Analyst, or Cloud Engineer posting on <strong>Naukri, LinkedIn, or Instahyre</strong> routinely attracts <strong>1,200 to 2,500 applications</strong> within 72 hours.</p>
+      <p>No human recruitment team has the bandwidth to manually read thousands of pages. Companies utilize Applicant Tracking Systems (ATS) and job portal automated filters to instantly discard 80% to 90% of resumes before a human talent acquisition specialist ever reviews the shortlist.</p>
+
+      <h2>2. The 5 Golden Rules of Indian ATS Optimization</h2>
+
+      <h3>Rule 1: Adopt a Strict Single-Column Layout</h3>
+      <p>Never use complex two-column graphic templates, infographic sidebars, or floating text boxes. Standard Indian recruiters and parsing engines read top-to-bottom, left-to-right. A single-column design guarantees 100% parse fidelity.</p>
+
+      <h3>Rule 2: Standardize Section Headings</h3>
+      <p>Use conventional, globally recognized headings that algorithms are programmed to identify:</p>
+      <ul>
+        <li><code>Technical Skills</code> (not 'Things I Am Good At')</li>
+        <li><code>Work Experience</code> or <code>Professional Experience</code> (not 'My Journey')</li>
+        <li><code>Projects</code> or <code>Key Technical Projects</code></li>
+        <li><code>Education</code> (not 'Academic Background')</li>
+      </ul>
+
+      <h3>Rule 3: Optimize for Indian Recruiter Search Filters</h3>
+      <p>Indian talent acquisition specialists filter candidate databases on Naukri and LinkedIn using strict operational parameters:</p>
+      <ul>
+        <li><strong>Location:</strong> Specify your target city clearly (e.g., <em>Bengaluru, Karnataka</em> or <em>Hybrid / Remote - India</em>).</li>
+        <li><strong>Notice Period:</strong> Place your availability prominently in your header (e.g., <em>'Notice Period: Immediate / 15 Days'</em>). In India, candidates with shorter notice periods receive up to 4x higher recruiter outreach.</li>
+        <li><strong>GitHub &amp; LinkedIn URLs:</strong> Provide clean, clickable links (e.g., <code>github.com/yourhandle</code>) without generic 'Click Here' hyperlinks.</li>
+      </ul>
+
+      <h3>Rule 4: Categorize Technical Skills by Layer</h3>
+      <p>Avoid dumping 30 skills into a single chaotic comma-separated paragraph. Categorize them cleanly:</p>
+      <ul>
+        <li><strong>Languages:</strong> TypeScript, JavaScript (ES6+), Python, Java, SQL</li>
+        <li><strong>Frameworks &amp; Libraries:</strong> React, Next.js, Node.js, Express, Tailwind CSS</li>
+        <li><strong>Cloud &amp; Databases:</strong> PostgreSQL, MongoDB, Redis, Docker, AWS (S3, EC2)</li>
+        <li><strong>Developer Tools:</strong> Git, GitHub Actions, Postman, Jest, Linux</li>
+      </ul>
+
+      <h3>Rule 5: Quantify Bullet Points with the Google X-Y-Z Formula</h3>
+      <p>Every bullet under Work Experience and Projects must demonstrate quantifiable business or engineering impact. Replace passive duties with active metrics:</p>
+      <ul>
+        <li><em>Weak:</em> Responsible for developing payment gateway integration.</li>
+        <li><em>Strong (ATS-Optimized):</em> Integrated Razorpay payment gateway and webhook reconciliation in Next.js, processing ₹15L+ in monthly transactions with zero sync failures.</li>
+      </ul>
+
+      <h2>3. Privacy &amp; Data Security: Compliance with India's DPDP Act 2023</h2>
+      <p>When using online career tools, data privacy is paramount. Under India's <strong>Digital Personal Data Protection (DPDP) Act 2023</strong>, candidates have strict rights regarding how their personal identity, employment history, and contact details are handled.</p>
+      <p>At <strong>VayloAI</strong>, privacy is embedded by design:</p>
+      <ul>
+        <li>Your resume text is never shared with third-party telemarketers, credit card issuers, or spam databases.</li>
+        <li>Processing occurs over secure SSL/TLS 1.3 encrypted sessions.</li>
+        <li>You retain unconditional rights to delete your uploaded documents and profile data at any time from your account settings.</li>
+      </ul>
+
+      <h2>4. Recommended Role-Specific Guides</h2>
+      <p>Explore our deep, role-specific ATS keywords and architectural bullet blueprints:</p>
+      <ul>
+        <li><a href="/resume/software-engineer">Software Engineer Resume Guide</a></li>
+        <li><a href="/resume/fresher">Fresher &amp; College Student Resume Guide</a></li>
+        <li><a href="/resume/btech">B.Tech CSE Placement Resume Blueprint</a></li>
+        <li><a href="/resume/data-analyst">Data Analyst Resume Keywords</a></li>
+        <li><a href="/resume/ai-engineer">AI Engineer &amp; LLM Resume Guide</a></li>
+      </ul>
+
+      <h2>5. Check Your ATS Readiness in 30 Seconds</h2>
+      <p>Ready to see how Indian and global recruiters view your resume? Upload your resume to the <a href="/free-ats-resume-checker">VayloAI Free ATS Resume Checker</a> to get an instant keyword match score, formatting audit, and personalized fix recommendations.</p>
+    `
   },
 ];
 

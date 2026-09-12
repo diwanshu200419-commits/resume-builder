@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -91,19 +91,24 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2"
+              className="space-y-2 pt-2"
             >
-              <Link href="/free-ats-resume-checker">
-                <Button size="lg" className="w-full sm:w-auto px-7 py-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-500/20 gap-2 transition-all hover:scale-[1.02]">
-                  <Sparkles className="w-4 h-4" /> Check Your Resume Free
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
-              <Link href="/builder">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 py-6 rounded-xl border-border bg-surface text-text-primary hover:bg-surface-elevated font-semibold gap-2">
-                  Launch Resume Builder
-                </Button>
-              </Link>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <Link href="/free-ats-resume-checker">
+                  <Button size="lg" className="w-full sm:w-auto px-7 py-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-500/20 gap-2 transition-all hover:scale-[1.02]">
+                    <Sparkles className="w-4 h-4" /> Get Your Free ATS Score &amp; Resume Review Now
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <Link href="/builder">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 py-6 rounded-xl border-border bg-surface text-text-primary hover:bg-surface-elevated font-semibold gap-2">
+                    Launch Resume Builder
+                  </Button>
+                </Link>
+              </div>
+              <p className="text-xs text-text-muted">
+                In 30 seconds, see your 100-point ATS score, missing keywords, and recruiter diagnostic breakdown.
+              </p>
             </motion.div>
 
             {/* Honest Value Badges */}
