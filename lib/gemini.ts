@@ -97,11 +97,18 @@ HUMANISATION & ANTI-BOILERPLATE RULES:
   "Dynamic team player", "Strong communicator", "Detail-oriented", "Go-getter",
   "Seasoned professional", "Innovative leader", "Highly motivated", "Out-of-the-box thinker",
   "Enthusiastic", "Self-starter", "Experienced professional". These are empty filler.
-- Write as a SPECIFIC REAL PERSON: the summary must reflect the candidate's actual stated background,
-  not a generic version of the target role. If the input says they worked in payments at ABC Corp,
-  the summary must say so — not "built scalable applications in a dynamic environment."
-- Vary sentence rhythm naturally. Not every bullet must follow the identical structure.
-  Mix scope-first bullets, action-first bullets, and outcome-first bullets where it sounds natural.
+- BANNED CLICHÉ TEMPLATES — NEVER open a summary with participle-bridge formulas:
+  "Transitioning from [X] to [Y]...", "Leveraging [X] to [Y]...", "Drawing on [X]...",
+  "With [X] years of experience in [Y]...", "Bringing [X] to...", "Building on [X]...".
+  These formulas are robotic AI templates.
+- STRUCTURAL & RHYTHMIC VARIETY (MANDATORY):
+  Vary opening grammar and sentence architecture genuinely between generations:
+  • Direct Identity/Domain: "Backend software engineer with production payment processing experience in Python and SQL."
+  • Problem/Context First: "Financial transaction services require strict fault tolerance — work executed across three years at ABC Corp."
+  • Competency & Scope: "Python and SQL developer with three years of payment infrastructure maintenance and peer code review responsibilities."
+  • Domain Application: "Technical enterprise sales demands firsthand engineering credibility. Three years maintaining payment APIs at ABC Corp provides direct insight into customer architecture requirements."
+  • Governance/Integrity: "Three years building financial payment systems and enforcing code quality standards at ABC Corp instilled a discipline of procedural accuracy and institutional compliance."
+- VARY SENTENCE LENGTH: Mix punchy short clauses (8–14 words) with informative descriptive clauses (18–25 words). Avoid monotonous rhythm where every sentence has the same cadence.
 - ROLE-ADAPTIVE TONE: The vocabulary, emphasis, and framing must shift to match the specific
   target role passed in the request — derived entirely from reading that free-text role name,
   NOT from a hardcoded list. Examples of how tone changes:
@@ -1051,7 +1058,7 @@ ${jobDescXml}
 RESPONSE FORMAT (RETURN STRICT VALID JSON ONLY, NO MARKDOWN FENCES):
 {
   "resume": {
-    "summary": "<2–3 sentences. MUST: (1) open with a concrete, specific fact from the candidate's actual stated background — their real company name, real role, real domain, or real achievement; (2) name the target role '${input.targetRole}' or a natural variant of it; (3) NOT begin with any banned filler phrase (Results-driven, Dedicated, Passionate, Proven track record, etc.); (4) use vocabulary natural for '${input.targetRole}' work.>",
+    "summary": "<2–3 sentences. MUST: (1) open with a concrete, specific fact from candidate background; (2) name target role '${input.targetRole}'; (3) NOT begin with banned filler (Results-driven, Dedicated, etc.); (4) NOT begin with participle templates like 'Transitioning from...', 'Leveraging...', 'Drawing on...', 'With X years...'; (5) use sentence structure and vocabulary organic to '${input.targetRole}' work.>",
     "experience": [
       {
         "title": "Job Title from Raw Input",
