@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ export default function ResumeBuilderPage() {
     email: "john.doe@example.com",
     phone: "+1 234 567 890",
     location: "San Francisco, CA",
-    summary: "Dedicated software engineer with experience building web applications using React, Node.js, and TypeScript.",
+    summary: "", // AI will generate a specific summary based on your input and target role
   });
 
   const [experience, setExperience] = useState({

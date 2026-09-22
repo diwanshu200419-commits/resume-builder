@@ -1,4 +1,4 @@
-﻿// app/api/fix-bullet/route.ts
+// app/api/fix-bullet/route.ts
 //
 // VayloAI — Domain-Agnostic FAANG-Level ATS Bullet-Point Rewriter
 // Dynamically classifies JD into 1 of 12 domains (Finance, HR, Sales, IT, PM, Ops, etc.)
@@ -137,7 +137,7 @@ async function callGeminiForRewrite(
     const systemInstruction = buildSystemPrompt(domain);
 
     const model = client.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-3.6-flash",
       generationConfig: {
         responseMimeType: "application/json",
         temperature: 0.3,
