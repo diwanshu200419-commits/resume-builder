@@ -38,11 +38,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // PHASE 1: Submit only top 5. Expand to all 23 once these are indexed.
   // To promote a post to Phase 1, add its slug here (must be in BLOG_POSTS).
   const PHASE1_BLOG_SLUGS = [
-    "what-is-an-ats-resume",                      // informational → funnels to product
-    "why-ats-rejects-resumes",                    // high intent: problem-aware users
-    "how-to-check-ats-score",                     // direct product match query
-    "ats-resume-format",                          // high-volume keyword
-    "case-study-fresher-to-sde-ats-transformation", // social proof / conversion
+    "what-is-an-ats-resume",                          // informational → funnels to product
+    "why-ats-rejects-resumes",                        // high intent: problem-aware users
+    "how-to-check-ats-score",                         // direct product match query
+    "ats-resume-format",                              // high-volume keyword
+    "case-study-fresher-to-sde-ats-transformation",   // social proof / conversion
+    "generative-engine-optimization-geo-guide",        // new: GEO — zero-competition keyword
+    "resume-quantification-guide-india",               // new: high commercial intent
+    "linkedin-profile-optimization-india-2026",        // new: high search volume India
   ];
 
   // ── Tier 3: Role pages — top 5 highest-volume roles only ────────
