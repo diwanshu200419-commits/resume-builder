@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
       analysis = {
         job_title: "AI / ML Engineer",
         optimized_resume_text:
-          "Results-driven AI/ML Engineer with experience architecting high-throughput LLM pipelines and RAG vector search microservices.",
+          "AI/ML Engineer with experience building LLM pipelines and RAG vector search microservices.",
         job_description:
           "Senior AI/ML Engineer responsible for LLM optimization, PyTorch, and FastAPI microservices.",
       };

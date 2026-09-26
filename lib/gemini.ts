@@ -509,7 +509,7 @@ RESPONSE FORMAT (STRICT VALID JSON ONLY):
       optimized_full_text: resumeText,
       professional_summary: {
         before: "Experienced developer",
-        after: "Results-driven Software Engineer with proven track record of scaling high-throughput web applications and optimizing system performance."
+        after: "Software engineer with hands-on background in building web services — added missing keywords from job description to improve ATS match. Review and personalize this section before submitting."
       },
       skills_section: {
         before: "Languages & Frameworks",
@@ -517,7 +517,7 @@ RESPONSE FORMAT (STRICT VALID JSON ONLY):
       },
       experience_section: {
         before: "Developed software features",
-        after: "Engineered scalable web services and optimized database queries, driving 35% improvement in application response times."
+        after: "Delivered software features with focus on code quality and reliability — quantify specific impact metrics (e.g. latency, scale, users) to strengthen this bullet."
       },
       optimized_ats_score: 94,
       changes_made: [
@@ -849,12 +849,57 @@ export async function generateInterviewPrep(resumeText: string, jobDescription: 
 }
 
 export async function generateLinkedInSuggestions(resumeText: string, jobDescription?: string): Promise<LinkedInSuggestions> {
-  return {
-    headline_options: ["Senior Software Engineer | React, Next.js & Distributed Systems", "Full Stack Developer | Building High-Scale Web Apps"],
-    about_section: "Results-driven Software Engineer with expertise in modern web architectures.",
-    skills_to_add: ["System Design", "TypeScript", "Next.js", "Cloud Architecture"],
-    profile_tips: ["Feature your portfolio link in the top section", "Use quantifiable metrics in experience bullets"],
-  };
+  try {
+    const aiResult = await withRetryAndTimeout(async () => {
+      const jdSection = jobDescription
+        ? `\nTarget Job Description:\n${jobDescription.slice(0, 1500)}`
+        : "";
+
+      const prompt = `${MASTER_SYSTEM_PROMPT}
+
+TASK: Generate LinkedIn profile optimization suggestions based on the candidate's resume.
+
+BANNED PHRASES (never use these): "Results-driven", "Proven track record", "Passionate about", "Dynamic professional", "Dedicated professional", "Motivated individual", "Team player", "Go-getter", "Detail-oriented", "Self-starter", "Think outside the box", "Synergy", "Leverage", "Transformational".
+
+RULES:
+- Headline must be specific and factual — name actual tech stack, seniority, and domain. No fluff.
+- About section must open with a concrete professional fact (not a banned phrase), vary sentence structure, and sound like a real human wrote it.
+- Skills must be real technologies/domains from the resume — not generic buzzwords.
+- Profile tips must be actionable and specific to this candidate.
+
+Resume:
+${resumeText.slice(0, 3000)}${jdSection}
+
+RESPONSE FORMAT (strict valid JSON only):
+{
+  "headline_options": ["<specific headline 1>", "<specific headline 2>"],
+  "about_section": "<3-4 sentences. Open with concrete fact. Vary rhythm. Specific to this candidate>",
+  "skills_to_add": ["<real skill 1>", "<real skill 2>", "<real skill 3>", "<real skill 4>"],
+  "profile_tips": ["<specific actionable tip 1>", "<specific actionable tip 2>"]
+}`;
+
+      const result = await getModel().generateContent(prompt);
+      const jsonText = cleanAndExtractJSON(result.response.text());
+      return JSON.parse(jsonText);
+    });
+
+    return aiResult;
+  } catch (error) {
+    console.error("[generateLinkedInSuggestions] Error:", error);
+    // Neutral fallback — no banned phrases, clearly placeholder
+    return {
+      headline_options: [
+        "Software Engineer | Full Stack Web Development & APIs",
+        "Developer | Building Scalable Backend & Frontend Systems",
+      ],
+      about_section: "Software engineer focused on building reliable web systems. Add 2–3 sentences here with specific technologies you work with and quantifiable impact you've delivered.",
+      skills_to_add: ["TypeScript", "Next.js", "PostgreSQL", "REST APIs"],
+      profile_tips: [
+        "Add a portfolio or GitHub link in your About section for immediate credibility.",
+        "Quantify your top 3 experience bullets with metrics (scale, latency, users, revenue).",
+      ],
+    };
+  }
 }
 
 // ORIGINAL optimizeBulletPoints (pre-humanisation stub, kept for rollback):

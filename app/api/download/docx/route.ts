@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     let buffer: Buffer;
     if (type === "cover-letter") {
-      const content = analysis.cover_letter || `Dear Hiring Manager,\n\nI am writing to express my strong interest in the ${title} position at your company. With a proven track record in software engineering and AI implementation, I am confident in my ability to deliver immediate value.\n\nSincerely,\n${name}`;
+      const content = analysis.cover_letter || `Dear Hiring Manager,\n\nI am writing to express my strong interest in the ${title} position at your company. My background in software engineering and AI implementation aligns directly with your requirements, and I am confident in my ability to contribute immediate value.\n\nSincerely,\n${name}`;
       buffer = await generateCoverLetterDOCX(content, title);
     } else {
       const content = analysis.optimized_resume_text || analysis.original_resume_text;

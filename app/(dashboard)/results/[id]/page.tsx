@@ -55,7 +55,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
       weak_sections: ["Quantifiable Metrics", "Cloud Infrastructure"],
       optimized_resume_text: "Optimized AI/ML Engineer Resume with 96% ATS Compatibility...",
       before_summary: "Experienced developer building web applications.",
-      after_summary: "Results-driven AI/ML Engineer with 5+ years of experience architecting high-throughput LLM pipelines and RAG vector search microservices.",
+      after_summary: "AI/ML Engineer with 5+ years building LLM inference pipelines and RAG retrieval microservices — run a fresh ATS scan with your actual resume to see your personalized before/after.",
       before_skills: "Python, PyTorch, React",
       after_skills: "Python, PyTorch, LangChain, Pinecone, FastAPI, Docker, AWS SageMaker",
       before_experience: "Worked on machine learning features.",
