@@ -506,7 +506,7 @@ RESPONSE FORMAT (STRICT VALID JSON ONLY):
   } catch (error) {
     console.error("Error in optimizeResume:", error);
     return {
-      optimized_full_text: `${resumeText}\n\n[FAANG Optimized Skills]: ${missingKeywords.join(", ")}`,
+      optimized_full_text: resumeText,
       professional_summary: {
         before: "Experienced developer",
         after: "Results-driven Software Engineer with proven track record of scaling high-throughput web applications and optimizing system performance."

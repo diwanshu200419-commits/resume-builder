@@ -47,13 +47,14 @@ export async function POST(request: NextRequest) {
     }
 
     const title = jobTitle || analysis.job_title || "Resume";
-    const name = profile?.full_name?.split(" ")[0] || "VayloAI";
-    const filename = `${name}-${title.replace(/\s+/g, "-")}-Resume.pdf`;
+    const name = profile?.full_name || analysis.candidate_name || "Candidate";
+    const firstName = name.split(" ")[0] || "VayloAI";
+    const filename = `${firstName}-${title.replace(/\s+/g, "-")}-Resume.pdf`;
 
     let buffer: Buffer;
     if (type === "cover-letter") {
       const content = analysis.cover_letter || `Dear Hiring Manager,\n\nI am writing to express my strong interest in the ${title} position. With a proven track record in software engineering and AI implementation, I am confident in my ability to deliver value.\n\nSincerely,\n${name}`;
-      buffer = await generateCoverLetterPDF(content, title);
+      buffer = await generateCoverLetterPDF(content, title, name);
     } else {
       const content = analysis.optimized_resume_text || analysis.original_resume_text;
       buffer = await generateResumePDF(content, filename);
