@@ -62,25 +62,54 @@ export function calculateATSScore(input: CalculateATSScoreInput): CanonicalATSSc
   let keywordScore = 75; // Default for resume-quality mode (no JD)
 
   if (hasJD) {
-    const rawTerms = lowerJD.match(/[a-z0-9.+#-]+(?:\s[a-z0-9.+#-]+)*/g) || [];
-    const termCounts = new Map<string, number>();
+    // Sentence-split first to prevent full JD sentences becoming single "keywords"
+    const jdPhrases = lowerJD.split(/[.\n,;!?()[\]{}]+/).map(s => s.trim()).filter(Boolean);
 
     const stopwords = new Set([
       "the", "a", "an", "and", "or", "for", "with", "in", "on", "at", "to", "of",
       "required", "preferred", "experience", "work", "ability", "strong", "good",
       "team", "role", "candidate", "responsibilities", "requirements", "knowledge",
       "years", "plus", "must", "have", "building", "working", "using", "support",
+      "looking", "will", "our", "your", "you", "we", "are", "is", "be", "that",
+      "this", "also", "well", "key", "high", "new", "large", "across", "within",
+      "help", "ensure", "design", "develop", "build", "create", "lead", "manage",
+      "implement", "include", "provide", "maintain", "deliver", "collaborate",
     ]);
 
-    for (const term of rawTerms) {
-      const clean = term.toLowerCase().trim().replace(/[^a-z0-9.+#\s-]/g, "");
-      const norm = TECHNICAL_ALIASES[clean] || clean;
-      if (norm.length > 2 && !stopwords.has(norm)) {
-        termCounts.set(norm, (termCounts.get(norm) || 0) + 1);
+    const termCounts = new Map<string, number>();
+
+    for (const phrase of jdPhrases) {
+      const words = phrase.split(/\s+/).map(w => w.replace(/[^a-z0-9.+#-]/g, "")).filter(w => w.length > 1);
+
+      for (const w of words) {
+        const clean = w.toLowerCase().trim();
+        const norm = TECHNICAL_ALIASES[clean] || clean;
+        if (norm.length > 1 && norm.length <= 30 && !stopwords.has(norm)) {
+          termCounts.set(norm, (termCounts.get(norm) || 0) + 1);
+        }
+      }
+
+      // Two-word compound tech terms
+      for (let i = 0; i < words.length - 1; i++) {
+        const twoWord = `${words[i]} ${words[i + 1]}`;
+        const norm = TECHNICAL_ALIASES[twoWord] || twoWord;
+        const w1 = words[i].replace(/[^a-z0-9]/g, "");
+        const w2 = words[i + 1].replace(/[^a-z0-9]/g, "");
+        if (
+          norm.length > 3 && norm.length <= 30 &&
+          !stopwords.has(w1) && !stopwords.has(w2) &&
+          (TECHNICAL_ALIASES[twoWord] || /[0-9.+#]/.test(twoWord) || TECHNICAL_ALIASES[w1] || TECHNICAL_ALIASES[w2])
+        ) {
+          termCounts.set(norm, (termCounts.get(norm) || 0) + 1);
+        }
       }
     }
 
-    const extractedKeywords = Array.from(termCounts.keys()).slice(0, 15);
+    const extractedKeywords = Array.from(termCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([key]) => key)
+      .slice(0, 15);
+
     let matchedCount = 0;
 
     for (const kw of extractedKeywords) {

@@ -207,6 +207,12 @@ export async function POST(request: NextRequest) {
             missing_keywords: atsResult.missing_keywords,
             weak_sections: atsResult.weak_sections,
             optimized_resume_text: optimization.optimized_full_text,
+            before_summary: optimization.professional_summary.before,
+            after_summary: optimization.professional_summary.after,
+            before_skills: optimization.skills_section.before,
+            after_skills: optimization.skills_section.after,
+            before_experience: optimization.experience_section.before,
+            after_experience: optimization.experience_section.after,
             status: "done",
           })
           .eq("id", dbAnalysisId);

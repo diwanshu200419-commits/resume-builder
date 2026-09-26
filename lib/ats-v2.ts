@@ -1,52 +1,94 @@
 import type { ATSAnalysisResult, ATSV2ScoreBreakdown, ATSV2RequirementMatch, ATSV2PriorityFix } from "@/types";
 
 export const TECHNICAL_ALIASES: Record<string, string> = {
-  "react.js": "react",
-  "reactjs": "react",
-  "react": "react",
-  "node": "nodejs",
-  "node.js": "nodejs",
-  "nodejs": "nodejs",
-  "postgresql": "postgresql",
-  "postgres": "postgresql",
-  "psql": "postgresql",
-  "machine learning": "machine_learning",
-  "ml": "machine_learning",
-  "javascript": "javascript",
-  "js": "javascript",
-  "typescript": "typescript",
-  "ts": "typescript",
-  "aws": "aws",
-  "amazon web services": "aws",
-  "docker": "docker",
-  "containerization": "docker",
-  "kubernetes": "kubernetes",
-  "k8s": "kubernetes",
-  "gcp": "gcp",
-  "google cloud": "gcp",
-  "rest": "rest_api",
-  "restful": "rest_api",
-  "rest api": "rest_api",
-  "graphql": "graphql",
-  "python": "python",
-  "java": "java",
-  "c++": "cpp",
-  "cpp": "cpp",
-  "c#": "csharp",
-  "csharp": "csharp",
-  "golang": "golang",
-  "go": "golang",
-  "sql": "sql",
-  "mongodb": "mongodb",
-  "mongo": "mongodb",
-  "redis": "redis",
-  "ci/cd": "cicd",
-  "cicd": "cicd",
-  "html": "html",
-  "css": "css",
-  "next.js": "nextjs",
-  "nextjs": "nextjs",
+  // JavaScript ecosystem
+  "react.js": "react", "reactjs": "react", "react": "react",
+  "node": "nodejs", "node.js": "nodejs", "nodejs": "nodejs",
+  "next.js": "nextjs", "nextjs": "nextjs",
+  "vue.js": "vue", "vuejs": "vue", "vue": "vue",
+  "angular": "angular", "angularjs": "angular",
+  "express.js": "express", "expressjs": "express", "express": "express",
+  "javascript": "javascript", "js": "javascript",
+  "typescript": "typescript", "ts": "typescript",
+  "webpack": "webpack", "vite": "vite", "babel": "babel",
+  "tailwind": "tailwind", "tailwindcss": "tailwind",
+
+  // Python ecosystem
+  "python": "python", "django": "django", "flask": "flask",
+  "fastapi": "fastapi", "pytorch": "pytorch", "tensorflow": "tensorflow",
+  "scikit-learn": "scikit_learn", "sklearn": "scikit_learn", "pandas": "pandas",
+  "numpy": "numpy", "langchain": "langchain",
+
+  // Databases
+  "postgresql": "postgresql", "postgres": "postgresql", "psql": "postgresql",
+  "mongodb": "mongodb", "mongo": "mongodb",
+  "mysql": "mysql", "sqlite": "sqlite", "redis": "redis",
+  "elasticsearch": "elasticsearch", "cassandra": "cassandra",
+  "dynamodb": "dynamodb", "firestore": "firestore",
+
+  // Cloud & DevOps
+  "aws": "aws", "amazon web services": "aws",
+  "gcp": "gcp", "google cloud": "gcp",
+  "azure": "azure",
+  "docker": "docker", "containerization": "docker",
+  "kubernetes": "kubernetes", "k8s": "kubernetes",
+  "terraform": "terraform", "ansible": "ansible",
+  "ci/cd": "cicd", "cicd": "cicd", "github actions": "github_actions",
+  "jenkins": "jenkins", "vercel": "vercel", "netlify": "netlify",
+
+  // APIs & Architecture
+  "rest": "rest_api", "restful": "rest_api", "rest api": "rest_api",
+  "graphql": "graphql", "grpc": "grpc",
+  "microservices": "microservices", "serverless": "serverless",
+  "websockets": "websockets", "websocket": "websockets",
+
+  // Other languages
+  "java": "java", "golang": "golang", "go": "golang",
+  "c++": "cpp", "cpp": "cpp", "c#": "csharp", "csharp": "csharp",
+  "rust": "rust", "kotlin": "kotlin", "swift": "swift", "scala": "scala",
+  "ruby": "ruby", "php": "php",
+
+  // Markup / styling
+  "html": "html", "css": "css", "sass": "sass", "scss": "sass",
+
+  // Data / ML
+  "machine learning": "machine_learning", "ml": "machine_learning",
+  "deep learning": "deep_learning", "nlp": "nlp",
+  "sql": "sql", "nosql": "nosql",
+
+  // Auth & security
+  "oauth": "oauth", "jwt": "jwt", "oauth2": "oauth",
+  "authentication": "authentication", "authorization": "authorization",
+
+  // Testing
+  "jest": "jest", "cypress": "cypress", "playwright": "playwright",
+  "selenium": "selenium", "pytest": "pytest",
+
+  // Tooling / misc
+  "git": "git", "github": "git", "gitlab": "git",
+  "linux": "linux", "unix": "unix", "bash": "bash",
+  "agile": "agile", "scrum": "scrum", "jira": "jira",
+  "figma": "figma",
 };
+
+// Generic job-description words that look like skills but are not
+export const JUNK_TERMS = new Set([
+  "senior", "junior", "engineer", "developer", "full", "stack", "backend", "frontend",
+  "software", "web", "applications", "application", "scalable", "performance",
+  "high-performance", "infrastructure", "cloud", "services", "service", "platform",
+  "systems", "system", "solutions", "solution", "tools", "tool", "technologies",
+  "technology", "tech", "data", "code", "coding", "programming", "digital",
+  "products", "product", "projects", "project", "features", "feature",
+  "environment", "environments", "practices", "best", "practices",
+  "role", "position", "team", "teams", "company", "organization",
+  "hands-on", "fast-paced", "startup", "communication", "skills",
+  "ability", "knowledge", "understanding", "excellent", "strong",
+  "proficient", "proficiency", "experience", "relevant", "related",
+  "modern", "latest", "current", "various", "multiple", "general",
+  "architecture", "patterns", "design", "patterns", "principles",
+  "frameworks", "framework", "library", "libraries", "tools",
+]);
+
 
 export interface MatchResult {
   matchCount: number;
@@ -259,24 +301,63 @@ export function evaluateATSV2(
   let skillsScoreRaw = 0;
 
   if (hasJD) {
-    const rawTerms = jdLower.match(/[a-z0-9.+#-]+(?:\s[a-z0-9.+#-]+)*/g) || [];
-    const termCounts = new Map<string, number>();
+    // ── Strict keyword extraction ──────────────────────────────────────────
+    // Step 1: Split JD into individual sentences/phrases to prevent sentence
+    //         fragments being treated as single multi-word "skills".
+    const jdPhrases = jdLower.split(/[.\n,;!?()[\]{}]+/).map(s => s.trim()).filter(Boolean);
 
     const stopwords = new Set([
       "the", "a", "an", "and", "or", "for", "with", "in", "on", "at", "to", "of",
       "required", "preferred", "experience", "work", "ability", "strong", "good",
       "team", "role", "candidate", "responsibilities", "requirements", "knowledge",
       "years", "plus", "must", "have", "building", "working", "using", "support",
+      "looking", "will", "our", "your", "you", "we", "are", "is", "be", "that",
+      "this", "also", "well", "key", "high", "new", "large", "across", "within",
+      "help", "ensure", "design", "develop", "build", "create", "lead", "manage",
+      "implement", "include", "provide", "maintain", "deliver", "collaborate",
+      "communicate", "understand", "join", "apply", "demonstrate", "drive",
     ]);
 
-    for (const term of rawTerms) {
-      const norm = normalizeSkill(term);
-      if (norm.length > 2 && !stopwords.has(norm)) {
-        termCounts.set(norm, (termCounts.get(norm) || 0) + 1);
+    const termCounts = new Map<string, number>();
+
+    for (const phrase of jdPhrases) {
+      // Extract 1-word and 2-word tokens only (max 3 words for compound tech terms)
+      const words = phrase.split(/\s+/).map(w => w.replace(/[^a-z0-9.+#-]/g, "")).filter(w => w.length > 1);
+
+      // Single-word tokens
+      for (const w of words) {
+        const norm = normalizeSkill(w);
+        if (norm.length > 1 && !stopwords.has(norm) && !JUNK_TERMS.has(norm) && !JUNK_TERMS.has(w)) {
+          termCounts.set(norm, (termCounts.get(norm) || 0) + 1);
+        }
+      }
+
+      // Two-word compound terms (e.g. "next.js", "machine learning", "rest api")
+      for (let i = 0; i < words.length - 1; i++) {
+        const twoWord = `${words[i]} ${words[i + 1]}`;
+        const norm = normalizeSkill(twoWord);
+        // Only keep if both words are non-stopwords and the combined token is in aliases or looks technical
+        const w1 = words[i].replace(/[^a-z0-9]/g, "");
+        const w2 = words[i + 1].replace(/[^a-z0-9]/g, "");
+        if (
+          norm.length > 3 &&
+          !stopwords.has(w1) &&
+          !stopwords.has(w2) &&
+          !JUNK_TERMS.has(w1) &&
+          !JUNK_TERMS.has(w2) &&
+          (TECHNICAL_ALIASES[twoWord] || /[0-9.+#]/.test(twoWord) || TECHNICAL_ALIASES[w1] || TECHNICAL_ALIASES[w2])
+        ) {
+          termCounts.set(norm, (termCounts.get(norm) || 0) + 1);
+        }
       }
     }
 
-    const extractedSkills = Array.from(termCounts.keys()).slice(0, 20);
+    // Filter: only keep tokens ≤ 30 chars, not junk, not stopwords
+    const extractedSkills = Array.from(termCounts.entries())
+      .filter(([key]) => key.length <= 30 && !JUNK_TERMS.has(key))
+      .sort((a, b) => b[1] - a[1])
+      .map(([key]) => key)
+      .slice(0, 20);
 
     let mustHavePoints = 0;
     let mustHaveMax = 0;
