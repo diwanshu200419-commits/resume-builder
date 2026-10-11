@@ -146,6 +146,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <meta name="google-site-verification" content="googlea1966f76a89819c1" />
         <meta name="google-site-verification" content="0w0LWASRueXYjlydirI9OkfyFuaSVfHtymdPVEY5ad0" />
         {/* TODO: Replace empty string below with your real msvalidate.01 code from https://www.bing.com/webmasters */}
@@ -153,9 +156,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Leave empty until you have the real code — an invalid code is worse than none */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-ENLDX3KQQ7"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             // Prevent analytics pollution from automated tests (Playwright/Puppeteer/Selenium), localhost, and test runners
             var isAutomatedTest = !!(navigator.webdriver || window.__playwright || window._phantom || window.callPhantom);

@@ -3,8 +3,24 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  compress: true,
+  poweredByHeader: false,
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 2592000,
+  },
   experimental: {
     serverComponentsExternalPackages: ['pdf-parse'],
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-icons',
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-progress',
+      '@radix-ui/react-avatar',
+    ],
   },
 
   // P0-2: Redirect /free-ats-checker → /free-ats-resume-checker (eliminate duplicate)
@@ -97,6 +113,13 @@ const nextConfig = {
         source: '/checkout/:path*',
         headers: [
           { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      // Cache-Control headers for static branding assets
+      {
+        source: '/(icon.*|apple-icon.*|favicon.*|site\\.webmanifest)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
     ];

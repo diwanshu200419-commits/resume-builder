@@ -209,6 +209,281 @@ export const MCQ_QUESTION_BANK: MCQQuestion[] = [
     correctIndex: 1,
     explanation: "Public administration balances rule of law with public welfare and life-safety. In life-critical emergencies, administrative law empowers officers to grant conditional/provisional entry with recorded memos, ensuring public health needs are met without compromising official auditability.",
     tags: ["ethics", "governance", "public-welfare"]
+  },
+
+  // =========================================================================
+  // ADVANCED FRONTEND & REACT 18 / NEXT.JS
+  // =========================================================================
+  {
+    id: "mcq-fe-03",
+    roleCategory: "software_engineering",
+    subRole: "frontend",
+    difficulty: "hard",
+    category: "technical",
+    scenario: "What is the primary architectural difference between React 18 Server Components (RSC) and traditional Client-Side Hydration (SSR with getInitialProps / getServerSideProps)?",
+    options: [
+      "Server Components re-render on every state change inside the browser DOM",
+      "Server Components zero-out their JavaScript dependencies from the client bundle because they execute exclusively on the server and stream serialized React nodes (JSON-like wire format)",
+      "Server Components replace CSS Modules with inline styles automatically",
+      "Server Components only support SQLite and cannot execute database queries directly"
+    ],
+    correctIndex: 1,
+    explanation: "React Server Components (RSC) execute exclusively on the server and emit an abstract UI tree representation rather than executable JS bundles. Third-party dependencies used only within Server Components (e.g. markdown parsers, heavy date libraries) are completely excluded from the browser bundle, drastically reducing initial JS payload and TBT.",
+    tags: ["react", "nextjs", "rsc", "performance"]
+  },
+  {
+    id: "mcq-fe-04",
+    roleCategory: "software_engineering",
+    subRole: "frontend",
+    difficulty: "medium",
+    category: "technical",
+    scenario: "Consider the following JavaScript execution: console.log(1); setTimeout(() => console.log(2), 0); Promise.resolve().then(() => console.log(3)); queueMicrotask(() => console.log(4)); console.log(5); In what order are the numbers printed?",
+    options: [
+      "1, 2, 3, 4, 5",
+      "1, 5, 3, 4, 2",
+      "1, 5, 2, 3, 4",
+      "1, 3, 4, 5, 2"
+    ],
+    correctIndex: 1,
+    explanation: "Synchronous code runs first (1, then 5). Microtasks (Promise.then and queueMicrotask) are drained completely before the event loop moves to the macrotask queue. Thus, microtasks 3 and 4 execute before the setTimeout macrotask callback (2), yielding: 1, 5, 3, 4, 2.",
+    tags: ["javascript", "event-loop", "asynchronous"]
+  },
+  {
+    id: "mcq-fe-05",
+    roleCategory: "software_engineering",
+    subRole: "frontend",
+    difficulty: "medium",
+    category: "technical",
+    scenario: "In a TypeScript project, you have an API response that returns either { status: 'success', data: User } or { status: 'error', error: string }. What is the recommended type-safe pattern to handle both variants without type casting?",
+    options: [
+      "Cast the response to 'any' and check if response.data is truthy",
+      "Use Discriminated Unions where the common literal property 'status' serves as the discriminant tag for narrowing in switch/if blocks",
+      "Write a custom RegExp to match error strings in JSON",
+      "Convert the object into a TypeScript Enum"
+    ],
+    correctIndex: 1,
+    explanation: "Discriminated Unions (tagged unions) leverage a shared literal property ('status') so TypeScript compiler automatically narrows the object type inside conditional branches (e.g. if (res.status === 'success') guarantees access to res.data without unsafe casts).",
+    tags: ["typescript", "type-safety", "architecture"]
+  },
+
+  // =========================================================================
+  // ADVANCED BACKEND, DATABASES & NODE.JS
+  // =========================================================================
+  {
+    id: "mcq-be-04",
+    roleCategory: "software_engineering",
+    subRole: "backend",
+    difficulty: "hard",
+    category: "technical",
+    scenario: "A CPU-intensive image compression algorithm running on a Node.js Express server is causing high response latency for lightweight health check and user profile endpoints. What is the root cause and the best resolution?",
+    options: [
+      "The garbage collector has run out of memory; increase --max-old-space-size to 8GB",
+      "The synchronous image processing logic blocks the single-threaded Node.js Event Loop; offload the computation to a Worker Thread pool or asynchronous background worker queue (e.g. BullMQ / Redis)",
+      "Express.js cannot handle more than 10 concurrent requests; rewrite in PHP",
+      "Switch from HTTP/1.1 to HTTP/2 to allow simultaneous CPU execution"
+    ],
+    correctIndex: 1,
+    explanation: "Because Node.js executes application JavaScript on a single event loop thread, synchronous CPU-bound operations stall all asynchronous I/O callbacks, causing pending connections to buffer and timeout. Offloading heavy CPU work to Worker Threads or external background workers frees the event loop to serve concurrent requests immediately.",
+    tags: ["nodejs", "event-loop", "performance", "worker-threads"]
+  },
+  {
+    id: "mcq-be-05",
+    roleCategory: "software_engineering",
+    subRole: "backend",
+    difficulty: "hard",
+    category: "technical",
+    scenario: "Under PostgreSQL's default READ COMMITTED isolation level, which concurrency phenomenon is prevented, and which phenomenon can still occur within the same transaction?",
+    options: [
+      "Dirty Reads are prevented; Non-Repeatable Reads and Phantom Reads can still occur",
+      "All anomalies including Dirty Reads, Non-Repeatable Reads, and Serialization Failures are fully prevented",
+      "Dirty Reads can occur, but Non-Repeatable Reads are prevented",
+      "PostgreSQL locks all rows in the entire table preventing concurrent writes"
+    ],
+    correctIndex: 0,
+    explanation: "In READ COMMITTED, transactions only see data committed before the query began (preventing Dirty Reads where uncommitted changes are visible). However, if another transaction commits an update or insert midway, a re-read within the first transaction can see modified values (Non-Repeatable Read) or new matching rows (Phantom Read).",
+    tags: ["postgresql", "acid", "transactions", "databases"]
+  },
+  {
+    id: "mcq-be-06",
+    roleCategory: "software_engineering",
+    subRole: "backend",
+    difficulty: "hard",
+    category: "system_design",
+    scenario: "A hot cache key (e.g. homepage top products) in Redis expires during peak traffic, causing 50,000 concurrent requests to hit the primary relational database simultaneously, crashing the DB. What is this phenomenon called and how is it prevented?",
+    options: [
+      "Cache Poisoning; resolve by disabling Redis TLS encryption",
+      "Cache Stampede (Thundering Herd); resolve using a distributed mutex lock (Singleflight/Mutex) or probabilistic early expiration (XFetch algorithm)",
+      "Buffer Overflow; resolve by converting integers to floating point numbers",
+      "Memory Leak; resolve by flushing Redis with FLUSHALL every minute"
+    ],
+    correctIndex: 1,
+    explanation: "Cache Stampede occurs when a high-traffic key expires, triggering simultaneous expensive database queries from concurrent workers. Mitigations include distributed mutex locks (allowing only one request to rebuild cache while others await), or background re-computation before TTL expires (probabilistic early refresh).",
+    tags: ["redis", "caching", "system-design", "high-availability"]
+  },
+
+  // =========================================================================
+  // SYSTEM DESIGN, ARCHITECTURE & DEVOPS
+  // =========================================================================
+  {
+    id: "mcq-sd-01",
+    roleCategory: "software_engineering",
+    subRole: "system_design",
+    difficulty: "medium",
+    category: "system_design",
+    scenario: "According to the CAP theorem in distributed systems, when a network partition (P) occurs between two data centers, what fundamental trade-off must system architects choose between?",
+    options: [
+      "Speed vs Storage cost",
+      "Consistency (C) vs Availability (A) — either return error/stale rejection to ensure data unanimity, or accept writes locally risking split-brain divergence",
+      "Security vs Microservices",
+      "IPv4 vs IPv6 routing"
+    ],
+    correctIndex: 1,
+    explanation: "Because physical network partitions (loss of communication between nodes) are inevitable in distributed systems, architects must choose whether to sacrifice Availability (returning errors to guarantee every reader receives latest write) or Consistency (permitting isolated nodes to answer reads/writes at the cost of stale or divergent state).",
+    tags: ["system-design", "cap-theorem", "distributed-systems"]
+  },
+  {
+    id: "mcq-sd-02",
+    roleCategory: "software_engineering",
+    subRole: "system_design",
+    difficulty: "medium",
+    category: "technical",
+    scenario: "A payment gateway webhook delivers transaction success notifications. Due to network retries, the webhook URL receives the exact same event payload 4 times over 30 seconds. How should the backend ensure the user's wallet is credited only once?",
+    options: [
+      "Sleep for 5 seconds before processing each incoming webhook",
+      "Implement an Idempotency mechanism with a unique transaction_id constraint in the database, verifying whether the transaction was already processed before applying balance increments",
+      "Drop every second webhook automatically based on request count",
+      "Store payment events only in client sessionStorage"
+    ],
+    correctIndex: 1,
+    explanation: "Payment webhooks operate on at-least-once delivery guarantees. Ensuring idempotency requires persisting the unique transaction ID with a database UNIQUE constraint or transactional lock, rejecting duplicate processing attempts without failing the HTTP 200 acknowledgement to the gateway.",
+    tags: ["payments", "idempotency", "system-design", "security"]
+  },
+  {
+    id: "mcq-devops-01",
+    roleCategory: "software_engineering",
+    subRole: "devops",
+    difficulty: "easy",
+    category: "technical",
+    scenario: "Why are Docker Multi-Stage Builds considered an industry best practice for compiling and containerizing Next.js or Go applications?",
+    options: [
+      "They enable running Docker containers on multiple physical laptops simultaneously",
+      "They separate the heavyweight build environment (Node.js SDK, npm devDependencies, compilers) from the slim production runtime container, minimizing image size and reducing security attack surface",
+      "They bypass Dockerfile syntax validation",
+      "They automatically provision cloud Kubernetes clusters on AWS"
+    ],
+    correctIndex: 1,
+    explanation: "Multi-stage builds allow developers to execute 'npm install' and 'next build' within a full builder image, and copy only the compiled static output and production node_modules into a minimal lightweight base (such as alpine or distroless), shrinking image sizes from 1.5GB down to <100MB and stripping compiler vulnerabilities.",
+    tags: ["docker", "devops", "containerization", "security"]
+  },
+  {
+    id: "mcq-devops-02",
+    roleCategory: "software_engineering",
+    subRole: "devops",
+    difficulty: "medium",
+    category: "system_design",
+    scenario: "What is the key functional difference between a Kubernetes Liveness Probe and a Readiness Probe?",
+    options: [
+      "Liveness probes check network bandwidth; Readiness probes check CPU clock speed",
+      "A failing Liveness probe triggers Kubernetes to restart the container; a failing Readiness probe removes the Pod from Service load balancer traffic until it passes without restarting it",
+      "Liveness probes only run on dev clusters; Readiness probes only run in production",
+      "Readiness probes terminate the entire Kubernetes node"
+    ],
+    correctIndex: 1,
+    explanation: "Liveness probes detect deadlocks or unrecoverable application hangs (restarting the pod to recover). Readiness probes determine if the pod is initialized and ready to accept incoming HTTP traffic (preventing requests from reaching a pod that is still warming up caches or executing DB migrations).",
+    tags: ["kubernetes", "devops", "microservices", "reliability"]
+  },
+
+  // =========================================================================
+  // DATA SCIENCE, AI & PYTHON
+  // =========================================================================
+  {
+    id: "mcq-data-03",
+    roleCategory: "data_ai",
+    subRole: "python",
+    difficulty: "medium",
+    category: "technical",
+    scenario: "You need to parse and filter a 40GB server log file on a machine with only 8GB of RAM in Python. Which implementation avoids Out-Of-Memory (OOM) termination?",
+    options: [
+      "Read all lines into a Python list: logs = file.readlines()",
+      "Use a Python Generator function with 'yield' to stream line-by-line in O(1) memory overhead",
+      "Load the file into a JSON object using json.load()",
+      "Multiply RAM capacity using Python's sys.setrecursionlimit()"
+    ],
+    correctIndex: 1,
+    explanation: "Generators produce items lazily on demand via the iterator protocol without materializing the entire sequence in memory. Streaming line-by-line consumes constant O(1) memory regardless of file size, preventing OOM crashes on memory-constrained systems.",
+    tags: ["python", "generators", "memory-management", "data-pipelines"]
+  },
+  {
+    id: "mcq-data-04",
+    roleCategory: "data_ai",
+    subRole: "machine_learning",
+    difficulty: "hard",
+    category: "technical",
+    scenario: "In an enterprise Retrieval-Augmented Generation (RAG) system, why is a two-stage retrieval pipeline (Bi-Encoder Dense Vector Search followed by Cross-Encoder Re-Ranking) preferred over vector search alone?",
+    options: [
+      "Bi-encoders cannot handle English vocabulary",
+      "Dense vector search (Bi-Encoder) quickly retrieves candidate chunks from millions of documents in milliseconds (high recall), while Cross-Encoder accurately models token-level query-document interactions to score top results (high precision)",
+      "Cross-encoders run completely without GPUs and consume zero memory",
+      "Vector databases delete documents that have not been re-ranked within 24 hours"
+    ],
+    correctIndex: 1,
+    explanation: "Bi-encoders encode queries and documents into separate embeddings (enabling sub-millisecond approximate nearest neighbor search via HNSW), but lose fine-grained token-level cross-attention. Passing the top 20-50 candidates through a Cross-Encoder re-ranker evaluates deep query-document interactions, boosting retrieval precision by up to 25-35%.",
+    tags: ["ai", "rag", "embeddings", "vector-search", "llm"]
+  },
+
+  // =========================================================================
+  // CORE COMPUTER SCIENCE (OS, DBMS, NETWORKS FOR PLACEMENTS)
+  // =========================================================================
+  {
+    id: "mcq-cs-01",
+    roleCategory: "software_engineering",
+    subRole: "core_cs",
+    difficulty: "medium",
+    category: "technical",
+    scenario: "What causes 'Thrashing' in an Operating System's Virtual Memory management subsystem?",
+    options: [
+      "The hard drive spindle speed exceeds CPU clock cycle limits",
+      "The system spends more time swapping pages into and out of memory than executing actual process CPU instructions due to insufficient physical RAM for active working sets",
+      "Two processes simultaneously access the same read-only shared library",
+      "The network interface card drops UDP packets during high congestion"
+    ],
+    correctIndex: 1,
+    explanation: "Thrashing occurs when the total memory required by active processes (their working sets) exceeds available physical RAM. The OS continuously encounters page faults and pages data between RAM and swap space, dropping CPU utilization to near zero as processes spend all their time waiting on disk I/O.",
+    tags: ["operating-systems", "virtual-memory", "core-cs"]
+  },
+  {
+    id: "mcq-cs-02",
+    roleCategory: "software_engineering",
+    subRole: "core_cs",
+    difficulty: "medium",
+    category: "technical",
+    scenario: "Why do relational database engines (PostgreSQL, MySQL InnoDB) use B+ Trees rather than standard Binary Search Trees (BST) or Hash Tables as the default index structure?",
+    options: [
+      "B+ Trees have higher node branch factors (minimizing disk I/O depth) and linked leaf nodes that allow efficient range scans (e.g. BETWEEN, >, <)",
+      "Binary Search Trees store only alphanumeric characters and cannot index timestamps",
+      "Hash Tables do not work with numerical primary keys",
+      "B+ Trees require zero storage space on disk"
+    ],
+    correctIndex: 0,
+    explanation: "B+ Trees have very high fan-out (thousands of keys per node), keeping tree depth small (typically 3-4 levels for millions of rows) and minimizing expensive disk block reads. Crucially, all values reside in linked leaf nodes, enabling fast sequential range queries (WHERE age BETWEEN 20 AND 30) which Hash Tables cannot perform.",
+    tags: ["dbms", "b-plus-tree", "indexing", "core-cs"]
+  },
+  {
+    id: "mcq-cs-03",
+    roleCategory: "software_engineering",
+    subRole: "core_cs",
+    difficulty: "medium",
+    category: "technical",
+    scenario: "During the establishment of a secure HTTPS connection over TCP and TLS 1.3, what is the minimum round-trip time (RTT) overhead required before application data can be transmitted on a resumed session?",
+    options: [
+      "4 RTTs (2 for TCP handshake and 2 for TLS asymmetric key exchange)",
+      "0-RTT (Zero Round-Trip Time) using TLS 1.3 Early Data resumption over an established connection",
+      "Always 10 RTTs regardless of protocol version",
+      "TCP connections do not require handshakes when HTTPS is enabled"
+    ],
+    correctIndex: 1,
+    explanation: "While a standard fresh connection requires 1 RTT for TCP 3-way handshake and 1 RTT for TLS 1.3 key exchange (total 2 RTTs), TLS 1.3 supports 0-RTT Session Resumption (Early Data) using pre-shared keys (PSK), allowing the client to send HTTP requests in the very first payload flight.",
+    tags: ["networking", "tcp", "tls", "core-cs", "performance"]
   }
 ];
 

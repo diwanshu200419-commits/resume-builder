@@ -131,6 +131,11 @@ export default function InterviewPrepPage() {
                 Start Practicing Free <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
+            <Link href="/technical-interview-mcq">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto border-border text-text-primary hover:bg-surface-elevated font-semibold h-14 px-8 text-lg rounded-xl">
+                Practice Technical MCQs Quiz
+              </Button>
+            </Link>
           </div>
         </section>
 

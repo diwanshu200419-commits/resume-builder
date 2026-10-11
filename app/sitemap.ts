@@ -5,47 +5,46 @@ import { ROLE_PAGES_DATA } from "@/lib/seo/role-pages";
 const BASE_URL = "https://www.vayloai.online";
 
 // Last meaningful update date — bump this when you make significant content changes
-const LAST_UPDATED = new Date("2026-09-14");
+const LAST_UPDATED = new Date("2026-10-11");
 
 // ─────────────────────────────────────────────────────────────────
-// CRAWL BUDGET STRATEGY (new domain, Sep 2026)
+// CRAWL BUDGET STRATEGY (new domain, Sep-Oct 2026)
 //
 // Google allocates crawl budget based on domain authority.
 // As a new site, submitting 60+ pages causes Google to "discover"
 // them all but index almost none — this is the exact wall we hit.
 //
-// Strategy: Submit only our highest-value 15 pages now.
+// Strategy: Submit only our highest-value pages.
 // Expand in phases as each wave gets indexed:
-//   Phase 1 (now):    Core product + top 3 blog + top 3 role pages
-//   Phase 2 (~Oct):   Add next 5 blog + 5 role pages once Phase 1 indexed
-//   Phase 3 (~Nov):   Full sitemap once domain authority is established
+//   Phase 1: Core product + top blog + top role pages + technical MCQ
 // ─────────────────────────────────────────────────────────────────
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // ── Tier 1: Core product pages — highest commercial intent ──────
   const coreRoutes = [
-    { path: "",                          priority: 1.0, changeFreq: "daily" },
-    { path: "/free-ats-resume-checker",  priority: 1.0, changeFreq: "daily" },
-    { path: "/ai-resume-builder",        priority: 0.95, changeFreq: "daily" },
-    { path: "/interview-preparation",    priority: 0.90, changeFreq: "weekly" },
-    { path: "/pricing",                  priority: 0.90, changeFreq: "weekly" },
-    { path: "/cover-letter-generator",   priority: 0.85, changeFreq: "weekly" },
-    { path: "/blog",                     priority: 0.85, changeFreq: "daily" },
-    { path: "/about",                    priority: 0.60, changeFreq: "monthly" },
+    { path: "",                            priority: 1.0, changeFreq: "daily" },
+    { path: "/free-ats-resume-checker",    priority: 1.0, changeFreq: "daily" },
+    { path: "/technical-interview-mcq",    priority: 0.95, changeFreq: "daily" },
+    { path: "/ai-resume-builder",          priority: 0.95, changeFreq: "daily" },
+    { path: "/interview-preparation",      priority: 0.90, changeFreq: "weekly" },
+    { path: "/pricing",                    priority: 0.90, changeFreq: "weekly" },
+    { path: "/cover-letter-generator",     priority: 0.85, changeFreq: "weekly" },
+    { path: "/blog",                       priority: 0.85, changeFreq: "daily" },
+    { path: "/about",                      priority: 0.60, changeFreq: "monthly" },
   ];
 
   // ── Tier 2: Top blog posts — highest search intent / word count ──
-  // PHASE 1: Submit only top 5. Expand to all 23 once these are indexed.
-  // To promote a post to Phase 1, add its slug here (must be in BLOG_POSTS).
+  // PHASE 1: High authority, high intent.
   const PHASE1_BLOG_SLUGS = [
+    "top-15-fullstack-interview-questions-2026",      // high intent: technical interview practice
     "what-is-an-ats-resume",                          // informational → funnels to product
     "why-ats-rejects-resumes",                        // high intent: problem-aware users
     "how-to-check-ats-score",                         // direct product match query
     "ats-resume-format",                              // high-volume keyword
     "case-study-fresher-to-sde-ats-transformation",   // social proof / conversion
-    "generative-engine-optimization-geo-guide",        // new: GEO — zero-competition keyword
-    "resume-quantification-guide-india",               // new: high commercial intent
-    "linkedin-profile-optimization-india-2026",        // new: high search volume India
+    "generative-engine-optimization-geo-guide",        // GEO — zero-competition keyword
+    "resume-quantification-guide-india",               // high commercial intent
+    "linkedin-profile-optimization-india-2026",        // high search volume India
   ];
 
   // ── Tier 3: Role pages — top 5 highest-volume roles only ────────

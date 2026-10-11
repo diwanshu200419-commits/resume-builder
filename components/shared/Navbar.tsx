@@ -126,6 +126,9 @@ export function Navbar() {
             <Link href="/pricing" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
               Pricing
             </Link>
+            <Link href="/technical-interview-mcq" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
+              Technical MCQs
+            </Link>
             <Link href="/blog" className="text-sm text-text-secondary hover:text-text-primary transition-colors font-medium">
               Blog & Guides
             </Link>
@@ -262,6 +265,9 @@ export function Navbar() {
             </Link>
             <Link href="/pricing" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
               Pricing
+            </Link>
+            <Link href="/technical-interview-mcq" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
+              Technical MCQ Practice
             </Link>
             <Link href="/blog" className="block text-sm text-text-secondary hover:text-text-primary py-1" onClick={() => setOpen(false)}>
               Blog & Career Guides
