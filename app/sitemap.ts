@@ -5,7 +5,7 @@ import { ROLE_PAGES_DATA } from "@/lib/seo/role-pages";
 const BASE_URL = "https://www.vayloai.online";
 
 // Last meaningful update date — bump this when you make significant content changes
-const LAST_UPDATED = new Date("2026-10-11");
+const LAST_UPDATED = new Date("2026-10-16");
 
 // ─────────────────────────────────────────────────────────────────
 // CRAWL BUDGET STRATEGY (new domain, Sep-Oct 2026)
@@ -29,6 +29,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/interview-preparation",      priority: 0.90, changeFreq: "weekly" },
     { path: "/pricing",                    priority: 0.90, changeFreq: "weekly" },
     { path: "/cover-letter-generator",     priority: 0.85, changeFreq: "weekly" },
+    { path: "/how-to-write-a-resume",      priority: 0.95, changeFreq: "weekly" },
+    { path: "/fresher-resume-guide",       priority: 0.95, changeFreq: "weekly" },
+    { path: "/ats-resume-guide",           priority: 0.95, changeFreq: "weekly" },
+    { path: "/resume-tips",                priority: 0.90, changeFreq: "weekly" },
+    { path: "/job-search-tips",            priority: 0.90, changeFreq: "weekly" },
+    { path: "/interview-questions-and-answers", priority: 0.95, changeFreq: "weekly" },
     { path: "/blog",                       priority: 0.85, changeFreq: "daily" },
     { path: "/about",                      priority: 0.60, changeFreq: "monthly" },
   ];

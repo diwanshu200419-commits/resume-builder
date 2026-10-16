@@ -82,15 +82,14 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider mb-3">Career Resources</h4>
             <ul className="space-y-2 text-xs text-text-secondary">
-              <li><Link href="/blog" className="hover:text-accent transition-colors font-medium text-accent">Career Blog Hub</Link></li>
+              <li><Link href="/how-to-write-a-resume" className="hover:text-accent transition-colors font-medium text-accent">How to Write a Resume (2026)</Link></li>
+              <li><Link href="/fresher-resume-guide" className="hover:text-accent transition-colors font-medium">Fresher Resume Guide India</Link></li>
+              <li><Link href="/ats-resume-guide" className="hover:text-accent transition-colors font-medium">How to Pass ATS Guide</Link></li>
+              <li><Link href="/interview-questions-and-answers" className="hover:text-accent transition-colors font-medium text-emerald-400">50 Interview Questions & Answers</Link></li>
+              <li><Link href="/resume-tips" className="hover:text-accent transition-colors">25 Resume Tips That Get Hired</Link></li>
+              <li><Link href="/job-search-tips" className="hover:text-accent transition-colors">Job Search Tips India (2026)</Link></li>
               <li><Link href="/technical-interview-mcq" className="hover:text-accent transition-colors font-semibold text-emerald-400">Technical Interview MCQs (2026)</Link></li>
               <li><Link href="/interview-preparation" className="hover:text-accent transition-colors">STAR Voice Interview Coach</Link></li>
-              <li><Link href="/blog/case-study-fresher-to-sde-ats-transformation" className="hover:text-accent transition-colors">Case Study: Fresher SDE-1</Link></li>
-              <li><Link href="/blog/top-15-fullstack-interview-questions-2026" className="hover:text-accent transition-colors">Full-Stack Interview Questions</Link></li>
-              <li><Link href="/blog/step-by-step-guide-100-point-ats-analyzer" className="hover:text-accent transition-colors">100-Point ATS Guide</Link></li>
-              <li><Link href="/blog/how-to-optimize-resume-for-ats-india" className="hover:text-accent transition-colors">ATS Playbook India</Link></li>
-              <li><Link href="/blog/what-is-an-ats-resume" className="hover:text-accent transition-colors">What is an ATS Resume?</Link></li>
-              <li><Link href="/blog/how-to-check-ats-score" className="hover:text-accent transition-colors">How to Check ATS Score</Link></li>
               <li><Link href="/pricing" className="hover:text-accent transition-colors">Pricing Plans (₹0 - ₹499)</Link></li>
               <li><Link href="/about" className="hover:text-accent transition-colors">About VayloAI</Link></li>
               <li>
