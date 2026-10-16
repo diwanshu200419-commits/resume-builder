@@ -14,7 +14,7 @@ interface NotificationItem {
   body: string;
   type: string;
   link: string | null;
-  read: boolean;
+  read_at: string | null;
   created_at: string;
 }
 
@@ -39,7 +39,7 @@ export function NotificationCenter() {
   const supabaseRef = useRef(createClient());
   const channelRef = useRef<any>(null);
 
-  const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const unreadCount = notifications.filter((notification) => !notification.read_at).length;
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -105,7 +105,7 @@ export function NotificationCenter() {
   const markOneRead = async (id: string) => {
     setNotifications((prev) =>
       prev.map((notification) =>
-        notification.id === id ? { ...notification, read: true } : notification
+        notification.id === id ? { ...notification, read_at: new Date().toISOString() } : notification
       )
     );
 
@@ -129,7 +129,7 @@ export function NotificationCenter() {
     if (unreadCount === 0) return;
 
     setNotifications((prev) =>
-      prev.map((notification) => ({ ...notification, read: true }))
+      prev.map((notification) => ({ ...notification, read_at: notification.read_at ?? new Date().toISOString() }))
     );
 
     try {
@@ -224,7 +224,7 @@ export function NotificationCenter() {
                 </div>
               ) : (
                 notifications.slice(0, 5).map((notification) => {
-                  const isUnread = !notification.read;
+                  const isUnread = !notification.read_at;
                   return (
                     <div
                       key={notification.id}
